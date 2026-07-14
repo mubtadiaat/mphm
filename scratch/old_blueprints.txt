@@ -1,0 +1,9875 @@
+# 00_Project_Vision.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : Project Vision
+>
+> Version : 2.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Project Overview
+
+MPHM merupakan sistem informasi akademik berbasis web yang dirancang khusus untuk mendukung seluruh proses administrasi akademik Madrasah Putri Hidayatul Mubtadi'at.
+
+Sistem ini dibangun sebagai **Progressive Web Application (PWA)** dengan pendekatan **Enterprise SaaS Architecture**, sehingga memiliki performa tinggi, mudah dikembangkan, aman, dan siap digunakan dalam jangka panjang.
+
+MPHM bukan sekadar aplikasi input nilai, tetapi menjadi pusat pengelolaan seluruh aktivitas akademik yang berpusat pada Tahun Ajaran (Academic Workspace).
+
+---
+
+# 2. Vision
+
+Membangun platform akademik modern yang:
+
+- Profesional.
+- Cepat.
+- Aman.
+- Responsif.
+- Mudah digunakan.
+- Mudah dikembangkan.
+- Enterprise Grade.
+- Cloud Native.
+- AI Friendly.
+- Long-Term Maintainable.
+
+Seluruh pengembangan harus berorientasi pada kualitas arsitektur, bukan sekadar menghasilkan fitur.
+
+---
+
+# 3. Mission
+
+MPHM dikembangkan untuk:
+
+- Mempermudah proses administrasi akademik.
+- Mempermudah proses input nilai.
+- Mengurangi pekerjaan manual.
+- Menghilangkan redundansi data.
+- Menyediakan monitoring akademik secara realtime.
+- Menjadi pusat informasi akademik.
+- Menjamin konsistensi data.
+- Menyediakan audit terhadap seluruh aktivitas penting.
+- Mempermudah pengembangan fitur baru di masa depan.
+
+---
+
+# 4. Core Values
+
+Seluruh pengembangan MPHM wajib menjunjung nilai berikut.
+
+- Simplicity
+- Consistency
+- Performance
+- Security
+- Scalability
+- Maintainability
+- Reliability
+- Accessibility
+- Productivity
+- Transparency
+
+---
+
+# 5. Target Users
+
+Sistem memiliki beberapa jenis pengguna.
+
+## Super Admin
+
+Memiliki akses penuh terhadap seluruh sistem.
+
+Bertanggung jawab atas:
+
+- Konfigurasi sistem.
+- Manajemen pengguna.
+- Manajemen role.
+- Manajemen permission.
+- Maintenance.
+- Audit.
+- Recovery.
+
+---
+
+## Admin
+
+Mengelola seluruh aktivitas akademik.
+
+Meliputi:
+
+- Tahun Ajaran
+- Semester
+- Kurikulum
+- Mata Pelajaran
+- Kelas
+- Siswi
+- Pengguna
+- Monitoring
+- Laporan
+- Recycle Bin
+
+Admin juga menjadi pengendali seluruh konfigurasi akademik.
+
+---
+
+## Mustahiq
+
+Mustahiq hanya mengampu **satu kelas aktif** pada satu Tahun Ajaran.
+
+Setelah login.
+
+Mustahiq langsung diarahkan menuju Dashboard Kelas yang menjadi tanggung jawabnya.
+
+Mustahiq tidak dapat melihat kelas lain.
+
+Mustahiq hanya dapat:
+
+- Melihat siswi pada kelasnya.
+- Menginput nilai kelasnya.
+- Mengubah nilai sebelum Finalisasi.
+- Melihat progress input kelasnya.
+- Mencetak laporan sesuai hak akses.
+
+---
+
+## Mudir
+
+Memiliki akses monitoring.
+
+Tidak melakukan input data.
+
+Mudir dapat melihat:
+
+- Statistik Akademik.
+- Progress Input Nilai.
+- Progress Finalisasi.
+- Aktivitas Sistem.
+- Dashboard Monitoring.
+
+---
+
+## Operator
+
+Bertugas membantu operasional administrasi harian madrasah, pengelolaan data santri, dan kelas di bawah supervisi Admin.
+
+---
+
+## Mufattisy
+
+Pimpinan tingkatan yang bertugas melakukan monitoring akademik pada jenjang/tingkatan yang ditugaskan.
+
+---
+
+## Petugas Keamanan
+
+Bertugas melakukan verifikasi data santri (pencarian santri, kelas, dan kamar) serta mencatat laporan kejadian pelanggaran kedisiplinan santri. Role ini bersifat non-akademik dan tidak memiliki akses ke nilai/raport.
+
+---
+
+## Wali Santri
+
+Memiliki akses read-only portal untuk memantau perkembangan akademik, kehadiran, akhlaq, dan riwayat kedisiplinan putri.
+
+---
+
+# 6. Scope
+
+Versi pertama MPHM mencakup.
+
+## Authentication
+
+- Login
+- Logout
+- Session
+- Role
+- Permission
+
+---
+
+## Academic Workspace
+
+- Tahun Ajaran
+- Semester
+- Kurikulum
+- Mata Pelajaran
+- Kelas
+
+---
+
+## Student Management
+
+- Data Siswi
+- Import
+- Export
+- Restore
+- Soft Delete
+
+---
+
+## User Management
+
+- Pengguna
+- Role
+- Permission
+- Reset Password
+
+---
+
+## Score Management
+
+- Input Nilai
+- Finalisasi
+- Monitoring
+- Audit
+
+---
+
+## Disciplinary & Incident Management (Pelanggaran Santri)
+
+- Master Jenis Pelanggaran (Dikelola Admin)
+- Pencatatan Laporan Pelanggaran (Petugas Keamanan & Admin)
+- Unggah Bukti Pelanggaran
+- Riwayat Pelanggaran Santri
+- Status Penanganan Pelanggaran
+
+---
+
+## Report
+
+- Rekap Nilai
+- Cetak Laporan
+
+---
+
+## Monitoring
+
+Dashboard Admin dapat memonitor secara realtime.
+
+- Progress Input Nilai.
+- Progress Finalisasi.
+- Progress per Kelas.
+- Progress per Mustahiq.
+- Aktivitas Sistem.
+
+---
+
+## Audit
+
+Seluruh perubahan penting wajib tercatat.
+
+---
+
+## Recycle Bin
+
+Seluruh data penting menggunakan Soft Delete.
+
+Data tetap dapat dipulihkan selama masa retensi.
+
+---
+
+# 7. Academic Workspace Concept
+
+Seluruh aktivitas akademik berada di dalam Workspace Tahun Ajaran.
+
+```text
+Academic Year
+        │
+        ▼
+Academic Settings
+        │
+        ▼
+Curriculum
+        │
+        ▼
+Classes
+        │
+        ▼
+Students
+        │
+        ▼
+Academic Activities
+```
+
+Ketika Admin mengaktifkan Tahun Ajaran baru.
+
+Seluruh sistem otomatis menggunakan konfigurasi Tahun Ajaran tersebut.
+
+---
+
+# 8. Academic Configuration
+
+Seluruh konfigurasi akademik dikendalikan oleh Admin.
+
+Meliputi.
+
+- Tahun Ajaran Aktif.
+- Semester Aktif.
+- Kurikulum.
+- Mata Pelajaran.
+- Kelas.
+- Deadline Input Nilai.
+- Status Finalisasi.
+- Pengumuman Dashboard.
+
+Perubahan konfigurasi tidak boleh mengubah histori Tahun Ajaran sebelumnya.
+
+---
+
+# 9. Curriculum Flexibility
+
+Setiap Tahun Ajaran dapat memiliki Kurikulum yang berbeda.
+
+Setiap Kurikulum dapat memiliki Mata Pelajaran yang berbeda.
+
+Setiap Kelas dapat menggunakan Kurikulum yang berbeda apabila diperlukan.
+
+Perubahan Kurikulum hanya berlaku untuk Tahun Ajaran yang sedang aktif dan tidak memengaruhi data historis.
+
+---
+
+# 10. Workflow Philosophy
+
+MPHM menggunakan **Workflow Engine**.
+
+Setiap proses memiliki tahapan yang jelas.
+
+Contoh.
+
+```text
+Draft
+
+↓
+
+Review
+
+↓
+
+Final
+
+↓
+
+Locked
+```
+
+Seluruh Workflow dikendalikan oleh Backend.
+
+Frontend hanya menampilkan status.
+
+---
+
+# 11. Soft Delete Philosophy
+
+Seluruh data penting tidak langsung dihapus.
+
+Data dipindahkan ke Recycle Bin.
+
+Selama masa retensi.
+
+- Data masih dapat dipulihkan.
+- Audit tetap tersedia.
+- Relasi data tetap terjaga.
+
+Setelah melewati masa retensi.
+
+Cloudflare Cron Worker akan melakukan Permanent Delete secara otomatis.
+
+---
+
+# 12. Audit Philosophy
+
+Seluruh aktivitas penting harus dapat ditelusuri.
+
+Minimal mencatat.
+
+- Pengguna.
+- Modul.
+- Aktivitas.
+- Data Sebelum.
+- Data Sesudah.
+- Waktu.
+- Alamat IP.
+- User Agent.
+
+Audit Log tidak dapat diubah maupun dihapus.
+
+---
+
+# 13. Realtime Philosophy
+
+MPHM dirancang sebagai aplikasi yang selalu menampilkan data terbaru.
+
+Seluruh perubahan penting diperbarui secara otomatis menggunakan mekanisme sinkronisasi data tanpa mengharuskan pengguna melakukan refresh halaman.
+
+---
+
+# 14. User Experience Philosophy
+
+MPHM menggunakan pendekatan **Modern Enterprise SaaS**.
+
+Karakteristik.
+
+- Bersih.
+- Modern.
+- Ringan.
+- Informatif.
+- Cepat.
+- Responsif.
+- Konsisten.
+
+Setiap halaman harus memberikan pengalaman yang sederhana namun profesional.
+
+---
+
+# 15. Technology Vision
+
+Teknologi utama.
+
+Frontend.
+
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- shadcn/ui
+- TanStack Query
+- TanStack Table
+- React Hook Form
+- Zod
+
+Backend.
+
+- Cloudflare Workers
+- OpenNext
+
+Database.
+
+- Cloudflare D1
+- Drizzle ORM
+
+Storage.
+
+- Cloudflare R2
+
+Deployment.
+
+- Cloudflare
+
+---
+
+# 16. Architectural Vision
+
+Seluruh sistem harus mengikuti prinsip.
+
+- Enterprise Architecture.
+- Feature-Based Architecture.
+- Component-Driven Development.
+- Clean Architecture.
+- Workflow Driven.
+- API First.
+- Database First.
+- Modular Design.
+
+Setiap keputusan teknis harus mengutamakan konsistensi arsitektur.
+
+---
+
+# 17. Long-Term Roadmap
+
+Arsitektur MPHM harus siap mendukung penambahan modul baru tanpa perubahan besar pada fondasi sistem.
+
+Contoh.
+
+- Absensi
+- Hafalan
+- Akhlak
+- Pelanggaran
+- Prestasi
+- Perizinan
+- Kalender Akademik
+- Pengumuman
+- Surat Menyurat
+- Keuangan
+- Asrama
+- Inventaris
+- E-Learning
+- Multi Tenant
+
+---
+
+# 18. Success Criteria
+
+MPHM dianggap berhasil apabila mampu.
+
+- Mempermudah pekerjaan Admin.
+- Mempermudah Mustahiq melakukan input nilai.
+- Memberikan monitoring akademik secara realtime.
+- Menjamin keamanan dan konsistensi data.
+- Mengurangi kesalahan administrasi.
+- Mempercepat proses akademik.
+- Mudah dipelihara.
+- Mudah dikembangkan.
+- Siap digunakan selama bertahun-tahun.
+
+---
+
+# 19. Final Statement
+
+MPHM bukan sekadar aplikasi administrasi madrasah.
+
+MPHM adalah platform akademik modern yang dibangun dengan standar Enterprise SaaS, berorientasi pada kualitas arsitektur, pengalaman pengguna, keamanan data, serta keberlanjutan pengembangan jangka panjang.
+
+Seluruh keputusan bisnis, desain, implementasi, dan pengembangan fitur wajib mengacu pada visi ini agar MPHM tetap konsisten, profesional, dan mampu berkembang mengikuti kebutuhan madrasah di masa mendatang.
+# 01_Business_Requirements.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : Business Requirements Specification (BRS)
+>
+> Version : 2.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Pendahuluan
+
+## 1.1 Latar Belakang
+
+MPHM (Madrasah Putri Hidayatul Mubtadi'at) merupakan sistem informasi akademik berbasis web yang dirancang untuk mengelola seluruh proses administrasi pendidikan secara terintegrasi, mulai dari penerimaan santri, pengelolaan kelas, penilaian, absensi, promosi kenaikan kelas, hingga pengarsipan data alumni.
+
+Sistem dibangun sebagai **Enterprise Internal SaaS** dengan pendekatan **Cloud Native** menggunakan infrastruktur Cloudflare sehingga mudah dikembangkan, aman, memiliki performa tinggi, dan siap digunakan dalam jangka panjang.
+
+Sistem tidak hanya berfungsi sebagai aplikasi administrasi akademik, tetapi juga sebagai **pusat data permanen** yang menyimpan seluruh riwayat santri, alumni, pengajar, dan pengurus dari tahun ke tahun.
+
+---
+
+# 2. Tujuan Sistem
+
+Sistem dikembangkan untuk mencapai tujuan berikut:
+
+- Mengintegrasikan seluruh administrasi akademik dalam satu platform.
+- Menyediakan database santri yang tersimpan secara permanen.
+- Mempermudah pengelolaan kelas dan proses belajar mengajar.
+- Mempercepat proses input nilai dan absensi.
+- Mengurangi kesalahan administrasi.
+- Menyediakan monitoring akademik secara real-time.
+- Mendukung proses promosi dan kenaikan kelas.
+- Menyediakan riwayat akademik lengkap setiap santri.
+- Menyediakan database alumni yang terdokumentasi dengan baik.
+- Menjaga keamanan, integritas, dan histori seluruh perubahan data.
+
+---
+
+# 3. Ruang Lingkup Sistem
+
+Sistem mencakup seluruh proses administrasi akademik MPHM yang terdiri dari:
+
+- Manajemen Tahun Ajaran
+- Manajemen Semester
+- Manajemen Jenjang Pendidikan
+- Manajemen Tingkat
+- Manajemen Kelas
+- Manajemen Mata Pelajaran
+- Manajemen Santri
+- Manajemen Alumni
+- Manajemen Pengajar
+- Manajemen Pengurus
+- Manajemen Pengguna
+- Role Based Access Control (RBAC)
+- Penilaian
+- Absensi
+- Akhlaq
+- Promosi / Kenaikan Kelas
+- Raport
+- Dashboard
+- Global Database Search
+- Audit Log
+- Arsip Historis
+- Dynamic Custom Fields
+- Recycle Bin
+
+---
+
+# 4. Struktur Pendidikan MPHM
+
+Struktur pendidikan mengikuti aturan resmi MPHM berdasarkan masa pendidikan.
+
+| Jenjang              | Masa Pendidikan | Tingkat    |
+| -------------------- | --------------: | ---------- |
+| Sekolah I'dadiyyah   |         1 Tahun | I, II, III |
+| Madrasah Ibtidaiyyah |         6 Tahun | I – VI     |
+| Madrasah Tsanawiyah  |         3 Tahun | I – III    |
+| Madrasah Aliyah      |         3 Tahun | I – III    |
+| Al-Robithoh          |         1 Tahun | Khidmah    |
+
+Ketentuan:
+
+- Tingkat pada Sekolah I'dadiyyah merupakan pembagian kelas internal dalam satu tahun, bukan kenaikan tahunan.
+- Al-Robithoh merupakan program khidmah setelah Aliyah III.
+- Promosi kelas hanya berlaku pada jenjang yang memiliki kenaikan tahunan sesuai aturan akademik MPHM.
+
+---
+
+# 5. Tahun Ajaran
+
+Tahun Ajaran merupakan pusat seluruh aktivitas akademik.
+
+Dalam satu waktu hanya boleh terdapat satu Tahun Ajaran berstatus **Active**.
+
+Seluruh modul akademik mengikuti Tahun Ajaran aktif, meliputi:
+
+- Semester
+- Kelas
+- Penugasan Pengajar
+- Penugasan Mustahiq
+- Nilai
+- Absensi
+- Akhlaq
+- Raport
+- Promosi Kelas
+
+Pengguna tidak memilih Tahun Ajaran secara manual. Sistem akan menggunakan Tahun Ajaran aktif secara otomatis.
+
+---
+
+# 6. Semester
+
+Setiap Tahun Ajaran memiliki dua semester:
+
+- Semester I
+- Semester II
+
+Seluruh aktivitas akademik dilakukan berdasarkan Semester yang sedang berjalan.
+
+---
+
+# 7. Jenjang, Tingkat, dan Kelas
+
+Hierarki akademik pada sistem adalah sebagai berikut:
+
+```text
+Tahun Ajaran
+      │
+      ▼
+Semester
+      │
+      ▼
+Jenjang Pendidikan
+      │
+      ▼
+Tingkat
+      │
+      ▼
+Kelas
+      │
+      ▼
+Santri
+```
+
+Setiap kelas memiliki:
+
+- Jenjang
+- Tingkat
+- Nama Kelas
+- Wali Kelas (Mustahiq)
+- Daftar Santri
+- Daftar Mata Pelajaran
+
+---
+
+# 8. Master Data Permanen
+
+Sistem memiliki beberapa master data yang disimpan secara permanen dan tidak bergantung pada Tahun Ajaran.
+
+Master data tersebut meliputi:
+
+- Santri
+- Alumni
+- Pengajar
+- Pengurus
+- Wali Santri
+- Mata Pelajaran
+- Jenjang Pendidikan
+- Tingkat Pendidikan
+
+Seluruh perubahan terhadap master data harus tercatat pada Audit Log.
+
+---
+
+# 9. Database Santri
+
+Data santri disimpan secara permanen dari tahun ke tahun.
+
+Minimal informasi yang disimpan meliputi:
+
+- NIS
+- NISN
+- Nama Lengkap
+- Tempat Lahir
+- Tanggal Lahir
+- Nama Wali
+- Alamat
+- Nomor HP
+- Tahun Masuk
+- Tahun Keluar
+- Status Santri
+
+Status santri terdiri dari:
+
+- Aktif
+- Cuti
+- Boyong
+- Alumni
+
+Selain data identitas, sistem juga menyimpan riwayat:
+
+- Kelas
+- Nilai
+- Absensi
+- Akhlaq
+- Kamar
+- Promosi
+- Mutasi
+
+Data santri tidak dihapus ketika sudah tidak aktif, melainkan diarsipkan sebagai data historis.
+
+---
+
+# 10. Database Alumni
+
+Status Alumni merupakan kelanjutan dari data santri.
+
+Selain data identitas, sistem menyimpan informasi tambahan:
+
+- Status Khidmah
+- Penempatan Khidmah
+- Alasan Tidak Khidmah
+- Keterangan Qodho' Khidmah
+- Status Pengambilan Ijazah
+- Tanggal Pengambilan Ijazah
+- Keterangan Tambahan
+
+Data alumni tetap dapat dicari melalui Global Database Search.
+
+---
+
+# 11. Database Pengajar
+
+Data pengajar disimpan secara permanen.
+
+Informasi yang disimpan meliputi:
+
+- Nama
+- Tempat Lahir
+- Tanggal Lahir
+- Nama Wali
+- Alamat
+- Nomor HP
+- Tahun Mulai Mengajar
+- Tahun Selesai Mengajar
+- Status Pengajar
+
+Status pengajar terdiri dari:
+
+- Mustahiq
+- Munawib
+
+---
+
+# 12. Database Pengurus
+
+Data kepengurusan disimpan sebagai arsip historis.
+
+Meliputi:
+
+- Dewan Harian P3HM
+- MPHM
+- M3PHM
+
+Informasi yang disimpan:
+
+- Nama
+- Tempat Lahir
+- Tanggal Lahir
+- Nama Wali
+- Alamat
+- Nomor HP
+- Jabatan
+- Periode Jabatan
+- Tahun Mulai
+- Tahun Selesai
+
+Riwayat kepengurusan tidak boleh dihapus.
+
+---
+
+# 13. Role Based Access Control (RBAC)
+
+Seluruh pengguna sistem diberikan hak akses berdasarkan Role Based Access Control (RBAC).
+
+Setiap pengguna hanya dapat mengakses modul dan data sesuai dengan kewenangannya.
+
+Hak akses tidak hanya ditentukan berdasarkan jenis role, tetapi juga berdasarkan ruang lingkup data (Data Scope) seperti kelas, jenjang, atau seluruh sistem.
+
+---
+
+## 13.1 Super Administrator
+
+Super Administrator merupakan pengelola teknis aplikasi.
+
+Memiliki hak akses penuh terhadap seluruh modul dan konfigurasi sistem.
+
+Hak akses meliputi:
+
+- Manajemen Pengguna
+- Manajemen Role
+- Manajemen Permission
+- Konfigurasi Sistem
+- Master Data
+- Backup & Restore
+- Audit Log
+- Dynamic Custom Fields
+- Seluruh Data Akademik
+
+---
+
+## 13.2 Administrator Akademik
+
+Administrator Akademik bertanggung jawab terhadap seluruh administrasi akademik.
+
+Hak akses meliputi:
+
+- Tahun Ajaran
+- Semester
+- Jenjang
+- Tingkat
+- Kelas
+- Mata Pelajaran
+- Santri
+- Alumni
+- Pengajar
+- Pengurus
+- Penugasan Mustahiq
+- Promosi Kelas
+- Raport
+- Monitoring Akademik
+
+Administrator Akademik tidak dapat mengubah konfigurasi sistem.
+
+---
+
+## 13.3 Operator Akademik
+
+Operator membantu proses administrasi akademik.
+
+Hak akses dapat dibatasi sesuai kebutuhan.
+
+Operator dapat diberikan akses terhadap:
+
+- Input Data Santri
+- Pembaruan Biodata
+- Mutasi Santri
+- Pengelolaan Kelas
+- Absensi
+- Penilaian
+- Promosi
+- Database Search
+
+Permission diberikan secara fleksibel oleh Administrator.
+
+---
+
+## 13.4 Mustahiq (Wali Kelas)
+
+Mustahiq merupakan wali kelas yang bertanggung jawab terhadap satu kelas.
+
+Setiap Mustahiq hanya dapat memiliki satu kelas aktif dalam satu Tahun Ajaran.
+
+Hak akses:
+
+- Melihat Dashboard Kelas
+- Melihat Biodata Santri dalam kelasnya
+- Menginput Nilai
+- Menginput Absensi
+- Menginput Akhlaq
+- Melihat Riwayat Akademik Santri Kelasnya
+- Memberikan Rekomendasi Promosi
+
+Mustahiq tidak dapat:
+
+- Mengakses kelas lain
+- Mengubah master data santri
+- Menghapus data akademik
+- Mengakses konfigurasi sistem
+
+Sistem secara otomatis menentukan kelas berdasarkan akun yang digunakan.
+
+---
+
+## 13.5 Mufattisy (Pimpinan Tingkatan)
+
+Mufattisy bertugas melakukan monitoring pada jenjang tertentu.
+
+Contoh:
+
+- I'dadiyyah
+- Ibtidaiyyah
+- Tsanawiyah
+- Aliyah
+- Al-Robithoh
+
+Hak akses:
+
+- Melihat seluruh kelas pada jenjang yang ditugaskan
+- Monitoring Nilai
+- Monitoring Absensi
+- Monitoring Akhlaq
+- Monitoring Promosi
+- Melihat Statistik Jenjang
+- Melihat Laporan Akademik
+
+Tidak dapat:
+
+- Mengubah master data
+- Mengakses jenjang lain yang tidak ditugaskan
+
+---
+
+## 13.6 Pimpinan
+
+Role ini digunakan oleh:
+
+- Mundzir
+- Dzurriyah
+- Server
+
+Hak akses:
+
+- Monitoring seluruh jenjang
+- Monitoring seluruh kelas
+- Monitoring seluruh nilai
+- Monitoring absensi
+- Monitoring laporan akademik
+- Monitoring statistik
+- Monitoring riwayat akademik
+
+Pimpinan memiliki akses baca terhadap seluruh data lintas jenjang.
+
+---
+
+## 13.7 Petugas Keamanan
+
+Petugas Keamanan merupakan pengguna yang bertugas melakukan verifikasi data santri serta mencatat pelanggaran kedisiplinan.
+
+Hak akses meliputi:
+
+- Global Database Search
+- Melihat biodata dasar santri
+- Melihat lokasi kamar
+- Melihat status santri
+- Membuat laporan pelanggaran santri
+- Melihat riwayat pelanggaran santri
+- Mengunggah bukti pelanggaran (opsional)
+
+Data yang dapat dilihat:
+
+- Nama
+- NIS
+- NISN
+- Jenjang
+- Kelas
+- Kamar
+- Nama Wali
+- Alamat
+- Tahun Masuk
+- Status
+
+Petugas Keamanan tidak dapat mengakses:
+
+- Nilai
+- Absensi
+- Akhlaq
+- Raport
+- Pengaturan Sistem
+- Master Data
+
+Seluruh laporan pelanggaran akan tercatat pada Audit Log.
+
+Role ini tidak dapat mengubah data akademik.
+
+## 13.8 Wali Santri
+
+Wali Santri hanya dapat mengakses data anak yang terhubung dengan akunnya.
+
+Hak akses:
+
+- Profil Santri
+- Nilai
+- Absensi
+- Akhlaq
+- Riwayat Akademik
+- Raport
+
+Wali Santri tidak dapat melihat data santri lain.
+
+---
+
+# 14. Dashboard
+
+Dashboard ditampilkan sesuai dengan role pengguna.
+
+Dashboard hanya menampilkan informasi yang relevan terhadap hak akses pengguna.
+
+Dashboard yang tersedia:
+
+- Dashboard Super Administrator
+- Dashboard Administrator Akademik
+- Dashboard Operator
+- Dashboard Mustahiq
+- Dashboard Mufattisy
+- Dashboard Pimpinan
+- Dashboard Wali Santri
+
+---
+
+# 15. Penilaian
+
+Penilaian dilakukan oleh Mustahiq sesuai kelas yang diampu.
+
+Sistem mendukung:
+
+- Input Nilai Harian
+- Nilai Tengah Semester
+- Nilai Akhir Semester
+- Nilai Akhir Tahun
+- Nilai Raport
+
+Seluruh perubahan nilai disimpan secara otomatis (Auto Save).
+
+Tidak terdapat tombol Save.
+
+Perubahan nilai wajib tercatat pada Audit Log.
+
+---
+
+# 16. Absensi
+
+Absensi dilakukan berdasarkan kelas.
+
+Jenis absensi meliputi:
+
+- Hadir
+- Izin
+- Sakit
+- Alpha
+
+Sistem menyimpan histori absensi setiap semester.
+
+Data absensi digunakan sebagai salah satu pertimbangan proses promosi.
+
+---
+
+# 17. Akhlaq
+
+Setiap santri memiliki penilaian Akhlaq.
+
+Penilaian dilakukan oleh Mustahiq sesuai kelas yang diampu.
+
+Riwayat penilaian Akhlaq disimpan pada setiap semester.
+
+---
+
+# 18. Pelanggaran Santri
+
+Sistem menyediakan modul Pelanggaran Santri untuk mencatat seluruh kejadian pelanggaran kedisiplinan selama santri aktif.
+
+Modul ini terpisah dari penilaian Akhlaq.
+
+Pelanggaran dicatat berdasarkan kejadian (incident based) dan menjadi bagian dari riwayat santri.
+
+Pelanggaran dapat dibuat oleh:
+
+- Petugas Keamanan
+- Administrator Akademik (opsional)
+
+Setiap laporan pelanggaran minimal memuat:
+
+- Santri
+- Tanggal Kejadian
+- Waktu Kejadian (Opsional)
+- Jenis Pelanggaran
+- Kategori Pelanggaran
+- Tingkat Pelanggaran
+- Deskripsi Kejadian
+- Lokasi Kejadian (Opsional)
+- Bukti Foto atau Dokumen (Opsional)
+- Petugas Pelapor
+- Status Penanganan
+
+Status laporan terdiri dari:
+
+- Draft
+- Dilaporkan
+- Diproses
+- Selesai
+- Dibatalkan
+
+Seluruh riwayat pelanggaran disimpan secara permanen sebagai bagian dari histori santri.
+
+Riwayat pelanggaran dapat digunakan sebagai bahan evaluasi pembinaan sesuai kebijakan MPHM.
+
+# 18.1 Promosi / Kenaikan Kelas
+
+Promosi dilakukan pada akhir Tahun Ajaran.
+
+Tahapan promosi meliputi:
+
+1. Membuka Periode Promosi
+2. Generate Kandidat Santri
+3. Evaluasi Nilai
+4. Evaluasi Kehadiran
+5. Review Operator
+6. Persetujuan
+7. Finalisasi
+
+Status promosi terdiri dari:
+
+- PROMOTED
+- RETAINED
+- GRADUATED
+- TRANSFERRED
+- DROPPED
+- KHIDMAH
+
+Setelah promosi selesai, sistem akan:
+
+- Membuat Riwayat Akademik
+- Memindahkan Kelas
+- Memperbarui Status
+- Menyimpan Snapshot Data
+
+Promosi hanya dapat dilakukan satu kali dalam setiap Tahun Ajaran.
+
+---
+
+# 19. Aturan Promosi Berdasarkan Jenjang
+
+Madrasah Ibtidaiyyah mengikuti kenaikan kelas selama enam tahun.
+
+Madrasah Tsanawiyah mengikuti kenaikan kelas selama tiga tahun.
+
+Madrasah Aliyah mengikuti kenaikan kelas selama tiga tahun.
+
+Sekolah I'dadiyyah merupakan program satu tahun sehingga tingkat I, II, dan III bukan merupakan kenaikan tahunan.
+
+Al-Robithoh merupakan program khidmah selama satu tahun setelah Aliyah III.
+
+Seluruh aturan promosi harus mengikuti struktur pendidikan resmi MPHM.
+
+---
+
+# 20. Raport
+
+Raport dihasilkan setelah proses finalisasi semester selesai.
+
+Raport hanya dapat dibuat apabila:
+
+- Nilai lengkap
+- Absensi lengkap
+- Akhlaq lengkap
+- Tidak terdapat data yang belum diverifikasi
+
+Setelah raport diterbitkan, data semester akan berstatus Locked dan hanya dapat dibuka kembali oleh Administrator Akademik sesuai prosedur yang berlaku.
+
+---
+
+# 21. Global Database Search
+
+Sistem menyediakan fitur pencarian terpusat (Global Database Search) untuk memudahkan pencarian seluruh data utama.
+
+Menu Database terdiri dari:
+
+- Database Santri
+- Database Alumni
+- Database Pengajar
+- Database Pengurus
+
+Pencarian dapat dilakukan menggunakan:
+
+- Nama
+- NIS
+- NISN
+- Nama Wali
+- Nomor HP
+- Alamat
+- Tahun Masuk
+- Tahun Keluar
+
+Hasil pencarian dapat difilter berdasarkan:
+
+- Santri Aktif
+- Alumni
+- Cuti
+- Boyong
+- Pengajar
+- Pengurus
+- Jenjang
+- Tahun Ajaran
+
+Hak akses hasil pencarian mengikuti Role Based Access Control (RBAC).
+
+---
+
+# 22. Arsip Historis
+
+MPHM menerapkan konsep Historical Archive.
+
+Data yang sudah tidak aktif tidak dihapus dari sistem.
+
+Seluruh data berikut akan diarsipkan secara permanen:
+
+- Santri
+- Alumni
+- Pengajar
+- Pengurus
+- Riwayat Kelas
+- Riwayat Nilai
+- Riwayat Absensi
+- Riwayat Akhlaq
+- Riwayat Promosi
+- Riwayat Jabatan
+
+Data arsip tidak muncul pada menu operasional harian, namun tetap tersedia melalui Global Database Search sesuai hak akses pengguna.
+
+---
+
+# 23. Dynamic Custom Fields
+
+Administrator dapat menambahkan atribut data baru tanpa mengubah kode aplikasi maupun struktur database.
+
+Custom Field dapat diterapkan pada:
+
+- Santri
+- Alumni
+- Pengajar
+- Pengurus
+- Wali Santri
+- Mata Pelajaran
+- Kelas
+
+Jenis data yang didukung:
+
+- Text
+- Text Area
+- Number
+- Decimal
+- Date
+- Time
+- Date Time
+- Email
+- Phone
+- URL
+- Checkbox
+- Radio Button
+- Dropdown
+- Multi Select
+- File
+- Image
+
+Setiap Custom Field memiliki konfigurasi:
+
+- Nama Field
+- Label
+- Modul
+- Tipe Data
+- Default Value
+- Required
+- Unique
+- Read Only
+- Visible Role
+- Urutan Tampilan
+- Status Aktif
+
+Seluruh perubahan Custom Field dicatat pada Audit Log.
+
+---
+
+# 24. Monitoring Akademik
+
+Administrator Akademik, Mufattisy, dan Pimpinan dapat melakukan monitoring akademik secara real-time sesuai ruang lingkup kewenangannya.
+
+Monitoring meliputi:
+
+- Progress Penilaian
+- Progress Absensi
+- Progress Akhlaq
+- Progress Raport
+- Progress Promosi
+- Jumlah Santri Aktif
+- Statistik Jenjang
+- Statistik Kelas
+- Statistik Kelulusan
+
+Seluruh informasi diperbarui secara real-time berdasarkan data yang tersimpan.
+
+---
+
+# 25. Finalisasi Semester
+
+Finalisasi Semester dilakukan setelah seluruh proses akademik selesai.
+
+Tahapan finalisasi:
+
+1. Pemeriksaan Kelengkapan
+2. Verifikasi Data
+3. Perhitungan Nilai
+4. Validasi Data
+5. Lock Semester
+6. Generate Raport
+
+Setelah finalisasi selesai:
+
+- Data Semester menjadi Read Only.
+- Perubahan hanya dapat dilakukan melalui proses Unlock oleh Administrator Akademik.
+- Seluruh aktivitas Unlock wajib memiliki alasan dan tercatat pada Audit Log.
+
+---
+
+# 26. Lifecycle Data
+
+Setiap data utama memiliki siklus hidup (Lifecycle) yang jelas.
+
+## Tahun Ajaran
+
+```text
+Draft
+   │
+Published
+   │
+Active
+   │
+Archived
+```
+
+## Santri
+
+```text
+Aktif
+   │
+Cuti
+   │
+Boyong
+   │
+Alumni
+```
+
+## Nilai
+
+```text
+Draft
+   │
+Verified
+   │
+Final
+   │
+Locked
+```
+
+## Promosi
+
+```text
+Draft
+   │
+Processing
+   │
+Approved
+   │
+Locked
+```
+
+Setiap perubahan status harus tercatat pada Audit Log.
+
+---
+
+# 27. Recycle Bin
+
+Seluruh penghapusan data menggunakan mekanisme Soft Delete.
+
+Data yang dihapus tidak langsung dihapus permanen.
+
+Data dipindahkan ke Recycle Bin.
+
+Berlaku untuk:
+
+- Santri
+- Pengajar
+- Pengurus
+- Mata Pelajaran
+- Kelas
+- Penilaian
+- Absensi
+- Akhlaq
+- User
+
+Data disimpan selama masa retensi yang ditentukan oleh Administrator.
+
+Selama periode retensi data dapat:
+
+- Dipulihkan (Restore)
+- Dihapus Permanen
+
+Penghapusan permanen dilakukan secara otomatis menggunakan Cloudflare Cron Worker.
+
+---
+
+# 28. Audit Log
+
+Seluruh aktivitas penting wajib dicatat.
+
+Audit Log minimal menyimpan informasi:
+
+- Pengguna
+- Role
+- Modul
+- Aktivitas
+- Data Sebelum
+- Data Sesudah
+- Waktu
+- IP Address (Opsional)
+- User Agent (Opsional)
+
+Audit Log tidak dapat diubah oleh pengguna.
+
+Audit Log hanya dapat diakses oleh pengguna yang memiliki hak akses.
+
+---
+
+# 29. Keamanan Data
+
+Sistem menerapkan prinsip keamanan sebagai berikut:
+
+- Authentication wajib pada seluruh pengguna.
+- Authorization menggunakan Role Based Access Control (RBAC).
+- Session menggunakan Secure HttpOnly Cookie.
+- Middleware digunakan untuk Route Protection.
+- Seluruh komunikasi menggunakan HTTPS.
+- Password disimpan menggunakan hashing yang aman.
+- Data sensitif hanya dapat diakses sesuai hak akses.
+- Seluruh perubahan penting dicatat pada Audit Log.
+
+---
+
+# 30. Prinsip Bisnis
+
+Sistem dikembangkan berdasarkan prinsip berikut:
+
+- Database menjadi sumber kebenaran (Single Source of Truth).
+- Seluruh proses bisnis dijalankan di Backend.
+- Frontend hanya bertanggung jawab terhadap antarmuka pengguna.
+- Seluruh perubahan data wajib tervalidasi.
+- Seluruh perubahan penting wajib memiliki Audit Trail.
+- Seluruh data penting menggunakan Soft Delete.
+- Seluruh data historis disimpan secara permanen.
+- Seluruh hak akses menggunakan RBAC.
+- Seluruh modul harus saling terintegrasi.
+- Seluruh pengembangan harus menjaga integritas data.
+
+---
+
+# 31. Visi Pengembangan
+
+MPHM dikembangkan sebagai platform administrasi pendidikan modern yang dapat berkembang dalam jangka panjang.
+
+Pengembangan sistem harus selalu mengutamakan:
+
+- Scalability
+- Maintainability
+- Security
+- Reliability
+- Performance
+- Availability
+- Data Integrity
+- Auditability
+- User Experience
+
+Setiap modul baru wajib mengikuti Business Requirements Specification ini agar seluruh proses bisnis tetap konsisten, terdokumentasi, dan mudah dikembangkan.
+
+---
+
+# 32. Roadmap Pengembangan Modul
+
+Pengembangan sistem dilakukan secara bertahap dengan prioritas sebagai berikut:
+
+## Phase 1 — Foundation
+
+- Authentication
+- Authorization (RBAC)
+- Master Data
+- Dashboard
+- User Management
+- Audit Log
+
+## Phase 2 — Akademik
+
+- Tahun Ajaran
+- Semester
+- Jenjang
+- Tingkat
+- Kelas
+- Mata Pelajaran
+- Santri
+- Pengajar
+
+## Phase 3 — Operasional
+
+- Penilaian
+- Absensi
+- Akhlaq
+- Raport
+- Monitoring
+
+## Phase 4 — Progression
+
+- Promosi / Kenaikan Kelas
+- Mutasi
+- Alumni
+- Al-Robithoh
+- Riwayat Akademik
+
+## Phase 5 — Enterprise
+
+- Global Database Search
+- Dynamic Custom Fields
+- Arsip Historis
+- Laporan
+- Backup & Restore
+- Integrasi Modul Lanjutan
+
+---
+
+# 33. Penutup
+
+Dokumen Business Requirements Specification (BRS) ini menjadi acuan utama dalam perancangan database, API, antarmuka pengguna, hak akses, dan seluruh implementasi teknis MPHM.
+
+Seluruh perubahan kebutuhan bisnis harus diperbarui pada dokumen ini sebelum dilakukan implementasi agar konsistensi antara kebutuhan bisnis dan implementasi teknis tetap terjaga.
+BAGIAN 1: KEBUTUHAN PRIMER (Aturan Inti, Keamanan, & Tata Kelola Sistem)
+
+## 1. Arsitektur, Otentikasi, & Otorisasi Sistem
+
+- **Arsitektur Berlapis (Layered Architecture):**
+  `Client` -> `Presentation Layer` -> `Application Layer` -> `Business Layer` -> `Repository Layer` -> `Database`.
+- _Business Logic_ hanya boleh berada pada **Business Layer**.
+
+- **Authentication:** Menggunakan _Session Authentication_ dengan karakteristik _HttpOnly Cookie_, _Secure Cookie_, _Session Rotation_, dan _Middleware Protection_.
+- **Authorization:** Menggunakan _Role Based Access Control_ (RBAC) dan _Data Scope Authorization_. Seluruh endpoint wajib melakukan validasi Role. Daftar lengkap Role pada sistem hanya terdiri dari:
+
+1. Sekretariat (Mencakup seluruh fungsi pengelolaan administratif sebelumnya)
+2. Mustahiq (Wali Kelas)
+3. Mufattisy (Pimpinan Tingkatan)
+4. Pimpinan / Mundzir
+5. Petugas Keamanan
+6. Wali Santri
+
+- **Aturan Visibilitas Data Secara Global:** Semua user **selain** Sekretariat dan Pimpinan/Mundzir **wajib hanya melihat data di setiap kinerjanya/lingkup kerjanya masing-masing**.
+- **Pusat Data (Data Center):** Seluruh dashboard wajib mengambil data secara tersentralisasi (_Single Source of Truth_), bersifat _real-time_, serta responsif/optimal untuk PWA (_Desktop, Tablet, dan Mobile_).
+
+## 2. Aturan Pembagian Tanggung Jawab (Frontend vs Backend)
+
+- **Frontend Rules:** Hanya bertanggung jawab terhadap UI, UX, validasi ringan, navigasi, cache, _Optimistic Update_, _Loading State_, dan _Error State_. **Dilarang keras:** Menghitung nilai akademik, melakukan finalisasi, mengubah aturan bisnis, dan mengakses database secara langsung.
+- **Backend Rules:** Bertanggung jawab terhadap validasi data, validasi hak akses, _Business Logic_, perhitungan akademik, finalisasi, _Audit Log_, _Soft Delete_, _Recycle Bin_, dan integritas database. Seluruh validasi wajib dilakukan di Backend.
+
+## 3. Kebijakan Data, Log, Keamanan & Kinerja
+
+- **Tahun Ajaran Aktif:** Dalam satu waktu hanya boleh terdapat satu Tahun Ajaran aktif. Seluruh query sistem otomatis menggunakan Tahun Ajaran aktif. Pengguna tidak memilih Tahun Ajaran secara manual.
+- **Form Input (Auto Save):** Seluruh Form Input menggunakan mekanisme _Auto Save_ dengan alur: `Input` -> `Debounce` -> `Validation` -> `Save` -> `Toast` (✓ Tersimpan). Tidak terdapat tombol Save pada Form Input Nilai.
+- **Data Lifecycle:** Seluruh data mengikuti alur siklus: `Draft` -> `Published` -> `Active` -> `Locked` -> `Archived` -> `Trash` -> `Deleted` (menyesuaikan jenis data).
+- **Recycle Bin & Soft Delete:** Data tidak dihapus permanen. Penghapusan minimal mencatat `deleted_at` dan `deleted_by`. Data penting masuk ke _Recycle Bin_ dengan retensi **24 Jam** yang akan dihapus otomatis oleh _Cloudflare Cron Worker_.
+- **Audit Log:** Seluruh aktivitas penting dan aktivitas dashboard wajib dicatat secara permanen, bersifat _immutable_ (tidak dapat diubah oleh pengguna).
+- **Security Standard:** Wajib menerapkan _CSRF Protection_, _XSS Protection_, _SQL Injection Protection_, _Rate Limiting_, _Secure Headers_, _Input Validation_, dan _Output Escaping_.
+- **Performance Minimum:** Wajib menggunakan _Server Components_, _Code Splitting_, _Lazy Loading_, _Streaming_, _Optimistic Update_, _Server Side Pagination_, _Server Side Filtering_, _Server Side Sorting_, _Cache_, dan _Edge Rendering_.
+
+---
+
+# BAGIAN 2: KEBUTUHAN SEKUNDER (Spesifikasi Peran, Menu, & Operasional)
+
+## 1. Spesifikasi Detail Dashboard Berdasarkan Role
+
+Setiap pengguna memiliki Dashboard yang berbeda sesuai tugas, tanggung jawab, dan hak aksesnya (_Role Based Dashboard_). Pengguna tidak dapat mengakses Dashboard milik role lain.
+
+### A. Dashboard Sekretariat
+
+- **Fungsi:** Dashboard utama untuk mengelola seluruh administrasi MPHM dengan akses penuh terhadap seluruh modul sesuai kewenangan (telah mencakup hak akses yang sebelumnya dipisah sebagai Admin/Operator).
+- **Ringkasan Dashboard (Widget/Statistik):** Total Santri Aktif, Total Alumni, Total Pengajar, Total Pengurus, Tahun Ajaran Aktif, Semester Aktif, Jumlah Kelas, Jumlah Wali Santri, Statistik Kehadiran, Statistik Pelanggaran, Statistik Kelulusan.
+- **Struktur Menu:**
+- Dashboard
+- Pusat Data (Santri, Alumni, Pengajar, Pengurus, Wali Santri, Pencarian Database)
+- Akademik (Tahun Ajaran, Semester, Jenjang, Tingkat, Mata Pelajaran, Kelas, Penempatan Santri, Nilai, Absensi, Akhlaq, Pelanggaran, Rapor, Promosi)
+- Pengguna (Role, Hak Akses, Akun)
+- Master Data (Jenis Pelanggaran, Tingkat Pelanggaran, Dynamic Field)
+- Laporan (Akademik, Kehadiran, Pelanggaran, Alumni)
+- Pengaturan Sistem (Audit Log, Backup, Konfigurasi)
+
+- **Quick Actions:** Tambah Santri, Tambah Pengajar, Tambah Pengurus, Tambah Tahun Ajaran, Buat Kelas, Jalankan Promosi, Cetak Rapor.
+
+### B. Dashboard Mustahiq (Wali Kelas)
+
+- **Fungsi:** Mengelola aktivitas akademik kelas yang diampunya. **Wajib hanya melihat data dari 1 kelas yang diampunya.** Sistem otomatis menentukan Tahun Ajaran, Kelas, dan Hak Akses setelah login, tanpa perlu memilih secara manual.
+- **Ringkasan Dashboard (Widget/Statistik):** Jumlah Santri, Kehadiran Hari Ini, Nilai Belum Diisi, Akhlaq Belum Diisi, Pelanggaran Kelas, Pengumuman.
+- **Struktur Menu:** Dashboard, Data Santri Kelas, Absensi, Nilai, Akhlaq, Pelanggaran, Rapor, Profil Santri.
+- **Quick Actions:** Input Absensi, Input Nilai, Input Akhlaq, Lihat Profil Santri, Cetak Rekap Nilai.
+
+### C. Dashboard Mufattisy (Pimpinan Tingkatan)
+
+- **Fungsi:** Melakukan monitoring seluruh kelas pada tingkatan yang menjadi tanggung jawabnya. **Wajib hanya melihat data pada Tingkat yang dinaunginya.** Mufattisy **tidak menginput** nilai maupun absensi.
+- **Ringkasan Dashboard (Widget/Statistik):** Jumlah Kelas, Jumlah Santri, Persentase Kehadiran, Persentase Pengisian Nilai, Persentase Pengisian Akhlaq, Statistik Pelanggaran, Grafik Perkembangan.
+- **Struktur Menu:** Dashboard, Monitoring Kelas, Monitoring Nilai, Monitoring Absensi, Monitoring Akhlaq, Monitoring Pelanggaran, Laporan Tingkatan.
+- **Quick Actions:** Lihat Profil Santri, Lihat Rekap Nilai, Lihat Rekap Absensi, Cetak Laporan.
+
+### D. Dashboard Pimpinan / Mundzir
+
+- **Fungsi:** Monitoring seluruh aktivitas MPHM secara menyeluruh tanpa batas visibilitas (seperti Sekretariat). Tidak digunakan untuk pekerjaan administrasi harian.
+- **Ringkasan Dashboard (Widget/Statistik):** Total Santri, Total Alumni, Total Pengajar, Total Pengurus, Statistik Akademik, Statistik Kelulusan, Statistik Kehadiran, Statistik Pelanggaran, Grafik Perkembangan Tahunan.
+- **Struktur Menu:** Dashboard, Monitoring Akademik, Monitoring Pusat Data, Monitoring Pelanggaran, Monitoring Alumni, Laporan, Statistik.
+- **Quick Actions:** Lihat Statistik, Cetak Laporan, Lihat Profil Santri, Lihat Profil Pengajar.
+
+### E. Dashboard Petugas Keamanan
+
+- **Fungsi & Hak Akses khusus:** Melakukan pencatatan dan pemantauan pelanggaran santri berdasarkan kejadian (_Incident-Based Recording_) yang terpisah dari penilaian akhlaq semesteran.
+- **Aturan Visibilitas & Alur Kerja:** Hanya bisa melihat data yang dicari saja (tidak menampilkan semua data secara bawaan). Jika data hasil pencarian tidak diklik, maka tidak akan menampilkan informasi detail/lengkapnya.
+- **Alur Input Pelanggaran Wajib:** `Mencari Data` -> `Mengeklik Data Santri` -> `Input Pelanggaran` -> `Simpan`.
+- **Dilarang keras:** Mengakses, melihat, atau mengubah data akademik (Nilai, Absensi, Akhlaq, Raport).
+
+- **Ringkasan Dashboard (Widget/Statistik):** Pelanggaran Hari Ini, Pelanggaran Minggu Ini, Pelanggaran Bulan Ini, Santri Terbanyak Melanggar, Jenis Pelanggaran Terbanyak, Status Penanganan.
+- **Struktur Menu:** Dashboard, Cari Santri, Laporan Pelanggaran, Riwayat Pelanggaran, Statistik Pelanggaran.
+- **Quick Actions:** Cari Santri, Tambah Pelanggaran, Upload Bukti, Selesaikan Laporan.
+
+### F. Dashboard Wali Santri
+
+- **Fungsi:** Memantau perkembangan anak yang terhubung langsung dengan akun wali. **Wajib hanya dapat melihat data anaknya saja & hanya data monitoring terkait anaknya saja.** Tidak dapat melihat data santri lain.
+- **Ringkasan Dashboard (Widget/Statistik):** Biodata Anak, Kelas Saat Ini, Persentase Kehadiran, Nilai Terbaru, Akhlaq, Pelanggaran, Pengumuman.
+- **Struktur Menu:** Dashboard, Profil Anak, Nilai, Absensi, Akhlaq, Pelanggaran, Rapor, Kalender Akademik, Pengumuman.
+- **Quick Actions:** Lihat Rapor, Lihat Absensi, Lihat Nilai, Lihat Pengumuman.
+
+## 2. Aturan Pengelolaan Tabel & Data Massal
+
+- **Universal Data Grid Standard:** Seluruh halaman tabel wajib mengikuti satu standar komponen dokumen _Universal Data Grid Standard_. Tidak diperbolehkan membuat implementasi Data Table yang berbeda antar modul.
+- **Import & Export:** Seluruh modul yang memiliki proses input data wajib menyediakan fitur: _Import_, _Export_, _Download Template_, dan _Import History_. Format template wajib patuh pada _Universal Data Grid Standard_.
+- **Master Jenis Pelanggaran:** Bersifat dinamis dan dikelola secara sentral oleh Administrator melalui Dashboard Sekretariat.
+
+## 3. Prinsip Pengembangan Sistem (Development Principles)
+
+- Setiap kode, modul, dan fitur baru wajib memenuhi prinsip: **SOLID**, **DRY** (_Don't Repeat Yourself_), **KISS** (_Keep It Simple_), _Clean Architecture_, _Feature-Based Architecture_, _Type Safety_, _Reusable Components_, dan _Modular Design_.
+- Wajib mengutamakan konsistensi arsitektur dan pemanfaatan komponen _reusable_ yang sudah ada daripada kecepatan implementasi fitur baru.
+- **Error Handling:** Seluruh pesan error wajib mudah dipahami, informatif, tidak menampilkan isi teknis internal sistem, serta menyediakan solusi/tindakan berikutnya bagi pengguna.
+- **Filosofi Desain Utama:** _Role Based Dashboard_, _Data Scope Authorization_, _Person-Centric Architecture_, _Single Source of Truth_, _Enterprise Information System_, _Mobile First PWA_, _Real-Time Monitoring_, serta _Simple, Fast, dan Mudah Digunakan_.
+# 03_Database_Design.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : Database Design Specification (DDS)
+>
+> Version : 2.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Tujuan
+
+Dokumen ini mendefinisikan standar perancangan database yang menjadi fondasi seluruh sistem MPHM.
+
+Seluruh struktur tabel, relasi, indeks, constraint, dan strategi penyimpanan data wajib mengikuti dokumen ini.
+
+Database harus dirancang agar:
+
+- Mudah dikembangkan.
+- Mudah dipelihara.
+- Aman.
+- Konsisten.
+- Mendukung perkembangan sistem selama bertahun-tahun.
+- Tidak memerlukan perubahan struktur inti ketika fitur baru ditambahkan.
+
+---
+
+# 2. Technology
+
+Database menggunakan:
+
+- Cloudflare D1
+- SQLite Engine
+- Drizzle ORM
+- Cloudflare Workers
+- Cloudflare Cron Worker
+
+---
+
+# 3. Database Philosophy
+
+Database MPHM dibangun menggunakan konsep **Academic Workspace**.
+
+Artinya seluruh aktivitas akademik selalu berada di dalam satu Tahun Ajaran yang aktif.
+
+```text
+Academic Year
+        │
+        ▼
+Academic Settings
+        │
+        ▼
+Curriculum
+        │
+        ▼
+Classes
+        │
+        ▼
+Students
+        │
+        ▼
+Academic Activities
+```
+
+Semua transaksi akademik selalu memiliki referensi terhadap Tahun Ajaran.
+
+---
+
+# 4. Database Principles
+
+Seluruh desain database wajib mengikuti prinsip berikut.
+
+- Third Normal Form (3NF)
+- Type Safe
+- Modular
+- Scalable
+- Reusable
+- Audit Friendly
+- Soft Delete
+- Data Integrity
+- High Performance
+
+---
+
+# 5. Naming Convention
+
+## Table
+
+Gunakan bentuk jamak.
+
+Contoh:
+
+```text
+users
+roles
+students
+subjects
+curriculums
+classes
+scores
+reports
+```
+
+---
+
+## Primary Key
+
+Seluruh tabel menggunakan.
+
+```text
+id
+```
+
+Tipe:
+
+UUID
+
+---
+
+## Foreign Key
+
+Format.
+
+```text
+academic_year_id
+
+curriculum_id
+
+class_id
+
+student_id
+
+subject_id
+
+user_id
+
+semester_id
+
+role_id
+```
+
+---
+
+## Timestamp
+
+Minimal.
+
+```text
+created_at
+
+updated_at
+```
+
+---
+
+## Soft Delete
+
+Minimal.
+
+```text
+deleted_at
+
+deleted_by
+```
+
+---
+
+# 6. Academic Workspace
+
+Academic Year menjadi Root Entity.
+
+```text
+Academic Year
+
+├── Academic Settings
+
+├── Curriculum
+
+├── Semesters
+
+├── Classes
+
+├── Students
+
+├── Class Assignments
+
+├── Score Sessions
+
+├── Attendance
+
+├── Akhlaq
+
+├── Reports
+
+└── Notifications
+```
+
+Semua data akademik berada di bawah Academic Year.
+
+---
+
+# 7. Master Data
+
+Master Data bersifat global.
+
+```text
+roles
+
+permissions
+
+users
+
+subjects
+
+student_statuses
+
+user_statuses
+
+violation_types
+
+settings
+```
+
+Master Data tidak menyimpan transaksi.
+
+---
+
+# 8. Academic Data
+
+Academic Data bergantung pada Tahun Ajaran.
+
+```text
+academic_years
+
+academic_settings
+
+curriculums
+
+curriculum_subjects
+
+semesters
+
+classes
+
+students
+
+class_assignments
+
+score_sessions
+
+scores
+
+score_results
+
+attendance
+
+akhlaq
+
+student_violations
+
+reports
+```
+
+---
+
+# 9. Academic Year
+
+academic_years merupakan pusat seluruh Workspace Akademik.
+
+Satu Tahun Ajaran memiliki.
+
+- Semester
+- Kurikulum
+- Kelas
+- Penugasan
+- Siswi
+- Nilai
+- Raport
+
+Status.
+
+```text
+Draft
+
+↓
+
+Published
+
+↓
+
+Active
+
+↓
+
+Archived
+```
+
+Hanya boleh terdapat satu Active.
+
+---
+
+# 10. Academic Settings
+
+Gunakan tabel.
+
+```text
+academic_settings
+```
+
+Berfungsi sebagai pusat konfigurasi Tahun Ajaran.
+
+Contoh data.
+
+- Semester Aktif
+- Deadline Input Nilai
+- Deadline Finalisasi
+- Auto Lock
+- Auto Publish Raport
+- Status Input
+- Status Raport
+- Dashboard Announcement
+
+Seluruh Dashboard membaca konfigurasi dari tabel ini.
+
+---
+
+# 11. Curriculum
+
+Setiap Tahun Ajaran memiliki satu atau lebih Kurikulum.
+
+Contoh.
+
+```text
+2026/2027
+
+↓
+
+Kurikulum MPHM 2026
+```
+
+Clone Tahun Ajaran akan menyalin Kurikulum.
+
+---
+
+# 12. Subjects
+
+subjects merupakan Master Mata Pelajaran.
+
+Contoh.
+
+- Nahwu
+- Sharaf
+- Fiqih
+- Hadits
+- Tafsir
+- Mustholah
+
+Tabel ini tidak menyimpan aturan penilaian.
+
+---
+
+# 13. Curriculum Subjects
+
+Gunakan tabel.
+
+```text
+curriculum_subjects
+```
+
+Berfungsi menghubungkan.
+
+```text
+Curriculum
+
+↓
+
+Subject
+```
+
+Selain relasi.
+
+Tabel ini menyimpan.
+
+- Urutan Mata Pelajaran
+- Nilai Maksimum
+- Nilai Minimum
+- Bobot
+- Status
+- Keterangan
+
+Dengan demikian.
+
+Setiap Kurikulum dapat memiliki aturan Mata Pelajaran yang berbeda.
+
+---
+
+# 14. Semester
+
+Semester berada di bawah Academic Year.
+
+Minimal.
+
+- Semester I
+- Semester II
+
+Semester digunakan oleh seluruh transaksi akademik.
+
+---
+
+# 15. Classes
+
+Setiap Kelas berada di bawah Academic Year.
+
+Data.
+
+- Nama
+- Bagian
+- Status
+
+Kelas tidak menyimpan Mata Pelajaran secara langsung.
+
+Kelas menggunakan Kurikulum.
+
+---
+
+# 16. Students
+
+Setiap Siswi.
+
+- berada pada satu Tahun Ajaran.
+- berada pada satu Kelas.
+
+Riwayat perpindahan kelas tidak mengubah data lama.
+
+---
+
+# 17. Class Assignments
+
+Gunakan tabel.
+
+```text
+class_assignments
+```
+
+Berisi.
+
+- Academic Year
+- Class
+- User
+- Role
+- Start Date
+- End Date
+- Status
+
+Dengan demikian.
+
+Riwayat penugasan Mustahiq tetap tersimpan.
+
+---
+
+# 18. Score Sessions
+
+Input Nilai tidak langsung menuju tabel Scores.
+
+Gunakan Session.
+
+```text
+Academic Year
+
+↓
+
+Semester
+
+↓
+
+Class
+
+↓
+
+Subject
+
+↓
+
+Score Session
+```
+
+Status.
+
+```text
+Draft
+
+↓
+
+Ready
+
+↓
+
+Final
+
+↓
+
+Locked
+```
+
+---
+
+# 19. Scores
+
+Scores hanya menyimpan data mentah.
+
+Tidak menyimpan hasil perhitungan.
+
+Kolom utama.
+
+- Score Session
+- Student
+- Score Type
+- Score
+- Notes
+
+Contoh Score Type.
+
+- TAMRIN
+- UJIAN
+
+---
+
+# 20. Score Results
+
+Gunakan tabel terpisah.
+
+```text
+score_results
+```
+
+Berisi.
+
+- Nilai Khos
+- Nilai 'Am
+- Predikat
+- Ranking
+- Kelulusan
+
+Seluruh data dihitung Backend saat Finalisasi.
+
+---
+
+# 21. Attendance
+
+Attendance dipisahkan dari Nilai.
+
+Relasi.
+
+```text
+Academic Year
+
+↓
+
+Semester
+
+↓
+
+Class
+
+↓
+
+Student
+
+↓
+
+Attendance
+```
+
+---
+
+# 22. Akhlaq
+
+Akhlaq memiliki tabel sendiri.
+
+Tidak digabung dengan Nilai Akademik.
+
+---
+
+# 23. Violation Types & Student Violations (Pelanggaran Santri)
+
+Modul Pelanggaran Santri dipisahkan dari tabel Akhlaq dan Nilai Akademik.
+
+Master jenis pelanggaran disimpan pada tabel:
+
+```text
+violation_types
+```
+
+Atribut utama:
+- `id` (UUID, PK)
+- `name` (TEXT)
+- `category` (TEXT - Kerapian, Kedisiplinan, Adab, Ibadah, dll.)
+- `severity_level` (TEXT - Ringan, Sedang, Berat)
+- `points` (INTEGER, Opsional)
+- `description` (TEXT)
+- `is_active` (BOOLEAN, default true)
+
+Pencatatan kejadian pelanggaran disimpan pada tabel:
+
+```text
+student_violations
+```
+
+Atribut utama:
+- `id` (UUID, PK)
+- `academic_year_id` (UUID, FK -> academic_years.id)
+- `student_id` (UUID, FK -> students.id)
+- `violation_type_id` (UUID, FK -> violation_types.id)
+- `incident_date` (DATE)
+- `incident_time` (TIME, Opsional)
+- `location` (TEXT, Opsional)
+- `description` (TEXT)
+- `evidence_url` (TEXT, Opsional)
+- `reported_by` (UUID, FK -> users.id)
+- `status` (TEXT - Draft, Dilaporkan, Diproses, Selesai, Dibatalkan)
+
+---
+
+# 23. Reports
+
+Raport dihasilkan ketika Finalisasi.
+
+Raport disimpan.
+
+Tidak dihitung ulang setiap kali dibuka.
+
+---
+
+# 24. Notifications
+
+Gunakan tabel.
+
+```text
+notifications
+```
+
+Digunakan untuk.
+
+- Dashboard
+- Toast
+- Reminder
+- Deadline
+- Announcement
+
+---
+
+# 25. Audit Logs
+
+Seluruh aktivitas penting disimpan.
+
+Minimal.
+
+- User
+- Modul
+- Action
+- Old Data
+- New Data
+- Timestamp
+- IP Address
+- User Agent
+
+Audit Log bersifat immutable.
+
+---
+
+# 26. Import Histories
+
+Seluruh Import dicatat.
+
+Informasi.
+
+- User
+- Modul
+- File
+- Total Data
+- Success
+- Failed
+- Error Detail
+
+---
+
+# 27. Export Histories
+
+Seluruh Export dicatat.
+
+Informasi.
+
+- User
+- Modul
+- Format
+- Filter
+- Total Data
+- Export Time
+
+---
+
+# 28. Recycle Bin
+
+Recycle Bin tidak memiliki tabel sendiri.
+
+Recycle Bin merupakan hasil query seluruh tabel yang memiliki.
+
+```text
+deleted_at IS NOT NULL
+```
+
+Retensi.
+
+24 Jam.
+
+Cloudflare Cron Worker menghapus data permanen.
+
+---
+
+# 29. Universal Columns
+
+Seluruh tabel transaksi wajib memiliki.
+
+```text
+id
+
+created_at
+
+created_by
+
+updated_at
+
+updated_by
+
+deleted_at
+
+deleted_by
+```
+
+Dengan demikian seluruh histori dapat dilacak.
+
+---
+
+# 30. Indexing Strategy
+
+Seluruh Foreign Key wajib memiliki Index.
+
+Minimal.
+
+```text
+academic_year_id
+
+semester_id
+
+curriculum_id
+
+class_id
+
+student_id
+
+subject_id
+
+user_id
+
+status
+
+created_at
+
+deleted_at
+```
+
+Gunakan Composite Index pada query yang sering digunakan.
+
+Contoh.
+
+```text
+academic_year_id + semester_id
+
+academic_year_id + class_id
+
+class_id + student_id
+
+score_session_id + student_id
+
+curriculum_id + subject_id
+
+academic_year_id + student_id (student_violations)
+
+violation_type_id + status
+```
+
+---
+
+# 31. Constraints
+
+Gunakan.
+
+- Primary Key
+- Foreign Key
+- Unique
+- Check Constraint
+
+Contoh.
+
+Satu Tahun Ajaran hanya boleh memiliki satu Status Active.
+
+Satu Mustahiq hanya boleh memiliki satu Assignment aktif pada satu Tahun Ajaran.
+
+Satu Score Session hanya boleh Final satu kali.
+
+---
+
+# 32. Database Transactions
+
+Operasi berikut WAJIB menggunakan Transaction.
+
+- Import
+- Bulk Update
+- Bulk Delete
+- Restore
+- Clone Tahun Ajaran
+- Generate Raport
+- Finalisasi Nilai
+- Unlock Finalisasi
+
+---
+
+# 33. Database Views
+
+Gunakan View untuk Dashboard.
+
+Contoh.
+
+```text
+vw_dashboard_admin
+
+vw_dashboard_mustahiq
+
+vw_progress_class
+
+vw_progress_subject
+
+vw_score_completion
+
+vw_notification_summary
+```
+
+View hanya digunakan untuk Read Only.
+
+---
+
+# 34. Clone Academic Year
+
+Clone Tahun Ajaran hanya menyalin struktur.
+
+Yang disalin.
+
+- Academic Settings
+- Curriculum
+- Curriculum Subjects
+- Semester
+- Classes
+- Konfigurasi Dashboard
+
+Yang tidak disalin.
+
+- Students
+- Scores
+- Score Results
+- Attendance
+- Akhlaq
+- Reports
+- Audit Logs
+- Notifications
+
+---
+
+# 35. Future Scalability
+
+Database wajib mampu mendukung modul baru tanpa mengubah struktur inti.
+
+Contoh.
+
+- Hafalan
+- Prestasi
+- Pelanggaran
+- Perizinan
+- Keuangan
+- Asrama
+- Inventaris
+- Surat Menyurat
+- Kalender Akademik
+- Pengumuman
+- E-Learning
+
+Seluruh modul baru wajib mengikuti struktur Academic Workspace.
+
+---
+
+# 36. Database Architecture Principles
+
+MPHM menggunakan pendekatan **Academic Workspace Architecture**.
+
+Seluruh transaksi akademik selalu berada di dalam Workspace Tahun Ajaran.
+
+Seluruh perhitungan akademik dilakukan oleh Backend.
+
+Database hanya menyimpan:
+
+- Master Data
+- Data Transaksi
+- Data Finalisasi
+- Audit
+- Konfigurasi
+
+Tidak diperbolehkan menyimpan data hasil perhitungan yang masih dapat dihitung ulang, kecuali data yang telah melalui proses Finalisasi.
+
+Seluruh desain database harus mengutamakan:
+
+- Scalability
+- Maintainability
+- Performance
+- Data Integrity
+- Security
+- Long-Term Development
+# 04_API_Specification.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : API Specification
+>
+> Version : 1.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Tujuan
+
+Dokumen ini mendefinisikan standar API Backend yang digunakan oleh seluruh sistem MPHM.
+
+Seluruh komunikasi antara Frontend dan Backend wajib melalui API.
+
+Frontend **tidak diperbolehkan** mengakses Database secara langsung.
+
+---
+
+# 2. API Architecture
+
+Menggunakan arsitektur:
+
+```text
+Client
+
+↓
+
+Middleware
+
+↓
+
+Authentication
+
+↓
+
+Authorization
+
+↓
+
+Validation
+
+↓
+
+Business Service
+
+↓
+
+Repository
+
+↓
+
+Database
+```
+
+Business Logic hanya boleh berada pada **Business Service**.
+
+---
+
+# 3. API Principles
+
+Seluruh API wajib mengikuti prinsip berikut.
+
+- Stateless
+- Type Safe
+- RESTful
+- Secure
+- Predictable
+- Consistent Response
+- Versioning Ready
+- Audit Friendly
+
+---
+
+# 4. API Versioning
+
+Seluruh endpoint menggunakan prefix.
+
+```text
+/api/v1
+```
+
+Contoh.
+
+```text
+/api/v1/auth/login
+
+/api/v1/students
+
+/api/v1/classes
+```
+
+---
+
+# 5. Response Standard
+
+Semua endpoint wajib menggunakan struktur response yang sama.
+
+## Success
+
+```json
+{
+  "success": true,
+  "message": "Success",
+  "data": {}
+}
+```
+
+---
+
+## Validation Error
+
+```json
+{
+  "success": false,
+  "message": "Validation Failed",
+  "errors": {}
+}
+```
+
+---
+
+## Server Error
+
+```json
+{
+  "success": false,
+  "message": "Internal Server Error"
+}
+```
+
+---
+
+# 6. Authentication
+
+Authentication menggunakan:
+
+- Session Cookie
+- HttpOnly
+- Secure
+- SameSite
+- Session Rotation
+
+Endpoint.
+
+```text
+POST   /auth/login
+
+POST   /auth/logout
+
+GET    /auth/me
+
+POST   /auth/refresh
+```
+
+---
+
+# 7. Authorization
+
+Menggunakan RBAC.
+
+Role.
+
+- Super Admin
+- Admin
+- Operator
+- Mustahiq
+- Mudir
+
+Seluruh endpoint wajib melakukan validasi Role sebelum Business Logic dijalankan.
+
+---
+
+# 8. Academic Context
+
+Setelah Login.
+
+Backend otomatis mengetahui.
+
+- Academic Year Active
+- Semester Active
+- User
+- Role
+- Assigned Class
+
+Frontend tidak pernah mengirim informasi tersebut kecuali diperlukan oleh Admin.
+
+---
+
+# 9. Workflow Engine
+
+Seluruh modul menggunakan Workflow Engine.
+
+Workflow bukan sekadar Status.
+
+Workflow mengatur.
+
+- Tombol yang muncul
+- Hak akses
+- Validasi
+- Audit Log
+- Notifikasi
+- Lock Data
+- Automation
+
+---
+
+## Workflow Status
+
+Contoh.
+
+Academic Year
+
+```text
+Draft
+
+↓
+
+Published
+
+↓
+
+Active
+
+↓
+
+Archived
+```
+
+---
+
+Nilai
+
+```text
+Draft
+
+↓
+
+Review
+
+↓
+
+Final
+
+↓
+
+Locked
+```
+
+---
+
+Raport
+
+```text
+Draft
+
+↓
+
+Verified
+
+↓
+
+Published
+```
+
+---
+
+Workflow disimpan pada Backend.
+
+Frontend hanya menampilkan status.
+
+---
+
+# 10. Workflow Rules
+
+Setiap perubahan Workflow wajib melalui API.
+
+Contoh.
+
+```text
+Draft
+
+↓
+
+Review
+
+↓
+
+Final
+```
+
+Tidak diperbolehkan langsung.
+
+```text
+Draft
+
+↓
+
+Final
+```
+
+Kecuali oleh Super Admin.
+
+---
+
+# 11. Universal CRUD Standard
+
+Seluruh Master Data memiliki endpoint yang sama.
+
+```text
+GET
+
+POST
+
+PUT
+
+PATCH
+
+DELETE
+
+RESTORE
+
+EXPORT
+
+IMPORT
+```
+
+---
+
+# 12. Universal Import API
+
+Seluruh modul yang mendukung Import wajib memiliki endpoint.
+
+```text
+POST
+
+/import/template
+
+↓
+
+Download Template
+```
+
+---
+
+```text
+POST
+
+/import/preview
+```
+
+Validasi File.
+
+---
+
+```text
+POST
+
+/import/execute
+```
+
+Import Data.
+
+---
+
+```text
+GET
+
+/import/history
+```
+
+Riwayat Import.
+
+---
+
+# 13. Universal Export API
+
+```text
+GET
+
+/export/excel
+
+GET
+
+/export/csv
+
+GET
+
+/export/pdf
+```
+
+Export mengikuti Filter aktif.
+
+---
+
+# 14. Universal Search
+
+Search menggunakan Query Parameter.
+
+Contoh.
+
+```text
+GET
+
+/students
+
+?q=fatimah
+```
+
+Realtime.
+
+---
+
+# 15. Universal Filter
+
+Filter menggunakan Query Parameter.
+
+Contoh.
+
+```text
+/students
+
+?class=1
+
+&status=active
+
+&semester=1
+```
+
+Semua filter dilakukan di Backend.
+
+---
+
+# 16. Universal Pagination
+
+Semua endpoint mendukung.
+
+```text
+page
+
+limit
+
+sort
+
+order
+```
+
+Contoh.
+
+```text
+?page=1
+
+&limit=25
+
+&sort=name
+
+&order=asc
+```
+
+---
+
+# 17. Universal Bulk Action
+
+Endpoint.
+
+```text
+POST
+
+/bulk/update
+
+POST
+
+/bulk/delete
+
+POST
+
+/bulk/restore
+```
+
+Semua Bulk Action menggunakan Transaction.
+
+---
+
+# 18. Auto Save API
+
+Input Nilai menggunakan Auto Save.
+
+Alur.
+
+```text
+Typing
+
+↓
+
+Debounce
+
+↓
+
+PATCH
+
+↓
+
+Validation
+
+↓
+
+Save
+
+↓
+
+Response
+
+↓
+
+Toast
+```
+
+Tidak menggunakan tombol Save.
+
+---
+
+# 19. Academic APIs
+
+## Academic Year
+
+```text
+GET
+
+POST
+
+PATCH
+
+DELETE
+
+CLONE
+
+PUBLISH
+
+ACTIVATE
+
+ARCHIVE
+```
+
+---
+
+## Curriculum
+
+```text
+GET
+
+POST
+
+PATCH
+
+DELETE
+```
+
+---
+
+## Curriculum Subject
+
+```text
+GET
+
+POST
+
+PATCH
+
+DELETE
+
+SORT
+```
+
+---
+
+## Semester
+
+```text
+GET
+
+POST
+
+PATCH
+
+DELETE
+```
+
+---
+
+## Class
+
+```text
+GET
+
+POST
+
+PATCH
+
+DELETE
+```
+
+---
+
+## Student
+
+```text
+GET
+
+POST
+
+PATCH
+
+DELETE
+
+IMPORT
+
+EXPORT
+
+RESTORE
+```
+
+---
+
+## User
+
+```text
+GET
+
+POST
+
+PATCH
+
+DELETE
+
+RESET PASSWORD
+
+RESTORE
+```
+
+---
+
+# 20. Score APIs
+
+Score menggunakan Session.
+
+Flow.
+
+```text
+Semester
+
+↓
+
+Subject
+
+↓
+
+Score Session
+
+↓
+
+Students
+
+↓
+
+Scores
+```
+
+Endpoint.
+
+```text
+GET
+
+/score-session
+```
+
+---
+
+```text
+PATCH
+
+/scores
+```
+
+Auto Save.
+
+---
+
+```text
+POST
+
+/finalize
+```
+
+Finalisasi.
+
+---
+
+```text
+POST
+
+/unlock
+```
+
+Unlock.
+
+---
+
+# 21. Dashboard APIs
+
+Dashboard tidak mengambil seluruh data.
+
+Gunakan endpoint khusus.
+
+Admin.
+
+```text
+/dashboard/admin
+```
+
+Mustahiq.
+
+```text
+/dashboard/mustahiq
+```
+
+Mudir.
+
+```text
+/dashboard/mudir
+```
+
+Petugas Keamanan.
+
+```text
+/dashboard/security
+```
+
+Wali Santri.
+
+```text
+/dashboard/parent
+```
+
+Semua Dashboard menggunakan View atau Query teroptimasi.
+
+---
+
+# 22. Monitoring APIs
+
+Admin dapat melihat.
+
+- Progress Kelas
+- Progress Mata Pelajaran
+- Progress Input
+- Progress Finalisasi
+- Aktivitas
+- Statistik
+
+Endpoint.
+
+```text
+/monitoring
+```
+
+---
+
+# 23. Notification APIs
+
+```text
+GET
+
+/notifications
+
+PATCH
+
+/notifications/read
+
+DELETE
+
+/notifications
+```
+
+Realtime.
+
+---
+
+# 24. Audit APIs
+
+Audit bersifat Read Only.
+
+```text
+GET
+
+/audit-logs
+```
+
+Tidak memiliki.
+
+POST
+
+PUT
+
+DELETE
+
+---
+
+# 25. Recycle Bin APIs
+
+```text
+GET
+
+/recycle-bin
+```
+
+---
+
+```text
+POST
+
+/restore
+```
+
+---
+
+```text
+DELETE
+
+/permanent-delete
+```
+
+---
+
+# 26. Clone Academic Year
+
+Endpoint.
+
+```text
+POST
+
+/academic-years/{id}/clone
+```
+
+Yang disalin.
+
+- Academic Settings
+- Curriculum
+- Curriculum Subjects
+- Semester
+- Kelas
+
+Tidak menyalin.
+
+- Nilai
+- Raport
+- Audit
+- Import History
+- Export History
+
+---
+
+# 27. Validation
+
+Seluruh endpoint menggunakan.
+
+- Zod
+- Server Validation
+
+Frontend Validation hanya untuk User Experience.
+
+---
+
+# 28. Transaction
+
+Endpoint berikut wajib menggunakan Database Transaction.
+
+- Import
+- Bulk Update
+- Bulk Delete
+- Restore
+- Clone Academic Year
+- Finalisasi
+- Unlock
+- Generate Raport
+
+---
+
+# 29. Security
+
+Seluruh endpoint wajib.
+
+- Authentication
+- Authorization
+- Input Validation
+- Rate Limit
+- CSRF Protection
+- XSS Protection
+- SQL Injection Protection
+
+---
+
+# 30. Audit Integration
+
+Seluruh endpoint yang mengubah data wajib otomatis membuat Audit Log.
+
+Minimal mencatat.
+
+- User
+- Role
+- Module
+- Action
+- Before
+- After
+- Timestamp
+- IP Address
+- User Agent
+
+Developer tidak perlu memanggil Audit Log secara manual.
+
+Audit dibuat otomatis oleh Middleware.
+
+---
+
+# 31. Background Jobs
+
+Proses berikut dijalankan sebagai Background Job menggunakan Cloudflare Workers.
+
+- Generate Raport
+- Clone Academic Year
+- Export PDF
+- Import Data
+- Penghapusan Recycle Bin
+- Pengiriman Notifikasi
+- Perhitungan Statistik Dashboard
+
+Frontend hanya menerima Status Job.
+
+---
+
+# 31.1 Violation APIs (Pelanggaran Santri)
+
+## Violation Types (Master Jenis Pelanggaran)
+
+```text
+GET
+/violation-types
+
+POST
+/violation-types
+
+PATCH
+/violation-types/:id
+
+DELETE
+/violation-types/:id
+```
+
+## Student Violations (Pencatatan & Riwayat Pelanggaran)
+
+```text
+GET
+/student-violations
+
+POST
+/student-violations
+
+PATCH
+/student-violations/:id
+
+DELETE
+/student-violations/:id
+```
+
+---
+
+# 32. Real-Time Updates
+
+Dashboard menggunakan mekanisme Realtime.
+
+Perubahan berikut harus langsung diperbarui tanpa Refresh.
+
+- Progress Input Nilai
+- Progress Finalisasi
+- Dashboard Statistik
+- Notifikasi
+- Monitoring Admin
+- Status Workflow
+
+TanStack Query bertanggung jawab melakukan Cache Synchronization.
+
+---
+
+# 33. API Design Principles
+
+Seluruh API MPHM wajib memenuhi prinsip berikut.
+
+- RESTful
+- Predictable
+- Stateless
+- Type Safe
+- Secure
+- Reusable
+- Versioning Ready
+- Workflow Driven
+- Audit Friendly
+- Enterprise Grade
+
+API bukan hanya media CRUD, tetapi merupakan implementasi dari seluruh Business Rules, Workflow Engine, dan Academic Workspace yang telah ditetapkan pada dokumen sebelumnya.
+# 05_UI_UX_Guideline.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : UI / UX Guideline
+>
+> Version : 1.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Tujuan
+
+Dokumen ini menjadi standar utama dalam seluruh proses desain antarmuka (UI) dan pengalaman pengguna (UX) pada sistem MPHM.
+
+Seluruh halaman wajib memiliki tampilan yang konsisten, modern, profesional, responsif, dan mudah digunakan oleh seluruh pengguna.
+
+Standar ini berlaku untuk seluruh modul tanpa pengecualian.
+
+---
+
+# 2. Design Philosophy
+
+MPHM menggunakan konsep:
+
+> **Ultra-Modern Enterprise Professional SaaS Dashboard (AdminHMD Inspired)**
+
+Karakteristik utama yang WAJIB dipenuhi:
+- **Modern & Eksklusif** (Tidak boleh kaku, klasik, atau terlihat seperti sistem lama/tradisional)
+- **Profesional & Premium** (Proporsi spasi yang lega, tipografi tajam, kontras visual yang elegan)
+- **Bersih (Clean & Scannable)**
+- **Informatif & Berorientasi Produktivitas**
+- **Konsisten di seluruh modul**
+
+Inspirasi desain berasal dari:
+- **AdminHMD Professional Template** (Identity Cell, Pill Badges, Executive Topbar, User Profile Widget)
+- Linear
+- Vercel Dashboard
+- Stripe Dashboard
+- Supabase
+
+MPHM **dilarang keras** menggunakan gaya desain kaku/klasik, AdminLTE lama, atau antarmuka yang kurang profesional.
+
+---
+
+# 3. Design Principles
+
+Seluruh halaman wajib mengikuti prinsip berikut.
+
+- Simplicity
+- Consistency
+- Accessibility
+- Readability
+- Predictability
+- Minimal Click
+- Fast Interaction
+- Responsive
+- Reusable Component
+- Enterprise Ready
+
+---
+
+# 4. Design System
+
+Design System menggunakan.
+
+- shadcn/ui
+- Tailwind CSS v4
+- Design Token
+- CSS Variables
+
+Seluruh komponen berasal dari Design System.
+
+Tidak diperbolehkan membuat style sendiri apabila komponen sudah tersedia.
+
+---
+
+# 5. Color System
+
+Menggunakan Neutral Color.
+
+Prioritas.
+
+```text
+Primary
+
+Secondary
+
+Success
+
+Warning
+
+Danger
+
+Info
+
+Muted
+```
+
+Warna tidak digunakan secara berlebihan.
+
+Warna hanya digunakan sebagai penanda status dan aksi.
+
+---
+
+# 6. Typography
+
+Gunakan satu jenis Font.
+
+Prioritas.
+
+```text
+Geist
+
+↓
+
+Inter
+
+↓
+
+System Font
+```
+
+Hierarki.
+
+```text
+Display
+
+Heading
+
+Title
+
+Body
+
+Caption
+
+Small Text
+```
+
+Gunakan ukuran yang konsisten.
+
+---
+
+# 7. Spacing System
+
+Menggunakan skala 4px.
+
+Contoh.
+
+```text
+4
+
+8
+
+12
+
+16
+
+20
+
+24
+
+32
+
+40
+
+48
+
+64
+```
+
+Tidak menggunakan spacing acak.
+
+---
+
+# 8. Border Radius
+
+Gunakan Radius yang konsisten.
+
+```text
+Small
+
+Medium
+
+Large
+```
+
+Tidak menggunakan sudut tajam.
+
+---
+
+# 9. Shadow System
+
+Shadow merupakan bagian utama identitas visual MPHM.
+
+Gunakan Shadow bertingkat.
+
+```text
+xs
+
+sm
+
+md
+
+lg
+
+xl
+```
+
+Shadow digunakan pada.
+
+- Card
+- Dialog
+- Dropdown
+- Popover
+- Floating Panel
+
+Tidak menggunakan shadow berlebihan.
+
+---
+
+# 10. Glass & Surface
+
+Gunakan Surface modern.
+
+- Rounded Corner
+- Soft Shadow
+- Soft Border
+- Layered Surface
+
+Efek Glassmorphism hanya digunakan secara terbatas.
+
+---
+
+# 11. Layout
+
+Struktur utama.
+
+```text
+Header
+
+↓
+
+Sidebar
+
+↓
+
+Content
+
+↓
+
+Footer (Opsional)
+```
+
+Seluruh halaman mengikuti struktur yang sama.
+
+---
+
+# 12. Sidebar (Modern Enterprise AdminHMD Model)
+
+Sidebar bersifat tetap (Fixed layout).
+
+Menu menggunakan Icon + Label dengan kejelasan visual tinggi.
+
+Mendukung:
+- Collapse & Expand dengan animasi halus
+- Active State bergaya pill / bar tegas
+- Nested Menu terstruktur
+
+Wajib memiliki komponen di bagian bawah (Sidebar Footer):
+1. **User Profile Card**: Kartu profil rounded eksklusif berisi inisial Avatar, Nama Lengkap, dan Role/Workspace.
+2. **System Health Indicator**: Indikator titik hijau aktif berdenyut (*pulsing green dot*) dengan label status sistem (`System running smoothly`).
+
+---
+
+# 13. Header / Executive Topbar
+
+Header wajib bernuansa modern, profesional, dan tidak kaku.
+
+Header minimal berisi:
+- **Breadcrumb Navigasi**
+- **Executive Search Bar**: Input pencarian berbentuk *pill (`rounded-full`)* dengan shortcut badge `Ctrl K`
+- **Notification Bell**: Indikator notifikasi dengan alert badge berdenyut
+- **User Profile Pill Menu**: Navigasi profil cepat
+- **Theme Toggle**: Pengatur tema Light/Dark Mode
+
+---
+
+# 14. Dashboard
+
+Dashboard menggunakan Widget.
+
+Widget bersifat modular.
+
+Contoh.
+
+- Statistik
+- Grafik
+- Progress
+- Timeline
+- Quick Action
+- Kalender
+- Monitoring
+- Aktivitas Terbaru
+- Status Sistem
+
+Widget dapat dipindahkan atau ditambah di masa mendatang tanpa mengubah struktur halaman.
+
+---
+
+# 15. Card
+
+Seluruh informasi ditampilkan menggunakan Card.
+
+Karakteristik.
+
+- Rounded
+- Shadow
+- Padding konsisten
+- Header
+- Content
+- Footer (Opsional)
+
+---
+
+# 16. Data Grid
+
+Seluruh tabel mengikuti dokumen:
+
+Universal Data Grid Standard.
+
+Tidak diperbolehkan menggunakan desain tabel yang berbeda.
+
+---
+
+# 17. Form Design
+
+Seluruh Form memiliki.
+
+- Label
+- Placeholder
+- Description
+- Validation
+- Error Message
+- Helper Text
+
+Form tidak boleh membingungkan pengguna.
+
+---
+
+# 18. Input Experience
+
+Input harus.
+
+- Cepat
+- Mudah
+- Konsisten
+
+Gunakan.
+
+- Auto Focus
+- Keyboard Friendly
+- Auto Complete
+- Auto Save (modul tertentu)
+
+---
+
+# 19. Button
+
+Jenis Button.
+
+- Primary
+- Secondary
+- Outline
+- Ghost
+- Link
+- Destructive
+
+Gunakan ukuran yang konsisten.
+
+---
+
+# 20. Icon
+
+Menggunakan.
+
+Lucide Icons.
+
+Ikon digunakan untuk membantu pemahaman.
+
+Tidak digunakan sebagai dekorasi.
+
+---
+
+# 21. Dialog
+
+Gunakan Dialog untuk.
+
+- Detail
+- Import
+- Export
+- Konfirmasi
+- Restore
+- Delete
+
+Dialog selalu memiliki.
+
+- Title
+- Description
+- Primary Action
+- Secondary Action
+
+---
+
+# 22. Drawer
+
+Gunakan Drawer pada Mobile.
+
+Dialog besar tidak digunakan pada layar kecil.
+
+---
+
+# 23. Notification
+
+Gunakan Toast.
+
+Jenis.
+
+- Success
+- Error
+- Warning
+- Information
+
+Toast muncul di pojok layar dan menghilang otomatis.
+
+---
+
+# 24. Loading
+
+Gunakan Skeleton.
+
+Tidak menggunakan Spinner penuh halaman.
+
+Loading harus menyerupai bentuk konten yang akan ditampilkan.
+
+---
+
+# 25. Empty State
+
+Apabila data kosong.
+
+Tampilkan.
+
+- Ilustrasi
+- Judul
+- Penjelasan
+- Tombol aksi
+
+Contoh.
+
+```text
+Belum ada data siswi.
+
+Tambahkan siswi pertama untuk memulai.
+```
+
+---
+
+# 26. Error State
+
+Apabila terjadi kesalahan.
+
+Tampilkan.
+
+- Icon
+- Judul
+- Penjelasan
+- Tombol Refresh
+
+Tidak menampilkan pesan teknis dari server.
+
+---
+
+# 27. Animation
+
+Animation ringan.
+
+Gunakan.
+
+- Fade
+- Scale
+- Slide
+- Hover
+- Micro Interaction
+
+Durasi maksimal.
+
+250 ms.
+
+Animation hanya untuk meningkatkan pengalaman pengguna.
+
+---
+
+# 28. Responsive Design
+
+Desktop.
+
+≥1280 px
+
+Tablet.
+
+768–1279 px
+
+Mobile.
+
+<768 px
+
+Semua halaman wajib responsif.
+
+---
+
+# 29. Mobile Experience
+
+Sidebar berubah menjadi Drawer.
+
+Tabel berubah menjadi Card View.
+
+Form tetap nyaman digunakan dengan satu tangan.
+
+Target sentuh minimal 44 × 44 px.
+
+---
+
+# 30. Accessibility
+
+Minimal memenuhi.
+
+- Keyboard Navigation
+- Screen Reader
+- ARIA Label
+- Focus Indicator
+- Color Contrast
+- Semantic HTML
+
+---
+
+# 31. Search Experience
+
+Search selalu berada di posisi yang mudah dijangkau.
+
+Search menggunakan debounce.
+
+Hasil pencarian tampil secara realtime.
+
+---
+
+# 32. Filter Experience
+
+Filter menggunakan Panel atau Popover.
+
+Filter aktif ditampilkan sebagai Badge.
+
+Pengguna dapat menghapus filter satu per satu atau sekaligus.
+
+---
+
+# 33. Feedback Experience
+
+Setiap aksi pengguna harus memberikan umpan balik.
+
+Contoh.
+
+- Loading
+- Success
+- Failed
+- Warning
+- Progress
+
+Pengguna tidak boleh menebak apakah proses sedang berjalan.
+
+---
+
+# 34. Dashboard Monitoring
+
+Dashboard Admin wajib bersifat informatif.
+
+Minimal menampilkan.
+
+- Tahun Ajaran Aktif
+- Semester Aktif
+- Status Sistem
+- Progress Input Nilai
+- Progress Finalisasi
+- Progress Per Kelas
+- Progress Per Mustahiq
+- Grafik Aktivitas
+- Statistik Siswi
+- Statistik Pengguna
+- Aktivitas Terbaru
+- Notifikasi
+- Jadwal Akademik
+- Quick Action
+
+Dashboard menjadi pusat kontrol sistem.
+
+---
+
+# 34.1 Dashboard Petugas Keamanan & Wali Santri
+
+## Dashboard Petugas Keamanan
+Dirancang khusus untuk pencatatan dan monitoring kedisiplinan secara cepat dan efisien:
+- **Global Search Santri**: Pencarian instan berdasarkan Nama, NIS, Kelas, atau Kamar.
+- **Quick Report Card**: Form pencatatan pelanggaran santri cepat (1-click select santri & jenis pelanggaran).
+- **Daily Incident Chart**: Grafik kejadian pelanggaran harian/mingguan.
+- **Recent Violations Feed**: Daftar riwayat pelanggaran terbaru dengan status penanganan (Draft, Dilaporkan, Diproses, Selesai).
+
+## Dashboard Wali Santri
+Dirancang dengan pendekatan Read-Only Portal yang bersih dan transparan:
+- **Profile & Academic Overview**: Ringkasan kelas, wali kelas, dan kehadiran putri.
+- **Akhlaq & Disciplinary Log**: Riwayat kedisiplinan dan catatan pembinaan.
+
+---
+
+# 34.2 Halaman Pelanggaran & Master Jenis Pelanggaran
+
+- **Master Jenis Pelanggaran**: Menggunakan standar Universal Data Grid dengan filter Kategori & Tingkat Pelanggaran (Ringan, Sedang, Berat), serta Pill Badges warna untuk tingkat pelanggaran.
+- **Form Laporan Pelanggaran**: Auto-save atau Quick Modal dengan dukungan lampiran foto bukti kejadian.
+
+---
+
+# 35. Visual Hierarchy
+
+Prioritaskan informasi berdasarkan kepentingannya.
+
+Urutan.
+
+1. Informasi utama
+2. Statistik
+3. Aksi
+4. Detail
+5. Metadata
+
+Jangan menampilkan seluruh informasi dengan bobot visual yang sama.
+
+---
+
+# 36. Design Token
+
+Seluruh komponen menggunakan Design Token.
+
+Contoh.
+
+- Color
+- Radius
+- Shadow
+- Font
+- Border
+- Transition
+- Spacing
+
+Tidak menggunakan nilai hardcode.
+
+---
+
+# 37. Reusable Components
+
+Seluruh halaman wajib menggunakan komponen yang sudah tersedia.
+
+Komponen baru hanya dibuat apabila benar-benar belum tersedia.
+
+Duplikasi komponen tidak diperbolehkan.
+
+---
+
+# 38. Performance UX
+
+Antarmuka harus terasa cepat.
+
+Gunakan.
+
+- Optimistic Update
+- Skeleton Loading
+- Lazy Loading
+- Background Refresh
+- Prefetch
+- Streaming
+
+Pengguna tidak boleh menunggu proses yang sebenarnya dapat dilakukan di belakang layar.
+
+---
+
+# 39. Future Ready
+
+Desain harus mudah dikembangkan untuk mendukung.
+
+- Dark Mode
+- Multi Language
+- Theme Customization
+- Multi Tenant
+- Widget Customization
+- User Personalization
+
+Tanpa mengubah struktur dasar antarmuka.
+
+---
+
+# 40. UI/UX Principles
+
+Seluruh antarmuka MPHM harus memberikan pengalaman layaknya aplikasi SaaS modern.
+
+Prioritas utama adalah:
+
+- Konsistensi
+- Kecepatan
+- Kemudahan penggunaan
+- Informasi yang jelas
+- Estetika modern
+- Produktivitas pengguna
+- Responsivitas tinggi
+- Skalabilitas jangka panjang
+
+Seluruh implementasi UI dan UX wajib mengacu pada dokumen ini agar setiap halaman memiliki identitas visual yang seragam, profesional, dan siap berkembang menjadi sistem enterprise.
+# 06_Frontend_Architecture.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : Frontend Architecture
+>
+> Version : 1.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Tujuan
+
+Dokumen ini mendefinisikan standar arsitektur Frontend yang wajib diikuti selama proses pengembangan.
+
+Seluruh implementasi React, Next.js, UI Component, State Management, API Integration, Routing, Form, dan Data Fetching harus mengikuti dokumen ini.
+
+Tujuan utama:
+
+- Konsisten
+- Mudah dipelihara
+- Mudah dikembangkan
+- Reusable
+- Enterprise Grade
+- AI Friendly
+
+---
+
+# 2. Technology Stack
+
+Frontend wajib menggunakan teknologi berikut.
+
+| Technology          | Version       |
+| ------------------- | ------------- |
+| Next.js             | 15+           |
+| React               | 19            |
+| TypeScript          | Latest Stable |
+| Tailwind CSS        | v4            |
+| shadcn/ui           | Latest        |
+| TanStack Query      | Latest        |
+| TanStack Table      | Latest        |
+| React Hook Form     | Latest        |
+| Zod                 | Latest        |
+| Lucide Icons        | Latest        |
+| OpenNext Cloudflare | Latest        |
+
+Library lain hanya boleh ditambahkan apabila benar-benar diperlukan.
+
+---
+
+# 3. Architecture Principle
+
+Frontend menggunakan prinsip:
+
+- Feature Based Architecture
+- Component Driven Development
+- Server First
+- Reusable Components
+- Separation of Concerns
+- Clean Architecture
+- Type Safe
+
+Business Logic tidak boleh berada di dalam React Component.
+
+---
+
+# 4. Folder Structure
+
+```text
+src/
+
+├── app/
+│
+├── components/
+│
+├── features/
+│
+├── hooks/
+│
+├── lib/
+│
+├── services/
+│
+├── providers/
+│
+├── stores/
+│
+├── types/
+│
+├── utils/
+│
+└── styles/
+```
+
+---
+
+# 5. Feature Based Architecture
+
+Seluruh fitur berada pada folder:
+
+```text
+features/
+```
+
+Contoh.
+
+```text
+features/
+
+auth/
+
+dashboard/
+
+academic-years/
+
+curriculums/
+
+subjects/
+
+classes/
+
+students/
+
+scores/
+
+reports/
+
+users/
+
+roles/
+
+settings/
+
+notifications/
+
+violations/
+
+violation-types/
+
+audit/
+
+recycle-bin/
+```
+
+Setiap Feature berdiri sendiri.
+
+---
+
+# 6. Struktur Setiap Feature
+
+```text
+students/
+
+components/
+
+hooks/
+
+schemas/
+
+services/
+
+queries/
+
+mutations/
+
+types/
+
+utils/
+
+constants/
+
+pages/
+```
+
+Seluruh kebutuhan Feature berada pada folder Feature tersebut.
+
+---
+
+# 7. Shared Components
+
+Komponen umum ditempatkan pada.
+
+```text
+components/
+```
+
+Contoh.
+
+```text
+Button
+
+Input
+
+Card
+
+Dialog
+
+Modal
+
+Badge
+
+Avatar
+
+Skeleton
+
+Table
+
+Pagination
+
+SearchBox
+
+ImportDialog
+
+ExportDialog
+
+DataGrid
+```
+
+Tidak boleh terjadi duplikasi komponen.
+
+---
+
+# 8. Data Grid
+
+Seluruh tabel menggunakan satu komponen.
+
+```text
+<DataGrid />
+```
+
+Mengikuti dokumen:
+
+Universal Data Grid Standard.
+
+Tidak diperbolehkan membuat tabel sendiri.
+
+---
+
+# 9. Routing
+
+Menggunakan App Router.
+
+```text
+app/
+
+(auth)
+
+(dashboard)
+
+(class)
+
+(student)
+
+(score)
+
+(report)
+
+(settings)
+```
+
+Route dikelompokkan menggunakan Route Group.
+
+---
+
+# 10. Server Component
+
+Default.
+
+Seluruh halaman menggunakan:
+
+Server Component.
+
+Gunakan Client Component hanya apabila membutuhkan:
+
+- Event
+- State
+- Browser API
+- Animation
+- Form Interaction
+
+Server Component selalu diprioritaskan.
+
+---
+
+# 11. Client Component
+
+Gunakan hanya apabila benar-benar diperlukan.
+
+Contoh.
+
+- Modal
+- Dialog
+- Dropdown
+- Form
+- Chart
+- Auto Save
+- Drag & Drop
+
+---
+
+# 12. Data Fetching
+
+Menggunakan.
+
+Server Component
+
+↓
+
+Server Action
+
+↓
+
+TanStack Query
+
+Pemilihan dilakukan berdasarkan kebutuhan.
+
+---
+
+# 13. TanStack Query
+
+TanStack Query digunakan untuk:
+
+- Cache
+- Mutation
+- Optimistic Update
+- Revalidation
+- Background Refetch
+
+Seluruh Query memiliki Query Key yang konsisten.
+
+Contoh.
+
+```text
+academic-years
+
+students
+
+scores
+
+classes
+
+dashboard
+```
+
+---
+
+# 14. Mutation
+
+Seluruh perubahan data menggunakan Mutation.
+
+Contoh.
+
+```text
+Create
+
+Update
+
+Delete
+
+Restore
+
+Import
+
+Export
+
+Finalize
+```
+
+---
+
+# 15. Optimistic Update
+
+Seluruh perubahan ringan menggunakan Optimistic Update.
+
+Contoh.
+
+- Status
+- Toggle
+- Auto Save
+
+---
+
+# 16. React Hook Form
+
+Seluruh Form menggunakan:
+
+React Hook Form.
+
+Tidak menggunakan useState untuk mengelola Form.
+
+---
+
+# 17. Validation
+
+Menggunakan.
+
+Zod
+
+↓
+
+React Hook Form
+
+↓
+
+Backend Validation
+
+Frontend hanya untuk User Experience.
+
+---
+
+# 18. Form Standard
+
+Semua Form memiliki.
+
+- Validation
+- Error Message
+- Loading
+- Disabled State
+- Success Toast
+
+---
+
+# 19. Auto Save
+
+Input Nilai menggunakan Auto Save.
+
+Flow.
+
+```text
+Typing
+
+↓
+
+Debounce
+
+↓
+
+Validation
+
+↓
+
+Mutation
+
+↓
+
+Toast
+
+↓
+
+Saved
+```
+
+Tidak terdapat tombol Save.
+
+---
+
+# 20. Loading
+
+Loading menggunakan.
+
+Skeleton.
+
+Tidak menggunakan Full Page Spinner.
+
+---
+
+# 21. Empty State
+
+Seluruh halaman wajib memiliki Empty State.
+
+Minimal.
+
+- Icon
+- Judul
+- Deskripsi
+- CTA Button
+
+---
+
+# 22. Error State
+
+Seluruh halaman wajib memiliki.
+
+- Error Illustration
+- Error Message
+- Refresh Button
+
+---
+
+# 23. Toast
+
+Menggunakan Toast untuk.
+
+- Success
+- Error
+- Warning
+- Information
+
+Toast tidak boleh menghalangi aktivitas pengguna.
+
+---
+
+# 24. Modal
+
+Gunakan Modal untuk.
+
+- Konfirmasi
+- Import
+- Export
+- Detail
+- Delete
+
+Tidak menggunakan Browser Alert.
+
+---
+
+# 25. Dialog Confirmation
+
+Seluruh proses penting wajib memiliki konfirmasi.
+
+Contoh.
+
+- Delete
+- Restore
+- Finalize
+- Publish
+- Clone
+- Archive
+
+---
+
+# 26. Dashboard
+
+Dashboard menggunakan Widget.
+
+Contoh.
+
+```text
+Statistic Card
+
+Progress Card
+
+Chart
+
+Activity Timeline
+
+Notification
+
+Quick Action
+```
+
+Semua Widget bersifat reusable.
+
+---
+
+# 27. State Management
+
+Prioritas.
+
+Server State
+
+↓
+
+TanStack Query
+
+↓
+
+React State
+
+↓
+
+Global Store
+
+Gunakan Global Store hanya jika benar-benar diperlukan.
+
+---
+
+# 28. Icons
+
+Seluruh Icon menggunakan.
+
+Lucide Icons.
+
+Tidak menggunakan campuran Icon Library.
+
+---
+
+# 29. Theme
+
+Design System menggunakan.
+
+shadcn/ui
+
+↓
+
+Tailwind CSS
+
+↓
+
+Design Token
+
+Tidak menggunakan inline style.
+
+---
+
+# 30. Styling Rules
+
+Gunakan.
+
+- Tailwind Utility
+- CSS Variables
+- Design Token
+
+Tidak menggunakan CSS manual kecuali benar-benar diperlukan.
+
+---
+
+# 31. Animation
+
+Animation ringan.
+
+Menggunakan.
+
+- Transition
+- Fade
+- Scale
+- Slide
+
+Durasi maksimal.
+
+250 ms.
+
+Tidak menggunakan animasi berlebihan.
+
+---
+
+# 32. Responsive Rules
+
+Desktop
+
+≥1280px
+
+Tablet
+
+768px–1279px
+
+Mobile
+
+<768px
+
+Semua halaman wajib responsif.
+
+---
+
+# 33. Accessibility
+
+Seluruh komponen wajib mendukung.
+
+- Keyboard Navigation
+- Focus Ring
+- Screen Reader
+- ARIA Label
+
+---
+
+# 34. Security
+
+Frontend tidak menyimpan.
+
+- Password
+- Session
+- Token
+
+Seluruh autentikasi menggunakan HttpOnly Cookie.
+
+---
+
+# 35. Performance
+
+Seluruh halaman wajib menerapkan.
+
+- Code Splitting
+- Lazy Loading
+- Dynamic Import
+- Streaming
+- Suspense
+- Image Optimization
+- Prefetch
+- Memoization bila diperlukan
+
+---
+
+# 36. Error Boundary
+
+Seluruh halaman utama wajib menggunakan.
+
+Error Boundary.
+
+Error tidak boleh menyebabkan seluruh aplikasi berhenti.
+
+---
+
+# 37. Reusable Principle
+
+Apabila suatu komponen telah tersedia.
+
+Developer wajib menggunakan komponen tersebut.
+
+Tidak diperbolehkan membuat komponen baru dengan fungsi yang sama.
+
+---
+
+# 38. Component Priority
+
+Urutan pencarian komponen.
+
+```text
+shadcn/ui
+
+↓
+
+Shared Components
+
+↓
+
+Feature Components
+
+↓
+
+New Component
+```
+
+---
+
+# 39. API Layer
+
+Frontend tidak memanggil fetch secara langsung dari Component.
+
+Seluruh komunikasi API melalui.
+
+```text
+services/
+```
+
+Component hanya memanggil Hook.
+
+---
+
+# 40. Hooks
+
+Gunakan Custom Hook.
+
+Contoh.
+
+```text
+useStudents()
+
+useClasses()
+
+useScores()
+
+useDashboard()
+
+useNotifications()
+```
+
+Business Logic tidak berada di Component.
+
+---
+
+# 41. Realtime Architecture
+
+Seluruh halaman yang membutuhkan data realtime menggunakan:
+
+TanStack Query
+
+↓
+
+Background Refetch
+
+↓
+
+Cache Synchronization
+
+↓
+
+Optimistic Update
+
+Frontend harus selalu menampilkan data terbaru tanpa perlu melakukan refresh halaman.
+
+---
+
+# 42. Dashboard Architecture
+
+Dashboard Admin terdiri dari widget modular.
+
+```text
+Dashboard
+
+├── Academic Status
+
+├── Statistics
+
+├── Input Progress
+
+├── Class Progress
+
+├── Finalization Progress
+
+├── Notification Center
+
+├── Activity Timeline
+
+├── Calendar
+
+├── Quick Action
+
+└── System Status
+```
+
+Setiap widget merupakan komponen independen yang dapat digunakan kembali.
+
+---
+
+# 43. Development Principles
+
+Frontend MPHM harus memenuhi prinsip berikut.
+
+- Enterprise Grade
+- Feature Based
+- Component Driven
+- Reusable
+- Responsive
+- Accessible
+- High Performance
+- Maintainable
+- Scalable
+- AI Friendly
+
+Seluruh implementasi wajib mengutamakan konsistensi, keterbacaan kode, kemudahan pengembangan jangka panjang, serta mengikuti seluruh dokumen yang telah ditetapkan sebelumnya.
+# 07_Development_Guidelines.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : Development Guidelines
+>
+> Version : 1.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Tujuan
+
+Dokumen ini menjadi standar pengembangan aplikasi MPHM.
+
+Seluruh kode yang dibuat oleh Developer maupun AI wajib mengikuti aturan dalam dokumen ini.
+
+Tujuan utama:
+
+- Konsisten
+- Mudah dipelihara
+- Mudah dikembangkan
+- Mudah dibaca
+- Production Ready
+- Enterprise Grade
+
+---
+
+# 2. General Principles
+
+Seluruh pengembangan wajib mengikuti prinsip:
+
+- SOLID
+- DRY (Don't Repeat Yourself)
+- KISS (Keep It Simple)
+- Clean Code
+- Clean Architecture
+- Separation of Concerns
+- Feature-Based Architecture
+- Reusable Components
+- Type Safety
+
+---
+
+# 3. Source of Truth
+
+Apabila terjadi konflik antar dokumen.
+
+Prioritas mengikuti urutan berikut.
+
+```text
+00_Project_Vision
+
+↓
+
+01_Business_Requirements
+
+↓
+
+02_System_Rules
+
+↓
+
+Universal_Data_Grid_Standard
+
+↓
+
+03_Database_Design
+
+↓
+
+04_API_Specification
+
+↓
+
+05_UI_UX_Guideline
+
+↓
+
+06_Frontend_Architecture
+
+↓
+
+07_Development_Guidelines
+```
+
+Dokumen dengan prioritas lebih tinggi selalu menjadi acuan utama.
+
+---
+
+# 4. Coding Standards
+
+Seluruh kode wajib:
+
+- Mudah dibaca.
+- Konsisten.
+- Memiliki nama yang jelas.
+- Tidak menggunakan singkatan yang membingungkan.
+- Tidak mengandung kode yang tidak digunakan.
+
+---
+
+# 5. TypeScript Rules
+
+Wajib menggunakan:
+
+- Strict Mode
+- Type Inference
+- Interface atau Type yang jelas
+- Zod Schema
+
+Dilarang menggunakan:
+
+```typescript
+any
+```
+
+kecuali benar-benar tidak dapat dihindari.
+
+---
+
+# 6. Naming Convention
+
+Gunakan penamaan yang konsisten.
+
+Folder:
+
+```text
+kebab-case
+```
+
+Component:
+
+```text
+PascalCase
+```
+
+Hook:
+
+```text
+useSomething
+```
+
+Function:
+
+```text
+camelCase
+```
+
+Constant:
+
+```text
+UPPER_SNAKE_CASE
+```
+
+Database:
+
+```text
+snake_case
+```
+
+---
+
+# 7. Component Rules
+
+Component harus:
+
+- Kecil.
+- Reusable.
+- Mudah diuji.
+- Fokus pada satu tanggung jawab.
+
+Component tidak boleh berisi Business Logic.
+
+---
+
+# 8. Business Logic
+
+Business Logic hanya berada pada Backend.
+
+Frontend hanya bertugas:
+
+- Menampilkan data.
+- Mengirim data.
+- Menangani interaksi pengguna.
+
+---
+
+# 9. API Rules
+
+Frontend tidak boleh memanggil endpoint secara langsung dari Component.
+
+Seluruh komunikasi API melalui Service Layer.
+
+---
+
+# 10. Form Rules
+
+Seluruh Form menggunakan:
+
+- React Hook Form
+- Zod
+
+Tidak menggunakan useState sebagai pengelola utama Form.
+
+---
+
+# 11. Validation Rules
+
+Validasi dilakukan pada:
+
+Frontend
+
+↓
+
+Backend
+
+Backend selalu menjadi validasi utama.
+
+---
+
+# 12. Error Handling
+
+Seluruh Error harus:
+
+- Ditangani.
+- Dicatat.
+- Tidak menyebabkan aplikasi berhenti.
+
+Tidak diperbolehkan membiarkan Promise tanpa penanganan Error.
+
+---
+
+# 13. Logging
+
+Gunakan Logging untuk:
+
+- Error
+- Warning
+- Audit
+- Background Job
+
+Jangan melakukan logging data sensitif.
+
+---
+
+# 14. Security
+
+Seluruh input dianggap tidak terpercaya.
+
+Semua data wajib divalidasi.
+
+Gunakan:
+
+- CSRF Protection
+- XSS Protection
+- SQL Injection Protection
+- Secure Cookie
+- HttpOnly Cookie
+
+---
+
+# 15. Performance
+
+Prioritaskan:
+
+- Server Component
+- Lazy Loading
+- Dynamic Import
+- Streaming
+- Memoization bila diperlukan
+- Server Pagination
+
+---
+
+# 16. Reusable Principle
+
+Sebelum membuat:
+
+- Component
+- Hook
+- Service
+- Utility
+
+Developer wajib memastikan bahwa implementasi serupa belum tersedia.
+
+---
+
+# 17. Database Rules
+
+Gunakan:
+
+- Drizzle ORM
+- Transaction
+- Foreign Key
+- Index
+
+Tidak diperbolehkan membuat SQL mentah tanpa alasan yang jelas.
+
+---
+
+# 18. Import & Export
+
+Seluruh fitur Import dan Export mengikuti:
+
+Universal Data Grid Standard.
+
+Tidak membuat implementasi yang berbeda.
+
+---
+
+# 19. Audit Log
+
+Seluruh perubahan data penting wajib menghasilkan Audit Log secara otomatis.
+
+Audit Log tidak dibuat secara manual pada setiap halaman.
+
+---
+
+# 20. Soft Delete
+
+Seluruh penghapusan data penting menggunakan:
+
+Soft Delete.
+
+Penghapusan permanen hanya dilakukan oleh Cloudflare Cron Worker setelah melewati masa retensi.
+
+---
+
+# 21. Workflow
+
+Seluruh perubahan status wajib melalui Workflow Engine.
+
+Tidak diperbolehkan mengubah status secara langsung tanpa validasi workflow.
+
+---
+
+# 22. Git Convention
+
+Branch.
+
+```text
+main
+
+develop
+
+feature/*
+
+fix/*
+
+hotfix/*
+```
+
+Commit mengikuti Conventional Commits.
+
+Contoh.
+
+```text
+feat:
+
+fix:
+
+refactor:
+
+docs:
+
+style:
+
+test:
+
+chore:
+```
+
+---
+
+# 23. Environment Variables
+
+Seluruh konfigurasi menggunakan Environment Variables.
+
+Tidak menyimpan Secret di dalam source code.
+
+---
+
+# 24. Dependency Rules
+
+Tidak menambahkan dependency baru apabila:
+
+- Sudah ada solusi bawaan.
+- Sudah tersedia pada stack proyek.
+
+Setiap dependency baru harus memiliki alasan yang jelas.
+
+---
+
+# 25. Code Review Checklist
+
+Sebelum Merge.
+
+Pastikan:
+
+- Tidak ada Error.
+- Tidak ada Warning.
+- Tidak ada Duplicate Code.
+- TypeScript bersih.
+- Build berhasil.
+- UI responsif.
+- Validasi berjalan.
+- Audit Log berfungsi.
+
+---
+
+# 26. Deployment
+
+Deployment menggunakan:
+
+- OpenNext.js
+- Cloudflare Workers
+- Cloudflare D1
+- Cloudflare R2
+
+Deployment harus dilakukan melalui Pipeline yang konsisten.
+
+---
+
+# 27. Documentation
+
+Seluruh fitur baru wajib memperbarui dokumentasi apabila memengaruhi:
+
+- Business Rules
+- API
+- Database
+- UI
+- Workflow
+
+---
+
+# 28. Testing
+
+Minimal dilakukan:
+
+- Functional Testing
+- Integration Testing
+- User Acceptance Testing (UAT)
+
+Fitur penting harus diuji sebelum dipublikasikan.
+
+---
+
+# 29. AI Development Rules
+
+Seluruh AI yang digunakan dalam proyek wajib:
+
+- Mengikuti seluruh dokumen spesifikasi.
+- Tidak membuat asumsi di luar spesifikasi.
+- Tidak mengubah struktur proyek tanpa instruksi.
+- Mengutamakan reuse daripada membuat kode baru.
+- Menghasilkan kode yang siap produksi.
+- Menjaga konsistensi arsitektur proyek.
+
+---
+
+# 30. Development Principles
+
+Setiap perubahan pada proyek harus memenuhi tiga pertanyaan berikut.
+
+1. Apakah solusi ini konsisten dengan arsitektur proyek?
+2. Apakah solusi ini dapat digunakan kembali?
+3. Apakah solusi ini tetap mudah dipelihara lima tahun ke depan?
+
+Jika salah satu jawaban adalah **tidak**, maka solusi tersebut harus ditinjau kembali sebelum diimplementasikan.
+
+Dokumen ini merupakan pedoman utama bagi seluruh proses pengembangan MPHM agar aplikasi tetap konsisten, scalable, aman, dan mudah dikembangkan dalam jangka panjang.
+# 08_AI_AGENT_RULES.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : AI Agent Rules
+>
+> Version : 1.0
+>
+> Status : APPROVED
+>
+> Target : Antigravity IDE AI
+
+---
+
+# 1. Purpose
+
+Dokumen ini mendefinisikan aturan yang wajib dipatuhi oleh AI Agent selama proses pengembangan sistem MPHM.
+
+AI bukan hanya menghasilkan kode yang berjalan, tetapi juga harus menjaga konsistensi arsitektur, kualitas kode, keamanan, performa, dan kemudahan pengembangan jangka panjang.
+
+AI bertindak sebagai **Senior Software Engineer**, **Software Architect**, **UI Engineer**, **Backend Engineer**, **Database Engineer**, dan **Code Reviewer** secara bersamaan.
+
+---
+
+# 2. Priority Rules
+
+Sebelum menghasilkan kode, AI wajib membaca seluruh dokumen berikut secara berurutan.
+
+```text
+00_Project_Vision.md
+
+↓
+
+01_Business_Requirements.md
+
+↓
+
+02_System_Rules.md
+
+↓
+
+Universal_Data_Grid_Standard.md
+
+↓
+
+03_Database_Design.md
+
+↓
+
+04_API_Specification.md
+
+↓
+
+05_UI_UX_Guideline.md
+
+↓
+
+06_Frontend_Architecture.md
+
+↓
+
+07_Development_Guidelines.md
+
+↓
+
+08_AI_AGENT_RULES.md
+```
+
+Apabila terjadi konflik.
+
+AI wajib mengikuti dokumen dengan prioritas yang lebih tinggi.
+
+---
+
+# 3. General Rules
+
+AI wajib:
+
+- Menghasilkan kode Production Ready.
+- Menghasilkan kode yang dapat langsung dijalankan.
+- Menghasilkan kode yang konsisten.
+- Menghasilkan kode yang mudah dipelihara.
+- Menghasilkan kode yang scalable.
+- Menghasilkan kode yang terdokumentasi dengan baik.
+
+AI dilarang menghasilkan:
+
+- Placeholder.
+- Dummy Logic.
+- TODO.
+- Mock Function.
+- Fake Data.
+- Hardcode yang tidak diperlukan.
+
+---
+
+# 4. Architecture Rules
+
+AI wajib mengikuti:
+
+- Clean Architecture
+- Feature Based Architecture
+- Component Driven Development
+- Modular Programming
+- Layered Architecture
+
+AI tidak boleh membuat struktur baru tanpa alasan yang jelas.
+
+---
+
+# 5. Technology Stack
+
+AI wajib menggunakan.
+
+Frontend
+
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- shadcn/ui
+- TanStack Query
+- TanStack Table
+- React Hook Form
+- Zod
+
+Backend
+
+- Cloudflare Workers
+- OpenNext
+- Drizzle ORM
+
+Database
+
+- Cloudflare D1
+
+Storage
+
+- Cloudflare R2
+
+Deployment
+
+- Cloudflare
+
+Tidak diperbolehkan mengganti stack tanpa instruksi.
+
+---
+
+# 6. Folder Rules
+
+AI wajib mengikuti struktur folder yang telah ditentukan.
+
+Tidak membuat folder baru apabila folder yang sesuai sudah tersedia.
+
+Semua fitur wajib berada di dalam folder Feature masing-masing.
+
+---
+
+# 7. Reusable Rules
+
+Sebelum membuat:
+
+- Component
+- Hook
+- Service
+- Utility
+- Type
+- Schema
+- Dialog
+- Form
+
+AI wajib mencari apakah implementasi serupa sudah tersedia.
+
+Jika tersedia.
+
+Gunakan implementasi tersebut.
+
+Tidak membuat duplikasi.
+
+---
+
+# 8. UI Rules
+
+Seluruh UI wajib mengikuti.
+
+05_UI_UX_Guideline.md
+
+Karakteristik.
+
+- Modern SaaS
+- Enterprise
+- Clean
+- Responsive
+- Professional
+
+Tidak menggunakan template dashboard lama.
+
+---
+
+# 9. Data Grid Rules
+
+Seluruh tabel wajib menggunakan.
+
+Universal Data Grid Standard.
+
+Tidak membuat tabel baru dengan implementasi berbeda.
+
+---
+
+# 10. API Rules
+
+Seluruh komunikasi data menggunakan API.
+
+Component tidak boleh melakukan fetch secara langsung.
+
+Gunakan:
+
+```text
+Component
+
+↓
+
+Hook
+
+↓
+
+Service
+
+↓
+
+API
+
+↓
+
+Backend
+```
+
+---
+
+# 11. Database Rules
+
+AI wajib menggunakan.
+
+- Drizzle ORM
+- Foreign Key
+- Index
+- Transaction
+- Soft Delete
+
+Tidak membuat SQL mentah apabila Drizzle dapat digunakan.
+
+---
+
+# 12. Business Logic Rules
+
+Business Logic hanya berada pada Backend.
+
+Frontend hanya bertugas.
+
+- Menampilkan data.
+- Mengirim data.
+- Menampilkan Status.
+- Menampilkan Error.
+
+---
+
+# 13. Validation Rules
+
+Frontend.
+
+↓
+
+Zod
+
+↓
+
+Backend Validation
+
+Backend selalu menjadi sumber validasi utama.
+
+---
+
+# 14. Workflow Rules
+
+Seluruh perubahan status mengikuti Workflow Engine.
+
+AI tidak boleh melewati Workflow.
+
+---
+
+# 15. Security Rules
+
+AI wajib menerapkan.
+
+- Authentication
+- Authorization
+- Input Validation
+- Output Escaping
+- CSRF Protection
+- XSS Protection
+- SQL Injection Protection
+- Rate Limiting
+
+---
+
+# 16. Performance Rules
+
+Prioritas.
+
+- Server Components
+- Streaming
+- Lazy Loading
+- Dynamic Import
+- Optimistic Update
+- Background Refetch
+- Cache
+- Virtual Table
+
+Tidak membuat proses yang menyebabkan render berlebihan.
+
+---
+
+# 17. Accessibility Rules
+
+Seluruh UI wajib memiliki.
+
+- Keyboard Navigation
+- Focus Indicator
+- ARIA Label
+- Semantic HTML
+
+---
+
+# 18. Naming Rules
+
+Gunakan.
+
+Folder
+
+```text
+kebab-case
+```
+
+Component
+
+```text
+PascalCase
+```
+
+Function
+
+```text
+camelCase
+```
+
+Hook
+
+```text
+useSomething
+```
+
+Database
+
+```text
+snake_case
+```
+
+---
+
+# 19. Import Rules
+
+Seluruh Import mengikuti.
+
+Universal Data Grid Standard.
+
+Flow.
+
+```text
+Download Template
+
+↓
+
+Upload
+
+↓
+
+Preview
+
+↓
+
+Validation
+
+↓
+
+Import
+```
+
+---
+
+# 20. Export Rules
+
+Seluruh Export mengikuti.
+
+Universal Data Grid Standard.
+
+Format.
+
+- Excel
+- CSV
+- PDF
+
+---
+
+# 21. Audit Rules
+
+Seluruh perubahan data penting wajib menghasilkan Audit Log.
+
+Audit dibuat otomatis.
+
+AI tidak perlu membuat Audit Log secara manual pada setiap endpoint.
+
+---
+
+# 22. Soft Delete Rules
+
+Seluruh Delete menggunakan.
+
+Soft Delete.
+
+Permanent Delete hanya dilakukan oleh Cloudflare Cron Worker.
+
+---
+
+# 23. Code Quality Rules
+
+AI wajib menghasilkan kode.
+
+- Clean
+- Readable
+- Typed
+- Reusable
+- Modular
+- Maintainable
+
+Tidak menghasilkan kode yang terlalu kompleks apabila solusi sederhana sudah cukup.
+
+---
+
+# 24. Error Handling Rules
+
+Seluruh Error harus.
+
+- Ditangani.
+- Dicatat.
+- Ditampilkan dengan baik.
+- Tidak menyebabkan aplikasi berhenti.
+
+---
+
+# 25. State Management Rules
+
+Prioritas.
+
+```text
+Server State
+
+↓
+
+TanStack Query
+
+↓
+
+React State
+
+↓
+
+Global Store
+```
+
+Global Store hanya digunakan apabila benar-benar diperlukan.
+
+---
+
+# 26. AI Decision Rules
+
+Sebelum menghasilkan kode.
+
+AI wajib mengevaluasi.
+
+1.
+
+Apakah solusi ini sesuai Business Requirements?
+
+2.
+
+Apakah sesuai System Rules?
+
+3.
+
+Apakah sesuai Database Design?
+
+4.
+
+Apakah sesuai API Specification?
+
+5.
+
+Apakah UI mengikuti UI Guideline?
+
+6.
+
+Apakah Frontend mengikuti Architecture?
+
+7.
+
+Apakah solusi dapat digunakan kembali?
+
+Jika salah satu jawaban adalah "Tidak".
+
+AI wajib memperbaiki solusi sebelum menghasilkan kode.
+
+---
+
+# 27. Forbidden Actions
+
+AI dilarang.
+
+- Mengubah struktur proyek tanpa instruksi.
+- Mengganti teknologi utama.
+- Menghapus fitur tanpa instruksi.
+- Menghilangkan Audit Log.
+- Menghilangkan Soft Delete.
+- Mengabaikan Workflow.
+- Membuat Business Logic di Frontend.
+- Mengakses Database langsung dari UI.
+- Menghasilkan kode yang tidak sesuai spesifikasi.
+
+---
+
+# 28. Response Rules
+
+Saat menghasilkan implementasi.
+
+AI wajib.
+
+- Menjelaskan perubahan yang dilakukan.
+- Menyebutkan file yang diubah.
+- Menjelaskan alasan perubahan.
+- Menjaga backward compatibility apabila memungkinkan.
+
+---
+
+# 29. Code Generation Strategy
+
+Saat menerima permintaan implementasi.
+
+AI wajib mengikuti urutan berikut.
+
+```text
+Analisis Requirement
+
+↓
+
+Membaca Dokumen
+
+↓
+
+Merancang Solusi
+
+↓
+
+Memastikan Konsistensi
+
+↓
+
+Implementasi
+
+↓
+
+Review Internal
+
+↓
+
+Optimasi
+
+↓
+
+Final Output
+```
+
+AI tidak boleh langsung menulis kode tanpa melakukan analisis.
+
+---
+
+# 30. Quality Checklist
+
+Sebelum menyelesaikan implementasi.
+
+AI wajib memastikan.
+
+□ Tidak ada duplicate code.
+
+□ Tidak ada hardcoded value yang tidak diperlukan.
+
+□ Tidak ada TypeScript Error.
+
+□ Tidak ada ESLint Error.
+
+□ Tidak ada unused import.
+
+□ Tidak ada unused variable.
+
+□ Menggunakan reusable component.
+
+□ Menggunakan reusable hook.
+
+□ Menggunakan reusable service.
+
+□ Mengikuti Feature Architecture.
+
+□ Mengikuti Workflow Engine.
+
+□ Mengikuti Universal Data Grid Standard.
+
+□ Menggunakan Soft Delete.
+
+□ Menghasilkan Audit Log.
+
+□ Aman terhadap input pengguna.
+
+□ Responsif.
+
+□ Mudah dipelihara.
+
+---
+
+# 31. Long-Term Vision
+
+Seluruh keputusan implementasi harus mempertimbangkan pengembangan sistem minimal selama lima hingga sepuluh tahun ke depan.
+
+AI harus selalu memilih solusi yang:
+
+- Lebih modular.
+- Lebih mudah dikembangkan.
+- Lebih mudah diuji.
+- Lebih mudah dipelihara.
+- Lebih konsisten.
+- Lebih aman.
+- Lebih efisien.
+
+AI tidak boleh mengorbankan kualitas arsitektur demi solusi yang lebih cepat apabila solusi tersebut akan menyulitkan pengembangan di masa depan.
+
+---
+
+# 32. Final Principle
+
+MPHM bukan sekadar aplikasi administrasi.
+
+MPHM adalah platform akademik berbasis web modern yang dirancang dengan standar Enterprise SaaS.
+
+Seluruh implementasi harus mengutamakan:
+
+- Kualitas Arsitektur
+- Konsistensi
+- Keamanan
+- Performa
+- Pengalaman Pengguna
+- Skalabilitas
+- Maintainability
+- Reusability
+- Long-Term Sustainability
+
+Apabila terdapat beberapa alternatif implementasi, AI wajib memilih solusi yang paling sesuai dengan seluruh dokumen spesifikasi proyek, bukan sekadar solusi yang paling cepat atau paling sederhana.
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : Data Center Blueprint
+>
+> Version : 1.0
+>
+> Status : Draft
+
+---
+
+# 1. Pendahuluan
+
+MPHM tidak hanya dibangun sebagai sistem akademik, tetapi juga sebagai **Pusat Data** yang menyimpan seluruh riwayat warga MPHM secara permanen.
+
+Setiap orang yang pernah menjadi bagian dari MPHM tetap memiliki data di dalam sistem meskipun sudah tidak aktif.
+
+Data tidak dihapus, melainkan berubah status dan disimpan sebagai arsip historis.
+
+---
+
+# 2. Tujuan
+
+Pusat Data dibuat untuk:
+
+- Menyimpan seluruh data secara permanen.
+- Menghindari duplikasi data.
+- Menyimpan seluruh perjalanan seseorang selama berada di MPHM.
+- Memudahkan pencarian data.
+- Menjadi sumber data utama (Single Source of Truth).
+- Menjadi dasar seluruh modul akademik.
+
+---
+
+# 3. Konsep Pusat Data
+
+Seluruh data utama berada pada satu kelompok menu bernama **Pusat Data**.
+
+```text
+Pusat Data
+│
+├── Santri
+├── Pengajar
+├── Pengurus
+├── Wali Santri
+└── Pencarian Database
+```
+
+Seluruh modul akademik mengambil data dari Pusat Data.
+
+---
+
+# 4. Prinsip Penyimpanan Data
+
+MPHM menggunakan prinsip:
+
+> Sekali data dibuat, data akan tetap tersimpan.
+
+Data tidak dihapus karena:
+
+- Lulus
+- Boyong
+- Cuti
+- Selesai Mengajar
+- Selesai Menjabat
+
+Yang berubah hanyalah status dan riwayatnya.
+
+---
+
+# 5. Database Santri
+
+Database Santri merupakan pusat seluruh data santri.
+
+## Identitas
+
+- NIS
+- NISN
+- Nama
+- Tempat Lahir
+- Tanggal Lahir
+- Nama Wali
+- Alamat
+- Nomor HP
+- Tahun Masuk
+- Tahun Keluar
+- Status
+
+Status:
+
+- Aktif
+- Cuti
+- Boyong
+- Alumni
+
+---
+
+## Riwayat Santri
+
+Setiap santri memiliki histori lengkap.
+
+Meliputi:
+
+- Riwayat Jenjang
+- Riwayat Tingkat
+- Riwayat Kelas
+- Riwayat Nilai
+- Riwayat Absensi
+- Riwayat Akhlaq
+- Riwayat Pelanggaran
+- Riwayat Promosi
+- Riwayat Kamar
+
+Semua histori disimpan permanen.
+
+---
+
+# 6. Database Alumni
+
+Alumni bukan data baru.
+
+Alumni merupakan kelanjutan dari data santri.
+
+Saat status berubah menjadi Alumni, seluruh data santri tetap dipertahankan.
+
+Kemudian sistem menambahkan informasi alumni.
+
+## Informasi Alumni
+
+- Status Khidmah
+- Penempatan Khidmah
+- Alasan Tidak Khidmah
+- Keterangan Qodho' Khidmah
+- Status Pengambilan Ijazah
+- Tanggal Pengambilan Ijazah
+- Keterangan
+
+---
+
+## Status Khidmah
+
+- Selesai Khidmah
+- Tidak Khidmah
+- Qodho' Khidmah
+
+---
+
+## Status Pengambilan Ijazah
+
+- Belum Bisa Diambil
+- Sudah Diambil
+
+---
+
+# 7. Database Pengajar
+
+Database Pengajar menyimpan seluruh data pengajar yang pernah mengajar di MPHM.
+
+Data tetap disimpan walaupun pengajar sudah tidak aktif.
+
+## Identitas
+
+- Nama
+- Tempat Lahir
+- Tanggal Lahir
+- Nama Wali
+- Alamat
+- Nomor HP
+
+---
+
+## Riwayat Mengajar
+
+- Tahun Mulai Mengajar
+- Tahun Selesai Mengajar
+- Mata Pelajaran
+- Jenjang
+- Tingkat
+- Kelas
+
+---
+
+## Status Pengajar
+
+- Mustahiq
+- Munawib
+
+Seluruh riwayat mengajar tetap tersimpan.
+
+---
+
+# 8. Database Pengurus
+
+Database Pengurus menyimpan seluruh riwayat kepengurusan.
+
+Organisasi meliputi:
+
+- P3HM
+- MPHM
+- M3PHM
+
+---
+
+## Identitas
+
+- Nama
+- Tempat Lahir
+- Tanggal Lahir
+- Nama Wali
+- Alamat
+- Nomor HP
+
+---
+
+## Riwayat Kepengurusan
+
+- Organisasi
+- Jabatan
+- Periode
+- Tahun Mulai
+- Tahun Selesai
+
+Satu orang dapat memiliki lebih dari satu riwayat kepengurusan.
+
+Contoh:
+
+- Ketua MPHM
+- Bendahara P3HM
+- Sekretaris M3PHM
+
+Semua riwayat tetap disimpan.
+
+---
+
+# 9. Database Wali Santri
+
+Database Wali Santri menyimpan data seluruh wali santri.
+
+Informasi meliputi:
+
+- Nama
+- Hubungan dengan Santri
+- Alamat
+- Nomor HP
+
+Satu wali dapat terhubung dengan lebih dari satu santri.
+
+---
+
+# 10. Pencarian Database
+
+Sistem menyediakan pencarian terpusat.
+
+Menu:
+
+```text
+Pusat Data
+
+└── Pencarian Database
+```
+
+Pencarian dapat menggunakan:
+
+- Nama
+- NIS
+- NISN
+- Nama Wali
+- Nomor HP
+- Alamat
+
+---
+
+## Hasil Pencarian
+
+Hasil pencarian dapat berasal dari:
+
+- Santri
+- Alumni
+- Pengajar
+- Pengurus
+- Wali Santri
+
+Hak akses mengikuti Role pengguna.
+
+---
+
+# 11. Arsip Historis
+
+Seluruh data yang sudah tidak aktif dipindahkan ke Arsip Historis.
+
+Yang termasuk arsip:
+
+- Alumni
+- Santri Boyong
+- Santri Cuti
+- Pengajar Tidak Aktif
+- Pengurus Selesai Menjabat
+
+Data tetap dapat dicari.
+
+Namun tidak muncul pada menu operasional harian.
+
+---
+
+# 12. Profil Terpadu
+
+Setiap orang memiliki satu halaman profil.
+
+Halaman tersebut berisi seluruh perjalanan orang tersebut selama berada di MPHM.
+
+Contoh:
+
+```text
+Fatimah
+
+Status :
+Alumni
+
+Riwayat
+
+2020
+Masuk MPHM
+
+↓
+
+Ibtidaiyyah
+
+↓
+
+Tsanawiyah
+
+↓
+
+Aliyah
+
+↓
+
+Khidmah
+
+↓
+
+Alumni
+
+↓
+
+Ijazah Diambil
+```
+
+Contoh lain:
+
+```text
+Aisyah
+
+Santri
+
+↓
+
+Alumni
+
+↓
+
+Mustahiq
+
+↓
+
+Pengurus MPHM
+
+↓
+
+Pengurus P3HM
+```
+
+Seluruh riwayat ditampilkan dalam satu halaman.
+
+---
+
+# 13. Hubungan Dengan Modul Akademik
+
+Pusat Data menjadi sumber data utama untuk seluruh modul.
+
+```text
+Pusat Data
+        │
+        ├── Akademik
+        ├── Kelas
+        ├── Nilai
+        ├── Absensi
+        ├── Akhlaq
+        ├── Pelanggaran
+        ├── Raport
+        ├── Promosi
+        └── Dashboard
+```
+
+Seluruh modul mengambil data dari Pusat Data.
+
+---
+
+# 14. Aturan Penyimpanan
+
+1. Data tidak dihapus ketika seseorang sudah tidak aktif.
+2. Seluruh perubahan status disimpan sebagai histori.
+3. Seluruh perubahan penting dicatat pada Audit Log.
+4. Seluruh data dapat ditelusuri kembali.
+5. Riwayat tidak boleh dihapus.
+6. Arsip tetap dapat dicari.
+7. Hak akses mengikuti Role pengguna.
+
+---
+
+# 15. Visi Pusat Data
+
+Pusat Data MPHM menjadi tempat penyimpanan seluruh perjalanan santri, pengajar, pengurus, dan wali santri dari tahun ke tahun.
+
+Dengan konsep ini, MPHM tidak hanya menjadi aplikasi administrasi akademik, tetapi juga menjadi pusat dokumentasi digital yang menjaga seluruh riwayat lembaga secara utuh, rapi, dan berkelanjutan.
+# 10_ENTERPRISE_DATA_ARCHITECTURE.md
+
+> Project : MPHM (Madrasah Putri Hidayatul Mubtadi'at)
+>
+> Document : Enterprise Data Architecture (Person-Centric Core)
+>
+> Version : 1.0
+>
+> Status : APPROVED
+
+---
+
+# 1. Pendahuluan
+
+Seiring berkembangnya MPHM dari sekadar Sistem Akademik menjadi **Enterprise Information System** dan **Pusat Data Abadi**, arsitektur database membutuhkan fondasi yang mampu menangani perjalanan hidup seseorang di lembaga selama puluhan tahun tanpa duplikasi data.
+
+Dokumen ini mendefinisikan standar **Person-Centric Enterprise Data Architecture** sebagai acuan tunggal seluruh perancangan skema database dan layanan backend MPHM.
+
+---
+
+# 2. Arsitektur Inti: Person-Centric Core
+
+Satu prinsip utama sistem MPHM:
+> **Setiap individu hanya memiliki SATU IDENTITAS UTAMA (`people`), sedangkan perannya (`student`, `teacher`, `guardian`, `organization_member`, `alumni`) adalah PROFIL yang dapat bertambah seiring waktu.**
+
+```text
+                        people (Identitas Tunggal / Core Person)
+                                          │
+        ┌───────────────────┬─────────────┴──────┬────────────────────────┬───────────────────────┐
+        ▼                   ▼                    ▼                        ▼                       ▼
+ student_profiles    teacher_profiles     guardian_profiles    organization_memberships    alumni_records
+ (Santri Aktif)      (Mustahiq/Munawib)   (Wali Santri)        (Pengurus Organisasi)       (Status Khidmah/Ijazah)
+        │                   │                                             │                       │
+        ▼                   ▼                                             ▼                       ▼
+  Academic History     Teaching History                             Jabatan P3HM/MPHM        Qodho' & Ijazah
+  Disciplinary Log     Schedule Assignment                          Periode Masa Khidmah
+```
+
+Contoh kasus riwayat hidup **Fatimah**:
+1. Tahun 2020: Masuk sebagai **Santri** (`student_profiles` -> `people.id`).
+2. Tahun 2026: Lulus dan menjadi **Alumni** (`alumni_records` -> `student_profiles.id`).
+3. Tahun 2027: Mengabdi sebagai **Mustahiq / Wali Kelas** (`teacher_profiles` -> `people.id`).
+4. Tahun 2028: Menjadi **Pengurus MPHM** (`organization_memberships` -> `people.id`).
+
+Dalam seluruh fase di atas, identitas dasar Fatimah (Nama, Tempat/Tanggal Lahir, Alamat, Kontak) **hanya disimpan satu kali** pada tabel `people`.
+
+---
+
+# 3. Spesifikasi Skema Core (`people`)
+
+Tabel `people` menjadi induk dari seluruh profil manusia di dalam sistem:
+
+- `id` (UUID PK)
+- `nik` (TEXT - Nomor Induk Kependudukan, Opsional/Unique)
+- `fullName` (TEXT NOT NULL)
+- `gender` (TEXT - `P` | `L`)
+- `birthPlace` (TEXT)
+- `birthDate` (TEXT - YYYY-MM-DD)
+- `phone` (TEXT)
+- `address` (TEXT)
+- `email` (TEXT)
+- `photoUrl` (TEXT)
+- Universal Audit Columns (`createdAt`, `createdBy`, `updatedAt`, `updatedBy`, `deletedAt`, `deletedBy`)
+
+---
+
+# 4. Profil & Peran (Profiles & Memberships)
+
+## 4.1 Student Profiles (`student_profiles`)
+Menghubungkan `people.id` dengan identitas kesantrian:
+- `id` (UUID PK)
+- `personId` (UUID FK -> `people.id`)
+- `nis` (TEXT UNIQUE)
+- `nisn` (TEXT UNIQUE)
+- `entryYear` (TEXT)
+- `status` (`active` | `cuti` | `boyong` | `alumni`)
+
+## 4.2 Teacher Profiles (`teacher_profiles`)
+Menyimpan peran pengajar tanpa membuat tabel identitas terpisah:
+- `id` (UUID PK)
+- `personId` (UUID FK -> `people.id`)
+- `nip` / `kodePengajar` (TEXT UNIQUE)
+- `teacherType` (`mustahiq` | `munawib` | `umum`)
+- `status` (`active` | `inactive`)
+
+## 4.3 Guardian Profiles (`guardian_profiles` & `student_guardians`)
+Menyimpan peran wali santri:
+- `id` (UUID PK)
+- `personId` (UUID FK -> `people.id`)
+- `relationship` (`Ayah` | `Ibu` | `Wali`)
+- `occupation` (TEXT)
+
+## 4.4 Organization Memberships (`organization_memberships`)
+*Catatan: Sistem MPHM tidak menggunakan istilah "Staff", melainkan Pengurus / Dewan Harian / Organisasi.*
+- `id` (UUID PK)
+- `personId` (UUID FK -> `people.id`)
+- `organization` (`P3HM` | `MPHM` | `M3PHM` atau organisasi resmi lainnya)
+- `position` (TEXT - Jabatan, misal: Ketua, Sekretaris, Bendahara, Keamanan)
+- `periodStartYear` (TEXT)
+- `periodEndYear` (TEXT)
+- `status` (`active` | `completed`)
+
+## 4.5 Alumni Records (`alumni_records`)
+Alumni bukan individu baru, melainkan ekstensi dari profil santri yang telah menyelesaikan pendidikan:
+- `id` (UUID PK)
+- `studentProfileId` (UUID FK -> `student_profiles.id`)
+- `graduationYearId` (UUID FK -> `academic_years.id`)
+- `khidmahStatus` (`selesai_khidmah` | `tidak_khidmah` | `qodho_khidmah`)
+- `khidmahLocation` (TEXT - Tempat penempatan khidmah)
+- `khidmahNotes` (TEXT - Keterangan Qodho' / Catatan pengabdian)
+- `ijazahStatus` (`belum_bisa_diambil` | `sudah_diambil`)
+- `ijazahTakenAt` (TIMESTAMP)
+
+---
+
+# 5. Arsitektur Dinamis Modul Pelanggaran Santri
+
+Agar Master Pelanggaran fleksibel dan dapat diperluas tanpa migrasi skema database, perancangan menggunakan 3 lapis master:
+
+```text
+Master Kategori Pelanggaran (violation_categories)
+        │
+        ▼
+Master Severity Pelanggaran (violation_severities)
+        │
+        ▼
+Master Jenis Pelanggaran (violation_types)
+        │
+        ▼
+Laporan Kejadian Pelanggaran (student_violations)
+```
+
+1. **`violation_categories`**: Master Kategori dinamis (Admin dapat menambah kategori seperti: *Kerapian*, *Kedisiplinan*, *Adab*, *Ibadah*, *Administrasi*, *Perizinan*, *Kebersihan*, *Asrama*, *Keamanan*). Atribut: `name`, `color`, `icon`, `isActive`.
+2. **`violation_severities`**: Master Tingkat Keparahan dinamis (`name`: Ringan/Sedang/Berat/Sangat Berat, `levelWeight`, `badgeColor`, `isActive`).
+3. **`violation_types`**: Master Jenis Pelanggaran (`categoryId`, `severityId`, `name`, `defaultPoints`, `description`, `isActive`).
+4. **`student_violations`**: Catatan insiden pelanggaran santri (`academicYearId`, `studentId`, `violationTypeId`, `incidentDate`, `incidentTime`, `location`, `description`, `evidenceUrl`, `reportedBy`, `status`).
+
+---
+
+# 6. Global Search Command Palette (`CTRL + K`)
+
+Seluruh entitas dalam arsitektur Person-Centric dapat dicari secara cepat dari manapun melalui **Command Palette (`CTRL + K`)**:
+- Pencarian multi-kategori instan
+- Menampilkan Badge status (`Santri`, `Alumni`, `Pengajar`, `Pengurus`, `Wali Santri`)
+- Langsung membuka halaman **Profil Terpadu 360°**
+
+---
+
+# 7. Profil Terpadu 360° (`Person 360° Profile`)
+
+Setiap `people.id` memiliki satu halaman profil komprehensif yang menampilkan seluruh tab riwayat:
+1. **Identitas & Biodata Lengkap**
+2. **Riwayat Akademik & Kelas**
+3. **Riwayat Absensi**
+4. **Riwayat Nilai**
+5. **Riwayat Akhlaq**
+6. **Riwayat Pelanggaran & Kedisiplinan**
+7. **Status Khidmah Alumni**
+8. **Status Pengambilan Ijazah**
+9. **Riwayat Kepengurusan Organisasi (P3HM/MPHM/M3PHM)**
+10. **Audit Timeline & Histori Sistem**
+
+Arsitektur ini menjadikan MPHM sebagai pusat dokumentasi keumatan yang abadi, rapi, dan siap berkembang dalam skala enterprise.
+# 11_ACADEMIC_ENTERPRISE_BLUEPRINT.md
+
+> **Project:** MPHM (Madrasah Putri Hidayatul Mubtadi'at)  
+> **Document:** Enterprise Academic, Rombel, Promotion Engine & Guardian Portal Blueprint  
+> **Version:** 2.0 (APPROVED)  
+> **Status:** OFFICIAL SINGLE SOURCE OF TRUTH  
+
+---
+
+## 1. Tujuan & Filosofi Arsitektur
+
+Blueprint ini menjadi acuan teknis resmi implementasi **Modul Akademik, Rombongan Belajar (Rombel), Promotion Engine, dan Portal Wali Santri**.  
+Seluruh struktur mengikuti prinsip **Person-Centric Enterprise Data Architecture**:
+- Tidak ada duplikasi identitas fisik (`people`).
+- Seluruh pergerakan santri antar kelas maupun perubahan status disimpan sebagai **riwayat historis abadi** (*append-only historical record*).
+- Status penempatan kelas tidak pernah dihapus.
+
+---
+
+## 2. Prioritas Implementasi
+
+### Phase 1 — Modul Akademik & Rombel
+1. Master Tahun Ajaran (`academic_years`)
+2. Master Semester, Jenjang, dan Tingkat (konstanta & master permanen)
+3. Rombongan Belajar / Kelas (`academic_classes`)
+4. Penugasan Wali Kelas / Mustahiq
+5. Penempatan Santri & Batch Assignment (`class_enrollments`)
+6. Promotion Engine (Mesin Kenaikan Kelas & Kelulusan)
+
+### Phase 2 — Portal Wali Santri (Guardian Portal)
+- Dibangun setelah fondasi akademik Phase 1 stabil.
+- Akses bersifat **Read-Only** untuk memantau data anak asuh terdaftar.
+
+---
+
+## 3. Spesifikasi Skema Database Akademik
+
+### 3.1 `academic_years`
+Tabel master Tahun Ajaran:
+- `id`: string (UUID / kode seperti `AY-2025-2026`)
+- `name`: string (contoh: `2025/2026`)
+- `status`: string (`ACTIVE` | `ARCHIVED` | `DRAFT`)
+- `startDate`: string
+- `endDate`: string
+
+### 3.2 `academic_classes`
+Tabel master Rombongan Belajar (Kelas):
+- `id`: string (UUID)
+- `academicYearId`: string (FK ke `academic_years.id`)
+- `jenjangId`: string (`1`: I'dadiyyah, `2`: Ibtida'iyyah, `3`: Tsanawiyyah, `4`: Aliyyah)
+- `tingkatId`: string (`I`, `II`, `III`, `IV`, `V`, `VI`)
+- `className`: string (contoh: `Ibtidaiyyah II-A`)
+- `classCode`: string (contoh: `IBT-2A-2526`)
+- `mustahiqId`: string | null (FK ke `people.id`, Wali Kelas)
+- `capacity`: number (default: 35)
+- `status`: string (`ACTIVE` | `INACTIVE`)
+
+### 3.3 `class_enrollments`
+Tabel relasi penempatan santri dalam kelas (*Historical Record*):
+- `id`: string (UUID)
+- `academicYearId`: string (FK ke `academic_years.id`)
+- `classId`: string (FK ke `academic_classes.id`)
+- `studentProfileId`: string (FK ke `student_profiles.id`)
+- `status`: string Enum permanen:
+  - `ACTIVE`: Aktif di kelas ini
+  - `PROMOTED`: Telah naik ke kelas berikutnya
+  - `RETAINED`: Tinggal kelas
+  - `TRANSFERRED`: Pindah kelas / mutasi internal
+  - `BOYONG`: Keluar / boyong sebelum lulus
+  - `GRADUATED`: Lulus dari tingkat akhir
+
+---
+
+## 4. Proses Bisnis Promotion Engine
+
+Mesin Kenaikan Kelas dijalankan pada akhir Tahun Ajaran dengan alur kerja berikut:
+1. **Pilih Sumber:** Tahun Ajaran Asal & Kelas Asal.
+2. **Pilih Tujuan:** Tahun Ajaran Tujuan.
+3. **Penentuan Keputusan per Santri:**
+   - **Naik Kelas (`PROMOTED`)**: Pilih kelas tujuan di Tahun Ajaran baru.
+   - **Tinggal Kelas (`RETAINED`)**: Pilih kelas di tingkat yang sama di Tahun Ajaran baru.
+   - **Boyong (`BOYONG`)**: Tandai status akhir santri di kelas lama sebagai `BOYONG`.
+   - **Lulus (`GRADUATED`)**: Tandai `GRADUATED` dan otomatis buatkan entri permanen pada `alumni_records`.
+4. **Pembentukan Enrollment Baru:** Sistem membuat baris baru di `class_enrollments` untuk Tahun Ajaran tujuan dengan status awal `ACTIVE`.
+5. **Arsip Historis:** Baris enrollment lama tetap tersimpan utuh dan tidak diubah/dihapus.
+
+---
+
+## 5. Spesifikasi Fitur Batch Assignment
+
+Alur penempatan santri massal ke kelas baru:
+- **Multi-Select Santri:** Memilih daftar santri yang belum memiliki kelas aktif pada Tahun Ajaran terpilih.
+- **Pilih Kelas Tujuan:** Menampilkan kapasitas terisi vs batas kapasitas kelas (`capacity`).
+- **Validasi Aturan:** Mencegah melebihi kapasitas dan mendeteksi duplikasi pendaftaran pada tahun ajaran yang sama.
+- **Konfirmasi Modal:** Menampilkan ringkasan sebelum penyimpanan dilakukan.
+
+---
+
+## 6. Aturan Penugasan Mustahiq (Wali Kelas)
+
+- Mustahiq dihubungkan langsung ke `people.id` (Person-Centric).
+- **Aturan Tunggal:** Satu Mustahiq hanya boleh menjadi wali kelas pada **1 kelas aktif** dalam 1 Tahun Ajaran (kecuali terdapat pengecualian khusus oleh Administrator).
+
+---
+
+## 7. Portal Wali Santri (Guardian Portal - Read-Only 360°)
+
+Akses eksklusif bagi orang tua / wali (`guardian_profiles` -> `student_profiles`):
+- **Biodata & Kelas Saat Ini**
+- **Grafik & Riwayat Nilai / Rapor**
+- **Rekam Jejak Kehadiran (Absensi)**
+- **Catatan Akhlaq & Kedisiplinan (Pelanggaran)**
+- **Pengumuman Resmi Madrasah**
+Seluruh tampilan bersifat *Read-Only* transparan.
+# Blueprint Deployment Cloudflare
+
+## Tujuan
+
+Setiap proses deployment harus langsung menggunakan domain produksi **https://m.p3hm.my.id** sebagai domain utama aplikasi.
+
+Tidak diperbolehkan menggunakan domain bawaan Cloudflare Pages (`*.pages.dev`) maupun subdomain sementara sebagai alamat utama aplikasi. Seluruh konfigurasi deployment harus menganggap `https://m.p3hm.my.id` sebagai Production URL.
+
+---
+
+# Aturan Wajib
+
+## Domain Production
+
+Production URL wajib:
+
+```
+https://m.p3hm.my.id
+```
+
+Preview URL boleh menggunakan domain bawaan Cloudflare.
+
+Contoh:
+
+```
+https://xxxxxxxx.pages.dev
+```
+
+Tetapi URL tersebut hanya digunakan untuk Preview Deployment dan tidak boleh menjadi URL utama aplikasi.
+
+---
+
+## Domain Mapping
+
+Deployment harus otomatis menghubungkan project ke:
+
+```
+m.p3hm.my.id
+```
+
+dan memastikan seluruh request production menggunakan domain tersebut.
+
+---
+
+## Redirect
+
+Apabila masih tersedia URL:
+
+```
+*.pages.dev
+```
+
+maka URL tersebut hanya digunakan untuk preview.
+
+Semua konfigurasi aplikasi harus menganggap:
+
+```
+https://m.p3hm.my.id
+```
+
+sebagai Origin, Base URL, dan Canonical URL.
+
+---
+
+# Environment
+
+## Production
+
+```
+APP_ENV=production
+
+APP_URL=https://m.p3hm.my.id
+
+NEXT_PUBLIC_APP_URL=https://m.p3hm.my.id
+```
+
+---
+
+## Preview
+
+```
+APP_ENV=preview
+```
+
+menggunakan URL bawaan Cloudflare Pages.
+
+---
+
+## Development
+
+```
+APP_ENV=development
+
+APP_URL=http://localhost:3000
+```
+
+---
+
+# Routing
+
+Semua route berada di bawah domain utama.
+
+Contoh:
+
+```
+https://m.p3hm.my.id/
+
+https://m.p3hm.my.id/login
+
+https://m.p3hm.my.id/dashboard
+
+https://m.p3hm.my.id/dashboard/students
+
+https://m.p3hm.my.id/dashboard/classes
+
+https://m.p3hm.my.id/api/*
+```
+
+Tidak diperbolehkan membuat domain:
+
+```
+app.p3hm.my.id
+
+portal.p3hm.my.id
+
+dashboard.p3hm.my.id
+```
+
+kecuali terdapat kebutuhan arsitektur yang benar-benar mengharuskannya.
+
+---
+
+# Authentication
+
+Semua callback authentication wajib menggunakan domain utama.
+
+Contoh:
+
+```
+AUTH_URL=https://m.p3hm.my.id
+```
+
+atau
+
+```
+NEXTAUTH_URL=https://m.p3hm.my.id
+```
+
+Cookie harus menggunakan domain production.
+
+---
+
+# SEO
+
+Canonical URL
+
+```
+https://m.p3hm.my.id
+```
+
+Sitemap
+
+```
+https://m.p3hm.my.id/sitemap.xml
+```
+
+Robots
+
+```
+https://m.p3hm.my.id/robots.txt
+```
+
+Open Graph URL
+
+```
+https://m.p3hm.my.id
+```
+
+---
+
+# Cloudflare Configuration
+
+Deployment harus mengonfigurasi:
+
+- Cloudflare Pages atau Cloudflare Workers
+- Custom Domain
+- SSL Full (Strict)
+- Always Use HTTPS
+- Automatic HTTPS Rewrites
+- HTTP/3
+- Brotli Compression
+- Early Hints
+- Cache Rules sesuai kebutuhan aplikasi
+
+Setelah deployment selesai, domain production harus langsung aktif pada:
+
+```
+https://m.p3hm.my.id
+```
+
+tanpa memerlukan konfigurasi manual tambahan.
+
+---
+
+# Build Target
+
+Framework:
+
+```
+Next.js 15
+```
+
+Output:
+
+```
+Cloudflare
+```
+
+Runtime:
+
+```
+Edge Runtime
+```
+
+Package Manager:
+
+```
+pnpm
+```
+
+Node.js:
+
+```
+22 LTS
+```
+
+---
+
+# Ketentuan Deployment
+
+Setiap proses deploy harus memenuhi seluruh kondisi berikut:
+
+- Build berhasil tanpa error.
+- Domain production langsung mengarah ke `https://m.p3hm.my.id`.
+- SSL aktif dan valid.
+- Seluruh URL internal menggunakan domain production.
+- Seluruh API menggunakan domain production.
+- Preview deployment tetap tersedia melalui domain bawaan Cloudflare.
+- Tidak ada referensi ke domain `*.pages.dev` pada konfigurasi production.
+
+---
+
+# Acceptance Criteria
+
+Deployment dianggap berhasil apabila seluruh poin berikut terpenuhi:
+
+- Aplikasi dapat diakses melalui `https://m.p3hm.my.id`.
+- Seluruh halaman menggunakan HTTPS.
+- Login dan autentikasi berjalan normal.
+- API dapat diakses melalui `https://m.p3hm.my.id/api/*`.
+- Canonical URL mengarah ke `https://m.p3hm.my.id`.
+- Tidak ada redirect loop.
+- Tidak terdapat mixed content.
+- Semua aset (CSS, JavaScript, gambar, font) dimuat dari domain production.
+- Deployment dapat diulang tanpa perlu konfigurasi ulang domain.
+
+---
+
+# Instruksi untuk AI Agent
+
+Setiap kali melakukan deployment ke Cloudflare, AI Agent wajib:
+
+1. Menganggap `https://m.p3hm.my.id` sebagai satu-satunya domain production.
+2. Menghubungkan deployment ke Custom Domain `m.p3hm.my.id`.
+3. Menggunakan domain tersebut sebagai Base URL aplikasi.
+4. Mengonfigurasi environment production agar mengarah ke `https://m.p3hm.my.id`.
+5. Memastikan seluruh route, API, autentikasi, metadata, dan SEO menggunakan domain production.
+6. Tidak menggunakan domain bawaan Cloudflare Pages sebagai domain utama.
+7. Melakukan verifikasi akhir bahwa aplikasi dapat diakses melalui `https://m.p3hm.my.id` dengan SSL aktif dan seluruh fungsi berjalan normal.
+modul Kelas (Rombel) merupakan pusat operasional akademik setelah Tahun Ajaran dan Semester aktif ditentukan.
+
+Modul ini menjadi penghubung antara Tahun Ajaran, Semester, Santri, Mustahiq, Kurikulum, Jadwal, Absensi, dan Nilai.
+
+1. Posisi Modul dalam Academic Workspace
+
+Urutan hirarki akademik MPHM adalah:
+
+Academic Year
+│
+├── Semester
+│ │
+│ └── Kelas (Rombel)
+│ │
+│ ├── Wali Kelas (Mustahiq)
+│ ├── Santri
+│ ├── Kurikulum
+│ ├── Jadwal
+│ ├── Absensi
+│ └── Nilai
+
+Artinya:
+
+Tahun Ajaran menentukan periode akademik.
+Semester menentukan periode operasional.
+Kelas merupakan workspace utama seluruh aktivitas akademik. 2. Struktur Identitas Kelas
+
+Identitas kelas tidak diketik bebas.
+
+Identitas dibentuk otomatis dari tiga komponen.
+
+A. Jenjang (Master Permanen)
+I'dadiyyah
+Ibtida'iyyah
+Tsanawiyyah
+Aliyyah
+
+Master ini bersifat permanen.
+
+Tidak dapat ditambah ataupun dihapus melalui UI.
+
+B. Tingkat (Master Permanen)
+
+Setiap jenjang memiliki tingkatan tetap.
+
+I'dadiyyah
+I
+II
+III
+Ibtida'iyyah
+I
+II
+III
+IV
+V
+VI
+Tsanawiyyah
+I
+II
+III
+Aliyyah
+I
+II
+III
+
+Dropdown Tingkat akan berubah otomatis mengikuti Jenjang yang dipilih.
+
+C. Bagian
+
+Bagian merupakan input dinamis.
+
+Contoh:
+
+A
+B
+C
+D
+E
+F
+
+Tidak dibatasi jumlahnya.
+
+Administrator cukup mengetik:
+
+A
+
+atau
+
+B
+
+atau
+
+Unggulan
+
+atau
+
+Tahfidz
+
+Sistem hanya memastikan tidak ada duplikasi pada kombinasi yang sama.
+
+3. Identitas Kelas
+
+Nama kelas dihasilkan otomatis.
+
+Formula:
+
+Nama Kelas
+
+=
+
+Jenjang
+
+- Tingkat
+- Bagian
+
+Contoh:
+
+Ibtida'iyyah III-A
+
+I'dadiyyah II-B
+
+Aliyyah I-Tahfidz
+
+Field ini read-only.
+
+Administrator tidak mengubahnya secara manual.
+
+4. Entity Relationship
+   Academic Year
+   │
+   ├──────────────┐
+   │ │
+   ▼ ▼
+   Semester Curriculum
+   │
+   ▼
+   Class
+   │
+   ┌────┼──────────────┐
+   │ │ │
+   ▼ ▼ ▼
+   Teacher Student Schedule
+   │
+   ▼
+   Attendance
+   │
+   ▼
+   Assessment
+5. Struktur Entity Class
+   Class
+
+id
+
+academicYearId
+
+semesterId
+
+curriculumId
+
+jenjang
+
+tingkat
+
+bagian
+
+name
+
+status
+
+createdAt
+
+updatedAt
+
+deletedAt 6. Business Rules
+CL-01
+
+Kelas wajib memiliki:
+
+Tahun Ajaran
+Semester
+
+Tidak boleh berdiri sendiri.
+
+CL-02
+
+Data kelas selalu mengikuti Tahun Ajaran dan Semester yang sedang dipilih.
+
+CL-03
+
+Nama kelas dibentuk otomatis.
+
+Administrator hanya memilih:
+
+Jenjang
+Tingkat
+
+serta mengisi:
+
+Bagian
+CL-04
+
+Tidak boleh terdapat dua kelas dengan identitas yang sama pada Semester yang sama.
+
+Contoh:
+
+Ibtida'iyyah III-A
+
+Semester Ganjil
+
+2026/2027
+
+hanya boleh satu.
+
+CL-05
+
+Satu kelas hanya memiliki satu wali kelas aktif.
+
+CL-06
+
+Seorang Mustahiq hanya boleh menjadi wali kelas satu kelas pada Tahun Ajaran yang sama.
+
+CL-07
+
+Kurikulum ditentukan pada level kelas.
+
+Mata pelajaran mengikuti kurikulum tersebut.
+
+CL-08
+
+Penghapusan menggunakan Soft Delete.
+
+Data:
+
+Nilai
+Absensi
+Jadwal
+
+tetap aman.
+
+CL-09
+
+Saat Clone Tahun Ajaran:
+
+yang ikut disalin:
+
+struktur kelas
+kurikulum
+assignment wali kelas (opsional sesuai kebijakan)
+
+yang tidak ikut disalin:
+
+santri
+absensi
+nilai
+jurnal
+pelanggaran 7. UI/UX Flow
+Toolbar
+Page Header
+
+↓
+
+Year Selector
+
+↓
+
+Semester Selector
+
+↓
+
+Filter Jenjang
+
+↓
+
+Search
+
+↓
+
+Tambah Kelas
+DataTable
+
+Kolom:
+
+Nama Kelas
+
+Jenjang
+
+Tingkat
+
+Bagian
+
+Wali Kelas
+
+Kurikulum
+
+Jumlah Santri
+
+Status
+
+Aksi
+Form Tambah Kelas
+
+Urutan input:
+
+Jenjang
+
+↓
+
+Tingkat
+
+↓
+
+Bagian
+
+↓
+
+Preview Nama
+
+↓
+
+Kurikulum
+
+↓
+
+Mustahiq
+
+↓
+
+Simpan
+
+Preview selalu berubah realtime.
+
+Misal:
+
+Nama Kelas
+
+Ibtida'iyyah IV-B 8. Mock Service
+
+Sementara backend belum tersedia.
+
+Akan dibuat tiga service.
+
+classes.service.ts
+
+mustahiq.service.ts
+
+curriculum.service.ts
+
+Seluruh UI hanya berkomunikasi melalui Service Layer.
+
+Ketika backend selesai, cukup mengganti implementasi service tanpa mengubah UI.
+
+9. Struktur Feature
+   src/features/classes/
+
+components/
+ClassTable.tsx
+ClassFormDialog.tsx
+ClassDetailDrawer.tsx
+AssignMustahiqDialog.tsx
+
+queries/
+useClasses.ts
+useMustahiqLookup.ts
+useCurriculumLookup.ts
+
+mutations/
+useClassMutations.ts
+
+services/
+classes.service.ts
+mustahiq.service.ts
+curriculum.service.ts
+
+schemas/
+index.ts
+
+types/
+index.ts 10. Backend Readiness
+
+Service dirancang sebagai Swap Point.
+
+UI
+
+↓
+
+TanStack Query
+
+↓
+
+Mutation Hook
+
+↓
+
+Service Layer
+
+↓
+
+Mock
+
+↓
+
+Backend REST API
+
+Saat backend tersedia:
+
+Mock
+
+↓
+
+fetch()
+
+↓
+
+REST API
+
+Tidak diperlukan perubahan pada UI maupun hooks.
+Modul Promosi / Kenaikan Kelas MPHM
+
+1. Tujuan Modul
+   Modul Promosi/Kenaikan Kelas digunakan untuk:
+   • Melakukan proses akhir tahun ajaran.
+   • Menentukan status kelulusan/kenaikan santri.
+   • Memindahkan santri ke kelas berikutnya.
+   • Membuat riwayat akademik santri.
+   • Menangani aturan khusus setiap jenjang.
+   • Menyediakan proses verifikasi sebelum data menjadi permanen.
+   Modul ini tidak hanya memindahkan kelas, tetapi menjadi academic progression engine.
+
+---
+
+2.  Konsep Dasar
+    Tahun Ajaran
+    Promosi dilakukan berdasarkan:
+    Tahun Ajaran Aktif
+    |
+    |
+    Evaluasi Nilai + Kehadiran + Status Santri
+    |
+    |
+    Keputusan Promosi
+    |
+    |
+    Pembentukan Kelas Tahun Berikutnya
+    Contoh:
+    2025/2026
+    Ibtidaiyyah II-A
+
+            ↓
+
+2026/2027
+Ibtidaiyyah III-A
+
+---
+
+3. Status Promosi Santri
+   Setiap santri memiliki hasil akhir:
+   Status Keterangan
+   PROMOTED Naik kelas
+   RETAINED Tetap di kelas
+   GRADUATED Tamat jenjang
+   TRANSFERRED Pindah program
+   DROPPED Tidak melanjutkan
+   KHIDMAH Masuk Al-Robithoh
+
+---
+
+4. Aturan Promosi Berdasarkan Jenjang
+   A. Madrasah Ibtidaiyyah
+   Masa pendidikan:
+   6 tahun
+   Struktur:
+   I
+   ↓
+   II
+   ↓
+   III
+   ↓
+   IV
+   ↓
+   V
+   ↓
+   VI
+   Aturan:
+   Kelas Saat Ini Hasil
+   I II
+   II III
+   III IV
+   IV V
+   V VI
+   VI Lulus Ibtidaiyyah
+
+---
+
+B. Madrasah Tsanawiyah
+Masa pendidikan:
+3 tahun
+Struktur:
+I
+↓
+II
+↓
+III
+Aturan:
+Kelas Saat Ini Hasil
+I II
+II III
+III Lulus Tsanawiyah
+
+---
+
+C. Madrasah Aliyah
+Masa pendidikan:
+3 tahun
+Struktur:
+I
+↓
+II
+↓
+III
+Aturan:
+Kelas Saat Ini Hasil
+I II
+II III
+III Al-Robithoh
+
+---
+
+D. I'dadiyyah
+Masa pendidikan:
+1 tahun
+Struktur:
+I'dadiyyah
+
+Tingkat I
+Tingkat II
+Tingkat III
+Catatan:
+Tingkat bukan tahun akademik.
+Contoh:
+2025/2026
+
+I'dadiyyah Tingkat I
+|
+|
+Evaluasi internal
+|
+|
+Tidak otomatis naik tahun
+Pada akhir program:
+Pilihan:
+Lulus I'dadiyyah
+|
+|
+Penempatan:
+
+- Ibtidaiyyah
+- Tsanawiyah
+- Program lain
+
+---
+
+E. Al-Robithoh
+Masa pendidikan:
+1 tahun khidmah
+Setelah:
+Aliyah III
+|
+↓
+Al-Robithoh
+|
+↓
+Selesai Khidmah
+Status akhir:
+COMPLETED
+
+---
+
+5. Alur Proses Promosi
+   Step 1 — Membuka Periode Promosi
+   Admin membuat periode:
+   Contoh:
+   Promosi Tahun Ajaran 2025/2026
+
+Status:
+DRAFT
+Data:
+• Tahun ajaran asal
+• Tahun ajaran tujuan
+• Jenis promosi
+• Operator
+
+---
+
+Step 2 — Generate Kandidat Santri
+Sistem mengambil:
+• Santri aktif
+• Kelas aktif
+• Jenjang
+• Nilai
+• Kehadiran
+• Pelanggaran (opsional)
+Contoh:
+Kelas:
+Ibtidaiyyah II-A
+
+Jumlah:
+35 santri
+
+---
+
+Step 3 — Evaluasi Otomatis
+Sistem memberikan rekomendasi:
+Contoh:
+Ahmad
+
+Nilai:
+Lulus
+
+Kehadiran:
+95%
+
+Rekomendasi:
+PROMOTED
+
+---
+
+Step 4 — Review Operator
+Operator dapat mengubah:
+PROMOTED
+|
+|
+RETAINED
+dengan alasan.
+Contoh:
+Status:
+Tidak Naik
+
+Alasan:
+Belum memenuhi kompetensi akademik
+
+---
+
+Step 5 — Finalisasi Promosi
+Setelah disetujui:
+Sistem membuat:
+
+1. Riwayat akademik
+2. Perubahan kelas
+3. Perubahan status
+4. Snapshot data
+
+---
+
+6. Database Design
+   Table: promotion_periods
+   promotion_periods
+
+id
+academic_year_from_id
+academic_year_to_id
+
+status
+
+created_by
+approved_by
+
+created_at
+approved_at
+Status:
+DRAFT
+PROCESSING
+WAITING_APPROVAL
+APPROVED
+LOCKED
+
+---
+
+Table: promotion_transactions
+Menyimpan hasil setiap santri.
+promotion_transactions
+
+id
+
+promotion_period_id
+
+student_id
+
+current_class_id
+target_class_id
+
+current_level
+target_level
+
+promotion_status
+
+reason
+
+approved_by
+
+created_at
+
+---
+
+Table: academic_history
+Riwayat permanen.
+academic_history
+
+id
+
+student_id
+
+academic_year_id
+
+institution_level
+
+class_id
+
+status
+
+promotion_transaction_id
+Contoh:
+Ahmad
+
+2025/2026
+Ibtidaiyyah II
+
+2026/2027
+Ibtidaiyyah III
+
+---
+
+7. Tampilan Modul
+   Menu
+   Akademik
+
+└── Promosi / Kenaikan Kelas
+
+      ├── Periode Promosi
+      ├── Proses Promosi
+      ├── Persetujuan
+      ├── Riwayat Promosi
+      └── Laporan
+
+---
+
+8. Halaman Periode Promosi
+   Tabel:
+   Tahun Asal Tahun Tujuan Status
+   2025/2026 2026/2027 Draft
+   Action:
+   • Mulai Proses
+   • Lihat Kandidat
+   • Finalisasi
+
+---
+
+9. Halaman Kandidat Promosi
+   Data Grid:
+   Santri Jenjang Kelas Rekomendasi Status
+   Ahmad Ibtidaiyyah II-A Naik PROMOTED
+   Ali Tsanawiyah III Lulus GRADUATED
+   Filter:
+   • Jenjang
+   • Kelas
+   • Status
+   • Hasil
+
+---
+
+10. Hak Akses
+    Super Admin
+    • Semua akses
+    Kepala Madrasah
+    • Review
+    • Persetujuan
+    Operator Akademik
+    • Generate
+    • Edit rekomendasi
+    Wali Kelas
+    • Melihat kelas sendiri
+    • Memberikan rekomendasi
+
+---
+
+11. Integrasi Modul Lain
+    Modul ini bergantung pada:
+    Academic Year
+    |
+    |
+    Class Management
+    |
+    |
+    Student Management
+    |
+    |
+    Assessment
+    |
+    |
+    Promotion
+    |
+    |
+    Enrollment
+
+---
+
+12. Business Rule Final
+1. Promosi hanya dapat dilakukan sekali dalam satu tahun ajaran.
+1. Setelah finalisasi, transaksi tidak dapat diedit tanpa proses pembukaan kembali.
+1. Semua perubahan harus memiliki audit trail.
+1. I'dadiyyah tidak mengikuti kenaikan kelas tahunan.
+1. Al-Robithoh otomatis menjadi tujuan setelah Aliyah III apabila memenuhi syarat.
+1. Santri yang tidak naik kelas tetap tercatat pada kelas lama di tahun berikutnya.
+1. Riwayat akademik tidak boleh dihapus.
+# Blueprint Modul Kelas, Jenjang, Tingkat & Bagian
+
+## MPHM Academic Domain Specification
+
+**Versi:** 1.0
+
+**Status:** Final
+
+**Berlaku Untuk:** Seluruh Modul Akademik
+
+---
+
+# 1. Tujuan
+
+Dokumen ini mendefinisikan struktur akademik resmi Madrasah Putri Hidayatul Mubtadi'at (MPHM).
+
+Blueprint ini menjadi acuan tunggal (Single Source of Truth) bagi seluruh modul akademik sehingga tidak terjadi inkonsistensi struktur data.
+
+Seluruh modul berikut wajib mengikuti blueprint ini:
+
+- Academic Workspace
+
+- Kelas
+
+- Siswi
+
+- Kurikulum
+
+- Mata Pelajaran
+
+- Jadwal
+
+- Absensi
+
+- Penilaian
+
+- Raport
+
+- Pelanggaran Santri
+
+- Alumni
+
+---
+
+# 2. Hierarki Akademik
+
+Struktur akademik MPHM terdiri dari hierarki berikut.
+
+```
+
+Tahun Ajaran
+
+    │
+
+    ▼
+
+Semester
+
+    │
+
+    ▼
+
+Jenjang
+
+    │
+
+    ▼
+
+Tingkat
+
+    │
+
+    ▼
+
+Bagian / Kelas
+
+    │
+
+    ▼
+
+Siswi
+
+```
+
+Seluruh data akademik berada di bawah Tahun Ajaran.
+
+---
+
+# 3. Jenjang (Master Data)
+
+Jenjang merupakan data permanen.
+
+Tidak memiliki proses CRUD.
+
+Tidak dapat dihapus.
+
+Tidak dapat ditambah melalui aplikasi.
+
+Daftar Jenjang:
+
+| ID | Jenjang |
+
+|----|----------|
+
+| 1 | I'dadiyyah |
+
+| 2 | Ibtida'iyyah |
+
+| 3 | Tsanawiyyah |
+
+| 4 | Aliyyah |
+
+Implementasi disarankan menggunakan:
+
+- Constant
+
+- Enum
+
+- Configuration
+
+bukan tabel database dinamis.
+
+---
+
+# 4. Tingkat (Master Data)
+
+Setiap Jenjang memiliki Tingkat yang tetap.
+
+## 4.1 I'dadiyyah
+
+- I
+
+- II
+
+- III
+
+---
+
+## 4.2 Ibtida'iyyah
+
+- I
+
+- II
+
+- III
+
+- IV
+
+- V
+
+- VI
+
+---
+
+## 4.3 Tsanawiyyah
+
+- I
+
+- II
+
+- III
+
+---
+
+## 4.4 Aliyyah
+
+- I
+
+- II
+
+- III
+
+Total Tingkat:
+
+- I'dadiyyah : 3
+
+- Ibtida'iyyah : 6
+
+- Tsanawiyyah : 3
+
+- Aliyyah : 3
+
+---
+
+# 5. Bagian (Kelas)
+
+Bagian merupakan kelas nyata tempat siswi belajar.
+
+Contoh:
+
+I'dadiyyah I-A
+
+I'dadiyyah I-B
+
+I'dadiyyah II-A
+
+Ibtida'iyyah IV-C
+
+Aliyyah III-B
+
+dst.
+
+Bagian bersifat dinamis.
+
+Administrator cukup mengetik nama bagian.
+
+Contoh:
+
+A
+
+B
+
+C
+
+D
+
+E
+
+F
+
+G
+
+...
+
+AA
+
+AB
+
+AC
+
+dst.
+
+Tidak ada batas jumlah bagian.
+
+---
+
+# 6. Identitas Kelas
+
+Satu kelas dibentuk oleh kombinasi berikut:
+
+- Tahun Ajaran
+
+- Semester
+
+- Jenjang
+
+- Tingkat
+
+- Bagian
+
+Contoh:
+
+2026/2027
+
+Semester Ganjil
+
+Ibtida'iyyah
+
+III
+
+B
+
+menjadi
+
+Ibtida'iyyah III-B
+
+Tahun Ajaran 2026/2027
+
+---
+
+# 7. Relasi Domain
+
+Setiap Kelas memiliki:
+
+- satu Tahun Ajaran
+
+- satu Semester aktif
+
+- satu Jenjang
+
+- satu Tingkat
+
+- satu Bagian
+
+- satu Kurikulum
+
+- satu Wali Kelas aktif
+
+- banyak Siswi
+
+---
+
+# 8. Relasi Wali Kelas
+
+Wali kelas menggunakan Assignment.
+
+Bukan atribut tetap pada tabel kelas.
+
+```
+
+Class
+
+    │
+
+    ▼
+
+Class Assignment
+
+    │
+
+    ▼
+
+Mustahiq
+
+```
+
+Keuntungan:
+
+- histori pergantian wali kelas tersimpan
+
+- tidak kehilangan data
+
+- mendukung audit
+
+---
+
+# 9. Relasi Kurikulum
+
+Satu kelas menggunakan satu kurikulum.
+
+Kurikulum menentukan:
+
+- Mata Pelajaran
+
+- Beban Belajar
+
+- Struktur Penilaian
+
+Mata pelajaran tidak dihubungkan langsung ke kelas.
+
+Hubungan:
+
+```
+
+Kurikulum
+
+      │
+
+      ▼
+
+Daftar Mata Pelajaran
+
+      │
+
+      ▼
+
+Kelas
+
+```
+
+---
+
+# 10. Relasi Siswi
+
+Satu Siswi hanya boleh berada pada satu kelas dalam satu Tahun Ajaran.
+
+Ketika naik kelas:
+
+Tidak mengubah data lama.
+
+Sistem membuat relasi baru pada Tahun Ajaran berikutnya.
+
+---
+
+# 11. Business Rules
+
+## CL-01
+
+Kelas wajib memiliki Tahun Ajaran.
+
+---
+
+## CL-02
+
+Kelas wajib memiliki Semester.
+
+---
+
+## CL-03
+
+Kelas wajib memiliki Jenjang.
+
+---
+
+## CL-04
+
+Kelas wajib memiliki Tingkat.
+
+---
+
+## CL-05
+
+Kelas wajib memiliki Bagian.
+
+---
+
+## CL-06
+
+Satu kelas hanya memiliki satu wali kelas aktif.
+
+---
+
+## CL-07
+
+Satu Mustahiq tidak boleh menjadi wali kelas aktif pada lebih dari satu kelas dalam Tahun Ajaran yang sama.
+
+---
+
+## CL-08
+
+Satu kelas hanya menggunakan satu kurikulum.
+
+---
+
+## CL-09
+
+Penghapusan kelas menggunakan Soft Delete.
+
+---
+
+## CL-10
+
+Clone Tahun Ajaran hanya menyalin:
+
+- struktur kelas
+
+- assignment wali kelas (opsional sesuai kebijakan)
+
+Tidak menyalin:
+
+- siswi
+
+- absensi
+
+- nilai
+
+- jadwal
+
+- raport
+
+---
+
+# 12. UI Requirement
+
+Halaman Kelas minimal menampilkan:
+
+- Nama Kelas
+
+- Jenjang
+
+- Tingkat
+
+- Bagian
+
+- Tahun Ajaran
+
+- Semester
+
+- Kurikulum
+
+- Wali Kelas
+
+- Jumlah Siswi
+
+- Status
+
+Menggunakan komponen:
+
+- PageHeader
+
+- DataTable
+
+- StatusBadge
+
+- EmptyState
+
+- ConfirmDialog
+
+- TableSkeleton
+
+---
+
+# 13. Backend Ready Architecture
+
+UI
+
+↓
+
+React Hook Form
+
+↓
+
+Zod
+
+↓
+
+TanStack Query
+
+↓
+
+Mutation / Query Hooks
+
+↓
+
+Service Layer
+
+↓
+
+REST API / GraphQL
+
+Mock Service hanya berada pada Service Layer.
+
+UI tidak boleh mengakses data dummy secara langsung.
+
+---
+
+# 14. Future Modules
+
+Blueprint ini menjadi dasar implementasi:
+
+- Modul Siswi
+
+- Modul Kurikulum
+
+- Modul Mata Pelajaran
+
+- Modul Jadwal
+
+- Modul Absensi
+
+- Modul Penilaian
+
+- Modul Raport
+
+- Modul Alumni
+
+Seluruh modul wajib mengikuti struktur akademik yang didefinisikan pada dokumen ini.
+
+---
+
+# Status Dokumen
+
+**Status:** Final
+
+Dokumen ini menjadi referensi utama (Single Source of Truth) untuk seluruh pengembangan domain akademik MPHM.
+jadwal kegiatan, jangan dimasukkan sebagai jadwal harian umum saja, tetapi harus dikaitkan dengan Jenjang → Masa Pendidikan → Tingkat → Kelas karena MPHM memiliki struktur pendidikan yang berbeda.
+Konsep yang disesuaikan:
+• Ibtida'iyyah → masa 6 tahun (Tingkat I–VI)
+• Tsanawiyyah → masa 3 tahun (Tingkat I–III)
+• Aliyyah → masa 3 tahun (Tingkat I–III)
+• I'dadiyyah → masa 1 tahun (Tingkat I–III hanya pembagian kelompok, bukan kenaikan)
+• Al-Robithoh → masa 1 tahun khidmah setelah Aliyyah III
+Jadwal dari gambar hanya diambil bagian jam sekolah/madrasah, bukan seluruh kegiatan pondok.
+Jawaban untuk implementasi:
+
+---
+
+Silakan buatkan modul Academic Schedule / Jadwal Akademik dengan konsep berbasis Jenjang dan Tingkatan.
+Aturan dasar:
+
+1. Jadwal tidak berdiri sendiri, tetapi mengikuti:
+   Jenjang
+   ↓
+   Tingkat
+   ↓
+   Kelas
+   ↓
+   Jadwal
+2. Master Jenjang:
+   I'dadiyyah
+   Ibtida'iyyah
+   Tsanawiyyah
+   Aliyyah
+   Al-Robithoh
+3. Struktur masa pendidikan:
+   I'dadiyyah
+
+- Tingkat I
+- Tingkat II
+- Tingkat III
+  (1 Tahun, tidak ada kenaikan)
+
+Ibtida'iyyah
+
+- Tingkat I
+- Tingkat II
+- Tingkat III
+- Tingkat IV
+- Tingkat V
+- Tingkat VI
+  (6 Tahun)
+
+Tsanawiyyah
+
+- Tingkat I
+- Tingkat II
+- Tingkat III
+  (3 Tahun)
+
+Aliyyah
+
+- Tingkat I
+- Tingkat II
+- Tingkat III
+  (3 Tahun)
+
+Al-Robithoh
+
+- Khidmah
+  (1 Tahun)
+
+---
+
+Jadwal Sekolah MPHM
+Yang dimasukkan hanya kegiatan sekolah:
+Pagi
+Waktu Kegiatan Target
+07.00 - 09.00 Sekolah Hissoh Ula Ibtida'iyyah II sampai Ibtida’iyyah VI dan Tsanawiyyah I
+09.30 - 10.30 Sekolah Hissoh Tsani Ibtida'iyyah II sampai Ibtida’iyyah VI dan Tsanawiyyah I
+
+---
+
+Malam
+Waktu Kegiatan Target
+19.00 - 21.00 Sekolah Hissoh Ula I’dadiyyah I-III, Tsanawiyyah II, Tsanawiyyah III, Aliyyah I-III
+21.30 - 22.30 Sekolah Hissoh Tsani I’dadiyyah I-III, Tsanawiyyah II, Tsanawiyyah III, Aliyyah I-III
+
+---
+
+Business Rule Jadwal
+SCH-01
+Jadwal harus terikat dengan Tahun Ajaran aktif.
+SCH-02
+Jadwal dapat dibuat berdasarkan:
+Jenjang
+
+- Tingkat
+- Kelas
+  SCH-03
+  Jika jadwal dibuat pada level Tingkat, seluruh kelas pada tingkat tersebut otomatis menggunakan jadwal yang sama.
+  Contoh:
+  Tsanawiyyah III
+
+        ↓
+
+Tsanawiyyah III-A
+Tsanawiyyah III-B
+Tsanawiyyah III-C
+SCH-04
+Jadwal kelas dapat dioverride jika ada kebutuhan khusus.
+SCH-05
+I'dadiyyah tidak menggunakan sistem kenaikan tingkat tahunan.
+SCH-06
+Al-Robithoh memiliki jadwal khusus khidmah dan tidak mengikuti jadwal sekolah reguler.
+
+---
+
+Struktur Modul
+src/features/schedules/
+
+├── components/
+│
+├── ScheduleTable.tsx
+├── ScheduleFormDialog.tsx
+├── ScheduleCalendar.tsx
+├── ScheduleTargetSelector.tsx
+│
+├── queries/
+│ └── useSchedules.ts
+│
+├── mutations/
+│ └── useScheduleMutation.ts
+│
+├── services/
+│ └── schedules.service.ts
+│
+├── schemas/
+│ └── index.ts
+│
+└── types/
+└── index.ts
+
+---
+
+Form Jadwal
+Field:
+Tahun Ajaran
+Semester
+
+Target Jadwal:
+○ Jenjang
+○ Tingkat
+○ Kelas
+
+Jenjang:
+[Tsanawiyyah]
+
+Tingkat:
+[I]
+
+Kelas:
+[A]
+
+Hari:
+[Senin]
+
+Jam Mulai:
+07:00
+
+Jam Selesai:
+09:00
+
+Kegiatan:
+Sekolah Hissoh Ula
+
+---
+
+Dengan struktur ini, modul jadwal akan siap terintegrasi dengan:
+Academic Year
+|
+Semester
+|
+Class (Rombel)
+|
+Student
+|
+Attendance
+|
+Schedule
+dan tidak bertabrakan dengan aturan promosi/kenaikan kelas MPHM.
+# Universal Data Grid Standard
+
+> Version : 1.0
+>
+> Status : APPROVED
+
+---
+
+## Tujuan
+
+Seluruh halaman yang memiliki data berbentuk tabel **WAJIB** menggunakan standar komponen Data Grid yang sama agar pengalaman pengguna konsisten di seluruh aplikasi.
+
+Standar ini berlaku untuk seluruh modul tanpa pengecualian.
+
+Contoh:
+
+- Tahun Ajaran
+- Semester
+- Kelas
+- Mata Pelajaran
+- Siswi
+- Users
+- Roles
+- Nilai
+- Absensi
+- Akhlaq
+- Raport
+- Audit Log
+- Recycle Bin
+- dan seluruh modul baru di masa mendatang.
+
+---
+
+# Standar Layout
+
+Urutan komponen Data Grid wajib mengikuti susunan berikut.
+
+```text
+Page Header
+
+↓
+
+Toolbar
+
+↓
+
+Filter Panel
+
+↓
+
+Data Table
+
+↓
+
+Pagination
+```
+
+---
+
+# Toolbar
+
+Toolbar wajib berada di bagian atas tabel.
+
+Komponen yang tersedia:
+
+```text
+🔍 Search
+
+Filter
+
+Columns
+
+Import
+
+Export
+
+Refresh
+
++ Tambah Data
+```
+
+Urutan tombol tidak boleh diubah agar seluruh halaman memiliki pengalaman yang konsisten.
+
+---
+
+# Search
+
+Search bersifat realtime.
+
+Karakteristik:
+
+- Tidak menggunakan tombol Search.
+- Menggunakan debounce.
+- Pencarian dilakukan secara langsung.
+- Mendukung pencarian beberapa kolom sekaligus.
+
+---
+
+# Filter
+
+Seluruh tabel wajib memiliki Filter.
+
+Filter menyesuaikan modul.
+
+Contoh:
+
+Siswi
+
+- Tahun Ajaran
+- Semester
+- Kelas
+- Status
+
+Mata Pelajaran
+
+- Tahun Ajaran
+- Semester
+- Kelas
+- Status
+
+Users
+
+- Role
+- Status
+
+Nilai
+
+- Tahun Ajaran
+- Semester
+- Kelas
+- Mata Pelajaran
+- Status
+
+---
+
+# Column Manager
+
+Setiap tabel wajib memiliki pengaturan kolom.
+
+Fitur:
+
+- Show Column
+- Hide Column
+- Resize Column
+- Reorder Column
+- Pin Left
+- Pin Right
+
+Preferensi pengguna disimpan agar tetap digunakan saat login berikutnya.
+
+---
+
+# Import
+
+Seluruh modul yang menerima input data wajib memiliki tombol Import.
+
+Menu Import terdiri dari:
+
+```text
+Import
+
+▼
+
+Download Template
+
+Import Data
+
+Import History
+```
+
+---
+
+# Download Template
+
+Template Import dibuat otomatis oleh sistem.
+
+Format file:
+
+- Microsoft Excel (.xlsx)
+
+Template wajib memiliki dua Sheet.
+
+```text
+Petunjuk
+
+Data
+```
+
+---
+
+## Sheet Petunjuk
+
+Berisi:
+
+- Penjelasan fungsi setiap kolom.
+- Aturan pengisian.
+- Contoh data.
+- Format tanggal.
+- Nilai yang diperbolehkan.
+- Kolom yang wajib diisi.
+- Kolom yang bersifat opsional.
+
+Sheet ini bersifat Read Only.
+
+---
+
+## Sheet Data
+
+Berisi tabel yang akan diisi pengguna.
+
+Header tabel wajib:
+
+- Freeze Header
+- Bold
+- Background berbeda
+- Tidak dapat diedit
+- Tidak dapat dipindahkan
+
+---
+
+# Tooltip Header
+
+Setiap Header Kolom wajib memiliki komentar (Comment/Note).
+
+Saat pengguna mengarahkan mouse ke Header, akan muncul informasi mengenai kolom tersebut.
+
+Contoh:
+
+Nama Siswi
+
+↓
+
+"Masukkan nama lengkap sesuai data administrasi."
+
+Tanggal Lahir
+
+↓
+
+"Format: DD-MM-YYYY"
+
+Status
+
+↓
+
+"Pilihan: Aktif, Alumni, Keluar"
+
+Seluruh komentar dibuat otomatis oleh sistem.
+
+---
+
+# Import Validation
+
+Import tidak boleh langsung menyimpan data ke database.
+
+Alur Import wajib sebagai berikut.
+
+```text
+Upload File
+
+↓
+
+Preview
+
+↓
+
+Validation
+
+↓
+
+Error Checking
+
+↓
+
+Confirmation
+
+↓
+
+Import Database
+```
+
+---
+
+# Validation Result
+
+Setelah proses validasi selesai, sistem menampilkan:
+
+- Total Data
+- Data Valid
+- Data Error
+- Data Duplikat
+- Data Baru
+- Data Akan Diupdate
+
+Contoh:
+
+```text
+Total Data
+
+250
+
+──────────────
+
+Valid
+
+240
+
+──────────────
+
+Error
+
+10
+```
+
+---
+
+# Error Detail
+
+Jika terdapat kesalahan.
+
+Sistem harus menampilkan:
+
+- Nomor Baris
+- Nama Kolom
+- Nilai
+- Penyebab Kesalahan
+- Solusi
+
+Contoh:
+
+```text
+Baris 18
+
+Kolom
+
+Tanggal Lahir
+
+Error
+
+Format Salah
+
+Harus
+
+DD-MM-YYYY
+```
+
+---
+
+# Import Confirmation
+
+Data baru akan disimpan setelah pengguna menekan tombol:
+
+```text
+Import Data
+```
+
+Tidak ada proses import otomatis.
+
+---
+
+# Import History
+
+Setiap proses Import wajib dicatat.
+
+Informasi yang disimpan:
+
+- Waktu Import
+- User
+- Modul
+- Jumlah Data
+- Berhasil
+- Gagal
+- Detail Error
+
+Admin dapat melihat seluruh riwayat Import.
+
+---
+
+# Export
+
+Seluruh tabel wajib memiliki tombol Export.
+
+Menu:
+
+```text
+Export
+
+▼
+
+Excel
+
+CSV
+
+PDF
+```
+
+Data yang diekspor mengikuti Filter yang sedang aktif.
+
+---
+
+# Refresh
+
+Refresh hanya memuat ulang data.
+
+Tidak me-refresh seluruh halaman.
+
+Menggunakan mekanisme invalidate cache.
+
+---
+
+# Sorting
+
+Seluruh kolom mendukung Sorting.
+
+Mode:
+
+- Ascending
+- Descending
+
+---
+
+# Pagination
+
+Pilihan jumlah data.
+
+- 10
+- 25
+- 50
+- 100
+- 250
+- 500
+
+---
+
+# Bulk Selection
+
+Setiap tabel wajib mendukung Multi Selection.
+
+Ketika terdapat data yang dipilih.
+
+Toolbar berubah menjadi Bulk Toolbar.
+
+Contoh:
+
+```text
+12 Data Dipilih
+
+Restore
+
+Export
+
+Pindahkan ke Trash
+
+Ubah Status
+```
+
+---
+
+# Bulk Action
+
+Bulk Action mengikuti modul.
+
+Contoh:
+
+Siswi
+
+- Ubah Status
+- Pindahkan Kelas
+- Export
+- Trash
+
+Users
+
+- Ubah Role
+- Reset Password
+- Nonaktifkan
+- Trash
+
+---
+
+# Recycle Bin
+
+Seluruh modul wajib menggunakan Recycle Bin.
+
+Data tidak langsung dihapus.
+
+Alur:
+
+```text
+Active
+
+↓
+
+Trash
+
+↓
+
+24 Jam
+
+↓
+
+Permanent Delete
+```
+
+Selama berada di Trash.
+
+Data dapat:
+
+- Restore
+- Delete Permanently
+
+---
+
+# Empty State
+
+Apabila tabel tidak memiliki data.
+
+Sistem wajib menampilkan Empty State yang informatif.
+
+Tidak boleh hanya menampilkan tabel kosong.
+
+---
+
+# Loading State
+
+Loading menggunakan Skeleton.
+
+Tidak menggunakan Spinner penuh halaman.
+
+---
+
+# Error State
+
+Apabila terjadi kesalahan.
+
+Sistem menampilkan:
+
+- Penyebab
+- Solusi
+- Tombol Refresh
+
+---
+
+# Responsive
+
+Desktop
+
+Menggunakan Data Grid penuh.
+
+Tablet
+
+Column Collapse.
+
+Mobile
+
+Card View.
+
+Tidak menggunakan Horizontal Scroll sebagai solusi utama.
+
+---
+
+# Accessibility
+
+Data Grid wajib mendukung:
+
+- Keyboard Navigation
+- Screen Reader
+- Focus Indicator
+- Shortcut Keyboard
+
+---
+
+# Performance
+
+Seluruh Data Grid wajib menggunakan:
+
+- Server Side Pagination
+- Server Side Filtering
+- Server Side Sorting
+- Virtual Rendering (untuk data besar)
+- Lazy Loading
+- Cache
+
+---
+
+# Cell Formatting & Ultra-Modern Table Visual Standard (AdminHMD Model)
+
+Seluruh tampilan tabel dan sel data **WAJIB** bernuansa modern, profesional, dan elegan (berkarakter Enterprise SaaS), tidak boleh kaku atau bergaya klasik tradisional.
+
+1. **Identity Cell Pattern (Kolom Entitas Orang)**:
+   Setiap data pengguna/santri/pengajar/staff wajib di-render dengan kombinasi:
+   - **Avatar / Inisial Bundar** (`rounded-full`) dengan latar lembut (`bg-primary/10`)
+   - **Nama Utama Tebal (`font-semibold text-sm`)**
+   - **Sub-info / Email / NIP (`text-xs text-zinc-400`)** tepat di bawah nama
+
+2. **Status & Role Pill Badges**:
+   Seluruh status akun maupun role wajib menggunakan *pill badge (`rounded-full`)* berspasi rapi dengan warna semantik modern (Hijau `Active`, Kuning/Amber `Pending`, Abu-abu/Merah `Suspended`).
+
+3. **Row Action Pill Button**:
+   Tombol aksi per baris menggunakan desain *pill outline / light button (`rounded-full`)* seperti tombol `Lihat / Edit` agar tabel tampak bersih dan berkelas.
+
+---
+
+# Prinsip
+
+Universal Data Grid merupakan standar antarmuka utama dalam sistem MPHM.
+
+Seluruh modul wajib menggunakan komponen Data Grid yang sama agar pengalaman pengguna konsisten, pengembangan lebih cepat, dan proses pemeliharaan sistem menjadi lebih mudah.
+## Master Jenis Pelanggaran
+
+Jenis pelanggaran dikelola melalui Dashboard Administrator dan tidak ditentukan secara tetap di dalam aplikasi.
+
+Administrator dapat:
+
+- Menambah jenis pelanggaran
+- Mengubah jenis pelanggaran
+- Menghapus jenis pelanggaran
+- Mengaktifkan atau menonaktifkan jenis pelanggaran
+
+Setiap jenis pelanggaran memiliki atribut berikut:
+
+- Nama Pelanggaran
+- Kategori
+- Tingkat Pelanggaran
+- Poin Pelanggaran (Opsional)
+- Deskripsi
+- Status Aktif
+
+Jenis pelanggaran yang dinonaktifkan tidak dapat dipilih pada laporan baru, namun tetap dipertahankan pada riwayat pelanggaran yang sudah ada.
+Berikut saya buatkan simulasi jadwal Madrasah Tsanawiyyah I (MTs I) sampai Bagian I Lokal 09, mengikuti format tabel pada gambar.
+Tujuan simulasi ini adalah agar ketika dimasukkan ke website MPHM, dapat terlihat bagaimana reaksi modul Kelas → Jadwal → Pengajar → Lokal → Santri.
+Asumsi:
+• Jenjang: Madrasah Tsanawiyyah
+• Tingkat: I
+• Jumlah lokal: A – I (9 lokal)
+• Setiap lokal memiliki:
+o 1 wali lokal
+o 2 waktu pelajaran utama (Hissoh Ula & Tsani)
+o Mata pelajaran sesuai pola gambar
+• Tahun Ajaran: 2026/2027
+
+---
+
+Jadwal Madrasah Tsanawiyyah I
+Struktur Kelas
+Lokal Wali Lokal
+MTs I Lokal A Bpk. Charis Wahyudi
+MTs I Lokal B Bpk. Abdurrahman Addakhel
+MTs I Lokal C Bpk. Ahmad Ilmi Nuroni
+MTs I Lokal D Bpk. Aji Prio Pangestu
+MTs I Lokal E Bpk. Muhammad Shoddiq Asyhary
+MTs I Lokal F Bpk. Salman Al Farisy
+MTs I Lokal G Bpk. Alex Rizquna
+MTs I Lokal H Bpk. Zidna Farhan Biknada
+MTs I Lokal I Bpk. Ali Ya'lu
+
+---
+
+Bagian A Lokal 01
+MTs I-A
+Wali Lokal: Bpk. Charis Wahyudi
+Hari Hissoh Ula Hissoh Tsani
+Sabtu فتح المبين مختصر جداً
+Ahad الخريدة البهية مختصر جداً
+Senin القواعد الصرفية فتح المبين
+Selasa التصريف الإصطلاحي وصايا الآباء للأبناء
+Rabu الإعلال سلم التوفيق
+Kamis سلم التوفيق تحفة الأطفال / القرآن
+
+---
+
+Bagian B Lokal 02
+MTs I-B
+Wali Lokal: Bpk. Abdurrahman Addakhel
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً بلوغ المرام
+Ahad الخريدة البهية سلم التوفيق
+Senin القواعد الصرفية وصايا الآباء للأبناء
+Selasa التصريف الإصطلاحي فتح المبين
+Rabu الإعلال بلوغ المرام
+Kamis سلم التوفيق تحفة الأطفال / القرآن
+
+---
+
+Bagian C Lokal 03
+MTs I-C
+Wali Lokal: Bpk. Ahmad Ilmi Nuroni
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً سلم التوفيق
+Ahad الخريدة البهية بلوغ المرام
+Senin القواعد الصرفية فتح المبين
+Selasa التصريف الإصطلاحي تحفة الأطفال / القرآن
+Rabu الإعلال وصايا الآباء للأبناء
+Kamis سلم التوفيق بلوغ المرام
+
+---
+
+Bagian D Lokal 04
+MTs I-D
+Wali Lokal: Bpk. Aji Prio Pangestu
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً فتح المبين
+Ahad الخريدة البهية تحفة الأطفال / القرآن
+Senin القواعد الصرفية بلوغ المرام
+Selasa التصريف الإصطلاحي وصايا الآباء للأبناء
+Rabu الإعلال سلم التوفيق
+Kamis سلم التوفيق بلوغ المرام
+
+---
+
+Bagian E Lokal 05
+MTs I-E
+Wali Lokal: Bpk. Muhammad Shoddiq Asyhary
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً بلوغ المرام
+Ahad الخريدة البهية فتح المبين
+Senin القواعد الصرفية وصايا الآباء للأبناء
+Selasa التصريف الإصطلاحي بلوغ المرام
+Rabu الإعلال سلم التوفيق
+Kamis سلم التوفيق تحفة الأطفال / القرآن
+
+---
+
+Bagian F Lokal 06
+MTs I-F
+Wali Lokal: Bpk. Salman Al Farisy
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً سلم التوفيق
+Ahad الخريدة البهية وصايا الآباء للأبناء
+Senin القواعد الصرفية بلوغ المرام
+Selasa التصريف الإصطلاحي فتح المبين
+Rabu الإعلال تحفة الأطفال / القرآن
+Kamis سلم التوفيق بلوغ المرام
+
+---
+
+Bagian G Lokal 07
+MTs I-G
+Wali Lokal: Bpk. Alex Rizquna
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً وصايا الآباء للأبناء
+Ahad الخريدة البهية بلوغ المرام
+Senin القواعد الصرفية سلم التوفيق
+Selasa التصريف الإصطلاحي تحفة الأطفال / القرآن
+Rabu الإعلال فتح المبين
+Kamis سلم التوفيق بلوغ المرام
+
+---
+
+Bagian H Lokal 08
+MTs I-H
+Wali Lokal: Bpk. Zidna Farhan Biknada
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً فتح المبين
+Ahad الخريدة البهية وصايا الآباء للأبناء
+Senin القواعد الصرفية تحفة الأطفال / القرآن
+Selasa التصريف الإصطلاحي بلوغ المرام
+Rabu الإعلال سلم التوفيق
+Kamis سلم التوفيق بلوغ المرام
+
+---
+
+Bagian I Lokal 09
+MTs I-I
+Wali Lokal: Bpk. Ali Ya'lu
+Hari Hissoh Ula Hissoh Tsani
+Sabtu مختصر جداً وصايا الآباء للأبناء
+Ahad الخريدة البهية تحفة الأطفال / القرآن
+Senin القواعد الصرفية فتح المبين
+Selasa التصريف الإصطلاحي بلوغ المرام
+Rabu الإعلال سلم التوفيق
+Kamis سلم التوفيق بلوغ المرام
+
+---
+
+Bentuk Data yang Akan Masuk Website MPHM
+Jika dibuat sebagai data sistem:
+Entity Class
+Class
+|
+├── Jenjang
+│ └── Tsanawiyyah
+│
+├── Tingkat
+│ └── I
+│
+├── Lokal
+│ └── A-I
+│
+├── Wali Lokal
+│
+└── Student Enrollment
+Contoh:
+Class ID:
+MTs-I-A-2026
+
+Nama:
+Tsanawiyyah I Lokal A
+
+Wali:
+Bpk. Charis Wahyudi
+
+Jumlah Santri:
+35
+
+---
+
+Entity Schedule
+Contoh:
+Schedule ID:
+SCH-MTS1-A-SABTU-01
+
+Jenjang:
+Tsanawiyyah
+
+Tingkat:
+I
+
+Lokal:
+A
+
+Hari:
+Sabtu
+
+Jam:
+07.00-09.00
+
+Pelajaran:
+فتح المبين
+
+Guru:
+Bpk. Charis Wahyudi
+
+---
+
+Dengan data ini, ketika modul Jadwal dibuka di website:
+Akademik
+|
+└── Jadwal
+|
+└── Tsanawiyyah
+|
+└── Tingkat I
+|
+├── Lokal A
+├── Lokal B
+├── Lokal C
+...
+└── Lokal I
+akan muncul 9 lokal lengkap seperti tabel pada gambar.
+Struktur ini juga sudah sesuai dengan aturan MPHM bahwa Tsanawiyyah memiliki masa pendidikan 3 tahun (I, II, III) dan promosi hanya berpindah tingkat saat tahun ajaran berganti.
+UI/UX Direction
+
+Saya ingin seluruh UI/UX MPHM mengambil inspirasi design language dari komponen-komponen premium yang ada di Uiverse.io, bukan melakukan copy-paste desain maupun kode secara langsung.
+
+Gunakan Uiverse sebagai referensi untuk:
+
+Card: https://uiverse.io/Smit-Prajapati/smart-liger-5
+Button: https://uiverse.io/alexroumi/shy-sloth-91
+Input
+Form
+Search
+Sidebar
+Header
+Data Table
+Empty State
+Dialog
+Dropdown
+Hover Effect
+Loading Skeleton
+Badge
+Navigation
+Dashboard Widget
+Statistic Card
+Menu
+Tooltip
+Toast
+Pagination
+
+Ambil karakter visualnya, bukan menyalin implementasinya.
+
+Visual Style
+
+Target visual yang saya inginkan:
+
+Modern SaaS
+Premium Enterprise
+Elegant
+Minimalist
+Soft UI
+High-end Dashboard
+Pixel Perfect
+Clean Layout
+Professional
+Consistent Design System
+Animation
+
+Gunakan micro interaction yang elegan seperti pada komponen premium di Uiverse:
+
+hover transition
+active state
+focus state
+subtle scale
+soft shadow animation
+smooth opacity transition
+subtle gradient animation
+loading animation
+ripple effect seperlunya
+drawer animation
+dialog animation
+
+Hindari animasi yang berlebihan.
+
+Card Design
+
+Semua Card harus memiliki karakter:
+
+rounded-xl atau rounded-2xl
+soft shadow
+thin border
+layered appearance
+elegant spacing
+hover elevation
+subtle gradient
+premium typography
+icon yang proporsional
+hierarchy yang jelas
+Sidebar
+
+Sidebar harus menyerupai dashboard SaaS modern:
+
+clean
+floating feeling
+active indicator
+elegant hover
+smooth collapse
+icon lucide
+responsive
+mobile drawer
+subtle animation
+Header
+
+Header harus terasa premium:
+
+glass effect ringan
+search modern
+notification
+profile dropdown
+breadcrumb
+theme toggle
+sticky header
+smooth shadow ketika scroll
+Button
+
+Button mengikuti gaya premium seperti pada Uiverse:
+
+rounded-lg
+elegant gradient
+smooth hover
+subtle glow
+loading state
+disabled state
+focus ring
+icon animation
+Form
+
+Form harus terasa modern:
+
+floating label (bila sesuai)
+focus animation
+elegant validation
+helper text
+icon prefix
+smooth transition
+clean spacing
+Table
+
+DataTable harus modern:
+
+sticky header
+hover row
+zebra optional
+loading skeleton
+empty state
+pagination
+sorting
+filtering
+responsive
+smooth transition
+Empty State
+
+Empty State harus informatif:
+
+ilustrasi sederhana
+icon lucide
+CTA utama
+CTA sekunder
+copywriting profesional
+spacing lega
+Dashboard
+
+Dashboard harus terasa seperti aplikasi SaaS modern:
+
+statistic cards
+quick actions
+activity timeline
+recent data
+charts
+progress indicator
+calendar widget
+responsive grid
+visual hierarchy kuat
+Color System
+
+Gunakan Design System berikut:
+
+Base : Zinc / Neutral
+Brand Accent : Gold MPHM
+Secondary Accent : Blue dari logo MPHM
+Success : Green
+Warning : Amber
+Danger : Red
+
+Warna emas hanya sebagai identitas visual, bukan warna dominan.
+
+Design Rules
+
+Seluruh komponen harus:
+
+reusable
+accessible
+responsive
+modular
+konsisten
+menggunakan Tailwind CSS v4
+menggunakan shadcn/ui
+menggunakan Lucide Icons
+mengikuti Feature-Based Architecture
+mengikuti Design System yang sama
+
+Setiap komponen baru harus memiliki kualitas visual setara dengan komponen premium yang ada di Uiverse, namun tetap memiliki identitas visual MPHM dan tidak menyalin desain secara langsung.

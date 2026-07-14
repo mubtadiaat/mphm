@@ -1,0 +1,41 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1784016803251,
+      "tag": "0000_nice_winter_soldier",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1784033572856,
+      "tag": "0001_lyrical_salo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1784033589592,
+      "tag": "0002_foamy_sue_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1784034041618,
+      "tag": "0003_cynical_kingpin",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1784035078133,
+      "tag": "0004_empty_nightmare",
+      "breakpoints": true
+    }
+  ]
+}

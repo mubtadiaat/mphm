@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mphm-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-13",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "ENVIRONMENT": "development"
+  },
+
+  // Cloudflare D1 — Database utama MPHM
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "db_mphm",
+      "database_id": "your-d1-database-id-here", // Ganti saat deploy
+      "migrations_dir": "../../packages/db/drizzle"
+    }
+  ],
+
+  // KV Namespace — Session Cache untuk auth
+  "kv_namespaces": [
+    {
+      "binding": "SESSION_KV",
+      "id": "your-kv-namespace-id-here" // Ganti saat deploy
+    }
+  ],
+
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

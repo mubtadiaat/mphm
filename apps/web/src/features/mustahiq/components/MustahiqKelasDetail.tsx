@@ -1,0 +1,91 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/api";
+import { Users, Layers, AlertCircle } from "lucide-react";
+
+export function MustahiqKelasDetail() {
+  const { data: myClass, isLoading, isError } = useQuery({
+    queryKey: ["mustahiq-my-class"],
+    queryFn: async () => {
+      const res = await apiRequest<{ data: any }>("/api/mustahiq/class/my-class");
+      return res.data;
+    },
+    retry: false,
+  });
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-zinc-500 animate-pulse">Memuat data kelas Anda...</div>;
+  }
+
+  if (isError || !myClass) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center text-center gap-4 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-200 dark:border-rose-900/30 text-rose-600">
+        <AlertCircle className="w-12 h-12 opacity-50" />
+        <h3 className="font-bold text-lg">Kelas Tidak Ditemukan</h3>
+        <p className="text-sm opacity-80 max-w-sm">Anda belum ditugaskan ke kelas manapun pada tahun ajaran aktif ini. Hubungi Sekretariat.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 dark:border-blue-500/10 rounded-2xl flex flex-col justify-between gap-6 shadow-sm">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col gap-1.5 z-10">
+          <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+            <Layers className="w-4 h-4" />
+            <span>Kelas Yang Diampu</span>
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+            {myClass.class.fullName}
+          </h1>
+          <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
+            Tingkat: {myClass.class.institutionLevel} | Kapasitas: {myClass.class.capacity} Santri
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-800/50">
+          <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <Users className="w-4 h-4 text-zinc-500" />
+            Daftar Santri Kelas Ini
+          </h3>
+          <span className="px-3 py-1 bg-white dark:bg-zinc-700 rounded-full text-xs font-bold border border-zinc-200 dark:border-zinc-600">
+            Total: {myClass.students?.length || 0}
+          </span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+              <tr>
+                <th className="px-4 py-3">No</th>
+                <th className="px-4 py-3">Nama Santri</th>
+                <th className="px-4 py-3">NIS</th>
+                <th className="px-4 py-3">NISN</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {myClass.students?.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-8 text-zinc-500">Belum ada santri terdaftar di kelas ini.</td>
+                </tr>
+              ) : (
+                myClass.students.map((student: any, i: number) => (
+                  <tr key={student.studentId} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                    <td className="px-4 py-3 text-zinc-500">{i + 1}</td>
+                    <td className="px-4 py-3 font-medium">{student.fullName}</td>
+                    <td className="px-4 py-3">{student.nis || '-'}</td>
+                    <td className="px-4 py-3">{student.nisn || '-'}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

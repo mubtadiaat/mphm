@@ -1,0 +1,1129 @@
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+
+**"Sistem Informasi Akademik & Pusat Data Abadi Enterprise"**
+
+## #00: VISI STRATEGIS, ARSITEKTUR STACK & DEPLOYMENT
+
+Sistem Informasi Akademik MPHM dibangun sebagai platform **Enterprise Internal SaaS**. Arsitektur wajib dipisah sepenuhnya (*Strictly Decoupled*) untuk menjamin performa maksimal, keamanan militer, dan keandalan jangka panjang di jaringan Cloudflare.
+
+**1. Tech Stack Mutlak (The New Stack):**
+
+* **Frontend Layer (Web & 3D Presentation):** Next.js 15+ (App Router), React 19. Di-deploy murni sebagai Static/Edge di **Cloudflare Pages**.
+* **Backend API Gateway (Business Logic):** **Hono.js** berjalan di atas **Cloudflare Workers**. (Zero HTML rendering di backend, murni JSON REST API).
+* **Pusat Data (Database):** **Cloudflare D1** (Serverless SQLite) dikelola dengan Drizzle ORM.
+* **Media & Asset Storage:** **Cloudinary**. Seluruh foto profil, aset 3D, dokumen bukti, wajib diunggah langsung ke Cloudinary (bukan R2/Worker).
+
+**2. Aturan Deployment & Domain Produksi:**
+
+* **Domain Utama:** Seluruh sistem beroperasi HANYA di `https://m.p3hm.my.id`.
+* **API Base URL:** `https://m.p3hm.my.id/api/*`.
+* Tidak ada referensi ke domain `*.pages.dev` atau `*.workers.dev` pada konfigurasi produksi.
+
+---
+
+## #01: UI/UX, 3D, & MODERN ANIMATION STANDARD
+
+Seluruh antarmuka WAJIB **100% Responsive (Mobile-First, Tablet, Desktop)** dan mengusung filosofi *Ultra-Modern Enterprise Professional SaaS* (sekelas UI premium di Uiverse/Vercel/Linear).
+
+**1. Desain Visual & Komponen:**
+
+* Menggunakan **Tailwind CSS v4** dan **shadcn/ui** (kustomisasi premium).
+* Karakteristik visual: *Glassmorphism* halus, *soft shadow*, *thin border*, *hover elevation*, dan tipografi bersih.
+* **Universal Data Grid:** Tabel wajib memiliki *Realtime Search* (tanpa tombol cari), *Column Manager*, *Server-Side Pagination*, dan format sel identitas (Avatar bulat + Nama Tebal + Sub-info).
+
+**2. Animasi & Rendering 3D:**
+
+* **Micro-interactions:** Menggunakan **Framer Motion** untuk transisi perpindahan halaman, *drawer collapse*, *subtle glow* pada form, dan *loading skeleton*.
+* **3D Elements:** Menggunakan **React Three Fiber / Three.js** untuk elemen interaktif di Dashboard (misal: Logo MPHM 3D, Kartu Statistik Mengambang yang bereaksi terhadap kursor/sentuhan). Animasi 3D harus ringan dan tidak mengorbankan performa.
+
+---
+
+## #02: PIPELINE MEDIA CLOUDINARY (STRICTLY DECOUPLED)
+
+Untuk memastikan Cloudflare Workers tidak dibebani file berat, sistem media menggunakan **Direct Signed Upload**.
+
+1. **Request Signature:** Frontend meminta token otorisasi ke Backend (Hono).
+2. **Direct Upload:** Frontend mengunggah file (Foto/Bukti) **langsung** ke server Cloudinary.
+3. **Save URL:** Cloudinary membalas dengan URL gambar, lalu Frontend mengirim URL tersebut ke Backend untuk disimpan di database D1.
+
+---
+
+## #03: ENTERPRISE DATA ARCHITECTURE (PERSON-CENTRIC)
+
+Database menganut prinsip **Single Source of Truth**. Tidak boleh ada duplikasi data manusia seumur hidup.
+
+**1. Tabel Inti (`people`):**
+Menyimpan identitas dasar (ID, NIK, Nama, TTL, Alamat, Nomor WA, URL Avatar Cloudinary). Wajib dikunci dengan indeks non-unik pada nama dan indeks unik pada NIK.
+
+**2. Matriks Profil Polimorfik (Smart Data):**
+Entitas `people` dapat memiliki banyak profil seiring waktu. Penghapusan `people` ditolak mutlak (`ON DELETE RESTRICT`) jika profil masih ada.
+
+* `student_profiles`: Santri (Terkait NIS, NISN).
+* `teacher_profiles`: Pengajar / Mustahiq (Terkait Kode Pengajar).
+* `guardian_profiles`: Wali Santri (Diikat dengan Nomor KK, 1 KK bisa melihat banyak santri).
+* `organization_memberships`: Pengurus / Mufattisy / Mundzir.
+* `alumni_records`: Alumni (Otomatis dibuat saat lulus).
+
+**3. Global Command Palette (CTRL+K):**
+Pencarian instan lintas peran (Mencari "Fatimah" akan memunculkan apakah dia Santri, Alumni, atau Pengajar).
+
+---
+
+## #04: ACADEMIC WORKSPACE & MANAJEMEN ROMBEL
+
+Seluruh data operasional diisolasi di dalam **Tahun Ajaran Aktif**.
+
+**1. Hierarki Mutlak:**
+`Tahun Ajaran -> Semester -> Jenjang -> Tingkat -> Kelas/Bagian -> Jadwal & Nilai`
+
+**2. Master Jenjang & Tingkat (Permanen & Hardcoded di Logic):**
+
+* **I'dadiyyah:** Tingkat I - III (Hanya pembagian kelompok, masa 1 tahun, **tanpa kenaikan kelas**).
+* **Ibtida'iyyah:** Tingkat I - VI (Masa 6 tahun).
+* **Tsanawiyyah:** Tingkat I - III (Masa 3 tahun).
+* **Aliyyah:** Tingkat I - III (Masa 3 tahun).
+* **Al-Robithoh:** Khidmah/Mengabdi pasca Aliyyah (Masa 1 tahun).
+
+**3. Aturan Rombel & Mustahiq:**
+Satu kelas hanya dipegang oleh 1 Mustahiq (Wali Kelas) per Tahun Ajaran. Kelas yang sudah berjalan tidak boleh dihapus permanen (Gunakan *Soft Delete*).
+
+---
+
+## #05: ENGINE PENILAIAN & PROMOTION (KENAIKAN KELAS)
+
+Ini adalah jantung logika komputasi akademik MPHM.
+
+**1. Sistem Penilaian (Kwartal 1 - 4):**
+
+* Mustahiq menginput nilai asli (mendukung pecahan, misal: `6.5` atau `7.5`).
+* **Pengecualian 5 Mapel Sakral:** Al-Qur'an, Al-Khot/Al-Imla', Qiro'ah al-Kutub, Al-Muhafadhoh, dan Akhlaq.
+* **Nilai Maksimal 5 Mapel ini dibatasi mutlak di angka 8.** (API wajib menolak input > 8).
+* Kelima mapel ini **TIDAK DIHITUNG** (dieliminasi) dari total agregat nilai untuk penentuan Ranking kelas.
+
+
+
+**2. Promotion Engine (Kenaikan Kelas Akhir Tahun):**
+
+* Mesin yang mengeksekusi rekomendasi akhir secara massal: `PROMOTED` (Naik), `RETAINED` (Tinggal), `GRADUATED` (Lulus), atau `KHIDMAH` (Al-Robithoh).
+* Membaca histori Kwartal 1-4, persentase kehadiran, dan tingkat pelanggaran.
+* I'dadiyyah dikecualikan dari algoritma naik/tinggal tingkat.
+
+---
+
+## #06: JADWAL PENDIDIKAN & MANAJEMEN KEDISIPLINAN
+
+**1. Struktur Jadwal (Hissoh):**
+
+* Jadwal terikat pada `Tahun Ajaran -> Kelas`.
+* Dibagi menjadi sesi khusus Pesantren: *Hissoh Ula* (Sesi 1) dan *Hissoh Tsani* (Sesi 2).
+
+**2. Kedisiplinan & Worst-Case Tier Shifting:**
+
+* Master Pelanggaran bersifat dinamis (dikelola Admin Sekretariat) berisi: Kategori, Tingkat Keparahan (Ringan/Sedang/Berat/Sangat Berat), dan Poin.
+* **Algoritma Shifting Akhlaq:** Absensi fisik (kehadiran) dan pelanggaran fatal akan langsung memengaruhi/menjatuhkan predikat kualitatif Akhlaq (misal dari *Jayyid Awwal* jatuh ke *Maqbul*) secara otomatis pada Rapor.
+
+---
+
+## #07: ATURAN KEAMANAN & PENGEMBANGAN (AI AGENT RULES)
+
+Ini adalah **HARGA MATI** bagi eksekusi pengembangan:
+
+1. **RBAC (Role-Based Access Control):** Super Admin, Sekretariat, Operator, Mustahiq, Mufattisy, Pimpinan, Wali Santri. Setiap *role* HANYA BISA melihat data sesuai lingkup kerjanya (*Data Scope Authorization*).
+2. **Otentikasi:** Wajib menggunakan `HttpOnly Secure Cookie`.
+3. **Realtime Audit Log:** Seluruh aktivitas POST/PUT/DELETE memicu *Middleware* Worker untuk mencatat secara otomatis (Siapa, Kapan, Aksi, *Before/After*).
+4. **TanStack Query + Optimistic Update:** Frontend wajib menggunakan TanStack Query v5 dengan tata kelola *Cache* yang rapi. Antarmuka harus terasa realtime tanpa *reload*.
+5. **NO DUMMY LOGIC:** Dilarang keras membuat logika hardcode palsu (*mock* yang tidak bisa diganti). Backend API harus siap memvalidasi dengan *Zod Interceptors*. Seluruh penanganan *Error* membalas dengan format JSON yang konsisten.
+
+---
+
+### 🚀 STATUS: READY FOR DEVELOPMENT
+
+Blueprint ini adalah spesifikasi teknis tingkat *Enterprise SaaS*. Anda dapat langsung memerintahkan agen AI/Developer Anda dengan *prompt* berikut untuk memulai:
+
+> *"Berdasarkan Master Blueprint MPHM v4.0, mulai inisialisasi monorepo Turborepo. Set up Cloudflare Pages untuk Next.js 15 (Frontend) dengan Tailwind v4 dan shadcn, serta Cloudflare Workers untuk Hono.js (Backend) dengan D1 Database. Buat skema Drizzle pertama untuk tabel `people` dan `student_profiles`."*
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#01: STANDAR UI/UX, ANIMASI 3D & KOMPONEN MODERN (THE FRONTEND MASTERPIECE)
+Frontend MPHM dirancang bukan sebagai web administrasi biasa, melainkan sebagai Ultra-Modern Enterprise Professional SaaS Dashboard (Terinspirasi dari Vercel, Linear, Supabase, dan desain premium di Uiverse.io). Sistem harus terasa sangat cepat, elegan, dan hidup, namun tetap ringan untuk dieksekusi dari Edge (Cloudflare Pages).
+
+1. SISTEM DESAIN & IDENTITAS VISUAL (DESIGN TOKENS)
+Tidak ada nilai warna atau spasi yang di-hardcode. Seluruhnya harus menggunakan Design Tokens dari Tailwind CSS v4 dengan palet warna berikut:
+
+Base / Surface: Zinc / Neutral (Memberikan kesan bersih, clean, dan profesional).
+
+Primary Brand: Gold MPHM (Digunakan secara elegan sebagai identitas visual/aksen, BUKAN warna latar belakang dominan).
+
+Secondary Brand: Blue MPHM (Diambil dari warna logo).
+
+Semantic Colors: Success (Green), Warning (Amber), Danger (Red).
+
+Visual Feel: Soft UI, pixel-perfect, clean layout, minimalis namun mewah. Menggunakan glassmorphism ringan (backdrop-blur) pada elemen melayang (seperti Dropdown, Modal, Sticky Header).
+
+2. EKOSISTEM ANIMASI & 3D INTERAKTIF (THE "WOW" FACTOR)
+MPHM wajib mengimplementasikan animasi mikro dan elemen 3D untuk meningkatkan User Experience, dengan syarat mutlak tidak mengorbankan performa (bebas lag).
+
+Framer Motion (Micro-interactions):
+
+Seluruh pergantian rute/halaman wajib menggunakan transisi fade-in/slide yang sangat mulus.
+
+Button & Card: Efek hover yang lembut (subtle scale scale: 1.02), soft shadow expansion, dan ripple/glow effect saat diklik.
+
+Sidebar & Drawer: Animasi buka-tutup wajib smooth collapse tanpa patah-patah.
+
+Loading State: Menggunakan Skeleton loading bergelombang (shimmering) yang elegan (bukan sekadar spinner statis).
+
+React Three Fiber / Three.js (Elemen 3D Interaktif):
+
+3D Dashboard Widgets: Statistik utama (misal: Total Santri atau Kartu Status Server) dirender sebagai objek 3D berbentuk "koin" atau "kartu" melayang yang sedikit bereaksi berputar (rotasi mikrometer) saat kursor mouse digerakkan (mouse parallax/hover interaction).
+
+3D Empty State: Saat data kosong (misal tidak ada pelanggaran), jangan hanya tampilkan ikon datar. Tampilkan objek 3D interaktif ringan (seperti kotak kosong 3D atau ilustrasi logo 3D) yang dapat diputar perlahan oleh pengguna.
+
+Performa Mutlak: Semua elemen 3D wajib dibungkus dengan React.Suspense dan next/dynamic agar di-lazy-load dan tidak menunda render halaman utama (LCP).
+
+3. UNIVERSAL DATA GRID (STANDAR MUTLAK TABEL ENTERPRISE)
+Tidak boleh ada tabel yang dibuat manual atau berbeda gaya antar modul. Seluruh modul (Santri, Pengajar, Kelas, Jadwal) WAJIB menggunakan satu komponen <UniversalDataGrid /> yang dibangun di atas TanStack Table v9.
+
+Spesifikasi Fungsional:
+
+Realtime Search (Debounced): Kotak pencarian (tanpa tombol "Cari"). Saat mengetik, sistem menunggu 300ms (debounce), lalu otomatis memfilter data (Server-side API call).
+
+Server-Side Segala Hal: Pagination, Sorting, dan Filtering wajib di- handle di backend Hono untuk menopang puluhan ribu baris data.
+
+Column Manager: Fitur Show/Hide, Reorder, dan Pin Left/Right untuk setiap kolom. Preferensi ini disimpan otomatis.
+
+Spesifikasi Visual Tabel (AdminHMD Model):
+
+Identity Cell Pattern (Penting!): Untuk kolom nama manusia, wajib di-render sebagai:
+
+Avatar bulat (rounded-full) yang mengambil foto HANYA dari CDN Cloudinary.
+
+Nama tebal (font-semibold text-sm).
+
+Sub-informasi (NIS / NIK / Email) dengan teks kecil abu-abu tepat di bawah nama.
+
+Pill Badges: Status data (Aktif, Lulus, Boyong) dirender dengan bentuk kapsul (rounded-full) dengan warna semantik berlatar tipis (bg-green-500/10 text-green-500).
+
+Row Action: Tombol aksi pada ujung kanan tabel (Edit, Lihat, Hapus) menggunakan icon-only button yang memunculkan efek subtle glow saat di-hover.
+
+Desain Tabel: Garis pembatas tipis (divide-zinc-200/50), gaya zebra-stripes ringan atau hover row illumination yang bersih.
+
+4. SPESIFIKASI KOMPONEN PREMIUM (shadcn/ui KUSTOM)
+Setiap komponen standar tidak boleh langsung dipakai mentah, melainkan harus disesuaikan menjadi spesifikasi Premium Enterprise:
+
+Card: Berbentuk rounded-xl atau rounded-2xl, dengan soft shadow yang membesar perlahan saat di-scroll atau di-hover, garis tepi yang sangat tipis (border-zinc-200/40).
+
+Forms (Input/Select): Menggunakan animasi floating label atau focus-ring beranimasi (warna Brand Blue atau Gold MPHM yang muncul dari tengah saat form di-klik).
+
+Command Palette (CTRL + K): Modal pencarian ala "Mac Spotlight" yang blur di belakangnya. Bisa mencari fitur, nama santri, atau menu dalam sekejap mata dari halaman mana pun.
+
+5. LAYOUT & RESPONSIVITAS 100% (MOBILE-FIRST)
+Seluruh desain antarmuka menjamin responsivitas sempurna di Layar Lebar, Tablet, hingga Handphone.
+
+Desktop: Sidebar mengambang (floating feeling), Top bar elegan, dan ruang data spasial yang lega.
+
+Tablet/Mobile: Sidebar otomatis tersembunyi menjadi Bottom Navigation bergaya iOS atau Drawer Menu dari kiri (menggunakan Framer Motion). Universal Data Grid berubah menjadi Card-Stack List (tabel runtuh menjadi deretan kartu) di layar kecil agar tetap nyaman digulir.
+
+6. MANAJEMEN ASET MEDIA (CLOUDINARY PIPELINE)
+Komponen frontend untuk gambar wajib menggunakan integrasi langsung dengan Cloudinary.
+
+Image Component: Wajib menggunakan <Image /> dari Next.js dengan konfigurasi loader khusus Cloudinary agar otomatis mengatur tingkat kompresi (format WebP/AVIF), resize on the fly, dan optimasi resolusi.
+
+Fallback Avatar: Jika profil tidak memiliki foto dari Cloudinary, komponen wajib me-render Inisial Nama dua huruf dengan latar belakang gradien yang smooth.
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#02_ENTERPRISE_DATA_ARCHITECTURE (PERSON-CENTRIC) & API GATEWAY
+Transformasi MPHM dari sekadar "aplikasi web" menjadi "Pusat Data Abadi" bergantung sepenuhnya pada arsitektur database ini. Sistem dirancang untuk berjalan di Cloudflare D1 (Serverless SQLite) menggunakan Drizzle ORM dan Hono.js, menjamin waktu eksekusi API di bawah 10ms secara global.
+
+1. FILOSOFI "SINGLE SOURCE OF TRUTH" (PERSON-CENTRIC CORE)
+Kelemahan aplikasi akademik tradisional adalah redundansi data. Di MPHM v4.0, satu manusia di alam nyata hanya boleh memiliki satu baris data identitas (ID) seumur hidup.
+
+Sistem menggunakan konsep Polymorphic Profiles (Matriks Profil):
+
+Entitas Inti (people): Data biologi yang tidak pernah berubah (Nama, TTL, Jenis Kelamin, Golongan Darah, Nama Ibu Kandung).
+
+Entitas Profil (Role): Baju/Seragam yang dikenakan orang tersebut seiring berjalannya waktu.
+
+Fase 1: Santri (student_profiles).
+
+Fase 2: Lulus menjadi Alumni (alumni_records).
+
+Fase 3: Mengabdi menjadi Wali Kelas (teacher_profiles).
+
+Fase 4: Menjadi Pengurus Yayasan (organization_memberships).
+
+Keuntungan Mutlak: Jika Fatimah (yang kini menjadi pengajar) memperbarui nomor WhatsApp-nya, sistem hanya memperbarui tabel people. Secara otomatis, data nomor kontaknya sebagai alumni dan santri lama ikut terbarui.
+
+2. SPESIFIKASI SKEMA DATABASE INTI (DRIZZLE ORM)
+Ini adalah struktur absolut untuk dieksekusi oleh Developer / AI Agent.
+
+TypeScript
+// packages/db/src/schema/person.ts
+import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+
+// 1. TABEL CORE: PEOPLE
+export const people = sqliteTable("people", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  nik: text("nik").unique(), // Nullable (belum punya KTP/KK)
+  fullName: text("full_name").notNull(),
+  gender: text("gender", { enum: ["L", "P"] }).notNull(),
+  birthPlace: text("birth_place"),
+  birthDate: text("birth_date"), // Format YYYY-MM-DD
+  address: text("address"),
+  phoneNumber: text("phone_number"),
+  avatarUrl: text("avatar_url"), // MUTLAK URL DARI CLOUDINARY
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
+}, (table) => ({
+  nameIdx: uniqueIndex("name_idx").on(table.fullName), // INDEXING FOR SPEED
+}));
+
+// 2. PROFIL SANTRI
+export const studentProfiles = sqliteTable("student_profiles", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  // ATURAN MUTLAK: ON DELETE RESTRICT (Anti-hapus fatal)
+  personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }), 
+  nis: text("nis").notNull().unique(),
+  nisn: text("nisn").unique(),
+  enrollmentYear: integer("enrollment_year").notNull(),
+  status: text("status", { enum: ["ACTIVE", "GRADUATED", "DROPPED", "BOYONG", "KHIDMAH"] }).default("ACTIVE"),
+});
+
+// 3. PROFIL PENGAJAR / MUSTAHIQ
+export const teacherProfiles = sqliteTable("teacher_profiles", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
+  teacherCode: text("teacher_code").notNull().unique(), // Cth: "UST-01"
+  status: text("status", { enum: ["ACTIVE", "INACTIVE"] }).default("ACTIVE"),
+});
+
+// 4. PROFIL WALI SANTRI (Smart Guardian Mapping)
+export const guardianProfiles = sqliteTable("guardian_profiles", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
+  familyCardNumber: text("family_card_number").notNull(), // NOMOR KK
+  relation: text("relation", { enum: ["AYAH", "IBU", "WALI"] }).notNull(),
+});
+Aturan Keamanan Database (DB-01): onDelete: "restrict". SQLite di Edge Server akan otomatis menolak penghapusan baris pada tabel people jika orang tersebut masih tercatat memiliki rapor, pelanggaran, atau profil. Sistem hanya mengenal Soft Delete / Perubahan Status.
+
+3. CLOUDINARY PIPELINE (STRICTLY DECOUPLED MEDIA)
+Untuk menjaga database Cloudflare D1 tetap sangat ringan, tidak ada file biner yang dikirim melewati Worker.
+
+Alur Keamanan Upload Media (Zero Worker Bottleneck):
+
+Frontend Intercept: Pengguna memilih foto santri di antarmuka Next.js.
+
+Request Signature: Frontend memanggil GET /api/media/signature ke Hono Backend.
+
+Generate Token: Hono Worker menghasilkan SHA-1 Signature menggunakan Cloudinary Secret Key dan membalas dengan parameter rahasia.
+
+Direct to Cloudinary: Frontend melakukan POST langsung ke https://api.cloudinary.com/v1_1/mphm/image/upload.
+
+URL Persistence: Cloudinary mengembalikan secure_url. Frontend lalu melakukan PUT /api/students/:id dengan menyisipkan URL tersebut ke database D1.
+
+4. API GATEWAY STANDARD (HONO.JS ON EDGE)
+API Backend bukan sekadar media CRUD, melainkan gerbang hukum bisnis.
+
+1. Interseptor Validasi Sakral (Zod Payload Validation):
+Semua request masuk wajib ditangkap oleh Middleware Zod sebelum menyentuh logika database.
+
+TypeScript
+// Contoh implementasi di Hono API
+import { zValidator } from '@hono/zod-validator'
+import { z } from 'zod'
+
+app.post('/api/students', zValidator('json', z.object({
+  fullName: z.string().min(3),
+  gender: z.enum(['L', 'P']),
+  nis: z.string().length(6)
+})), (c) => {
+  // Hanya dieksekusi jika validasi lolos
+})
+2. Standar Respon Universal:
+Tidak peduli endpoint manapun, respons yang diterima Frontend wajib seragam:
+
+JSON
+{
+  "status": "Success",  // atau "Validation Error" / "Server Error"
+  "message": "Data profil santri berhasil diperbarui",
+  "data": {
+    "id": "abc-123",
+    "avatarUrl": "https://res.cloudinary.com/..."
+  }
+}
+3. Realtime Edge Audit Log (Otomatis):
+Setiap operasi POST, PUT, DELETE secara otomatis dicegat oleh Middleware Hono untuk mencatat ke tabel audit_logs:
+
+Siapa (ID User / Role)
+
+Kapan (Edge Timestamp)
+
+Modul Apa (Cth: STUDENT_PROFILE)
+
+Aksi (UPDATE)
+
+Diff Matrix (Data sebelum diubah vs Data setelah diubah).
+
+5. PROFIL TERPADU 360° & GLOBAL COMMAND PALETTE
+Karena datanya terpusat secara rapi, Frontend dapat menyediakan dua fitur sakti bagi Administrator:
+
+Global Command Palette (CTRL + K): Modal Spotlight Search yang bisa mencari nama siapapun dari halaman manapun. Hasil pencarian akan menampilkan Badge (Apakah dia Santri, Alumni, atau Keduanya).
+
+Profil Terpadu 360°: Mengklik nama seseorang akan membuka halaman megah yang menampilkan:
+
+Tab 1: Biodata Inti & Pas Foto (Cloudinary).
+
+Tab 2: Riwayat Kelas (Tahun ke Tahun).
+
+Tab 3: Grafik Agregat Rapor (Dihitung langsung dari D1).
+
+Tab 4: Rekam Jejak Kedisiplinan & Pelanggaran.
+
+🚀 Cara Mengeksekusi Tahap #02 Ini ke AI Agent / Developer:
+Salin prompt ini ke AI IDE Anda (Cursor, Windsurf, dll) untuk langsung mengeksekusi arsitektur database:
+
+"Berdasarkan Blueprint MPHM Tahap #02, silakan setup Drizzle ORM di dalam folder packages/db. Buat skema people, student_profiles, teacher_profiles, dan guardian_profiles menggunakan dialect drizzle-orm/sqlite-core untuk Cloudflare D1. Terapkan indeks pada kolom pencarian dan pastikan Foreign Key menggunakan onDelete: 'restrict'. Setelah itu, setup endpoint dasar di apps/backend menggunakan Hono untuk melakukan operasi GET dan POST dengan validasi Zod."
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#03_ACADEMIC_WORKSPACE_&_MANAJEMEN_ROMBEL (CORE ACADEMIC ENGINE)
+Pusat gravitasi dari seluruh operasional sistem MPHM adalah Tahun Ajaran. Sistem ini membuang desain "Tabel Kelas" tradisional dan beralih ke arsitektur Academic Workspace layaknya platform SaaS Enterprise, di mana setiap Tahun Ajaran adalah ruang kerja tertutup yang terisolasi.
+
+1. FILOSOFI "ACADEMIC WORKSPACE" (ISOLASI DATA MUTLAK)
+Tidak ada data transaksional (Rapor, Nilai, Absensi, Pelanggaran, Penempatan Kelas, Jadwal) yang beredar bebas tanpa terikat pada suatu academic_year_id.
+
+Isolasi Histori: Jika Administrator melihat Tahun Ajaran 2025/2026, maka seluruh antarmuka, dropdown siswa, list Mustahiq, dan tabel hanya akan menampilkan data spesifik di tahun tersebut.
+
+Mencegah Kebocoran Cache: Di Frontend (Next.js), TanStack Query Keys wajib menyertakan academicYearId di ujung array key-nya (cth: ['students', 'enrollment', academicYearId]) agar pergantian Tahun Ajaran seketika me-reset layar tanpa data yang "nyangkut".
+
+2. HIRARKI MUTLAK & MASTER DATA PERMANEN
+Sistem akademik MPHM sangat spesifik. Urutan mutlaknya adalah:
+Tahun Ajaran ➔ Semester ➔ Jenjang ➔ Tingkat ➔ Kelas/Bagian ➔ Jadwal & Nilai
+
+Aturan Emas (System Rule #AC-01): Jenjang dan Tingkat BUKAN tabel database dinamis. Keduanya adalah Data Permanen (Hardcoded Constants / Enums / Zod Schemas) di dalam sistem. Administrator tidak boleh melakukan CRUD (Tambah/Hapus) pada Jenjang dan Tingkat.
+
+Berikut adalah ketetapan sistematisnya:
+
+I'dadiyyah: Tingkat I, II, III. (Aturan Khusus: Masa pendidikan 1 tahun penuh, tanpa kenaikan tingkat. Hanya sekadar pembagian kelompok).
+
+Ibtida'iyyah: Tingkat I, II, III, IV, V, VI. (Masa pendidikan 6 tahun).
+
+Tsanawiyyah: Tingkat I, II, III. (Masa pendidikan 3 tahun).
+
+Aliyyah: Tingkat I, II, III. (Masa pendidikan 3 tahun).
+
+Al-Robithoh: Khidmah/Mengabdi purna-Aliyyah. (Masa pendidikan 1 tahun).
+
+3. IDENTITAS KELAS OTOMATIS & MANAJEMEN ROMBEL
+Pembuatan entitas Kelas (academic_classes) dirancang cerdas agar terstandarisasi dan mencegah kesalahan ketik (typo) oleh operator.
+
+Auto-Generated Naming: Administrator HANYA memilih Jenjang, Tingkat, dan mengetikkan "Bagian" (Contoh: A, B, Tahfidz). Sistem akan otomatis menggabungkannya menjadi identitas resmi yang dikunci: "Tsanawiyyah I-A".
+
+Aturan Satu Mustahiq (Wali Kelas): * Satu kelas aktif HANYA memiliki 1 Mustahiq.
+
+Satu Mustahiq HANYA boleh memegang 1 kelas aktif per Tahun Ajaran (Kecuali dilakukan bypass khusus oleh Super Admin). Mustahiq dikaitkan langsung melalui teacher_profiles.id.
+
+Soft Delete Policy: Penghapusan Kelas berstatus aktif menggunakan Soft Delete (mengubah deletedAt). Data Nilai, Absensi, dan Jadwal yang sudah melekat di kelas tersebut tetap aman dan tidak ikut terhapus.
+
+4. ENGINE PENEMPATAN SANTRI (BATCH ENROLLMENT)
+Bagaimana santri masuk ke dalam kelas? Melalui tabel persimpangan class_enrollments.
+
+Batch Assignment UI: Antarmuka khusus berupa Dual-List Transfer (layaknya sistem enterprise). Sebelah kiri adalah daftar santri berstatus Active yang "Belum Memiliki Kelas di Tahun Ini". Sebelah kanan adalah "Keranjang Kelas Tujuan".
+
+Kapasitas Rombel Guard: Setiap kelas memiliki parameter capacity (misal maksimal 35). Sistem akan menolak drag-and-drop santri jika melebihi batas.
+
+Historical Append-Only: Jika santri pindah kelas di tengah tahun, status enrollment di kelas lama diubah menjadi MOVED/DROPPED, dan sistem membuat baris enrollment baru di kelas baru. Jejak perpindahannya terlihat permanen di database.
+
+5. MANAJEMEN JADWAL PESANTREN (HISSOH ULA & TSANI)
+Jadwal di MPHM tidak mengikuti format sekolah umum. Modul jadwal dirancang mengikuti jam Pesantren (Struktur_Jadwal_Pendidikan_MPHM.md).
+
+Slot Waktu Spesifik: Jadwal dipisahkan secara struktural menjadi dua sesi krusial:
+
+Hissoh Ula (Sesi 1): Umumnya 07.00 - 08.00 (atau menyesuaikan).
+
+Hissoh Tsani (Sesi 2): Setelah jeda kitab.
+
+Target Jadwal Fleksibel (Inheritance): Jadwal dapat diterapkan pada level "Tingkat" atau "Kelas". Jika Administrator menerapkan "Mata Pelajaran Fathul Mubin pada Hari Sabtu Hissoh Ula untuk Tingkat Tsanawiyyah I", maka otomatis Lokal A, B, C, D, dst di tingkat tersebut mewarisi jadwal yang sama, tanpa perlu diinput manual satu per satu.
+
+6. TRANSISI TAHUN AJARAN (CLONE WORKSPACE ALGORITHM)
+Setiap pergantian tahun (misal dari 2025/2026 ke 2026/2027), sistem menggunakan fitur "Clone Academic Year". Ini dijalankan melalui Background Job via Cloudflare Workers.
+
+Yang OTOMATIS DISALIN (Copied): Struktur Kelas (Jenjang, Tingkat, Bagian), Kurikulum Mata Pelajaran, Jadwal Mingguan, dan Penugasan Wali Kelas (bisa dicentang opsional).
+
+Yang DITINGGALKAN (Not Copied - Clean Slate): Data Siswi (Enrollment dikosongkan untuk diisi melalui Modul Kenaikan Kelas), Data Nilai, Raport, Absensi, dan Jurnal Pelanggaran. Ruang kerja baru benar-benar bersih dan siap menampung hasil eksekusi dari Promotion Engine (Mesin Kenaikan Kelas).
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#04_ENGINE_PENILAIAN_ALGORITMA_KWARTAL_BUKU_RAPOR (CORE ASSESSMENT ENGINE)
+Modul Penilaian bukan sekadar borang input (CRUD) biasa. Ia adalah enjin pemprosesan berprestasi tinggi yang memuatkan Hukum Mutlak Penilaian Pesantren. Pemprosesan agregat (jumlah nilai dan ranking) wajib dijalankan sepenuhnya di lapisan Backend (Cloudflare Workers) untuk menjamin integriti data dan mengelakkan manipulasi Frontend.
+
+1. STRUKTUR WAKTU PENILAIAN (ALGORITMA 4 KWARTAL)
+Dalam satu Tahun Ajaran, sesi penilaian dipecahkan kepada 4 ruang waktu (Kwartal) yang tetap.
+
+Kwartal 1: Tamrin Semester I
+
+Kwartal 2: Ujian Semester I (Penentu Rapor Semester Ganjil)
+
+Kwartal 3: Tamrin Semester II
+
+Kwartal 4: Ujian Semester II (Penentu Rapor Semester Genap & Kenaikan Kelas)
+
+Aturan Input (Rule #EV-01): Mustahiq (Wali Kelas) memasukkan Nilai Asli (mendukung pecahan desimal seperti 6.5, 7.5, atau 8.5). Sistem tidak dibenarkan melakukan pembundaran (rounding) pramatang semasa kemasukan data.
+
+2. HUKUM MUTLAK 5 MATA PELAJARAN SAKRAL (THE SACRED GUARD)
+Ini adalah logik pengecualian paling utama dalam sistem akademik MPHM. Terdapat 5 mata pelajaran yang mempunyai piawaian dan layanan yang sama sekali berbeza daripada mata pelajaran umum.
+
+Senarai 5 Mata Pelajaran Sakral:
+
+Al-Qur'an
+
+Al-Khoth / Al-Imla'
+
+Qiro'ah al-Kutub
+
+Al-Muhafadhoh
+
+Akhlaq
+
+Ketetapan Sistem (Strict API Guard):
+
+Batas Maksimum 8 (Hard Limit): Sistem API Hono wajib menolak (HTTP 400 Bad Request) apa-apa kemasukan nilai yang melebihi angka 8 untuk kelima-lima mata pelajaran ini. Nilai seperti 8.5 atau 9 akan ditolak secara keras oleh Middleware Zod.
+
+Mata Pelajaran Umum (Selain 5 di atas): Nilai maksimum adalah 10, tanpa had minimum (mengikut hasil ujian sebenar siswi).
+
+3. ENJIN KOMPUTASI RANKING (ELIMINASI PERINGKAT)
+Semasa sistem mengira jumlah nilai (Total Score) untuk menyusun Peringkat (Ranking) kelas, enjin komputasi secara paksa mengeluarkan (mengeliminasi) 5 mata pelajaran sakral di atas.
+
+Algoritma Komputasi (Backend Executed):
+
+Jumlah Agregat = (Total Seluruh Nilai Siswi) - (Nilai Al-Qur'an + Al-Khoth/Al-Imla' + Qiro'ah al-Kutub + Al-Muhafadhoh + Akhlaq)
+
+Hanya mata pelajaran seperti Fath al-Mubin, Al-Ajurrumiyah, Sullam at-Taufiq, dll, yang akan dijumlahkan untuk menentukan siapa yang mendapat Ranking 1, 2, 3 dalam Rombel (Kelas) tersebut.
+
+4. WORST-CASE TIER SHIFTING (ALGORITMA PREDIKAT AKHLAQ)
+Penentuan Predikat Kualitatif Akhlaq (cth: Jayyid Awwal, Jayyid Tsani, Maqbul) tidak dinilai semata-mata di atas kertas. Sistem akan mengintegrasikan pangkalan data Kehadiran (Absensi) dan Pelanggaran (Violations) secara automatik.
+
+Trigger Matriks Penalti: Jika seorang santri mempunyai skor Akhlaq kertas yang tinggi, tetapi mesin mengesan rekod "Pelanggaran Sangat Berat" (dari student_violations) atau kadar ketidakhadiran alfa yang tinggi (dari attendance_records), sistem akan menjatuhkan (shifting down) predikat kualitatif akhirnya secara automatik.
+
+Trap Guard: Jika Mustahiq (Wali Kelas) cuba memanipulasi (override) kejatuhan predikat ini secara manual, sistem API akan memaksa mereka mengisi lajur overrideReason (Alasan Perubahan) yang panjangnya tidak boleh kurang daripada 15 aksara untuk direkodkan dalam Audit Log.
+
+5. KOMPONEN UI/UX: 3D ADAPTIVE SPREADSHEET
+Untuk memudahkan Mustahiq menguruskan berpuluh-puluh siswi, antara muka input nilai direka bentuk menyerupai perisian hamparan kerja (spreadsheet) yang ultra-moden, responsif, dan pintar.
+
+Visual Separation: Lajur (kolom) untuk 5 Mapel Sakral diberi warna latar (seperti subtle gold/amber) atau pemisah visual berbanding Mapel Umum. Jika Mustahiq menaip angka 9 di lajur Al-Qur'an, lajur tersebut akan serta-merta bertukar merah (bergetar menggunakan Framer Motion) dan mengembalikan nilai kepada 8 atau kosong.
+
+Auto-Save Buffer Matrix (Debounced Ingestion): Tiada butang "Simpan Semua". Sebaik sahaja Mustahiq selesai menaip satu nilai, sistem menahan data (buffer) selama 500ms, lalu menghantarnya secara automatik ke Backend. Pengguna akan melihat penunjuk status 3D Cloud kecil di hujung skrin yang berubah dari "Menyimpan..." kepada "Tersimpan".
+
+6. PEMATUHAN TERMINOLOGI (ZERO SHORTCUT RULE)
+Sistem DILARANG KERAS menggunakan singkatan teknikal di antara muka (UI) mahupun cetakan Buku Rapor PDF.
+
+❌ Dilarang: "K1", "S1", "U1", "Smt 1"
+
+✅ Wajib Tepat: "Kwartal 1", "Kwartal 2", "Semester Ganjil", "Semester Genap".
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#05_PROMOTION_ENGINE_RIWAYAT_AKADEMIK (KENAIKAN KELAS & KELULUSAN)
+Modul Kenaikan Kelas di MPHM BUKAN sekadar fitur memindahkan nama santri dari satu tabel ke tabel lain. Ini adalah Academic Progression Engine otomatis yang membaca komputasi Kwartal, mengevaluasi kehadiran, mendeteksi pelanggaran, dan mencatat sejarah permanen yang tidak bisa dihancurkan (immutable record).
+
+1. FILOSOFI "PROMOTION ENGINE" & STATUS MUTLAK
+Engine ini akan memberikan rekomendasi otomatis kepada Mustahiq (Wali Kelas) di akhir tahun. Setiap santri wajib diberikan salah satu dari 6 status akhir berikut sebelum ruang kerja (workspace) tahun ajaran ditutup:
+
+PROMOTED (Naik Kelas): Memenuhi syarat pindah ke tingkat selanjutnya.
+
+RETAINED (Tinggal Kelas): Tidak memenuhi syarat, wajib mengulang di tingkat yang sama.
+
+GRADUATED (Lulus): Tamat dari jenjang pendidikan tersebut (Misal: Lulus Ibtida'iyyah VI atau Tsanawiyyah III).
+
+KHIDMAH (Al-Robithoh): Status khusus bagi santri Aliyyah III yang melanjutkan masa pengabdian 1 tahun.
+
+TRANSFERRED (Pindah Program): Pindah jalur akademik di tengah jalan.
+
+DROPPED (Boyong/Keluar): Tidak melanjutkan pendidikan di MPHM.
+
+2. ATURAN HUKUM KENAIKAN PER JENJANG (BUSINESS RULES)
+Sistem API wajib menerapkan algoritma validasi State Machine berikut berdasarkan Jenjang (Master Data). Sistem menolak promosi yang menyalahi kodrat jenjang.
+
+A. I'dadiyyah (Pengecualian Mutlak):
+
+Memiliki Tingkat I, II, dan III, tetapi hanya ditempuh dalam masa 1 Tahun Ajaran (sebagai pembagian kelompok dasar).
+
+Rule #PR-01: I'dadiyyah dikecualikan dari eksekusi Promotion Engine tahunan.
+
+B. Madrasah Ibtida'iyyah (Masa 6 Tahun):
+
+Tingkat I ➔ II ➔ III ➔ IV ➔ V ➔ VI ➔ GRADUATED (Lulus Ibtida'iyyah).
+
+C. Madrasah Tsanawiyyah (Masa 3 Tahun):
+
+Tingkat I ➔ II ➔ III ➔ GRADUATED (Lulus Tsanawiyyah).
+
+D. Madrasah Aliyyah (Masa 3 Tahun):
+
+Tingkat I ➔ II ➔ III ➔ GRADUATED / KHIDMAH (Lulus Aliyyah / Langsung masuk ke Al-Robithoh).
+
+3. SIKLUS FINALISASI (WORKFLOW KENAIKAN KELAS)
+Proses ini sangat sakral dan hanya bisa dilakukan satu kali dalam satu Tahun Ajaran.
+
+Fase Draft (Wali Kelas): Mustahiq melihat daftar kelasnya. Sistem menampilkan rekomendasi (misal: Ahmad otomatis direkomendasikan PROMOTED karena nilai Kwartal 4 lolos). Mustahiq dapat mengubah rekomendasi ini (Override) dengan memberikan catatan.
+
+Fase Review (Mufattisy/Pimpinan): Pimpinan tingkat memeriksa rekapitulasi massal dan menekan "Setujui".
+
+Fase Eksekusi Akhir (Finalization Lock): Setelah disetujui, Cloudflare Background Worker akan berjalan:
+
+Sistem mengunci data Kenaikan Kelas Tahun Ajaran tersebut (tidak bisa diedit tanpa Bypass Super Admin).
+
+Sistem menyuntikkan data ke tabel academic_history secara permanen.
+
+Sistem secara otomatis menyiapkan Enrollment kosong di Tahun Ajaran berikutnya menggunakan Clone Academic Year.
+
+4. PUSAT DATA ABADI: TABEL academic_history
+Untuk memastikan riwayat pendidikan setiap individu dari masuk hingga lulus terekam bagaikan Blockchain, kita menggunakan tabel arsip Append-Only (hanya bisa ditambah, dilarang di-UPDATE/DELETE).
+
+Struktur Drizzle Skema academic_history:
+
+TypeScript
+export const academicHistory = sqliteTable("academic_history", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  studentId: text("student_id").notNull().references(() => studentProfiles.id),
+  academicYearId: text("academic_year_id").notNull(), // Misal: 2025/2026
+  institutionLevel: text("institution_level").notNull(), // Jenjang (Ibtida'iyyah)
+  classId: text("class_id").notNull(), // Kelas spesifik (Ibtida'iyyah II-A)
+  status: text("status").notNull(), // "PROMOTED", "RETAINED", "GRADUATED"
+  promotionTransactionId: text("promotion_transaction_id"), // Bukti Audit
+  recordedAt: integer("recorded_at", { mode: "timestamp" }).default(sql`(strftime('%s', 'now'))`),
+});
+Manfaat UI: Ketika Admin menggunakan fitur Global Command Palette (CTRL+K) dan mencari nama "Fatimah", tab Riwayat Akademik akan menampilkan timeline visual elegan dari tabel ini (seperti perjalanan dari tahun 2020 hingga lulus 2026).
+
+5. UI/UX: KANDIDAT PROMOSI (DATA GRID)
+Antarmuka untuk halaman Kenaikan Kelas wajib menggunakan <UniversalDataGrid /> dengan konfigurasi:
+
+Warna Baris Dinamis (Row Highlighting): Baris santri yang berstatus RETAINED (Tinggal) diberi corak latar kemerahan tipis (bg-danger/5), sedangkan PROMOTED normal.
+
+Batch Action: Administrator dapat mencentang ( checkbox ) banyak santri sekaligus dan mengubah statusnya menjadi PROMOTED atau GRADUATED secara massal.
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#06_SISTEM_KEHADIRAN_&_MATRIKS_KEDISIPLINAN (ATTENDANCE & DISCIPLINARY ENGINE)
+Modul ini adalah mesin aktif yang mengintegrasikan kedisiplinan dan absensi langsung ke dalam Enjin Penilaian (Rapor) dan Kenaikan Kelas. Semuanya dirancang tanpa hardcode, terpusat, dan memiliki guardrail (sistem pengaman) yang sangat ketat.
+
+1. MASTER JENIS PELANGGARAN (DINAMIS & TERPUSAT)
+Berdasarkan aturan ## Master Jenis Pelanggaran.md, sistem dilarang keras mematok mati jenis pelanggaran di dalam kode. Seluruhnya dikelola secara dinamis oleh Administrator melalui Dashboard.
+
+Struktur Skema Hierarki Pelanggaran (D1 Database):
+
+Kategori Utama (violation_categories): Hanya boleh menggunakan kategori resmi yang disetujui: Adab, Ibadah, Administrasi, Perizinan, Kebersihan, Asrama, dan Keamanan.
+
+Tingkat Keparahan (violation_severities): Hierarki mutlak yang terdiri dari: Ringan, Sedang, Berat, Sangat Berat.
+
+Jenis Pelanggaran (violation_types): Entitas yang mengikat Kategori dan Tingkat Keparahan. Atribut mutlaknya meliputi: Nama Pelanggaran, Poin Pelanggaran (Opsional), Deskripsi, dan Status Aktif.
+
+Aturan Soft-Delete Mutlak: Jika suatu jenis pelanggaran tidak lagi berlaku di MPHM, Administrator hanya bisa mengubah statusnya menjadi dinonaktifkan (isActive: false). Sistem API wajib menolak penghapusan permanen (DELETE) agar riwayat pelanggaran santri di tahun-tahun sebelumnya tidak rusak/hilang.
+
+2. PEREKODAN INSIDEN (student_violations) & BUKTI CLOUDINARY
+Berdasarkan 10_ENTERPRISE_DATA_ARCHITECTURE.md, setiap insiden pelanggaran yang dilakukan oleh santri dicatat dengan struktur rekaman yang detail dan menggunakan pipeline media yang terpisah sepenuhnya (decoupled).
+
+Atribut Wajib Insiden: academicYearId, studentId, violationTypeId, incidentDate, incidentTime, location, description, reportedBy, dan status.
+
+Bukti Pelanggaran (evidenceUrl): Jika pelapor/pengurus mengunggah bukti (seperti foto), file tersebut WAJIB diunggah menggunakan mekanisme Direct Signed Upload langsung ke Cloudinary. Database D1 hanya menyimpan URL Cloudinary-nya saja.
+
+3. ALGORITMA "WORST-CASE TIER SHIFTING" (PENURUNAN PREDIKAT AKHLAQ)
+Ini adalah jantung kedisiplinan yang berinteraksi langsung dengan Rapor. Nilai mata pelajaran Akhlaq (yang dibatasi maksimal di angka 8) akan menghasilkan Predikat Kualitatif (Jayyid Awwal, dll) di rapor.
+
+Trigger Penalti Otomatis: Meskipun nilai ujian Akhlaq seorang santri sempurna, jika enjin sistem mendeteksi santri tersebut memiliki rekod pelanggaran pada tingkat "Sangat Berat" atau memiliki jumlah absensi "Alfa" yang melebihi batas kewajaran, sistem akan menjatuhkan (shift down) Predikat Kualitatif Akhlaq santri tersebut secara otomatis saat Generate Raport.
+
+Override Traps Guard (Sistem Perangkap Manipulasi): Jika Mustahiq (Wali Kelas) mencoba mengubah manual predikat Akhlaq yang sudah dijatuhkan oleh sistem, API Hono wajib memblokir proses simpan tersebut, KECUALI Mustahiq mengisi kolom overrideReason (Alasan Perubahan).
+
+Aturan Zod Validasi: Kolom overrideReason wajib diisi dengan minimal 15 karakter. Jika kurang, kembalikan HTTP 400 Validation Error. Semua intervensi ini direkam otomatis oleh sistem Audit Log.
+
+4. MANAJEMEN KEHADIRAN (BERBASIS HISSOH)
+Berdasarkan # Struktur_Jadwal_Pendidikan_MPHM.md, absensi tidak menggunakan format sekolah umum, melainkan terikat pada Academic Workspace (Tahun Ajaran -> Kelas) dan sistem sesi madrasah.
+
+Sesi Absensi Mutlak: Kehadiran direkam berdasarkan dua waktu pelajaran utama pesantren:
+
+Hissoh Ula (Sesi 1)
+
+Hissoh Tsani (Sesi 2)
+
+Status Kehadiran: Hanya mengakomodasi 3 status ketidakhadiran yaitu: Sakit, Izin, dan Alfa.
+
+Data total perentase kehadiran dari Hissoh Ula dan Hissoh Tsani ini akan disalurkan ke modul Kenaikan Kelas (Promotion Engine) sebagai prasyarat evaluasi.
+
+5. UI/UX: PROFIL TERPADU 360° (COMMAND PALETTE)
+Setiap pencarian melalui Global Command Palette (CTRL + K) akan membuka halaman Profil Terpadu 360° milik santri.
+
+Halaman ini wajib memiliki Tab Riwayat Pelanggaran & Kedisiplinan.
+
+Sistem antarmuka harus menampilkan garis waktu (activity timeline) menggunakan Universal Data Grid Standard.
+
+Pelanggaran wajib ditampilkan dengan Pill Badges (kapsul) yang warnanya diambil langsung dari atribut badgeColor pada tabel violation_severities (contoh: Merah untuk Sangat Berat).
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#07_PORTAL_WALI_SANTRI_&_EKOSISTEM_KK_MAPPING(GUARDIAN PORTAL)
+Portal Wali Santri dirancang bukan sebagai aplikasi terpisah, melainkan sebagai ekosistem Read-Only 360° Dashboard yang terintegrasi langsung ke Pusat Data Abadi. Sistem pendaftarannya mengusung Smart KK Mapping Engine untuk menghilangkan pendaftaran manual berulang bagi orang tua yang memiliki lebih dari satu anak di MPHM.
+
+1. ALGORITMA "SMART KK MAPPING ENGINE"
+Aturan pendaftaran Wali Santri wajib mematuhi skema otomasi keluarga.
+
+Syarat Pendaftaran: Wali Santri WAJIB mendaftarkan diri menggunakan 3 parameter utama: Nama, Nomor WhatsApp (WA), dan Nomor KK (Kartu Keluarga).
+
+Alasan Penggunaan Nomor KK: Setiap Wali Santri bisa membawahi lebih dari satu siswi berdasarkan Kartu Keluarganya.
+
+Contoh Kasus Mutlak: Jika santri bernama Fatimah memiliki Nomor Induk Keluarga (Nomor KK) yang sama dengan santri bernama Zahro, maka Wali Santri cukup mendaftar SATU KALI menggunakan Nomor KK tersebut.
+
+Hasil Otomasi: Setelah berhasil masuk (Login), Dashboard Wali Santri akan secara otomatis memunculkan kedua siswi/santriwati tersebut di layar utama, tanpa memerlukan verifikasi admin yang berbelit-belit.
+
+2. VISIBILITAS DATA MUTLAK (DATA SCOPE AUTHORIZATION)
+Berdasarkan System Rule #02, arsitektur keamanan memberlakukan pembatasan ruang lingkup data (Data Scope Authorization) secara absolut:
+
+Wali Santri HANYA BISA melihat data anak kandung/anak asuh yang terikat dengan Nomor KK yang didaftarkannya.
+
+API Backend Hono akan langsung menolak (HTTP 403 Forbidden) jika request mencoba mengakses ID Santri yang berada di luar lingkup KK-nya.
+
+3. ANTARMUKA PORTAL: "READ-ONLY 360° DASHBOARD"
+Akun Wali Santri bersifat Eksklusif Read-Only (Hanya Baca). Wali santri tidak memiliki akses untuk melakukan operasi ubah (Update/Delete) data apa pun. Saat Wali Santri memilih salah satu anaknya (misal memilih tab "Fatimah"), portal akan menyajikan fitur komprehensif berikut:
+
+Biodata & Kelas Saat Ini: Menampilkan profil santri, Jenjang, Tingkat, Bagian, nama Mustahiq (Wali Kelas), dan status aktif (Active/Khidmah/Graduated).
+
+Rekam Jejak Kehadiran (Absensi): Menampilkan matriks persentase kehadiran (Sakit, Izin, Alfa) per sesi (Hissoh Ula & Hissoh Tsani).
+
+Catatan Akhlaq & Kedisiplinan: Mengambil data langsung dari Disciplinary Engine, menampilkan grafik aktivitas dan riwayat pelanggaran anak menggunakan antarmuka timeline (Garis Waktu). Jika anak melakukan pelanggaran, rinciannya langsung terlihat di sini secara real-time.
+
+Grafik & Riwayat Nilai / Rapor: Menampilkan laporan agregat nilai per Kwartal. Angka 5 Mapel Sakral (Al-Qur'an, Akhlaq, dsb) wajib dikunci maksimal angka 8 pada visualisasinya, serta memunculkan Predikat Akhlaq secara visual.
+
+4. ARSITEKTUR DATABASE RELASI (D1 DRIZZLE)
+Relasi Person-Centric di Backend dipetakan secara ketat untuk menopang KK Mapping Engine:
+
+Entitas wali disimpan dalam tabel inti people, dengan peran terikat pada tabel guardian_profiles.
+
+Tabel guardian_profiles wajib memiliki kolom family_card_number (Nomor KK).
+
+Endpoint login Wali Santri akan melakukan pencarian silang: mencari semua baris di student_profiles yang berelasi dengan tabel people (anak) yang memiliki atribut Nomor KK yang sama dengan family_card_number milik wali.
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#08_KEAMANAN_API_OTORISASI_PERAN_(RBAC) & REALTIME AUDIT LOG (SECURITY LAYER)
+
+Lapisan keamanan MPHM v4.0 dibangun di atas infrastruktur Edge Worker (Cloudflare Workers) menggunakan framework Hono.js. Seluruh pemeriksaan keamanan, otentikasi, otorisasi data (Data Scope), dan pencatatan log dilakukan di tingkat jaringan terdekat dengan pengguna sebelum menyentuh lapisan logika bisnis (Business Service Layer).1. MEKANISME OTENTIKASI (SECURE SESSION COOKIE)Berdasarkan aturan tata kelola sistem, otentikasi dilarang keras menggunakan JWT konvensional di LocalStorage karena rentan terhadap serangan XSS. Sistem wajib menggunakan Session Authentication:Karakteristik Cookie: Sesi disimpan di dalam cookie dengan flag HttpOnly, Secure, SameSite: Strict, dan diikat murni pada domain produksi https://m.p3hm.my.id.Session Rotation: Setiap kali pengguna melakukan tindakan krusial atau setelah masa aktif token habis (misal 1 jam), Edge Worker secara otomatis men-generate ID sesi baru (Session Rotation) untuk mencegah pembajakan sesi (Session Fixation).Stateless Token Verification: Sesi divalidasi langsung secara instan di atas V8 Isolates Cloudflare Workers menggunakan database sesi atau token terenkripsi yang efisien untuk menjaga latensi tetap di bawah 10ms.2. MATRIKS OTORISASI PERAN (ROLE-BASED ACCESS CONTROL - RBAC)Sistem membatasi hak akses secara mutlak. Daftar peran (Roles) resmi yang diakui oleh sistem HANYA TERDIRI DARI 6 PERAN SEBAGAI BERIKUT:NoNama Peran (Role)Ruang Lingkup Otorisasi Data & Hak Akses Global1SekretariatMemiliki akses penuh terhadap seluruh fungsi pengelolaan administratif, master data, dan konfigurasi akademik global institusi.2Mustahiq (Wali Kelas)Mengelola data operasional kelas yang ditugaskan (Assigned Class): Input Nilai Kwartal 1-4 (Mapel Umum & Sakral), rekam kehadiran (Hissoh Ula & Tsani), dan memberikan draf rekomendasi kenaikan kelas.3Mufattisy (Pimpinan Tingkatan)Melakukan peninjauan (Review) dan memberikan persetujuan (Approval) massal terhadap kandidat kenaikan kelas pada tingkatannya.4Pimpinan / MundzirMemiliki akses visibilitas data secara global (Global Dashboard Oversight) untuk kebutuhan monitoring realtime, bersifat Read-Only.5Petugas KeamananMemiliki akses khusus untuk memasukkan, mencatat, dan mengunggah bukti insiden pelanggaran santri langsung ke Disciplinary Engine.6Wali SantriMengakses Guardian Portal berstatus eksklusif Read-Only khusus untuk memantau rekam jejak anak asuh yang terikat dengan Nomor KK-nya.3. ATURAN VISIBILITAS DATA (DATA SCOPE AUTHORIZATION)Aturan Emas Sistem (System Rule #SEC-01): Semua user selain Sekretariat dan Pimpinan/Mundzir wajib hanya melihat data di setiap kinerjanya/lingkup kerjanya masing-masing.Mustahiq Scope Lock: Ketika seorang Mustahiq melakukan GET /api/scores, Middleware Hono secara otomatis menyuntikkan parameter ID kelas aktif miliknya (assignedClassId) yang didapatkan dari sesi login. Mustahiq ditolak keras secara arsitektural untuk menarik data nilai dari kelas lain.Wali Santri Scope Lock: API Gateway memvalidasi bahwa ID Siswi yang diminta berada di dalam array santriwati hasil eksekusi Smart KK Mapping Engine. Jika wali mencoba mengakses data anak di luar KK tersebut, server seketika mengembalikan HTTP 403 Forbidden.4. PIPELINE INTEGRASI REALTIME AUDIT LOG (AUTOMATED MIDDLEWARE)Developer tidak perlu memanggil fungsi Audit Log secara manual di dalam kode controller atau endpoint. Pencatatan rekam jejak dilakukan secara otomatis oleh Middleware Hono pada setiap rute yang mengubah data (POST, PUT, DELETE).Skema Penyimpanan Audit Log (audit_logs):TypeScriptexport const auditLogs = sqliteTable("audit_logs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull(),          // Siapa yang mengubah
+  role: text("role").notNull(),                // Peran saat bertindak
+  module: text("module").notNull(),            // Nama Modul (cth: ASSESSMENT, VIOLATION)
+  action: text("action").notNull(),            // POST / PUT / DELETE
+  beforeData: text("before_data"),             // JSON string sebelum diubah (Null jika POST)
+  afterData: text("after_data"),               // JSON string setelah diubah (Null jika DELETE)
+  ipAddress: text("ip_address").notNull(),     // IP Address Request
+  userAgent: text("user_agent").notNull(),     // Browser / Device User
+  timestamp: integer("timestamp", { mode: "timestamp" }).default(sql`(strftime('%s', 'now'))`),
+});
+Integritasi Data Sebelum & Sesudah: Untuk aksi PUT (Update), middleware melakukan operasi baca cepat (pre-fetch read) data yang ada di D1 sebelum perubahan dieksekusi, lalu mencatatnya ke dalam kolom beforeData. Setelah query simpan berhasil, payload baru dimasukkan ke kolom afterData. Mekanisme ini memastikan rekam jejak forensik data jika terjadi kesalahan administratif atau intervensi nilai ilegal.
+
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#08: OTORISASI HAK AKSES (RBAC), KEAMANAN, & GLOBAL REALTIME AUDIT TRAIL
+Keamanan, otorisasi, dan forensik data pada ekosistem MPHM v4.0 diimplementasikan secara terpusat di tingkat lapisan Backend API Gateway (Hono.js di atas Cloudflare Workers). Kebijakan ini memastikan bahwa seluruh operasi baca dan tulis (read/write) divalidasi pada jangkauan Edge Server sebelum mengeksekusi perintah ke basis data Cloudflare D1, memberikan perlindungan berlapis dengan performa tinggi.
+
+1. MANAJEMEN SESI & 6 PERAN RESMI (RBAC SYSTEM)
+Sistem autentikasiMPH tidak menggunakan token JWT di sisi client storage demi menghindari kerentanan Cross-Site Scripting (XSS). Sistem wajib menggunakan Session Authentication berbasis HttpOnly Cookie.
+
+Spesifikasi Keamanan Cookie (Strict Flag):
+
+HttpOnly: true (Mencegah skrip frontend membaca token sesi).
+
+Secure: true (Wajib dilewatkan hanya melalui jaringan HTTPS murni pada domain https://m.p3hm.my.id).
+
+SameSite: Strict (Mencegah serangan Cross-Site Request Forgery / CSRF).
+
+Session Rotation: Token sesi otomatis diperbarui (rotate) setiap kali pengguna melakukan tindakan krusial atau setelah masa aktif tertentu berlalu.
+
+6 Peran Resmi Sistem (Sesuai Aturan Mutlak #02):
+Lapisan otorisasi Backend wajib mengunci hak akses pengguna hanya ke dalam 6 peran struktural berikut:
+
+Sekretariat: Pengelolaan administratif terpusat, kontrol data induk, kurikulum, serta manajemen pelanggaran global.
+
+Mustahiq (Wali Kelas): Memiliki hak input nilai kuartal atau ujian semester, mengelola kehadiran berbasis hissoh, serta memberikan catatan kualitatif akhlaq.
+
+Mufattisy (Pimpinan Tingkatan): Melakukan peninjauan (review) pengisian nilai kelas, kedisiplinan tingkat, serta memberikan persetujuan pada kandidat kenaikan kelas.
+
+Pimpinan / Mundzir: Akses pemantauan eksekutif (monitoring dashboard) lintas jenjang dan visualisasi performa data pesantren secara menyeluruh.
+
+Petugas Keamanan: Pencatatan insiden pelanggaran santri secara langsung ke dalam jurnal kedisiplinan sesuai koridor jenis pelanggaran dinamis.
+
+Wali Santri: Akses masuk Read-Only khusus untuk memantau perkembangan anak asuh.
+
+2. DATA SCOPE AUTHORIZATION INTERCEPTOR
+Selain pembatasan berdasarkan fungsi peran (RBAC), sistem menerapkan Data Scope Authorization (Otorisasi Lingkup Data) secara absolut melalui Interceptor Middleware Hono.js. Pengguna di luar peran Sekretariat dan Pimpinan/Mundzir dilarang keras melihat atau mengubah data di luar batasan tugasnya.
+
+Penyekatan Mustahiq (Wali Kelas Guard):
+
+Mustahiq secara otomatis terikat pada satu class_id aktif di Tahun Ajaran berjalan.
+
+Setiap kali Mustahiq memanggil endpoint (Contoh: POST /api/scores atau GET /api/attendance), middleware keamanan backend akan memeriksa apakah data santri atau kelas yang diminta sesuai dengan class_id yang menjadi tanggung jawabnya. Jika tidak cocok, pelayan seketika memuntahkan respon HTTP 403 Forbidden.
+
+Penyekatan Wali Santri (KK Mapping Guard):
+
+Akun Wali Santri dikunci murni berbasis parameter family_card_number (Nomor KK).
+
+Wali Santri hanya diberikan hak akses membaca terhadap profil santriwati yang memiliki Nomor KK yang identik dengan profil walinya di dalam tabel people. Segala bentuk upaya manipulasi ID melalui URL frontend untuk mengintip data anak lain akan dipatahkan di tingkat Edge Workers.
+
+3. AUTOMATED FORENSICS AUDIT LOG ENGINE (BEFORE/AFTER PATTERN)
+Setiap operasi manipulasi data yang bersifat merubah isi basis data (POST, PUT, DELETE) wajib dicegat secara otomatis oleh Global Middleware Worker. Developer dilarang menuliskan fungsi pencatatan log audit secara manual di dalam fungsi bisnis controller (No Shortcut Checked).
+
+Atribut Rekam Jejak Forensik:
+Setiap baris log audit yang disimpan di dalam tabel audit_logs Cloudflare D1 wajib memuat data berikut:
+
+userId & userRole (Identitas eksekutor tindakan).
+
+module (Nama fitur yang diakses, contoh: ASSESSMENT_ENGINE, CLASS_MANAGEMENT).
+
+action (Jenis manipulasi: INSERT, UPDATE, DELETE).
+
+beforeData (Kondisi draf data lama dalam format JSON murni sebelum eksekusi mutasi).
+
+afterData (Kondisi draf data baru dalam format JSON murni setelah mutasi berhasil disimpan).
+
+meta (Mencatat stempel waktu Edge Timestamp, alamat IP asal request, dan User Agent peramban).
+
+Mekanisme Integritas Nilai (Anti-Ilegal Ingestion):
+Jika terjadi intervensi nilai rapor ilegal atau pengubahan sepihak pada data pelanggaran santriwati, administrator dapat melakukan komparasi forensik langsung antara lajur beforeData dan afterData untuk melacak kronologi kebocoran atau kesalahan administratif dengan validitas tinggi.
+🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+#09_STANDAR_DEPLOYMENT_CLOUDFLARE_&_UJI_KEPATUHAN (PRODUCTION GATEWAY)
+Sistem Informasi Akademik MPHM dirancang secara eksklusif (Cloud-Native) untuk dieksekusi di atas infrastruktur Cloudflare Ecosystem. Oleh karena arsitekturnya dipisah 100% (Frontend terpisah dari Backend), proses deployment wajib mematuhi aturan jaringan murni tanpa campur tangan arsitektur monolithic tradisional (seperti cPanel, VPS, atau Vercel).
+
+1. ATURAN DOMAIN PRODUKSI TUNGGAL (THE ONLY ORIGIN RULE)
+Ini adalah hukum jaringan yang tidak bisa ditawar. Seluruh ekosistem harus tunduk pada satu domain utama.
+
+Domain Produksi: https://m.p3hm.my.id
+
+*Tidak Ada .pages.dev: AI Agent / Developer DILARANG KERAS menggunakan domain bawaan *.pages.dev atau *.workers.dev pada variabel lingkungan (ENV) tingkat produksi (Production).
+
+Base URL Mutlak: Semua Canonical URL, Sitemap, Cookie Auth, dan API Callback wajib menganggap https://m.p3hm.my.id sebagai Base Origin.
+
+Routing API Terpusat: Meskipun Backend (Hono) berjalan di Cloudflare Workers dan terpisah dari Frontend (Next.js di Pages), keduanya direkatkan menggunakan fitur Cloudflare Custom Domains / Worker Routes.
+
+UI Web diakses melalui: https://m.p3hm.my.id/*
+
+API Gateway diakses melalui: https://m.p3hm.my.id/api/*
+
+2. INFRASTRUKTUR DEPLOYMENT (THE DECOUPLED STACK)
+Karena proyek menggunakan Turborepo/Nx (Monorepo), proses build dipecah menjadi dua pipeline yang berbeda di Cloudflare Dashboard:
+
+A. Frontend (Cloudflare Pages):
+
+Framework: Next.js 15+ (App Router).
+
+Runtime: Menggunakan konfigurasi @cloudflare/next-on-pages (OpenNext) agar fitur Server Components (SSR/ISR) dapat berjalan mulus di infrastruktur Edge.
+
+Environment Variable: NEXT_PUBLIC_API_URL = /api.
+
+B. Backend (Cloudflare Workers):
+
+Framework: Hono.js.
+
+Database Binding: Wajib melakukan binding ke Cloudflare D1 (Serverless SQLite) pada wrangler.toml.
+
+CORS Policy: Middleware Worker hanya menerima Access-Control-Allow-Origin: https://m.p3hm.my.id.
+
+3. KEAMANAN OTENTIKASI PRODUKSI (SECURE COOKIE POLICY)
+Mekanisme pengikatan sesi (session binding) di tingkat produksi wajib menerapkan parameter perlindungan lapis baja:
+
+Seluruh Set-Cookie dari respon login POST /api/auth/login harus mengandung:
+
+HttpOnly=true (Mencegah serangan pembacaan token oleh ekstensi peramban jahat).
+
+Secure=true (Memaksa kuki hanya berjalan di sambungan https://).
+
+SameSite=Strict (Menahan serangan CSRF dari domain lain).
+
+Domain=m.p3hm.my.id.
+
+4. PIPELINE MEDIA CLOUDINARY
+Mengingat Cloudflare Workers tidak dirancang untuk menangani manipulasi atau unggahan berkas berukuran raksasa secara terus-menerus, MPHM menggunakan Cloudinary sebagai Pangkalan Data Media.
+
+ENV Secrets Backend (Worker): Wajib menanamkan CLOUDINARY_API_KEY dan CLOUDINARY_API_SECRET dengan aman menggunakan perintah rahasia (wrangler secret put).
+
+Frontend Upload: UI (Next.js) tidak pernah mengirim berkas gambar (Foto Santri, Bukti Pelanggaran) melewati Worker. UI meminta token dari Worker, lalu mengunggahnya langsung ke CDN Cloudinary, untuk kemudian hanya menyimpan tautan URL-nya ke dalam basis data D1.
+
+5. LEMBAR UJI KEPATUHAN MUTU AKHIR (SANITY CHECKLIST)
+Sebelum sistem dinyatakan "Lulus Uji Terbang" dan diluncurkan ke para Mustahiq, Developer dan Pimpinan wajib memverifikasi poin-poin mutlak berikut:
+
+[ ] Zero Shortcut Checked: Seluruh antarmuka Rapor dan Transkrip wajib bersih dari singkatan pemalas (Tidak ada teks "K1" atau "S1", wajib menampilkan "Kwartal I" dan "Semester Ganjil").
+
+[ ] The Sacred Mapel Guard: Telah dicoba memasukkan nilai 9 pada mata pelajaran "Akhlaq" di form UI. API Backend wajib merespons HTTP 400 Validation Error (Maksimal nilai Al-Qur'an dan Akhlaq adalah 8).
+
+[ ] KK Mapping Engine Verified: Melakukan simulasi pendaftaran Wali Santri baru dengan Nomor KK. Sistem terbukti secara ajaib memunculkan seluruh data anak sekandung di layar pemantauan Wali tanpa campur tangan admin.
+
+[ ] Override Traps Guard Verified: Melakukan simulasi pengubahan predikat Rapor Akhlaq oleh Mustahiq. Sistem wajib menolak simpan jika alasan pengubahan (overrideReason) berisi teks pendek seperti "Telah dimaafkan". (Wajib minimal 15 aksara).
+
+[ ] Soft-Delete Rule: Memastikan penghapusan data Kelas atau Jenis Pelanggaran dari Dashboard hanya menyembunyikan status aktifnya (merubah is_active: false), tanpa memicu hilangnya jejak sejarah (DELETE FROM).
+🌟 MASTER BLUEPRINT MPHM v4.0 (EKSPANSI FINAL)
+BAB X: KURIKULUM & MANAJEMEN MATA PELAJARAN (SYLLABUS ENGINE)
+Modul ini adalah Syllabus Engine yang memastikan setiap santri mendapatkan mata pelajaran yang tepat sesuai dengan Jenjang dan Tingkatannya, serta memberikan sinyal otomatis kepada Scoring Engine mana mata pelajaran yang tergolong "Sakral" (maksimal nilai 8).
+
+1. FILOSOFI "GLOBAL SUBJECT POOL" & TIPE MAPEL
+   Sistem tidak boleh membuat mata pelajaran yang berulang-ulang untuk setiap kelas. Kita menggunakan konsep Global Subject Pool (Kolam Mata Pelajaran Terpusat) yang dikelola oleh Sekretariat.
+
+Master Mata Pelajaran (subjects): Menyimpan daftar murni (Contoh: Fath al-Mubin, Al-Ajurrumiyah, Sullam at-Taufiq, Al-Qur'an, Akhlaq).
+
+Klasifikasi Tipe Mutlak (The Sacred Flag): Di dalam database, setiap mata pelajaran wajib diklasifikasikan ke dalam 2 tipe (ENUM):
+
+SAKRAL (The Holy 5): Khusus untuk Al-Qur'an, Al-Khoth / Al-Imla', Qiro'ah al-Kutub, Al-Muhafadhoh, dan Akhlaq.
+
+UMUM (General): Untuk mata pelajaran selain kelima di atas.
+
+Integrasi Otomatis ke Engine Penilaian: Saat Mustahiq membuka form input nilai, API Hono akan membaca flag SAKRAL ini. Jika terdeteksi SAKRAL, kolom UI otomatis terkunci maksimal 8, dan di Backend, mapel ini langsung dikeluarkan dari komputasi Ranking.
+
+2. ARSITEKTUR "CURRICULUM MAPPING" (PEMETAAN SILABUS)
+   Mata pelajaran tidak ditempelkan langsung ke Kelas (Rombel), melainkan ditempelkan pada Kurikulum -> Jenjang -> Tingkat.
+
+Alur Logika Mutlak:
+Jika Administrator menetapkan bahwa Kurikulum "KMI 2026":
+Tsanawiyyah ➔ Tingkat I ➔ Mendapatkan Mapel: Al-Qur'an, Fath al-Mubin, dan Al-Ajurrumiyah.
+Maka, secara otomatis seluruh lokal kelas (Lokal A hingga Lokal I pada Tsanawiyyah I) akan memiliki kolom penilaian yang sama. Administrator tidak perlu menyusun mapel satu per satu untuk Lokal A, B, atau C.
+
+Versioning Kurikulum: Jika tahun depan ada perubahan kitab/mapel, Administrator tidak mengedit kurikulum lama (karena akan merusak rapor tahun lalu), melainkan menggunakan fitur Clone Curriculum, mengedit yang baru, dan menerapkannya untuk Academic Year yang baru.
+
+3. SKEMA DATABASE DRIZZLE ORM (SYLLABUS ENGINE)
+   Untuk menjamin eksekusi cepat di Cloudflare D1, relasi dibangun dengan struktur berikut:
+
+TypeScript
+// packages/db/src/schema/academic.ts
+import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
+
+// 1. MASTER MATA PELAJARAN (Global Pool)
+export const subjects = sqliteTable("subjects", {
+id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+code: text("code").notNull().unique(), // Cth: "MP-FQH-01"
+name: text("name").notNull(), // Cth: "Fath al-Mubin"
+subjectType: text("subject_type", { enum: ["SAKRAL", "UMUM"] }).default("UMUM"),
+isActive: integer("is_active", { mode: "boolean" }).default(true), // Soft Delete Mutlak
+});
+
+// 2. MASTER KURIKULUM (Wadah Silabus)
+export const curriculums = sqliteTable("curriculums", {
+id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+name: text("name").notNull(), // Cth: "Kurikulum Pesantren 2026"
+description: text("description"),
+isActive: integer("is_active", { mode: "boolean" }).default(true),
+});
+
+// 3. PEMETAAN SILABUS (Curriculum Subjects Mapping)
+// Mengikat Mapel ke Jenjang & Tingkat di dalam suatu Kurikulum
+export const curriculumSubjects = sqliteTable("curriculum_subjects", {
+id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+curriculumId: text("curriculum_id").notNull().references(() => curriculums.id, { onDelete: "cascade" }),
+subjectId: text("subject_id").notNull().references(() => subjects.id, { onDelete: "restrict" }), // ANTI HAPUS
+institutionLevel: text("institution_level").notNull(), // Enum: Ibtida'iyyah, Tsanawiyyah, dll
+classLevel: text("class_level").notNull(), // Enum: I, II, III, dll
+}, (table) => ({
+// Mencegah mapel yang sama dimasukkan 2x di tingkat yang sama pada 1 kurikulum
+uniqueMapping: uniqueIndex("unique_curriculum_mapping").on(
+table.curriculumId, table.subjectId, table.institutionLevel, table.classLevel
+),
+})); 4. UI/UX: SYLLABUS BUILDER (ANTARMUKA PENYUSUNAN)
+Sistem menolak cara kuno dengan form input dropdown yang melelahkan. Penyusunan Kurikulum menggunakan Interactive Syllabus Builder.
+
+Matrix View: Administrator melihat layar berupa Grid/Tabel Matriks.
+
+Baris (Rows): Daftar Mata Pelajaran Aktif.
+
+Kolom (Columns): Tingkat Kelas (Ibtida'iyyah I, Ibtida'iyyah II, dst).
+
+Toggle / Checkbox Interaktif: Administrator hanya perlu mencentang (checklist) kotak persimpangan untuk memasukkan Fath al-Mubin ke Tsanawiyyah I.
+
+Batch Mutation API: Saat tombol "Simpan Silabus" ditekan, Frontend mengumpulkan seluruh struktur matriks dan mengirimkannya dalam satu payload JSON array ke Hono API PUT /api/curriculums/:id/subjects untuk disimpan dalam satu kali transaksi Edge Database.
+
+5. INTEGRASI AKHIR KE KELAS (academic_classes)
+   Pada tabel academic_classes (yang sudah dibahas di BAB IV), terdapat kolom curriculumId.
+
+Ketika Administrator membuat kelas baru (Contoh: "Tsanawiyyah I-A"), Administrator mengaitkan kelas ini dengan "Kurikulum Pesantren 2026".
+
+API akan otomatis menarik semua mata pelajaran dari tabel curriculum_subjects yang berjenjang Tsanawiyyah dan bertingkat I, dan menyajikannya secara instan di buku nilai Mustahiq.
+🌟 THE ULTIMATE MASTER BLUEPRINT MPHM v4.0
+"Sistem Informasi Akademik & Pusat Data Abadi Enterprise SaaS"
+Status: FINAL & APPROVED FOR PRODUCTION
+
+BAB I: VISI, ARSITEKTUR INFRASTRUKTUR & DEPLOYMENT MUTLAK
+MPHM bukan sekadar web pendataan nilai, melainkan Pusat Data Abadi dengan standar Enterprise SaaS. Sistem WAJIB dipisah 100% (Strictly Decoupled) untuk menjamin performa tanpa batas di ekosistem Cloudflare.
+
+1. Tech Stack (The New Stack):
+
+Frontend (UI/UX & 3D Layer): Next.js 15+ (App Router), React 19. Di-deploy murni ke Cloudflare Pages.
+
+Backend (API Gateway): Hono.js berjalan di Cloudflare Workers (Zero HTML, murni JSON REST API secepat milidetik).
+
+Database: Cloudflare D1 (Serverless SQLite) dikelola dengan Drizzle ORM.
+
+Penyimpanan Media: Cloudinary. (Semua foto dan bukti wajib menggunakan Direct Signed Upload dari Frontend ke Cloudinary. Database D1 hanya menyimpan URL).
+
+2. Aturan Deployment Produksi:
+
+Domain mutlak HANYA di https://m.p3hm.my.id.
+
+Tidak ada referensi ke *.pages.dev di lingkungan produksi. API berjalan di https://m.p3hm.my.id/api/*.
+
+BAB II: STANDAR UI/UX, ANIMASI 3D, & DATA GRID ENTERPRISE
+Antarmuka mengusung filosofi Premium Enterprise SaaS (Terinspirasi linear/Uiverse) yang 100% Responsif (Mobile-First).
+
+1. Estetika & Interaksi (Tailwind v4 + shadcn/ui):
+
+Framer Motion: Wajib digunakan untuk transisi halaman (fade/slide), efek hover kartu (subtle elevation), buka-tutup sidebar/drawer yang sangat mulus, dan skeleton loading bergelombang.
+
+React Three Fiber (3D Elements): Digunakan secara elegan dan ringan. Contoh: Ilustrasi logo 3D melayang di Dashboard yang bereaksi terhadap kursor (mouse parallax), atau objek kotak 3D interaktif pada "Data Kosong" (Empty State).
+
+2. Universal Data Grid (Standar Semua Tabel):
+
+Wajib memiliki Server-Side Pagination, Debounced Realtime Search (tanpa tombol cari), dan Column Manager (Pin/Hide kolom).
+
+Identity Cell Pattern: Kolom nama orang WAJIB dirender dengan format: Avatar bundar (dari Cloudinary) + Nama Tebal + Sub-teks (NIS/NIK/Email) di bawahnya.
+
+Pill Badges: Status (Aktif, Lulus) wajib menggunakan kapsul berwarna semantik.
+
+BAB III: ENTERPRISE DATA ARCHITECTURE (PERSON-CENTRIC)
+Sistem menggunakan hukum Single Source of Truth. Tidak ada duplikasi manusia seumur hidup.
+
+1. Tabel Inti (people): Menyimpan identitas fisik abadi (Nama, TTL, Alamat, Cloudinary Avatar URL). Dilarang keras dihapus jika memiliki relasi profil (ON DELETE RESTRICT).
+2. Matriks Profil Polimorfik: Entitas people mengenakan "baju peran" seiring waktu:
+
+student_profiles (Santri)
+
+alumni_records (Alumni)
+
+teacher_profiles (Mustahiq / Pengajar)
+
+guardian_profiles (Wali Santri)
+3. Global Command Palette (CTRL+K): Fitur pencarian ala "Mac Spotlight" untuk mencari nama siapapun lintas profil dan memunculkan Halaman Profil Terpadu 360°.
+
+BAB IV: ACADEMIC WORKSPACE & ENGINE MANAJEMEN KELAS
+Semua data transaksional (Rapor, Jadwal, Absensi) terisolasi secara kedap udara di dalam ID Tahun Ajaran.
+
+1. Hierarki Mutlak: Tahun Ajaran ➔ Semester ➔ Jenjang ➔ Tingkat ➔ Kelas ➔ Jadwal.
+2. Master Jenjang & Tingkat (HARDCODED ENUMS, BUKAN TABEL):
+
+I'dadiyyah (Tingkat I-III, masa 1 tahun, pengecualian: tidak ada kenaikan kelas).
+
+Ibtida'iyyah (Tingkat I-VI, masa 6 tahun).
+
+Tsanawiyyah (Tingkat I-III, masa 3 tahun).
+
+Aliyyah (Tingkat I-III, masa 3 tahun).
+
+Al-Robithoh (Khidmah/Mengabdi pasca-Aliyyah, 1 tahun).
+3. Hukum Mustahiq (Wali Kelas): Satu kelas HANYA dipegang 1 Mustahiq aktif per Tahun Ajaran.
+4. Manajemen Kelas: Nama kelas auto-generated (Cth: Tsanawiyyah I-A). Penghapusan kelas menggunakan sistem Soft Delete.
+
+BAB V: ENGINE PENILAIAN & BUKU RAPOR (THE SACRED RULES)
+Ini adalah "Otak Komputasi" MPHM. API Backend bertugas keras menjaga integritas angka. Penilaian terbagi menjadi 4 Kwartal (Kwartal 1 hingga 4). Guru memasukkan Nilai Asli (mendukung desimal seperti 6.5).
+
+1. Hukum 5 Mata Pelajaran Sakral:
+
+Al-Qur'an, Al-Khoth/Al-Imla', Qiro'ah al-Kutub, Al-Muhafadhoh, Akhlaq.
+
+Batas Maksimal Mutlak 8: API Worker (Zod) wajib memblokir input di atas angka 8 untuk 5 mapel ini.
+
+Eliminasi Ranking: Kelima mapel ini TIDAK DIHITUNG dalam akumulasi total agregat nilai untuk menentukan Peringkat (Ranking) kelas.
+
+2. Anti-Singkatan UI: Antarmuka dilarang menggunakan singkatan malas (Haram: "K1". Wajib: "Kwartal 1"). Antarmuka Spreadsheet menggunakan Auto-Save Buffer (menahan data 500ms lalu otomatis menyimpan).
+
+BAB VI: SISTEM KEHADIRAN & KEDISIPLINAN (TIER SHIFTING)
+Kehadiran dan kedisiplinan berinteraksi langsung dengan Rapor.
+
+1. Absensi Berbasis Sesi: Kehadiran dihitung berdasarkan matriks Hissoh Ula (Sesi 1) dan Hissoh Tsani (Sesi 2) dengan status: Sakit, Izin, Alfa.
+2. Master Pelanggaran Dinamis: Dikelola Administrator, terbagi menjadi Kategori dan Tingkat Keparahan (Ringan hingga Sangat Berat). Menggunakan Soft Delete (isActive: false).
+3. Algoritma Worst-Case Tier Shifting: * Jika santri memiliki nilai Akhlaq kertas sempurna, namun sistem mendeteksi insiden "Sangat Berat" atau peratusan "Alfa" tinggi, sistem akan secara otomatis menjatuhkan predikat kualitatif Akhlaq (misal: dari Jayyid Awwal jatuh ke Maqbul).
+
+Override Traps Guard: Jika Wali Kelas mencoba mengubah manual predikat yang jatuh ini, API WAJIB menyetopnya kecuali diisi overrideReason minimal 15 aksara (terekam permanen di Audit Log).
+
+BAB VII: PROMOTION ENGINE (MESIN KENAIKAN KELAS & HISTORI)
+Modul ini mengeksekusi akhir perjalanan santri di penghujung Tahun Ajaran.
+
+Status Mutlak: PROMOTED (Naik), RETAINED (Tinggal), GRADUATED (Lulus), KHIDMAH, TRANSFERRED, DROPPED.
+
+Otomasi: Mesin membaca komputasi Kwartal 1-4, memilah kandidat, dan meminta finalisasi. Jenjang I'dadiyyah secara algoritma dilewati dari aturan kenaikan tingkat.
+
+Tabel academic_history: Saat dikunci, sistem menyuntikkan riwayat permanen ke tabel arsip (Append-Only, dilarang di-UPDATE/DELETE), lalu menggunakan algoritma Clone Academic Year untuk membuat rumah kelas baru yang kosong di tahun berikutnya.
+
+BAB VIII: PORTAL WALI SANTRI (SMART KK MAPPING ENGINE)
+Wali Santri memiliki Read-Only 360° Dashboard untuk memantau anak asuhnya.
+
+Otomatisasi Pendaftaran: Wali mendaftar dengan Nama, WA, dan Nomor KK.
+
+KK Mapping Engine: Sistem Backend akan menyisir relasi secara otomatis. Jika dalam database ada 3 santriwati yang memiliki Nomor KK identik dengan Wali tersebut, ketiga anak tersebut otomatis muncul di Dashboard Wali tanpa perlu approval admin satu per satu.
+
+BAB IX: KEAMANAN MILITER (RBAC, OTORISASI & GLOBAL AUDIT)
+Seluruh eksekusi logika dikunci di tingkat Cloudflare Edge Worker.
+
+HttpOnly Secure Cookie Session: Tidak menggunakan JWT di local storage. Anti-XSS & Anti-CSRF mutlak.
+
+6 Peran Rigid: Sekretariat, Mustahiq, Mufattisy, Pimpinan/Mundzir, Keamanan, Wali Santri.
+
+Data Scope Authorization: Mustahiq hanya bisa menarik API untuk ID Kelasnya. Wali Santri hanya bisa menarik API untuk ID Santri di dalam KK-nya. Melanggar = HTTP 403 Forbidden.
+
+Global Forensics Audit Log: Setiap interaksi Hono API yang melakukan POST/PUT/DELETE otomatis direkam oleh Middleware Global. Database audit_logs akan mencatat: Siapa, Kapan, Modul, dan format JSON murni Before Data vs After Data untuk melacak segala manipulasi.
+1. Root Monorepo Structure
+   Kita menggunakan pnpm workspace untuk mengelola dependensi antar app dan packages.
+
+Plaintext
+mphm-enterprise/
+├── apps/
+│ ├── web/ # Next.js 15 (Frontend Dashboard)
+│ └── api/ # Hono.js (Backend API Gateway)
+├── packages/
+│ ├── db/ # Drizzle Schema & D1 Configuration
+│ ├── ui/ # Shared components (shadcn/ui + custom premium)
+│ ├── utils/ # Shared logic (Zod validation, types, constants)
+│ └── config/ # Shared ESLint/TypeScript configs
+├── package.json
+├── turbo.json # Turborepo task pipeline
+└── pnpm-workspace.yaml
+
+2. Frontend Structure (apps/web)
+   setiap dashboard user dipisah berdasarkan role. Kita menggunakan struktur (dashboard)/[role] agar setiap role memiliki layout dan file navigasi sendiri.
+
+Plaintext
+apps/web/src/
+├── app/
+│ ├── (dashboard)/
+│ │ ├── sekretariat/ # Dashboard Sekretariat
+│ │ ├── mustahiq/ # Dashboard Wali Kelas
+│ │ ├── mufattisy/ # Dashboard Pengawas
+│ │ ├── pimpinan/ # Dashboard Pimpinan
+│ │ ├── keamanan/ # Dashboard Keamanan
+│ │ └── guardian/ # Dashboard Wali Santri
+│ └── layout.tsx
+├── components/
+│ ├── shared/ # Universal components (Sidebar, Topbar)
+│ └── data-grid/ # Implementasi Universal Data Grid Standard
+├── features/ # LOGIKA BISNIS PER ROLE (Pemisahan Total)
+│ ├── sekretariat/
+│ │ ├── components/ # Komponen khusus Admin (Cth: ViolationManager)
+│ │ ├── services/
+│ │ └── queries/
+│ ├── mustahiq/
+│ │ ├── components/ # Komponen khusus Wali Kelas (Cth: ScoreInputGrid)
+│ │ └── queries/
+│ ├── guardian/
+│ │ ├── components/ # Komponen Wali Santri (Cth: RaporViewer)
+│ │ └── queries/
+│ └── ... (role lainnya)
+└── lib/ # API Client (axios/fetch wrapper) 
+
+3. Backend Structure (apps/api)
+Karena kita menggunakan Hono.js, struktur routing dipisahkan berdasarkan peran untuk menjamin Data Scope Authorization yang ketat.
+
+Plaintext
+apps/api/src/
+├── routes/
+│ ├── admin/ # Endpoint untuk Sekretariat
+│ ├── mustahiq/ # Endpoint khusus Wali Kelas
+│ ├── guardian/ # Endpoint khusus Wali Santri (Read-Only)
+│ ├── auth/ # Session & Auth Logic
+│ └── public/
+├── middleware/
+│ ├── auth-middleware.ts # RBAC & Session check
+│ └── audit-middleware.ts # Forensics Audit Log
+├── services/ # Business Logic Layer (Pemisahan dari Controller)
+│ ├── academic.service.ts
+│ ├── disciplinary.service.ts
+│ └── grade.service.ts
+└── index.ts # Entry point
+
+4. Shared Package (packages/db)
+   Pusat Data Abadi (Drizzle Schema) disimpan di satu tempat untuk diakses baik oleh Backend (untuk validasi database) maupun Frontend (untuk tipe data/TypeScript).
+
+Plaintext
+packages/db/
+├── schema/
+│ ├── people.ts # Core Identity (People)
+│ ├── students.ts # Profil Santri
+│ ├── teachers.ts # Profil Mustahiq
+│ ├── academic.ts # Tahun Ajaran, Kelas, Rombel
+│ ├── scores.ts # Penilaian
+│ └── violations.ts # Pelanggaran
+└── index.ts # Drizzle Instance & Export

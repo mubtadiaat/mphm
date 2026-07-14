@@ -1,0 +1,1 @@
+ALTER TABLE student_profiles ADD `khidmah_placement` text;

@@ -1,0 +1,680 @@
+
+
+=== # 00_Project_Vision.md ===
+# 00_Project_Vision.md
+# 1. Project Overview
+  [Key Concepts]: Progressive Web Application (PWA), Enterprise SaaS Architecture
+# 2. Vision
+# 3. Mission
+# 4. Core Values
+# 5. Target Users
+## Super Admin
+## Admin
+## Mustahiq
+  [Key Concepts]: satu kelas aktif
+## Mudir
+## Operator
+## Mufattisy
+## Petugas Keamanan
+## Wali Santri
+# 6. Scope
+## Authentication
+## Academic Workspace
+## Student Management
+## User Management
+## Score Management
+## Disciplinary & Incident Management (Pelanggaran Santri)
+## Report
+## Monitoring
+## Audit
+## Recycle Bin
+# 7. Academic Workspace Concept
+# 8. Academic Configuration
+# 9. Curriculum Flexibility
+# 10. Workflow Philosophy
+  [Key Concepts]: Workflow Engine
+# 11. Soft Delete Philosophy
+# 12. Audit Philosophy
+# 13. Realtime Philosophy
+# 14. User Experience Philosophy
+  [Key Concepts]: Modern Enterprise SaaS
+# 15. Technology Vision
+# 16. Architectural Vision
+# 17. Long-Term Roadmap
+# 18. Success Criteria
+# 19. Final Statement
+
+=== # 01_Business_Requirements.md ===
+# 01_Business_Requirements.md
+# 1. Pendahuluan
+## 1.1 Latar Belakang
+  [Key Concepts]: Enterprise Internal SaaS, Cloud Native
+  [Key Concepts]: pusat data permanen
+# 2. Tujuan Sistem
+# 3. Ruang Lingkup Sistem
+# 4. Struktur Pendidikan MPHM
+# 5. Tahun Ajaran
+  [Key Concepts]: Active
+# 6. Semester
+# 7. Jenjang, Tingkat, dan Kelas
+# 8. Master Data Permanen
+# 9. Database Santri
+# 10. Database Alumni
+# 11. Database Pengajar
+# 12. Database Pengurus
+# 13. Role Based Access Control (RBAC)
+## 13.1 Super Administrator
+## 13.2 Administrator Akademik
+## 13.3 Operator Akademik
+## 13.4 Mustahiq (Wali Kelas)
+## 13.5 Mufattisy (Pimpinan Tingkatan)
+## 13.6 Pimpinan
+## 13.7 Petugas Keamanan
+## 13.8 Wali Santri
+# 14. Dashboard
+# 15. Penilaian
+# 16. Absensi
+# 17. Akhlaq
+# 18. Pelanggaran Santri
+# 18.1 Promosi / Kenaikan Kelas
+# 19. Aturan Promosi Berdasarkan Jenjang
+# 20. Raport
+# 21. Global Database Search
+# 22. Arsip Historis
+# 23. Dynamic Custom Fields
+# 24. Monitoring Akademik
+# 25. Finalisasi Semester
+# 26. Lifecycle Data
+## Tahun Ajaran
+## Santri
+## Nilai
+## Promosi
+# 27. Recycle Bin
+# 28. Audit Log
+# 29. Keamanan Data
+# 30. Prinsip Bisnis
+# 31. Visi Pengembangan
+# 32. Roadmap Pengembangan Modul
+## Phase 1 — Foundation
+## Phase 2 — Akademik
+## Phase 3 — Operasional
+## Phase 4 — Progression
+## Phase 5 — Enterprise
+# 33. Penutup
+
+=== # 02_System_Rules.md ===
+## 1. Arsitektur, Otentikasi, & Otorisasi Sistem
+  - **Arsitektur Berlapis (Layered Architecture):**
+  - _Business Logic_ hanya boleh berada pada **Business Layer**.
+  - **Authentication:** Menggunakan _Session Authentication_ dengan karakteristik _HttpOnly Cookie_, _Secure Cookie_, _Session Rotation_, dan _Middleware Protection_.
+  - **Authorization:** Menggunakan _Role Based Access Control_ (RBAC) dan _Data Scope Authorization_. Seluruh endpoint wajib melakukan validasi Role. Daftar lengkap Role pada sistem hanya terdiri dari:
+  - **Aturan Visibilitas Data Secara Global:** Semua user **selain** Sekretariat dan Pimpinan/Mundzir **wajib hanya melihat data di setiap kinerjanya/lingkup kerjanya masing-masing**.
+  - **Pusat Data (Data Center):** Seluruh dashboard wajib mengambil data secara tersentralisasi (_Single Source of Truth_), bersifat _real-time_, serta responsif/optimal untuk PWA (_Desktop, Tablet, dan Mobile_).
+## 2. Aturan Pembagian Tanggung Jawab (Frontend vs Backend)
+  - **Frontend Rules:** Hanya bertanggung jawab terhadap UI, UX, validasi ringan, navigasi, cache, _Optimistic Update_, _Loading State_, dan _Error State_. **Dilarang keras:** Menghitung nilai akademik, melakukan finalisasi, mengubah aturan bisnis, dan mengakses database secara langsung.
+  - **Backend Rules:** Bertanggung jawab terhadap validasi data, validasi hak akses, _Business Logic_, perhitungan akademik, finalisasi, _Audit Log_, _Soft Delete_, _Recycle Bin_, dan integritas database. Seluruh validasi wajib dilakukan di Backend.
+## 3. Kebijakan Data, Log, Keamanan & Kinerja
+  - **Tahun Ajaran Aktif:** Dalam satu waktu hanya boleh terdapat satu Tahun Ajaran aktif. Seluruh query sistem otomatis menggunakan Tahun Ajaran aktif. Pengguna tidak memilih Tahun Ajaran secara manual.
+  - **Form Input (Auto Save):** Seluruh Form Input menggunakan mekanisme _Auto Save_ dengan alur: `Input` -> `Debounce` -> `Validation` -> `Save` -> `Toast` (✓ Tersimpan). Tidak terdapat tombol Save pada Form Input Nilai.
+  - **Data Lifecycle:** Seluruh data mengikuti alur siklus: `Draft` -> `Published` -> `Active` -> `Locked` -> `Archived` -> `Trash` -> `Deleted` (menyesuaikan jenis data).
+  - **Recycle Bin & Soft Delete:** Data tidak dihapus permanen. Penghapusan minimal mencatat `deleted_at` dan `deleted_by`. Data penting masuk ke _Recycle Bin_ dengan retensi **24 Jam** yang akan dihapus otomatis oleh _Cloudflare Cron Worker_.
+  - **Audit Log:** Seluruh aktivitas penting dan aktivitas dashboard wajib dicatat secara permanen, bersifat _immutable_ (tidak dapat diubah oleh pengguna).
+  - **Security Standard:** Wajib menerapkan _CSRF Protection_, _XSS Protection_, _SQL Injection Protection_, _Rate Limiting_, _Secure Headers_, _Input Validation_, dan _Output Escaping_.
+  - **Performance Minimum:** Wajib menggunakan _Server Components_, _Code Splitting_, _Lazy Loading_, _Streaming_, _Optimistic Update_, _Server Side Pagination_, _Server Side Filtering_, _Server Side Sorting_, _Cache_, dan _Edge Rendering_.
+# BAGIAN 2: KEBUTUHAN SEKUNDER (Spesifikasi Peran, Menu, & Operasional)
+## 1. Spesifikasi Detail Dashboard Berdasarkan Role
+### A. Dashboard Sekretariat
+  - **Fungsi:** Dashboard utama untuk mengelola seluruh administrasi MPHM dengan akses penuh terhadap seluruh modul sesuai kewenangan (telah mencakup hak akses yang sebelumnya dipisah sebagai Admin/Operator).
+  - **Ringkasan Dashboard (Widget/Statistik):** Total Santri Aktif, Total Alumni, Total Pengajar, Total Pengurus, Tahun Ajaran Aktif, Semester Aktif, Jumlah Kelas, Jumlah Wali Santri, Statistik Kehadiran, Statistik Pelanggaran, Statistik Kelulusan.
+  - **Struktur Menu:**
+  - **Quick Actions:** Tambah Santri, Tambah Pengajar, Tambah Pengurus, Tambah Tahun Ajaran, Buat Kelas, Jalankan Promosi, Cetak Rapor.
+### B. Dashboard Mustahiq (Wali Kelas)
+  - **Fungsi:** Mengelola aktivitas akademik kelas yang diampunya. **Wajib hanya melihat data dari 1 kelas yang diampunya.** Sistem otomatis menentukan Tahun Ajaran, Kelas, dan Hak Akses setelah login, tanpa perlu memilih secara manual.
+  - **Ringkasan Dashboard (Widget/Statistik):** Jumlah Santri, Kehadiran Hari Ini, Nilai Belum Diisi, Akhlaq Belum Diisi, Pelanggaran Kelas, Pengumuman.
+  - **Struktur Menu:** Dashboard, Data Santri Kelas, Absensi, Nilai, Akhlaq, Pelanggaran, Rapor, Profil Santri.
+  - **Quick Actions:** Input Absensi, Input Nilai, Input Akhlaq, Lihat Profil Santri, Cetak Rekap Nilai.
+### C. Dashboard Mufattisy (Pimpinan Tingkatan)
+  - **Fungsi:** Melakukan monitoring seluruh kelas pada tingkatan yang menjadi tanggung jawabnya. **Wajib hanya melihat data pada Tingkat yang dinaunginya.** Mufattisy **tidak menginput** nilai maupun absensi.
+  - **Ringkasan Dashboard (Widget/Statistik):** Jumlah Kelas, Jumlah Santri, Persentase Kehadiran, Persentase Pengisian Nilai, Persentase Pengisian Akhlaq, Statistik Pelanggaran, Grafik Perkembangan.
+  - **Struktur Menu:** Dashboard, Monitoring Kelas, Monitoring Nilai, Monitoring Absensi, Monitoring Akhlaq, Monitoring Pelanggaran, Laporan Tingkatan.
+  - **Quick Actions:** Lihat Profil Santri, Lihat Rekap Nilai, Lihat Rekap Absensi, Cetak Laporan.
+### D. Dashboard Pimpinan / Mundzir
+  - **Fungsi:** Monitoring seluruh aktivitas MPHM secara menyeluruh tanpa batas visibilitas (seperti Sekretariat). Tidak digunakan untuk pekerjaan administrasi harian.
+  - **Ringkasan Dashboard (Widget/Statistik):** Total Santri, Total Alumni, Total Pengajar, Total Pengurus, Statistik Akademik, Statistik Kelulusan, Statistik Kehadiran, Statistik Pelanggaran, Grafik Perkembangan Tahunan.
+  - **Struktur Menu:** Dashboard, Monitoring Akademik, Monitoring Pusat Data, Monitoring Pelanggaran, Monitoring Alumni, Laporan, Statistik.
+  - **Quick Actions:** Lihat Statistik, Cetak Laporan, Lihat Profil Santri, Lihat Profil Pengajar.
+### E. Dashboard Petugas Keamanan
+  - **Fungsi & Hak Akses khusus:** Melakukan pencatatan dan pemantauan pelanggaran santri berdasarkan kejadian (_Incident-Based Recording_) yang terpisah dari penilaian akhlaq semesteran.
+  - **Aturan Visibilitas & Alur Kerja:** Hanya bisa melihat data yang dicari saja (tidak menampilkan semua data secara bawaan). Jika data hasil pencarian tidak diklik, maka tidak akan menampilkan informasi detail/lengkapnya.
+  - **Alur Input Pelanggaran Wajib:** `Mencari Data` -> `Mengeklik Data Santri` -> `Input Pelanggaran` -> `Simpan`.
+  - **Dilarang keras:** Mengakses, melihat, atau mengubah data akademik (Nilai, Absensi, Akhlaq, Raport).
+  - **Ringkasan Dashboard (Widget/Statistik):** Pelanggaran Hari Ini, Pelanggaran Minggu Ini, Pelanggaran Bulan Ini, Santri Terbanyak Melanggar, Jenis Pelanggaran Terbanyak, Status Penanganan.
+  - **Struktur Menu:** Dashboard, Cari Santri, Laporan Pelanggaran, Riwayat Pelanggaran, Statistik Pelanggaran.
+  - **Quick Actions:** Cari Santri, Tambah Pelanggaran, Upload Bukti, Selesaikan Laporan.
+### F. Dashboard Wali Santri
+  - **Fungsi:** Memantau perkembangan anak yang terhubung langsung dengan akun wali. **Wajib hanya dapat melihat data anaknya saja & hanya data monitoring terkait anaknya saja.** Tidak dapat melihat data santri lain.
+  - **Ringkasan Dashboard (Widget/Statistik):** Biodata Anak, Kelas Saat Ini, Persentase Kehadiran, Nilai Terbaru, Akhlaq, Pelanggaran, Pengumuman.
+  - **Struktur Menu:** Dashboard, Profil Anak, Nilai, Absensi, Akhlaq, Pelanggaran, Rapor, Kalender Akademik, Pengumuman.
+  - **Quick Actions:** Lihat Rapor, Lihat Absensi, Lihat Nilai, Lihat Pengumuman.
+## 2. Aturan Pengelolaan Tabel & Data Massal
+  - **Universal Data Grid Standard:** Seluruh halaman tabel wajib mengikuti satu standar komponen dokumen _Universal Data Grid Standard_. Tidak diperbolehkan membuat implementasi Data Table yang berbeda antar modul.
+  - **Import & Export:** Seluruh modul yang memiliki proses input data wajib menyediakan fitur: _Import_, _Export_, _Download Template_, dan _Import History_. Format template wajib patuh pada _Universal Data Grid Standard_.
+  - **Master Jenis Pelanggaran:** Bersifat dinamis dan dikelola secara sentral oleh Administrator melalui Dashboard Sekretariat.
+## 3. Prinsip Pengembangan Sistem (Development Principles)
+  - Setiap kode, modul, dan fitur baru wajib memenuhi prinsip: **SOLID**, **DRY** (_Don't Repeat Yourself_), **KISS** (_Keep It Simple_), _Clean Architecture_, _Feature-Based Architecture_, _Type Safety_, _Reusable Components_, dan _Modular Design_.
+  - **Error Handling:** Seluruh pesan error wajib mudah dipahami, informatif, tidak menampilkan isi teknis internal sistem, serta menyediakan solusi/tindakan berikutnya bagi pengguna.
+  - **Filosofi Desain Utama:** _Role Based Dashboard_, _Data Scope Authorization_, _Person-Centric Architecture_, _Single Source of Truth_, _Enterprise Information System_, _Mobile First PWA_, _Real-Time Monitoring_, serta _Simple, Fast, dan Mudah Digunakan_.
+
+=== # 03_Database_Design.md ===
+# 03_Database_Design.md
+# 1. Tujuan
+# 2. Technology
+# 3. Database Philosophy
+  [Key Concepts]: Academic Workspace
+# 4. Database Principles
+# 5. Naming Convention
+## Table
+## Primary Key
+## Foreign Key
+## Timestamp
+## Soft Delete
+# 6. Academic Workspace
+# 7. Master Data
+# 8. Academic Data
+# 9. Academic Year
+# 10. Academic Settings
+# 11. Curriculum
+# 12. Subjects
+# 13. Curriculum Subjects
+# 14. Semester
+# 15. Classes
+# 16. Students
+# 17. Class Assignments
+# 18. Score Sessions
+# 19. Scores
+# 20. Score Results
+# 21. Attendance
+# 22. Akhlaq
+# 23. Violation Types & Student Violations (Pelanggaran Santri)
+# 23. Reports
+# 24. Notifications
+# 25. Audit Logs
+# 26. Import Histories
+# 27. Export Histories
+# 28. Recycle Bin
+# 29. Universal Columns
+# 30. Indexing Strategy
+# 31. Constraints
+# 32. Database Transactions
+# 33. Database Views
+# 34. Clone Academic Year
+# 35. Future Scalability
+# 36. Database Architecture Principles
+  [Key Concepts]: Academic Workspace Architecture
+
+=== # 04_API_Specification.md ===
+# 04_API_Specification.md
+# 1. Tujuan
+  [Key Concepts]: tidak diperbolehkan
+# 2. API Architecture
+  [Key Concepts]: Business Service
+# 3. API Principles
+# 4. API Versioning
+# 5. Response Standard
+## Success
+## Validation Error
+## Server Error
+# 6. Authentication
+# 7. Authorization
+# 8. Academic Context
+# 9. Workflow Engine
+## Workflow Status
+# 10. Workflow Rules
+# 11. Universal CRUD Standard
+# 12. Universal Import API
+# 13. Universal Export API
+# 14. Universal Search
+# 15. Universal Filter
+# 16. Universal Pagination
+# 17. Universal Bulk Action
+# 18. Auto Save API
+# 19. Academic APIs
+## Academic Year
+## Curriculum
+## Curriculum Subject
+## Semester
+## Class
+## Student
+## User
+# 20. Score APIs
+# 21. Dashboard APIs
+# 22. Monitoring APIs
+# 23. Notification APIs
+# 24. Audit APIs
+# 25. Recycle Bin APIs
+# 26. Clone Academic Year
+# 27. Validation
+# 28. Transaction
+# 29. Security
+# 30. Audit Integration
+# 31. Background Jobs
+# 31.1 Violation APIs (Pelanggaran Santri)
+## Violation Types (Master Jenis Pelanggaran)
+## Student Violations (Pencatatan & Riwayat Pelanggaran)
+# 32. Real-Time Updates
+# 33. API Design Principles
+
+=== # 05_UI_UX_Guideline.md ===
+# 05_UI_UX_Guideline.md
+# 1. Tujuan
+# 2. Design Philosophy
+  [Key Concepts]: Ultra-Modern Enterprise Professional SaaS Dashboard (AdminHMD Inspired)
+  - **Modern & Eksklusif** (Tidak boleh kaku, klasik, atau terlihat seperti sistem lama/tradisional)
+  - **Profesional & Premium** (Proporsi spasi yang lega, tipografi tajam, kontras visual yang elegan)
+  - **Bersih (Clean & Scannable)**
+  - **Informatif & Berorientasi Produktivitas**
+  - **Konsisten di seluruh modul**
+  - **AdminHMD Professional Template** (Identity Cell, Pill Badges, Executive Topbar, User Profile Widget)
+  [Key Concepts]: dilarang keras
+# 3. Design Principles
+# 4. Design System
+# 5. Color System
+# 6. Typography
+# 7. Spacing System
+# 8. Border Radius
+# 9. Shadow System
+# 10. Glass & Surface
+# 11. Layout
+# 12. Sidebar (Modern Enterprise AdminHMD Model)
+  1. **User Profile Card**: Kartu profil rounded eksklusif berisi inisial Avatar, Nama Lengkap, dan Role/Workspace.
+  2. **System Health Indicator**: Indikator titik hijau aktif berdenyut (*pulsing green dot*) dengan label status sistem (`System running smoothly`).
+# 13. Header / Executive Topbar
+  - **Breadcrumb Navigasi**
+  - **Executive Search Bar**: Input pencarian berbentuk *pill (`rounded-full`)* dengan shortcut badge `Ctrl K`
+  - **Notification Bell**: Indikator notifikasi dengan alert badge berdenyut
+  - **User Profile Pill Menu**: Navigasi profil cepat
+  - **Theme Toggle**: Pengatur tema Light/Dark Mode
+# 14. Dashboard
+# 15. Card
+# 16. Data Grid
+# 17. Form Design
+# 18. Input Experience
+# 19. Button
+# 20. Icon
+# 21. Dialog
+# 22. Drawer
+# 23. Notification
+# 24. Loading
+# 25. Empty State
+# 26. Error State
+# 27. Animation
+# 28. Responsive Design
+# 29. Mobile Experience
+# 30. Accessibility
+# 31. Search Experience
+# 32. Filter Experience
+# 33. Feedback Experience
+# 34. Dashboard Monitoring
+# 34.1 Dashboard Petugas Keamanan & Wali Santri
+## Dashboard Petugas Keamanan
+  - **Global Search Santri**: Pencarian instan berdasarkan Nama, NIS, Kelas, atau Kamar.
+  - **Quick Report Card**: Form pencatatan pelanggaran santri cepat (1-click select santri & jenis pelanggaran).
+  - **Daily Incident Chart**: Grafik kejadian pelanggaran harian/mingguan.
+  - **Recent Violations Feed**: Daftar riwayat pelanggaran terbaru dengan status penanganan (Draft, Dilaporkan, Diproses, Selesai).
+## Dashboard Wali Santri
+  - **Profile & Academic Overview**: Ringkasan kelas, wali kelas, dan kehadiran putri.
+  - **Akhlaq & Disciplinary Log**: Riwayat kedisiplinan dan catatan pembinaan.
+# 34.2 Halaman Pelanggaran & Master Jenis Pelanggaran
+  - **Master Jenis Pelanggaran**: Menggunakan standar Universal Data Grid dengan filter Kategori & Tingkat Pelanggaran (Ringan, Sedang, Berat), serta Pill Badges warna untuk tingkat pelanggaran.
+  - **Form Laporan Pelanggaran**: Auto-save atau Quick Modal dengan dukungan lampiran foto bukti kejadian.
+# 35. Visual Hierarchy
+# 36. Design Token
+# 37. Reusable Components
+# 38. Performance UX
+# 39. Future Ready
+# 40. UI/UX Principles
+
+=== # 06_Frontend_Architecture.md ===
+# 06_Frontend_Architecture.md
+# 1. Tujuan
+# 2. Technology Stack
+# 3. Architecture Principle
+# 4. Folder Structure
+# 5. Feature Based Architecture
+# 6. Struktur Setiap Feature
+# 7. Shared Components
+# 8. Data Grid
+# 9. Routing
+# 10. Server Component
+# 11. Client Component
+# 12. Data Fetching
+# 13. TanStack Query
+# 14. Mutation
+# 15. Optimistic Update
+# 16. React Hook Form
+# 17. Validation
+# 18. Form Standard
+# 19. Auto Save
+# 20. Loading
+# 21. Empty State
+# 22. Error State
+# 23. Toast
+# 24. Modal
+# 25. Dialog Confirmation
+# 26. Dashboard
+# 27. State Management
+# 28. Icons
+# 29. Theme
+# 30. Styling Rules
+# 31. Animation
+# 32. Responsive Rules
+# 33. Accessibility
+# 34. Security
+# 35. Performance
+# 36. Error Boundary
+# 37. Reusable Principle
+# 38. Component Priority
+# 39. API Layer
+# 40. Hooks
+# 41. Realtime Architecture
+# 42. Dashboard Architecture
+# 43. Development Principles
+
+=== # 07_Development_Guidelines.md ===
+# 07_Development_Guidelines.md
+# 1. Tujuan
+# 2. General Principles
+# 3. Source of Truth
+# 4. Coding Standards
+# 5. TypeScript Rules
+# 6. Naming Convention
+# 7. Component Rules
+# 8. Business Logic
+# 9. API Rules
+# 10. Form Rules
+# 11. Validation Rules
+# 12. Error Handling
+# 13. Logging
+# 14. Security
+# 15. Performance
+# 16. Reusable Principle
+# 17. Database Rules
+# 18. Import & Export
+# 19. Audit Log
+# 20. Soft Delete
+# 21. Workflow
+# 22. Git Convention
+# 23. Environment Variables
+# 24. Dependency Rules
+# 25. Code Review Checklist
+# 26. Deployment
+# 27. Documentation
+# 28. Testing
+# 29. AI Development Rules
+# 30. Development Principles
+  [Key Concepts]: tidak
+
+=== # 08_AI_AGENT_RULES.md ===
+# 08_AI_AGENT_RULES.md
+# 1. Purpose
+  [Key Concepts]: Senior Software Engineer, Software Architect, UI Engineer, Backend Engineer, Database Engineer, Code Reviewer
+# 2. Priority Rules
+# 3. General Rules
+# 4. Architecture Rules
+# 5. Technology Stack
+# 6. Folder Rules
+# 7. Reusable Rules
+# 8. UI Rules
+# 9. Data Grid Rules
+# 10. API Rules
+# 11. Database Rules
+# 12. Business Logic Rules
+# 13. Validation Rules
+# 14. Workflow Rules
+# 15. Security Rules
+# 16. Performance Rules
+# 17. Accessibility Rules
+# 18. Naming Rules
+# 19. Import Rules
+# 20. Export Rules
+# 21. Audit Rules
+# 22. Soft Delete Rules
+# 23. Code Quality Rules
+# 24. Error Handling Rules
+# 25. State Management Rules
+# 26. AI Decision Rules
+# 27. Forbidden Actions
+# 28. Response Rules
+# 29. Code Generation Strategy
+# 30. Quality Checklist
+# 31. Long-Term Vision
+# 32. Final Principle
+
+=== # 09_DATA_CENTER_BLUEPRINT.md ===
+# 1. Pendahuluan
+  [Key Concepts]: Pusat Data
+# 2. Tujuan
+# 3. Konsep Pusat Data
+  [Key Concepts]: Pusat Data
+# 4. Prinsip Penyimpanan Data
+# 5. Database Santri
+## Identitas
+## Riwayat Santri
+# 6. Database Alumni
+## Informasi Alumni
+## Status Khidmah
+## Status Pengambilan Ijazah
+# 7. Database Pengajar
+## Identitas
+## Riwayat Mengajar
+## Status Pengajar
+# 8. Database Pengurus
+## Identitas
+## Riwayat Kepengurusan
+# 9. Database Wali Santri
+# 10. Pencarian Database
+## Hasil Pencarian
+# 11. Arsip Historis
+# 12. Profil Terpadu
+# 13. Hubungan Dengan Modul Akademik
+# 14. Aturan Penyimpanan
+# 15. Visi Pusat Data
+
+=== # 10_ENTERPRISE_DATA_ARCHITECTURE.md ===
+# 10_ENTERPRISE_DATA_ARCHITECTURE.md
+# 1. Pendahuluan
+  [Key Concepts]: Enterprise Information System, Pusat Data Abadi
+  [Key Concepts]: Person-Centric Enterprise Data Architecture
+# 2. Arsitektur Inti: Person-Centric Core
+  [Key Concepts]: Setiap individu hanya memiliki SATU IDENTITAS UTAMA (`people`), sedangkan perannya (`student`, `teacher`, `guardian`, `organization_member`, `alumni`) adalah PROFIL yang dapat bertambah seiring waktu.
+  [Key Concepts]: Fatimah
+  1. Tahun 2020: Masuk sebagai **Santri** (`student_profiles` -> `people.id`).
+  2. Tahun 2026: Lulus dan menjadi **Alumni** (`alumni_records` -> `student_profiles.id`).
+  3. Tahun 2027: Mengabdi sebagai **Mustahiq / Wali Kelas** (`teacher_profiles` -> `people.id`).
+  4. Tahun 2028: Menjadi **Pengurus MPHM** (`organization_memberships` -> `people.id`).
+  [Key Concepts]: hanya disimpan satu kali
+# 3. Spesifikasi Skema Core (`people`)
+# 4. Profil & Peran (Profiles & Memberships)
+## 4.1 Student Profiles (`student_profiles`)
+## 4.2 Teacher Profiles (`teacher_profiles`)
+## 4.3 Guardian Profiles (`guardian_profiles` & `student_guardians`)
+## 4.4 Organization Memberships (`organization_memberships`)
+## 4.5 Alumni Records (`alumni_records`)
+# 5. Arsitektur Dinamis Modul Pelanggaran Santri
+  1. **`violation_categories`**: Master Kategori dinamis (Admin dapat menambah kategori seperti: *Kerapian*, *Kedisiplinan*, *Adab*, *Ibadah*, *Administrasi*, *Perizinan*, *Kebersihan*, *Asrama*, *Keamanan*). Atribut: `name`, `color`, `icon`, `isActive`.
+  2. **`violation_severities`**: Master Tingkat Keparahan dinamis (`name`: Ringan/Sedang/Berat/Sangat Berat, `levelWeight`, `badgeColor`, `isActive`).
+  3. **`violation_types`**: Master Jenis Pelanggaran (`categoryId`, `severityId`, `name`, `defaultPoints`, `description`, `isActive`).
+  4. **`student_violations`**: Catatan insiden pelanggaran santri (`academicYearId`, `studentId`, `violationTypeId`, `incidentDate`, `incidentTime`, `location`, `description`, `evidenceUrl`, `reportedBy`, `status`).
+# 6. Global Search Command Palette (`CTRL + K`)
+  [Key Concepts]: Command Palette (`CTRL + K`)
+  - Langsung membuka halaman **Profil Terpadu 360°**
+# 7. Profil Terpadu 360° (`Person 360° Profile`)
+  1. **Identitas & Biodata Lengkap**
+  2. **Riwayat Akademik & Kelas**
+  3. **Riwayat Absensi**
+  4. **Riwayat Nilai**
+  5. **Riwayat Akhlaq**
+  6. **Riwayat Pelanggaran & Kedisiplinan**
+  7. **Status Khidmah Alumni**
+  8. **Status Pengambilan Ijazah**
+  9. **Riwayat Kepengurusan Organisasi (P3HM/MPHM/M3PHM)**
+  10. **Audit Timeline & Histori Sistem**
+
+=== # 11_ACADEMIC_ENTERPRISE_BLUEPRINT.md ===
+# 11_ACADEMIC_ENTERPRISE_BLUEPRINT.md
+  [Key Concepts]: Project:
+  [Key Concepts]: Document:
+  [Key Concepts]: Version:
+  [Key Concepts]: Status:
+## 1. Tujuan & Filosofi Arsitektur
+  [Key Concepts]: Modul Akademik, Rombongan Belajar (Rombel), Promotion Engine, dan Portal Wali Santri
+  [Key Concepts]: Person-Centric Enterprise Data Architecture
+  - Seluruh pergerakan santri antar kelas maupun perubahan status disimpan sebagai **riwayat historis abadi** (*append-only historical record*).
+## 2. Prioritas Implementasi
+### Phase 1 — Modul Akademik & Rombel
+### Phase 2 — Portal Wali Santri (Guardian Portal)
+  - Akses bersifat **Read-Only** untuk memantau data anak asuh terdaftar.
+## 3. Spesifikasi Skema Database Akademik
+### 3.1 `academic_years`
+### 3.2 `academic_classes`
+### 3.3 `class_enrollments`
+## 4. Proses Bisnis Promotion Engine
+  1. **Pilih Sumber:** Tahun Ajaran Asal & Kelas Asal.
+  2. **Pilih Tujuan:** Tahun Ajaran Tujuan.
+  3. **Penentuan Keputusan per Santri:**
+  - **Naik Kelas (`PROMOTED`)**: Pilih kelas tujuan di Tahun Ajaran baru.
+  - **Tinggal Kelas (`RETAINED`)**: Pilih kelas di tingkat yang sama di Tahun Ajaran baru.
+  - **Boyong (`BOYONG`)**: Tandai status akhir santri di kelas lama sebagai `BOYONG`.
+  - **Lulus (`GRADUATED`)**: Tandai `GRADUATED` dan otomatis buatkan entri permanen pada `alumni_records`.
+  4. **Pembentukan Enrollment Baru:** Sistem membuat baris baru di `class_enrollments` untuk Tahun Ajaran tujuan dengan status awal `ACTIVE`.
+  5. **Arsip Historis:** Baris enrollment lama tetap tersimpan utuh dan tidak diubah/dihapus.
+## 5. Spesifikasi Fitur Batch Assignment
+  - **Multi-Select Santri:** Memilih daftar santri yang belum memiliki kelas aktif pada Tahun Ajaran terpilih.
+  - **Pilih Kelas Tujuan:** Menampilkan kapasitas terisi vs batas kapasitas kelas (`capacity`).
+  - **Validasi Aturan:** Mencegah melebihi kapasitas dan mendeteksi duplikasi pendaftaran pada tahun ajaran yang sama.
+  - **Konfirmasi Modal:** Menampilkan ringkasan sebelum penyimpanan dilakukan.
+## 6. Aturan Penugasan Mustahiq (Wali Kelas)
+  - **Aturan Tunggal:** Satu Mustahiq hanya boleh menjadi wali kelas pada **1 kelas aktif** dalam 1 Tahun Ajaran (kecuali terdapat pengecualian khusus oleh Administrator).
+## 7. Portal Wali Santri (Guardian Portal - Read-Only 360°)
+  - **Biodata & Kelas Saat Ini**
+  - **Grafik & Riwayat Nilai / Rapor**
+  - **Rekam Jejak Kehadiran (Absensi)**
+  - **Catatan Akhlaq & Kedisiplinan (Pelanggaran)**
+  - **Pengumuman Resmi Madrasah**
+
+=== # Blueprint Deployment Cloudflare.md ===
+# Blueprint Deployment Cloudflare
+## Tujuan
+  [Key Concepts]: https://m.p3hm.my.id
+# Aturan Wajib
+## Domain Production
+## Domain Mapping
+## Redirect
+# Environment
+## Production
+## Preview
+## Development
+# Routing
+# Authentication
+# SEO
+# Cloudflare Configuration
+# Build Target
+# Ketentuan Deployment
+# Acceptance Criteria
+# Instruksi untuk AI Agent
+
+=== # Blueprint_Final_Modul_Kelas_(Rombel).md ===
+
+
+=== # Modul_Kenaikan_kelas.md ===
+
+
+=== # MPHM_Academic_Specification.md ===
+# Blueprint Modul Kelas, Jenjang, Tingkat & Bagian
+## MPHM Academic Domain Specification
+  [Key Concepts]: Versi:
+  [Key Concepts]: Status:
+  [Key Concepts]: Berlaku Untuk:
+# 1. Tujuan
+# 2. Hierarki Akademik
+# 3. Jenjang (Master Data)
+# 4. Tingkat (Master Data)
+## 4.1 I'dadiyyah
+## 4.2 Ibtida'iyyah
+## 4.3 Tsanawiyyah
+## 4.4 Aliyyah
+# 5. Bagian (Kelas)
+# 6. Identitas Kelas
+# 7. Relasi Domain
+# 8. Relasi Wali Kelas
+# 9. Relasi Kurikulum
+# 10. Relasi Siswi
+# 11. Business Rules
+## CL-01
+## CL-02
+## CL-03
+## CL-04
+## CL-05
+## CL-06
+## CL-07
+## CL-08
+## CL-09
+## CL-10
+# 12. UI Requirement
+# 13. Backend Ready Architecture
+# 14. Future Modules
+# Status Dokumen
+  [Key Concepts]: Status:
+
+=== # Struktur_Jadwal_Pendidikan_MPHM.md ===
+
+
+=== # Universal Data Grid Standard.md ===
+# Universal Data Grid Standard
+## Tujuan
+  [Key Concepts]: WAJIB
+# Standar Layout
+# Toolbar
+# Search
+# Filter
+# Column Manager
+# Import
+# Download Template
+## Sheet Petunjuk
+## Sheet Data
+# Tooltip Header
+# Import Validation
+# Validation Result
+# Error Detail
+# Import Confirmation
+# Import History
+# Export
+# Refresh
+# Sorting
+# Pagination
+# Bulk Selection
+# Bulk Action
+# Recycle Bin
+# Empty State
+# Loading State
+# Error State
+# Responsive
+# Accessibility
+# Performance
+# Cell Formatting & Ultra-Modern Table Visual Standard (AdminHMD Model)
+  [Key Concepts]: WAJIB
+  1. **Identity Cell Pattern (Kolom Entitas Orang)**:
+  - **Avatar / Inisial Bundar** (`rounded-full`) dengan latar lembut (`bg-primary/10`)
+  - **Nama Utama Tebal (`font-semibold text-sm`)**
+  - **Sub-info / Email / NIP (`text-xs text-zinc-400`)** tepat di bawah nama
+  2. **Status & Role Pill Badges**:
+  3. **Row Action Pill Button**:
+# Prinsip
+
+=== ## Master Jenis Pelanggaran.md ===
+## Master Jenis Pelanggaran
+
+=== ### Contoh_Jadwal.md ===
+
+
+=== ui_ux_directory.md ===
