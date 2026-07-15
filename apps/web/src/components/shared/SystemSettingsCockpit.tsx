@@ -70,7 +70,7 @@ const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: str
 
 export function SystemSettingsCockpit() {
   const { settings, refetchSettings } = useSystemSettings();
-  const { showToast } = useToast();
+  const { toast } = useToast();
   
   const updateSettingsMutation = useMutation({
     mutationFn: async (payload: any) => {
@@ -90,10 +90,10 @@ export function SystemSettingsCockpit() {
       refetchSettings();
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 3000);
-      showToast("Berhasil", "Pengaturan sistem berhasil diperbarui di server.", "success");
+      toast("Pengaturan sistem berhasil diperbarui di server.", "success", "Berhasil");
     },
     onError: () => {
-      showToast("Gagal", "Gagal menyimpan pengaturan ke server. Silakan coba lagi.", "error");
+      toast("Gagal menyimpan pengaturan ke server. Silakan coba lagi.", "error", "Gagal");
     }
   });
 
