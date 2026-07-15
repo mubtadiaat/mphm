@@ -36,9 +36,9 @@ PRAGMA foreign_keys = ON;
 INSERT INTO people (id, nik, full_name, gender, phone_number) VALUES 
 ('person-admin-mphm-uuid', '0000000000000000', 'Admin MPHM', 'L', '080000000000');
 
--- Admin User Account (password is password123)
+-- Admin User Account (password is madrasahp3hm123)
 INSERT INTO user_accounts (id, person_id, username, password_hash, role, is_active, created_at) VALUES
-('user-admin-mphm-uuid', 'person-admin-mphm-uuid', 'admin_mphm', '0102030405060708090a0b0c0d0e0f10:1726e48314a3aece4ce874808ac9abf75636b407c9bcfb4f3adc23080821e137', 'Sekretariat', 1, 1783900800);
+('user-admin-mphm-uuid', 'person-admin-mphm-uuid', 'admin_mphm', 'fc282fb6321b981ecc0eb2b6e1337c20:3b8a09f8f669a4511a91d1429aa081fc82346c61b6603315f0a58476ba417b2b', 'Sekretariat', 1, 1783900800);
 
 -- Active Academic Year (1448/1449 H)
 INSERT INTO academic_years (id, name, start_date, end_date, is_active, is_closed) VALUES
