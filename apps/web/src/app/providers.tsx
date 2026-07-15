@@ -4,6 +4,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastProvider } from "@/components/shared/ToastContext";
 import { SystemSettingsProvider } from "@/components/providers/SystemSettingsProvider";
+import { ForcePasswordChangeModal } from "@/components/shared/ForcePasswordChangeModal";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -23,6 +24,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ToastProvider>
         <SystemSettingsProvider>
           {children}
+          <ForcePasswordChangeModal />
         </SystemSettingsProvider>
       </ToastProvider>
     </QueryClientProvider>

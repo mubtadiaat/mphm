@@ -11,6 +11,7 @@ export interface UserSession {
   avatarUrl: string | null;
   assignedClassId: string | null;
   familyCardNumber: string | null;
+  mustChangePassword?: boolean;
 }
 
 export function useAuth() {

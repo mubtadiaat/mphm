@@ -6,6 +6,7 @@ import { eq, and, gt } from "drizzle-orm";
 import { createDb, userAccounts, userSessions, people, teacherProfiles, guardianProfiles, academicClasses, academicYears } from "@mphm/db";
 import type { AppEnv } from "../../types";
 import { requireAuth } from "../../middlewares/authMiddleware";
+import { deleteFromCloudinary } from "../../utils/cloudinary";
 
 const auth = new Hono<AppEnv>();
 
@@ -79,8 +80,76 @@ async function verifyPassword(password: string, storedHash: string): Promise<boo
 }
 
 // ============================================================
-// POST /api/auth/login
+// POST /api/auth/register-wali
 // ============================================================
+const registerWaliSchema = z.object({
+  whatsapp: z.string().min(5, "Nomor WhatsApp tidak valid"),
+  kk: z.string().min(10, "Nomor KK minimal 10 digit"),
+});
+
+auth.post(
+  "/register-wali",
+  zValidator("json", registerWaliSchema),
+  async (c) => {
+    const { whatsapp, kk } = c.req.valid("json");
+    const db = createDb(c.env.DB);
+
+    // 1. Cari guardianProfiles yang cocok dengan Nomor KK
+    const guardian = await db
+      .select()
+      .from(guardianProfiles)
+      .where(eq(guardianProfiles.familyCardNumber, kk))
+      .get();
+
+    if (!guardian) {
+      return c.json(
+        { status: "Error", message: "Data Wali Santri tidak ditemukan. Pastikan Nomor KK sesuai dengan yang didaftarkan ke Sekretariat." },
+        404
+      );
+    }
+
+    // 2. Cek apakah userAccount sudah ada untuk person ini
+    const existingAccount = await db
+      .select()
+      .from(userAccounts)
+      .where(eq(userAccounts.personId, guardian.personId))
+      .get();
+
+    if (existingAccount) {
+      return c.json(
+        { status: "Error", message: "Akun Wali Santri untuk Nomor KK tersebut sudah terdaftar. Silakan langsung login." },
+        409
+      );
+    }
+
+    // 3. Perbarui nomor telepon pada entitas person
+    await db
+      .update(people)
+      .set({ phoneNumber: whatsapp, updatedAt: new Date() })
+      .where(eq(people.id, guardian.personId));
+
+    // 4. Buat akun baru dengan default password "mphm123"
+    const defaultPasswordHash = await hashPassword("mphm123");
+    
+    await db.insert(userAccounts).values({
+      personId: guardian.personId,
+      username: whatsapp, // Username menggunakan nomor whatsapp
+      passwordHash: defaultPasswordHash,
+      role: "Wali Santri",
+    });
+
+    return c.json({
+      status: "Success",
+      message: "Pendaftaran berhasil. Silakan login menggunakan kredensial default.",
+      data: {
+        username: whatsapp,
+      }
+    });
+  }
+);
+
+// ============================================================
+// POST /api/auth/login
 const loginSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter"),
   password: z.string().min(6, "Password minimal 6 karakter"),
@@ -162,6 +231,8 @@ auth.post(
       domain: "m.p3hm.my.id",
     });
 
+    const isDefaultPassword = password === "mphm123";
+
     return c.json({
       status: "Success",
       message: "Login berhasil",
@@ -171,6 +242,7 @@ auth.post(
         fullName: person?.fullName || "",
         role: account.role,
         avatarUrl: person?.avatarUrl || null,
+        mustChangePassword: isDefaultPassword,
       },
     });
   }
@@ -280,6 +352,8 @@ auth.get("/me", async (c) => {
     }
   }
 
+  const isDefaultPassword = await verifyPassword("mphm123", account.passwordHash);
+
   return c.json({
     status: "Success",
     data: {
@@ -292,6 +366,7 @@ auth.get("/me", async (c) => {
       avatarUrl: person?.avatarUrl || null,
       assignedClassId,
       familyCardNumber,
+      mustChangePassword: isDefaultPassword,
     },
   });
 });
@@ -336,6 +411,18 @@ auth.put("/profile", requireAuth, zValidator("json", profileUpdateSchema), async
   }
 
   // 3. Update nama lengkap dan foto profil (Avatar) di tabel people
+  const currentPerson = await db.select().from(people).where(eq(people.id, user.personId)).get();
+  
+  if (currentPerson && avatarUrl !== undefined && avatarUrl !== currentPerson.avatarUrl) {
+    if (currentPerson.avatarUrl) {
+      await deleteFromCloudinary(currentPerson.avatarUrl, {
+        CLOUDINARY_CLOUD_NAME: c.env.CLOUDINARY_CLOUD_NAME,
+        CLOUDINARY_API_KEY: c.env.CLOUDINARY_API_KEY,
+        CLOUDINARY_API_SECRET: c.env.CLOUDINARY_API_SECRET,
+      });
+    }
+  }
+
   await db.update(people)
     .set({ 
       fullName, 
