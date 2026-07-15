@@ -31,6 +31,7 @@ export function HeaderProfile() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   
   // Show/Hide Password States
   const [showOldPass, setShowOldPass] = useState(false);
@@ -99,7 +100,7 @@ export function HeaderProfile() {
     }
   };
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!newFullName.trim()) {
@@ -127,27 +128,47 @@ export function HeaderProfile() {
       }
     }
 
-    // Apply changes locally via TanStack Query client
-    queryClient.setQueryData<UserSession>(["auth-session"], (prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        fullName: newFullName,
-        avatarUrl: avatarUrl
-      };
-    });
-
-    toast("Pengaturan akun Anda berhasil diperbarui!", "success", "Perubahan Disimpan");
+    setIsSaving(true);
     
-    // Clear password inputs
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    try {
+      await apiRequest("/api/auth/profile", {
+        method: "PUT",
+        body: JSON.stringify({
+          fullName: newFullName,
+          avatarUrl: avatarUrl,
+          oldPassword: oldPassword || undefined,
+          newPassword: newPassword || undefined,
+        })
+      });
 
-    // Auto-close modal after delay
-    setTimeout(() => {
-      setShowSettingsModal(false);
-    }, 1500);
+      // Apply changes locally via TanStack Query client
+      queryClient.setQueryData<UserSession>(["auth-session"], (prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          fullName: newFullName,
+          avatarUrl: avatarUrl
+        };
+      });
+
+      toast("Pengaturan akun Anda berhasil diperbarui!", "success", "Perubahan Disimpan");
+      
+      // Clear password inputs
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      // Auto-close modal after delay
+      setTimeout(() => {
+        setShowSettingsModal(false);
+      }, 1500);
+    } catch (err: any) {
+      toast(err.message || "Terjadi kesalahan saat menyimpan pengaturan.", "error", "Gagal Menyimpan");
+    } finally {
+      setIsSaving(false);
+    }
+    
+
   };
 
   return (
@@ -404,9 +425,14 @@ export function HeaderProfile() {
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2.5 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-colors cursor-pointer"
+                      disabled={isSaving}
+                      className={`px-5 py-2.5 text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-colors cursor-pointer ${
+                        isSaving
+                          ? "bg-zinc-400 text-zinc-100 cursor-not-allowed"
+                          : "bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                      }`}
                     >
-                      Simpan Perubahan
+                      {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
                     </button>
                   </div>
                 </form>

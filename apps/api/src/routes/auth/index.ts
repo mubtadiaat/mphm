@@ -230,4 +230,58 @@ auth.get("/me", requireAuth, async (c) => {
   });
 });
 
+// ============================================================
+// PUT /api/auth/profile — Update user profile & password
+// ============================================================
+const profileUpdateSchema = z.object({
+  fullName: z.string().min(3, "Nama lengkap minimal 3 karakter"),
+  avatarUrl: z.string().nullable().optional(),
+  oldPassword: z.string().optional(),
+  newPassword: z.string().min(6, "Password minimal 6 karakter").optional(),
+});
+
+auth.put("/profile", requireAuth, zValidator("json", profileUpdateSchema), async (c) => {
+  const user = c.get("user");
+  const { fullName, avatarUrl, oldPassword, newPassword } = c.req.valid("json");
+  const db = createDb(c.env.DB);
+
+  // 1. Dapatkan akun pengguna
+  const account = await db
+    .select()
+    .from(userAccounts)
+    .where(eq(userAccounts.id, user.userId))
+    .get();
+
+  if (!account) {
+    return c.json({ status: "Error", message: "Akun tidak ditemukan." }, 404);
+  }
+
+  // 2. Jika mengganti password, verifikasi password lama
+  if (oldPassword && newPassword) {
+    const isValidPassword = await verifyPassword(oldPassword, account.passwordHash);
+    if (!isValidPassword) {
+      return c.json({ status: "Error", message: "Password lama tidak sesuai." }, 400);
+    }
+    const newPasswordHash = await hashPassword(newPassword);
+    
+    await db.update(userAccounts)
+      .set({ passwordHash: newPasswordHash, updatedAt: new Date() })
+      .where(eq(userAccounts.id, user.userId));
+  }
+
+  // 3. Update nama lengkap dan foto profil (Avatar) di tabel people
+  await db.update(people)
+    .set({ 
+      fullName, 
+      avatarUrl: avatarUrl !== undefined ? avatarUrl : null,
+      updatedAt: new Date() 
+    })
+    .where(eq(people.id, user.personId));
+
+  return c.json({
+    status: "Success",
+    message: "Profil berhasil diperbarui."
+  });
+});
+
 export default auth;
