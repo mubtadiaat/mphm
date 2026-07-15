@@ -102,6 +102,7 @@ app.use('/api/admin/people/*', auditLogMiddleware('ADMIN_PEOPLE'))
 app.use('/api/admin/classes/*', auditLogMiddleware('ADMIN_CLASSES'))
 app.use('/api/admin/subjects/*', auditLogMiddleware('ADMIN_SUBJECTS'))
 app.use('/api/admin/violations/*', auditLogMiddleware('ADMIN_VIOLATIONS'))
+app.use('/api/admin/users/*', auditLogMiddleware('ADMIN_USERS'))
 app.use('/api/mustahiq/scores/*', auditLogMiddleware('MUSTAHIQ_SCORES'))
 app.use('/api/mustahiq/attendance/*', auditLogMiddleware('MUSTAHIQ_ATTENDANCE'))
 
