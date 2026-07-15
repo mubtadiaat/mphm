@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { setCookie, getCookie, deleteCookie } from "hono/cookie";
-import { eq } from "drizzle-orm";
-import { createDb, userAccounts, userSessions, people } from "@mphm/db";
+import { eq, and, gt } from "drizzle-orm";
+import { createDb, userAccounts, userSessions, people, teacherProfiles, guardianProfiles, academicClasses, academicYears } from "@mphm/db";
 import type { AppEnv } from "../../types";
 import { requireAuth } from "../../middlewares/authMiddleware";
 
@@ -203,29 +203,95 @@ auth.post("/logout", async (c) => {
 // ============================================================
 // GET /api/auth/me — Return current user info
 // ============================================================
-auth.get("/me", requireAuth, async (c) => {
-  const user = c.get("user");
-  const db = createDb(c.env.DB);
+auth.get("/me", async (c) => {
+  const sessionToken = getCookie(c, "session_token");
+  if (!sessionToken) {
+    return c.json({ status: "Success", data: null });
+  }
 
-  // Ambil full person data
+  const db = createDb(c.env.DB);
+  const now = new Date();
+
+  const session = await db
+    .select()
+    .from(userSessions)
+    .where(
+      and(
+        eq(userSessions.sessionToken, sessionToken),
+        gt(userSessions.expiresAt, now)
+      )
+    )
+    .get();
+
+  if (!session) {
+    return c.json({ status: "Success", data: null });
+  }
+
+  const account = await db
+    .select()
+    .from(userAccounts)
+    .where(eq(userAccounts.id, session.userId))
+    .get();
+
+  if (!account || !account.isActive) {
+    return c.json({ status: "Success", data: null });
+  }
+
+  // Session Rotation Logic (if older than 30 mins)
+  const sessionAge = now.getTime() - (session.createdAt?.getTime() || 0);
+  const THIRTY_MINUTES = 30 * 60 * 1000;
+  if (sessionAge > THIRTY_MINUTES) {
+    const buffer = new Uint8Array(32);
+    crypto.getRandomValues(buffer);
+    const newToken = Array.from(buffer, (b) => b.toString(16).padStart(2, "0")).join("");
+    const newExpiry = new Date(now.getTime() + 3600000);
+    
+    await db.update(userSessions).set({ sessionToken: newToken, expiresAt: newExpiry }).where(eq(userSessions.id, session.id));
+    setCookie(c, "session_token", newToken, {
+      httpOnly: true, secure: true, sameSite: "None", path: "/", maxAge: 3600,
+      domain: c.env.ENVIRONMENT === "production" ? "m.p3hm.my.id" : undefined,
+    });
+  }
+
+  // Get full person data
   const person = await db
     .select()
     .from(people)
-    .where(eq(people.id, user.personId))
+    .where(eq(people.id, account.personId))
     .get();
+
+  let assignedClassId = null;
+  let familyCardNumber = null;
+
+  if (account.role === "Mustahiq") {
+    const teacher = await db.select({ id: teacherProfiles.id }).from(teacherProfiles).where(eq(teacherProfiles.personId, account.personId)).get();
+    if (teacher) {
+      const assignedClass = await db.select({ id: academicClasses.id }).from(academicClasses).innerJoin(academicYears, eq(academicClasses.academicYearId, academicYears.id)).where(and(eq(academicClasses.mustahiqId, teacher.id), eq(academicYears.isActive, true))).get();
+      if (assignedClass) {
+        assignedClassId = assignedClass.id;
+      }
+    }
+  }
+
+  if (account.role === "Wali Santri") {
+    const guardian = await db.select({ familyCardNumber: guardianProfiles.familyCardNumber }).from(guardianProfiles).where(eq(guardianProfiles.personId, account.personId)).get();
+    if (guardian) {
+      familyCardNumber = guardian.familyCardNumber;
+    }
+  }
 
   return c.json({
     status: "Success",
     data: {
-      userId: user.userId,
-      accountId: user.accountId,
-      personId: user.personId,
-      username: user.username,
-      role: user.role,
+      userId: account.id,
+      accountId: account.id,
+      personId: account.personId,
+      username: account.username,
+      role: account.role,
       fullName: person?.fullName || "",
       avatarUrl: person?.avatarUrl || null,
-      assignedClassId: user.assignedClassId || null,
-      familyCardNumber: user.familyCardNumber || null,
+      assignedClassId,
+      familyCardNumber,
     },
   });
 });
