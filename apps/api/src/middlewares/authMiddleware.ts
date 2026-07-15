@@ -130,10 +130,10 @@ export const requireAuth = async (c: Context<AppEnv>, next: Next) => {
     setCookie(c, "session_token", newToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "Strict",
+      sameSite: "None",
       path: "/",
       maxAge: 3600,
-      domain: c.env.ENVIRONMENT === "production" ? "m.p3hm.my.id" : undefined,
+      domain: "m.p3hm.my.id",
     });
   }
 

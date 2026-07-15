@@ -321,7 +321,7 @@ auth.get("/me", async (c) => {
     await db.update(userSessions).set({ sessionToken: newToken, expiresAt: newExpiry }).where(eq(userSessions.id, session.id));
     setCookie(c, "session_token", newToken, {
       httpOnly: true, secure: true, sameSite: "None", path: "/", maxAge: 3600,
-      domain: c.env.ENVIRONMENT === "production" ? "m.p3hm.my.id" : undefined,
+      domain: "m.p3hm.my.id",
     });
   }
 

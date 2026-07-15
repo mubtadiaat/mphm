@@ -26,11 +26,8 @@ export async function apiRequest<T = any>(
   const response = await fetch(url, config);
   
   if (response.status === 401) {
-    // Session expired or invalid -> Redirect to login page on client
-    if (typeof window !== "undefined") {
-      document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-      window.location.href = "/";
-    }
+    // Don't force redirect here — let the calling component handle it.
+    // The dashboard layout and useAuth handle unauthenticated state gracefully.
     throw new Error("Unauthorized");
   }
 
