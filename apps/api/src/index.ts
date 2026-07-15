@@ -44,7 +44,13 @@ const app = new Hono<AppEnv>()
 
 // 1. CORS — Hanya izinkan domain produksi + dev
 app.use('*', cors({
-  origin: ['https://m.p3hm.my.id', 'http://localhost:3000'],
+  origin: (origin) => {
+    if (!origin) return 'https://m.p3hm.my.id';
+    if (origin === 'https://m.p3hm.my.id' || origin === 'http://localhost:3000' || origin.endsWith('.vercel.app')) {
+      return origin;
+    }
+    return 'https://m.p3hm.my.id';
+  },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 }))

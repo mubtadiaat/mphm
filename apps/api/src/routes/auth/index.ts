@@ -152,13 +152,14 @@ auth.post(
       .where(eq(userAccounts.id, account.id));
 
     // 8. Set HttpOnly Secure Cookie
+    const isProd = c.env.ENVIRONMENT === "production" || c.env.ENVIRONMENT === "development"; // Allow domain setting even if wrangler has 'development' by mistake for now
     setCookie(c, "session_token", sessionToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "Strict",
+      sameSite: "None",
       path: "/",
       maxAge: 3600, // 1 jam
-      domain: c.env.ENVIRONMENT === "production" ? "m.p3hm.my.id" : undefined,
+      domain: "m.p3hm.my.id",
     });
 
     return c.json({
@@ -193,7 +194,7 @@ auth.post("/logout", async (c) => {
   // Clear cookie
   deleteCookie(c, "session_token", {
     path: "/",
-    domain: c.env.ENVIRONMENT === "production" ? "m.p3hm.my.id" : undefined,
+    domain: "m.p3hm.my.id",
   });
 
   return c.json({ status: "Success", message: "Logout berhasil" });
