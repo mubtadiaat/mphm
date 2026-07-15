@@ -99,6 +99,7 @@ app.use('/api/mustahiq/*', requireAuth)
 app.use('/api/guardian/*', requireAuth)
 
 // Global audit log middleware untuk semua route yang mengubah data
+app.use('/api/media/*', auditLogMiddleware('MEDIA_LIBRARY'))
 app.use('/api/academic/*', auditLogMiddleware('ACADEMIC_WORKSPACE'))
 app.use('/api/assessment/*', auditLogMiddleware('ASSESSMENT_ENGINE'))
 app.use('/api/disciplinary/*', auditLogMiddleware('DISCIPLINARY_ENGINE'))

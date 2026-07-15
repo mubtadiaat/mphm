@@ -53,6 +53,9 @@ peopleAdmin.get("/", async (c) => {
   const limit = parseInt(c.req.query("limit") || "1000"); // increase default limit for list to make sure we show all in demo
   const offset = parseInt(c.req.query("offset") || "0");
   
+  const status = c.req.query("status") || undefined;
+  const classFilter = c.req.query("classFilter") || undefined;
+  
   const db = createDb(c.env.DB);
 
   // Default filter: hanya yang belum dihapus
@@ -71,11 +74,41 @@ peopleAdmin.get("/", async (c) => {
     }
 
     if (!targetYearId) {
-      return c.json({ data: [] });
+      return c.json({ data: [], total: 0 });
     }
 
     // Parameterized query — aman dari SQL injection
     const searchPattern = query ? `%${query}%` : null;
+    let statusPattern = null;
+    if (status === "aktif") statusPattern = "ACTIVE";
+    else if (status === "mutasi") statusPattern = "MUTASI"; // special handling below
+    else if (status === "alumni") statusPattern = "GRADUATED";
+    else if (status === "khidmah") statusPattern = "KHIDMAH";
+
+    const classPattern = classFilter ? `%${classFilter}%` : null;
+
+    // Count Total first
+    const countResult = await db.run(sql`
+      SELECT COUNT(*) as total
+      FROM student_profiles sp
+      JOIN people p ON p.id = sp.person_id
+      LEFT JOIN class_enrollments ce ON ce.student_id = sp.id AND ce.status = 'ACTIVE' AND ce.deleted_at IS NULL
+      LEFT JOIN academic_classes ac ON ac.id = ce.class_id AND ac.deleted_at IS NULL
+      WHERE ac.academic_year_id = ${targetYearId}
+      AND p.deleted_at IS NULL
+      AND sp.deleted_at IS NULL
+      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR sp.stambuk_number LIKE ${searchPattern})
+      AND (
+        ${statusPattern} IS NULL 
+        OR (${statusPattern} = 'ACTIVE' AND sp.status = 'ACTIVE')
+        OR (${statusPattern} = 'GRADUATED' AND sp.status = 'GRADUATED')
+        OR (${statusPattern} = 'KHIDMAH' AND sp.status = 'KHIDMAH')
+        OR (${statusPattern} = 'MUTASI' AND sp.status IN ('BOYONG', 'DROPPED'))
+      )
+      AND (${classPattern} IS NULL OR ac.full_name LIKE ${classPattern})
+    `);
+    const totalCount = (countResult.results[0] as { total: number })?.total || 0;
+
     const result = await db.run(sql`
       SELECT 
         sp.id as id,
@@ -116,14 +149,32 @@ peopleAdmin.get("/", async (c) => {
       AND p.deleted_at IS NULL
       AND sp.deleted_at IS NULL
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR sp.stambuk_number LIKE ${searchPattern})
+      AND (
+        ${statusPattern} IS NULL 
+        OR (${statusPattern} = 'ACTIVE' AND sp.status = 'ACTIVE')
+        OR (${statusPattern} = 'GRADUATED' AND sp.status = 'GRADUATED')
+        OR (${statusPattern} = 'KHIDMAH' AND sp.status = 'KHIDMAH')
+        OR (${statusPattern} = 'MUTASI' AND sp.status IN ('BOYONG', 'DROPPED'))
+      )
+      AND (${classPattern} IS NULL OR ac.full_name LIKE ${classPattern})
       LIMIT ${limit} OFFSET ${offset}
     `);
     const list = result.results || [];
-    return c.json({ status: "Success", data: list });
+    return c.json({ status: "Success", data: list, total: totalCount });
   }
 
   if (role === "teacher") {
     const searchPattern = query ? `%${query}%` : null;
+    const countResult = await db.run(sql`
+      SELECT COUNT(*) as total
+      FROM teacher_profiles tp
+      JOIN people p ON p.id = tp.person_id
+      WHERE p.deleted_at IS NULL
+      AND tp.deleted_at IS NULL
+      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR tp.teacher_code LIKE ${searchPattern})
+    `);
+    const totalCount = (countResult.results[0] as { total: number })?.total || 0;
+
     const result = await db.run(sql`
       SELECT 
         tp.id as id,
@@ -142,11 +193,21 @@ peopleAdmin.get("/", async (c) => {
       LIMIT ${limit} OFFSET ${offset}
     `);
     const list = result.results || [];
-    return c.json({ status: "Success", data: list });
+    return c.json({ status: "Success", data: list, total: totalCount });
   }
 
   if (role === "pengurus") {
     const searchPattern = query ? `%${query}%` : null;
+    const countResult = await db.run(sql`
+      SELECT COUNT(*) as total
+      FROM organization_memberships om
+      JOIN people p ON p.id = om.person_id
+      WHERE p.deleted_at IS NULL
+      AND om.deleted_at IS NULL
+      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR om.role_name LIKE ${searchPattern})
+    `);
+    const totalCount = (countResult.results[0] as { total: number })?.total || 0;
+
     const result = await db.run(sql`
       SELECT 
         om.id as id,
@@ -164,7 +225,44 @@ peopleAdmin.get("/", async (c) => {
       LIMIT ${limit} OFFSET ${offset}
     `);
     const list = result.results || [];
-    return c.json({ status: "Success", data: list });
+    return c.json({ status: "Success", data: list, total: totalCount });
+  }
+
+  if (role === "guardian") {
+    const searchPattern = query ? `%${query}%` : null;
+    
+    // For guardians, we want DISTINCT family cards.
+    // Count distinct family cards
+    const countResult = await db.run(sql`
+      SELECT COUNT(DISTINCT gp.family_card_number) as total
+      FROM guardian_profiles gp
+      JOIN people p ON p.id = gp.person_id
+      WHERE gp.deleted_at IS NULL
+      AND p.deleted_at IS NULL
+      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})
+    `);
+    const totalCount = (countResult.results[0] as { total: number })?.total || 0;
+
+    const result = await db.run(sql`
+      SELECT 
+        gp.family_card_number as familyCardNumber,
+        p.full_name as guardianName,
+        p.phone_number as phone,
+        gp.relation as relation,
+        p.nik as nik,
+        COUNT(DISTINCT sp.id) as childrenCount
+      FROM guardian_profiles gp
+      JOIN people p ON p.id = gp.person_id
+      LEFT JOIN guardian_profiles gp_child ON gp_child.family_card_number = gp.family_card_number AND gp_child.relation = 'ANAK'
+      LEFT JOIN student_profiles sp ON sp.person_id = gp_child.person_id
+      WHERE gp.deleted_at IS NULL
+      AND p.deleted_at IS NULL
+      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})
+      GROUP BY gp.family_card_number
+      LIMIT ${limit} OFFSET ${offset}
+    `);
+    const list = result.results || [];
+    return c.json({ status: "Success", data: list, total: totalCount });
   }
   
   const peopleService = new PeopleService(db);

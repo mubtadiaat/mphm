@@ -11,8 +11,13 @@ import { useToast } from "@/components/shared/ToastContext";
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 
 export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail: (data: Record<string, unknown>) => void, isReadOnly?: boolean }) {
-  const { data: remoteData = [], isLoading, deletePengurus } = usePengurus();
-  const data = remoteData;
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pengurusData, setPengurusData] = useState<Pengurus[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const { data: remoteData = { data: [], total: 0 }, isLoading, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +31,15 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [pengurusTitles, setPengurusTitles] = useState<string[]>([
     "Kepala Keamanan", "Staf Keamanan", "Staf IT & Sistem", "Staf Kebersihan / Operasional"
   ]);
+
+  useEffect(() => {
+    if (remoteData) {
+      queueMicrotask(() => {
+        setPengurusData(remoteData.data as any[]);
+        setTotalCount(remoteData.total);
+      });
+    }
+  }, [remoteData]);
 
   useEffect(() => {
     const saved = localStorage.getItem("job_titles_pengurus");
@@ -89,7 +103,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     )},
     {
       id: "actions", header: "Aksi",
-      cell: info => <TableActions onEdit={() => handleOpenEdit(info.row.original)} onDelete={() => handleDelete(info.row.original.id)} onDetail={() => onViewDetail(info.row.original as unknown as Record<string, unknown>)} isReadOnly={isReadOnly} />
+      cell: info => <TableActions onEdit={() => handleOpenEdit(info.row.original)} onDelete={() => handleDelete(info.row.original.id)} onDetail={() => onViewDetail(info.row.original as unknown as Record<string, unknown>)} isReadOnly={false} />
     }
   ];
 
@@ -110,19 +124,20 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
             Kelola master data Pengurus Keamanan, IT, dan Divisi Lainnya.
           </p>
         </div>
-        {!isReadOnly && (
-          <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95">
-            <Plus className="w-4 h-4" /> Tambah Pengurus
-          </button>
-        )}
+        <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95">
+          <Plus className="w-4 h-4" /> Tambah Pengurus
+        </button>
       </div>
 
       <UniversalDataGrid
         columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={data as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={100}
+        data={pengurusData as unknown as Record<string, unknown>[]}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={(row) => onViewDetail(row)}
         tableName="pengurus"

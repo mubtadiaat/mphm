@@ -10,12 +10,16 @@ import { IdentityCell } from "@/components/shared/IdentityCell";
 import { useSantri, Santri } from "../queries/useSantri";
 
 export function SertifikatTab() {
-  const { data = [], isLoading } = useSantri();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: remoteData = { data: [], total: 0 }, isLoading } = useSantri(undefined, pageIndex, pageSize, searchQuery, "aktif", "I'dadiyah");
   
   const [showPreview, setShowPreview] = useState(false);
   const [previewStudent, setPreviewStudent] = useState<Santri | null>(null);
 
-  const displayedStudents = useMemo(() => data.filter(s => s.class?.includes("I'dadiyah")), [data]);
+  const displayedStudents = remoteData.data;
 
   const handleCetak = (student: Santri) => {
     setPreviewStudent(student);
@@ -71,8 +75,13 @@ export function SertifikatTab() {
 
       <UniversalDataGrid
         columns={columns as any}
-        data={displayedStudents as any}
-        pageCount={1} pageIndex={0} pageSize={100} loading={isLoading}
+        data={displayedStudents as unknown as Record<string, unknown>[]}
+        pageCount={Math.ceil(remoteData.total / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery} loading={isLoading}
         onRowClick={() => {}}
         tableName="sertifikat"
       />

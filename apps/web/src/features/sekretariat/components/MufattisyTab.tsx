@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, X, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,11 +8,17 @@ import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
+
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 
 export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetail: (data: Record<string, unknown>) => void, isReadOnly?: boolean }) {
-  const { data: remoteData = [], isLoading, deletePengurus } = usePengurus("Mufattisy");
-  const data = remoteData;
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mufattisyList, setMufattisyList] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const { data: remoteData = { data: [], total: 0 }, isLoading, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -21,6 +27,15 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">("ACTIVE");
+
+  useEffect(() => {
+    if (remoteData) {
+      queueMicrotask(() => {
+        setMufattisyList(remoteData.data as any[]);
+        setTotalCount(remoteData.total);
+      });
+    }
+  }, [remoteData]);
 
   const resetForm = () => {
     setName(""); setPhone(""); setStatus("ACTIVE");
@@ -94,10 +109,13 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
 
       <UniversalDataGrid
         columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={data as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={100}
+        data={mufattisyList as unknown as Record<string, unknown>[]}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={(row) => onViewDetail(row)}
         tableName="mufattisy"

@@ -11,15 +11,16 @@ export interface Guru {
   avatarUrl?: string | null;
 }
 
-export function useGuru(query?: string) {
+export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
   const queryClient = useQueryClient();
 
-  const queryReq = useQuery<Guru[]>({
-    queryKey: ["sekretariat-guru", query],
+  const queryReq = useQuery<{ data: Guru[]; total: number }>({
+    queryKey: ["sekretariat-guru", query, pageIndex, pageSize],
     queryFn: async () => {
-      const url = query ? `/api/admin/people?role=teacher&q=${query}` : "/api/admin/people?role=teacher";
-      const res = await apiRequest<{ data: Guru[] }>(url);
-      return res.data || [];
+      let url = `/api/admin/people?role=teacher&limit=${pageSize}&offset=${pageIndex * pageSize}`;
+      if (query) url += `&q=${query}`;
+      const res = await apiRequest<{ data: Guru[]; total: number }>(url);
+      return res || { data: [], total: 0 };
     },
   });
 

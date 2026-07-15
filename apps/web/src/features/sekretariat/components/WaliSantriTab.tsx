@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { User } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
-import { useSantri, Santri } from "../queries/useSantri";
+import { useGuardians, Guardian } from "../queries/useGuardians";
 import { TableActions } from "@/components/shared/TableActions";
 
 interface SiswaTabProps {
@@ -14,50 +14,23 @@ interface SiswaTabProps {
 }
 
 export function WaliSantriTab({ onViewDetail, selectedYearId }: SiswaTabProps) {
-  const { data: remoteData, isLoading } = useSantri(selectedYearId);
-  const [santriData, setSantriData] = useState<Santri[]>([]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: remoteData = { data: [], total: 0 }, isLoading } = useGuardians(searchQuery, pageIndex, pageSize);
+  const [guardiansList, setGuardiansList] = useState<Guardian[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Sync with TanStack Query data
   useEffect(() => {
     if (remoteData) {
       queueMicrotask(() => {
-        setSantriData(remoteData);
+        setGuardiansList(remoteData.data);
+        setTotalCount(remoteData.total);
       });
     }
   }, [remoteData]);
-
-  // Data Grid Mapping untuk Wali Santri (Smart KK Mapping)
-  const uniqueGuardiansMap: Record<string, {
-    id: string;
-    familyCardNumber: string;
-    guardianName: string;
-    guardianNik?: string;
-    guardianPhone: string;
-    guardianRelation: "AYAH" | "IBU" | "WALI";
-    children: Array<{ name: string; class: string }>;
-  }> = {};
-
-  santriData.forEach((s) => {
-    if (s.familyCardNumber) {
-      if (!uniqueGuardiansMap[s.familyCardNumber]) {
-        uniqueGuardiansMap[s.familyCardNumber] = {
-          id: `guard-${s.familyCardNumber}`,
-          familyCardNumber: s.familyCardNumber,
-          guardianName: s.guardianName,
-          guardianNik: s.guardianNik,
-          guardianPhone: s.guardianPhone,
-          guardianRelation: s.guardianRelation,
-          children: []
-        };
-      }
-      // Tambahkan anak jika belum tercantum
-      if (!uniqueGuardiansMap[s.familyCardNumber].children.some(c => c.name === s.name)) {
-        uniqueGuardiansMap[s.familyCardNumber].children.push({ name: s.name, class: s.class });
-      }
-    }
-  });
-
-  const guardiansList = Object.values(uniqueGuardiansMap);
 
   // Columns definition: Wali Santri (Smart KK Mapping)
   const guardianColumns: ColumnDef<typeof guardiansList[number], unknown>[] = [
@@ -71,7 +44,7 @@ export function WaliSantriTab({ onViewDetail, selectedYearId }: SiswaTabProps) {
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">{info.getValue() as string}</span>
-            <span className="text-[11px] text-zinc-400 font-medium">Hubungan: {info.row.original.guardianRelation}</span>
+            <span className="text-[11px] text-zinc-400 font-medium">Hubungan: {info.row.original.relation}</span>
           </div>
         </div>
       ),
@@ -82,26 +55,22 @@ export function WaliSantriTab({ onViewDetail, selectedYearId }: SiswaTabProps) {
       cell: (info) => <span className="font-mono text-xs text-zinc-800 dark:text-zinc-300 font-bold">{info.getValue() as string}</span>,
     },
     {
-      accessorKey: "guardianNik",
+      accessorKey: "nik",
       header: "NIK Wali",
       cell: (info) => <span className="font-mono text-xs text-zinc-800 dark:text-zinc-300 font-bold">{info.getValue() as string || "-"}</span>,
     },
     {
-      accessorKey: "guardianPhone",
+      accessorKey: "phone",
       header: "No. HP / WhatsApp",
       cell: (info) => <span className="text-zinc-700 dark:text-zinc-300 text-xs font-mono">{info.getValue() as string}</span>,
     },
     {
       id: "children",
-      header: "Anak Binaan (Satu KK)",
+      header: "Jumlah Anak Binaan",
       cell: (info) => (
-        <div className="flex flex-wrap gap-1">
-          {info.row.original.children.map((child, idx) => (
-            <span key={idx} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-[10px] font-semibold rounded-md border border-blue-150 dark:border-blue-900/40">
-              {child.name} ({child.class})
-            </span>
-          ))}
-        </div>
+        <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-md border border-blue-150 dark:border-blue-900/40">
+          {info.row.original.childrenCount} Santri
+        </span>
       ),
     },
   ];
@@ -132,9 +101,12 @@ export function WaliSantriTab({ onViewDetail, selectedYearId }: SiswaTabProps) {
       <UniversalDataGrid
         columns={guardianColumns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
         data={guardiansList as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={10}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={(row) => onViewDetail(row as unknown as Record<string, unknown>)}
         tableName="wali_santri"

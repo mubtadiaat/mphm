@@ -10,12 +10,17 @@ import { IdentityCell } from "@/components/shared/IdentityCell";
 import { useSantri, Santri } from "../queries/useSantri";
 
 export function IjazahTab() {
-  const { data = [], isLoading } = useSantri();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: remoteData = { data: [], total: 0 }, isLoading } = useSantri(undefined, pageIndex, pageSize, searchQuery, "alumni", "Aliyyah");
   
   const [showPreview, setShowPreview] = useState(false);
   const [previewStudent, setPreviewStudent] = useState<Santri | null>(null);
 
-  const displayedStudents = useMemo(() => data.filter(s => s.class?.includes("Aliyyah") && s.status === "GRADUATED"), [data]);
+  // We can display the paginated data directly now since it is filtered by the server
+  const displayedStudents = remoteData.data;
 
   const handleCetak = (student: Santri) => {
     setPreviewStudent(student);
@@ -71,8 +76,13 @@ export function IjazahTab() {
 
       <UniversalDataGrid
         columns={columns as any}
-        data={displayedStudents as any}
-        pageCount={1} pageIndex={0} pageSize={100} loading={isLoading}
+        data={displayedStudents as unknown as Record<string, unknown>[]}
+        pageCount={Math.ceil(remoteData.total / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery} loading={isLoading}
         onRowClick={() => {}}
         tableName="ijazah"
       />

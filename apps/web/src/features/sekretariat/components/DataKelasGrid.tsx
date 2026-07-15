@@ -17,8 +17,10 @@ const CLASS_LEVELS_MAP: Record<string, string[]> = {
 export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false }: { onViewDetail?: (data: Record<string, unknown>) => void, selectedYearId?: string, isReadOnly?: boolean }) {
   const { data: remoteData, isLoading, createClass, isCreating } = useClasses(selectedYearId);
   
-  const { data: mustahiqList = [] } = useGuru();
-  const { data: mufattisyList = [] } = usePengurus("Mufattisy");
+  const { data: mustahiqListRemote = { data: [], total: 0 } } = useGuru("", 0, 100);
+  const mustahiqList = mustahiqListRemote.data;
+  const { data: mufattisyListRemote = { data: [], total: 0 } } = usePengurus("Mufattisy", 0, 100);
+  const mufattisyList = mufattisyListRemote.data;
   const [jenjang, setJenjang] = useState<string>("Semua");
   
   // State for Create Form

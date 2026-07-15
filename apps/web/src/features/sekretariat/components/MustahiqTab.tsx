@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, X, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,9 +11,23 @@ import { useToast } from "@/components/shared/ToastContext";
 import { useGuru, Guru } from "../queries/useGuru";
 
 export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail: (data: Record<string, unknown>) => void, isReadOnly?: boolean }) {
-  const { data: remoteData = [], isLoading, deleteGuru } = useGuru();
-  const data = remoteData;
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [teachers, setTeachers] = useState<Guru[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const { data: remoteData = { data: [], total: 0 }, isLoading, deleteGuru } = useGuru(searchQuery, pageIndex, pageSize);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (remoteData) {
+      queueMicrotask(() => {
+        setTeachers(remoteData.data as Guru[]);
+        setTotalCount(remoteData.total);
+      });
+    }
+  }, [remoteData]);
   
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Guru | null>(null);
@@ -94,10 +108,13 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
       <UniversalDataGrid
         columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={data as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={100}
+        data={teachers as unknown as Record<string, unknown>[]}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={(row) => onViewDetail(row)}
         tableName="mustahiq"

@@ -21,19 +21,31 @@ interface SiswaTabProps {
 }
 
 export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: SiswaTabProps) {
-  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId);
-  const [santriData, setSantriData] = useState<Santri[]>([]);
   const [activeSubTab, setActiveSubTab] = useState<"aktif" | "alumni" | "mutasi">("aktif");
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: queryResult, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, activeSubTab);
+  
+  const [santriData, setSantriData] = useState<Santri[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
+
+  // Reset page when tab changes
+  useEffect(() => {
+    setPageIndex(0);
+  }, [activeSubTab]);
 
   // Sync with TanStack Query data
   useEffect(() => {
-    if (remoteData) {
+    if (queryResult) {
       queueMicrotask(() => {
-        setSantriData(remoteData);
+        setSantriData(queryResult.data);
+        setTotalCount(queryResult.total);
       });
     }
-  }, [remoteData]);
+  }, [queryResult]);
 
   // Modal States
   const [showFormModal, setShowFormModal] = useState(false);
@@ -242,12 +254,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
     }
   };
 
-  // 1. Data Grid Filter per Tab
-  const filteredStudents = santriData.filter((s) => {
-    if (activeSubTab === "aktif") return s.status === "ACTIVE";
-    if (activeSubTab === "mutasi") return ["BOYONG", "DROPPED"].includes(s.status);
-    return false;
-  });
+  // 1. Server-Side filtering applied via useSantri
 
   // Columns definition: Santri Aktif
   const activeColumns: ColumnDef<Santri, unknown>[] = [
@@ -422,11 +429,11 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
   const getGridProps = () => {
     switch (activeSubTab) {
       case "aktif":
-        return { columns: activeColumns, data: filteredStudents, tableName: "santri_aktif" };
+        return { columns: activeColumns, data: santriData, tableName: "santri_aktif" };
       case "alumni":
-        return { columns: alumniColumns, data: filteredStudents, tableName: "santri_alumni" };
+        return { columns: alumniColumns, data: santriData, tableName: "santri_alumni" };
       case "mutasi":
-        return { columns: mutasiColumns, data: filteredStudents, tableName: "santri_mutasi" };
+        return { columns: mutasiColumns, data: santriData, tableName: "santri_mutasi" };
     }
   };
 
@@ -490,9 +497,12 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
       <UniversalDataGrid
         columns={gridProps.columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
         data={gridProps.data as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={10}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={onViewDetail ? ((row) => onViewDetail(row as unknown as Record<string, unknown>)) : undefined}
         tableName={gridProps.tableName}

@@ -10,9 +10,19 @@ import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 
-export function MundzirTab({ onViewDetail, isReadOnly = false }: { onViewDetail: (data: Record<string, unknown>) => void, isReadOnly?: boolean }) {
-  const { data: remoteData = [], isLoading, deletePengurus } = usePengurus("Mundzir");
-  const data = remoteData;
+interface MundzirTabProps {
+  onViewDetail: (data: Record<string, unknown>) => void;
+  isReadOnly?: boolean;
+}
+
+export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps) {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mundzirList, setMundzirList] = useState<Pengurus[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const { data: remoteData = { data: [], total: 0 }, isLoading, deletePengurus } = usePengurus(searchQuery || "Mundzir", pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +37,15 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: { onViewDetail:
   const [mundzirTitles, setMundzirTitles] = useState<string[]>([
     "Mundzir Utama", "Mundzir Asrama Putra", "Mundziroh Asrama Putri", "Mundzir Asrama (Umum)"
   ]);
+
+  useEffect(() => {
+    if (remoteData) {
+      queueMicrotask(() => {
+        setMundzirList(remoteData.data as any[]);
+        setTotalCount(remoteData.total);
+      });
+    }
+  }, [remoteData]);
 
   useEffect(() => {
     const saved = localStorage.getItem("job_titles_mundzir");
@@ -119,10 +138,13 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: { onViewDetail:
 
       <UniversalDataGrid
         columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={data as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={100}
+        data={mundzirList as unknown as Record<string, unknown>[]}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={(row) => onViewDetail(row)}
         tableName="mundzir"

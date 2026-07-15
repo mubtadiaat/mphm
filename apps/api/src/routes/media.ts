@@ -68,4 +68,26 @@ media.delete("/", async (c) => {
   }
 });
 
+// Explicit audit log untuk unggahan langsung dari frontend
+media.post("/audit", async (c) => {
+  const body = await c.req.json<{ url: string, action?: string, details?: string }>().catch(() => null);
+  
+  if (!body || !body.url) {
+    return c.json({ status: "Error", message: "URL gambar tidak diberikan." }, 400);
+  }
+
+  // Set data untuk audit log otomatis
+  c.set("auditBeforeData", null);
+
+  return c.json({ 
+    status: "Success", 
+    message: "Jejak audit berhasil dicatat.",
+    data: {
+      url: body.url,
+      action: body.action || "UPLOAD_MEDIA",
+      details: body.details
+    }
+  });
+});
+
 export default media;

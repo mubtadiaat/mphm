@@ -21,16 +21,21 @@ interface SiswaTabProps {
 }
 
 export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: SiswaTabProps) {
-  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "alumni");
   const [santriData, setSantriData] = useState<Santri[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<"aktif" | "alumni" | "mutasi">("aktif");
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
 
   // Sync with TanStack Query data
   useEffect(() => {
     if (remoteData) {
       queueMicrotask(() => {
-        setSantriData(remoteData);
+        setSantriData(remoteData.data);
+        setTotalCount(remoteData.total);
       });
     }
   }, [remoteData]);
@@ -344,10 +349,13 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
 
       <UniversalDataGrid
         columns={alumniColumns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={filteredData as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={10}
+        data={santriData as unknown as Record<string, unknown>[]}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={onViewDetail ? ((row) => onViewDetail(row as unknown as Record<string, unknown>)) : undefined}
         tableName="santri_alumni"

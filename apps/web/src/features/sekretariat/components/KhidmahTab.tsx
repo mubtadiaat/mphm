@@ -21,11 +21,16 @@ interface SiswaTabProps {
 }
 
 export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }: SiswaTabProps) {
-  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "khidmah");
   const [santriData, setSantriData] = useState<Santri[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
-  // Filter khusus untuk Khidmah
-  const filteredData = santriData.filter((s) => s.status === "KHIDMAH");
+  // Filter khusus untuk Khidmah (now handled by server)
+  const filteredData = santriData;
 
   // Modal States
   const [showFormModal, setShowFormModal] = useState(false);
@@ -35,7 +40,8 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
   useEffect(() => {
     if (remoteData) {
       queueMicrotask(() => {
-        setSantriData(remoteData);
+        setSantriData(remoteData.data);
+        setTotalCount(remoteData.total);
       });
     }
   }, [remoteData]);
@@ -411,9 +417,12 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
       <UniversalDataGrid
         columns={activeColumns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
         data={filteredData as unknown as Record<string, unknown>[]}
-        pageCount={1}
-        pageIndex={0}
-        pageSize={10}
+        pageCount={Math.ceil(totalCount / pageSize) || 1}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+        onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={onViewDetail ? ((row) => onViewDetail(row as unknown as Record<string, unknown>)) : undefined}
         tableName="santri_khidmah"

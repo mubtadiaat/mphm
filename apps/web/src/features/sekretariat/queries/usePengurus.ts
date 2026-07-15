@@ -11,15 +11,16 @@ export interface Pengurus {
   avatarUrl?: string | null;
 }
 
-export function usePengurus(query?: string) {
+export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
   const queryClient = useQueryClient();
 
-  const queryReq = useQuery<Pengurus[]>({
-    queryKey: ["sekretariat-pengurus", query],
+  const queryReq = useQuery<{ data: Pengurus[]; total: number }>({
+    queryKey: ["sekretariat-pengurus", query, pageIndex, pageSize],
     queryFn: async () => {
-      const url = query ? `/api/admin/people?role=pengurus&q=${query}` : "/api/admin/people?role=pengurus";
-      const res = await apiRequest<{ data: Pengurus[] }>(url);
-      return res.data || [];
+      let url = `/api/admin/people?role=pengurus&limit=${pageSize}&offset=${pageIndex * pageSize}`;
+      if (query) url += `&q=${query}`;
+      const res = await apiRequest<{ data: Pengurus[]; total: number }>(url);
+      return res || { data: [], total: 0 };
     },
   });
 

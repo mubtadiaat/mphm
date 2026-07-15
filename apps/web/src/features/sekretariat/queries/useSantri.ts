@@ -28,17 +28,36 @@ export interface Santri {
   khidmahPlacement?: string;
 }
 
-export function useSantri(academicYearId?: string) {
+export function useSantri(
+  academicYearId?: string,
+  pageIndex: number = 0,
+  pageSize: number = 10,
+  searchQuery: string = "",
+  statusTab: string = "aktif",
+  classFilter?: string
+) {
   const queryClient = useQueryClient();
 
-  const query = useQuery<Santri[]>({
-    queryKey: ["sekretariat-santri", academicYearId],
+  const query = useQuery<{ data: Santri[]; total: number }>({
+    queryKey: ["sekretariat-santri", academicYearId, pageIndex, pageSize, searchQuery, statusTab, classFilter],
     queryFn: async () => {
-      const url = academicYearId
-        ? `/api/admin/people?role=student&academicYearId=${academicYearId}`
-        : "/api/admin/people?role=student";
-      const res = await apiRequest<{ data: Santri[] }>(url);
-      return res.data || [];
+      const queryParams = new URLSearchParams({
+        role: "student",
+        limit: pageSize.toString(),
+        offset: (pageIndex * pageSize).toString(),
+      });
+      
+      if (academicYearId) queryParams.append("academicYearId", academicYearId);
+      if (searchQuery) queryParams.append("q", searchQuery);
+      if (statusTab) queryParams.append("status", statusTab);
+      if (classFilter) queryParams.append("classFilter", classFilter);
+
+      const url = `/api/admin/people?${queryParams.toString()}`;
+      const res = await apiRequest<{ data: Santri[]; total: number }>(url);
+      return {
+        data: res.data || [],
+        total: res.total || 0,
+      };
     },
   });
 
