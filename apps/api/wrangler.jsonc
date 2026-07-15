@@ -15,7 +15,7 @@
     {
       "binding": "DB",
       "database_name": "db_mphm",
-      "database_id": "eaccb9bd-3c37-455c-8ab5-b62d95ccfc65", // Ganti saat deploy
+      "database_id": "eaccb9bd-3c37-455c-8ab5-b62d95ccfc65",
       "migrations_dir": "../../packages/db/drizzle"
     }
   ],
@@ -24,7 +24,7 @@
   "kv_namespaces": [
     {
       "binding": "SESSION_KV",
-      "id": "b7e88ecf9f2142db8aa290d367da8d33" // Ganti saat deploy
+      "id": "b7e88ecf9f2142db8aa290d367da8d33"
     }
   ],
   
