@@ -84,6 +84,7 @@ export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
         { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
         { label: "Arsip Akademik", href: "/sekretariat/arsip", icon: Archive },
         { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
+        { label: "Dokumen & Template", href: "/sekretariat/document-template", icon: FileText },
         { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
       ]
     }

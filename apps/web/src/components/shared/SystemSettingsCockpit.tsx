@@ -16,7 +16,7 @@ import {
   MenuCapabilities
 } from "@/lib/useRoleUIConfig";
 import { MathFormulaBuilder } from "./MathFormulaBuilder";
-import { DocumentTemplateBuilder } from "./DocumentTemplateBuilder";
+
 
 const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: string }>> = {
   sekretariat: [
@@ -655,17 +655,6 @@ export function SystemSettingsCockpit() {
           >
             <Briefcase className="w-4 h-4" />
             <span>Jabatan Struktural</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("templates")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "templates"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-            <span>Dokumen & Template</span>
           </button>
           <button
             onClick={() => setSettingsTab("master_pelanggaran")}
@@ -1592,9 +1581,7 @@ export function SystemSettingsCockpit() {
             <MasterPelanggaranTab />
           )}
 
-          {settingsTab === "templates" && (
-            <DocumentTemplateBuilder />
-          )}
+
 
           {/* Save Button */}
           <div className="p-4 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl flex justify-end gap-3">
