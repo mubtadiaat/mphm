@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { GraduationCap, X, Printer, Award } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -75,7 +75,7 @@ export function IjazahTab() {
       </div>
 
       <UniversalDataGrid
-        columns={columns as any}
+        columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
         data={displayedStudents as unknown as Record<string, unknown>[]}
         pageCount={Math.ceil(remoteData.total / pageSize) || 1}
         pageIndex={pageIndex}

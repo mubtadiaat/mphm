@@ -241,7 +241,8 @@ auth.post(
         personId: account.personId,
         fullName: person?.fullName || "",
         role: account.role,
-        avatarUrl: person?.avatarUrl || null,
+        avatarUrl: person?.avatarUrl || (person as any)?.avatar_url || null,
+        avatar_url: person?.avatarUrl || (person as any)?.avatar_url || null,
         mustChangePassword: isDefaultPassword,
       },
     });
@@ -363,7 +364,8 @@ auth.get("/me", async (c) => {
       username: account.username,
       role: account.role,
       fullName: person?.fullName || "",
-      avatarUrl: person?.avatarUrl || null,
+      avatarUrl: person?.avatarUrl || (person as any)?.avatar_url || null,
+      avatar_url: person?.avatarUrl || (person as any)?.avatar_url || null,
       assignedClassId,
       familyCardNumber,
       mustChangePassword: isDefaultPassword,
@@ -412,10 +414,11 @@ auth.put("/profile", requireAuth, zValidator("json", profileUpdateSchema), async
 
   // 3. Update nama lengkap dan foto profil (Avatar) di tabel people
   const currentPerson = await db.select().from(people).where(eq(people.id, user.personId)).get();
+  const currentAvatarUrl = currentPerson?.avatarUrl || (currentPerson as any)?.avatar_url;
   
-  if (currentPerson && avatarUrl !== undefined && avatarUrl !== currentPerson.avatarUrl) {
-    if (currentPerson.avatarUrl) {
-      await deleteFromCloudinary(currentPerson.avatarUrl, {
+  if (currentPerson && avatarUrl !== undefined && avatarUrl !== currentAvatarUrl) {
+    if (currentAvatarUrl) {
+      await deleteFromCloudinary(currentAvatarUrl, {
         CLOUDINARY_CLOUD_NAME: c.env.CLOUDINARY_CLOUD_NAME,
         CLOUDINARY_API_KEY: c.env.CLOUDINARY_API_KEY,
         CLOUDINARY_API_SECRET: c.env.CLOUDINARY_API_SECRET,

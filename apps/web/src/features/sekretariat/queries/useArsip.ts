@@ -6,7 +6,7 @@ export function useArsipSiswa(academicYearId: string | undefined) {
     queryKey: ["arsip", "siswa", academicYearId],
     queryFn: async () => {
       if (!academicYearId) return [];
-      const res = await apiRequest<{ data: any[] }>(`/api/admin/arsip/siswa?academicYearId=${academicYearId}`);
+      const res = await apiRequest<{ data: Record<string, unknown>[] }>(`/api/admin/arsip/siswa?academicYearId=${academicYearId}`);
       return res.data || [];
     },
     enabled: !!academicYearId,
@@ -18,7 +18,7 @@ export function useArsipKelas(academicYearId: string | undefined) {
     queryKey: ["arsip", "kelas", academicYearId],
     queryFn: async () => {
       if (!academicYearId) return [];
-      const res = await apiRequest<{ data: any[] }>(`/api/admin/arsip/kelas?academicYearId=${academicYearId}`);
+      const res = await apiRequest<{ data: Record<string, unknown>[] }>(`/api/admin/arsip/kelas?academicYearId=${academicYearId}`);
       return res.data || [];
     },
     enabled: !!academicYearId,
@@ -30,7 +30,7 @@ export function useArsipNilai(academicYearId: string | undefined) {
     queryKey: ["arsip", "nilai", academicYearId],
     queryFn: async () => {
       if (!academicYearId) return [];
-      const res = await apiRequest<{ data: any[] }>(`/api/admin/arsip/nilai?academicYearId=${academicYearId}`);
+      const res = await apiRequest<{ data: Record<string, unknown>[] }>(`/api/admin/arsip/nilai?academicYearId=${academicYearId}`);
       return res.data || [];
     },
     enabled: !!academicYearId,
@@ -42,7 +42,7 @@ export function useArsipPelanggaran(academicYearId: string | undefined) {
     queryKey: ["arsip", "pelanggaran", academicYearId],
     queryFn: async () => {
       if (!academicYearId) return [];
-      const res = await apiRequest<{ data: any[] }>(`/api/admin/arsip/pelanggaran?academicYearId=${academicYearId}`);
+      const res = await apiRequest<{ data: Record<string, unknown>[] }>(`/api/admin/arsip/pelanggaran?academicYearId=${academicYearId}`);
       return res.data || [];
     },
     enabled: !!academicYearId,

@@ -1,12 +1,12 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.m.p3hm.my.id";
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   status: string;
   message?: string;
   data: T;
 }
 
-export async function apiRequest<T = any>(
+export async function apiRequest<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {

@@ -27,7 +27,7 @@ export function useUsers(query?: string) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Record<string, unknown>) => {
       const res = await apiRequest<{ data: UserAccount }>("/api/admin/users", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -40,7 +40,7 @@ export function useUsers(query?: string) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Record<string, unknown> }) => {
       const res = await apiRequest<{ data: UserAccount }>(`/api/admin/users/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),

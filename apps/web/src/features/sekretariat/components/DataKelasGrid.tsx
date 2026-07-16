@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, MoreVertical, BookOpen, Layers, Plus, X, Save } from "lucide-react";
+import { MoreVertical, BookOpen, Layers, Plus, X, Save } from "lucide-react";
 import { useClasses } from "@/features/sekretariat/queries/useClasses";
 import { useGuru } from "@/features/sekretariat/queries/useGuru";
 import { usePengurus } from "@/features/sekretariat/queries/usePengurus";

@@ -15,7 +15,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [mufattisyList, setMufattisyList] = useState<any[]>([]);
+  const [mufattisyList, setMufattisyList] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
   const { data: remoteData = { data: [], total: 0 }, isLoading, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
@@ -26,28 +26,27 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">("ACTIVE");
 
   useEffect(() => {
     if (remoteData) {
       queueMicrotask(() => {
-        setMufattisyList(remoteData.data as any[]);
+        setMufattisyList(remoteData.data as Pengurus[]);
         setTotalCount(remoteData.total);
       });
     }
   }, [remoteData]);
 
   const resetForm = () => {
-    setName(""); setPhone(""); setStatus("ACTIVE");
+    setName(""); setPhone("");
   };
 
   const handleOpenAdd = () => {
     setEditingData(null); resetForm(); setShowModal(true);
   };
 
-  const handleOpenEdit = (item: any) => {
+  const handleOpenEdit = (item: Pengurus) => {
     setEditingData(item);
-    setName(item.name); setPhone(item.phone); setStatus(item.status);
+    setName(item.name); setPhone(item.phone || "");
     setShowModal(true);
   };
 
@@ -56,7 +55,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
       try {
         await deletePengurus(id);
         toast("Data dihapus", "success", "Sukses");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus data", "error", "Gagal");
       }
     }

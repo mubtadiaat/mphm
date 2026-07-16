@@ -98,7 +98,7 @@ export function HeaderProfile() {
       } else {
         throw new Error("Signature invalid");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Cloudinary upload error:", err);
       toast("Gagal mengunggah foto ke server. Silahkan hubungi developer.", "error", "Unggah Gagal");
       setUploadFeedback("Upload gagal. Silakan coba lagi.");
@@ -158,6 +158,8 @@ export function HeaderProfile() {
         };
       });
 
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+
       toast("Pengaturan akun Anda berhasil diperbarui!", "success", "Perubahan Disimpan");
       
       // Clear password inputs
@@ -169,8 +171,8 @@ export function HeaderProfile() {
       setTimeout(() => {
         setShowSettingsModal(false);
       }, 1500);
-    } catch (err: any) {
-      toast(err.message || "Terjadi kesalahan saat menyimpan pengaturan.", "error", "Gagal Menyimpan");
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan pengaturan.", "error", "Gagal Menyimpan");
     } finally {
       setIsSaving(false);
     }

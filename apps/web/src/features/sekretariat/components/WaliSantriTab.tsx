@@ -5,7 +5,6 @@ import { User } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { useGuardians, Guardian } from "../queries/useGuardians";
-import { TableActions } from "@/components/shared/TableActions";
 
 interface SiswaTabProps {
   onViewDetail: (data: Record<string, unknown>) => void;
@@ -13,7 +12,7 @@ interface SiswaTabProps {
   selectedYearId?: string;
 }
 
-export function WaliSantriTab({ onViewDetail, selectedYearId }: SiswaTabProps) {
+export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");

@@ -34,19 +34,18 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">("ACTIVE");
 
   const resetForm = () => {
-    setName(""); setPhone(""); setStatus("ACTIVE");
+    setName(""); setPhone("");
   };
 
   const handleOpenAdd = () => {
     setEditingData(null); resetForm(); setShowModal(true);
   };
 
-  const handleOpenEdit = (item: any) => {
+  const handleOpenEdit = (item: Guru) => {
     setEditingData(item);
-    setName(item.name); setPhone(item.phone); setStatus(item.status);
+    setName(item.name); setPhone(item.phone || "");
     setShowModal(true);
   };
 
@@ -55,7 +54,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
       try {
         await deleteGuru(id);
         toast("Data dihapus", "success", "Sukses");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus data", "error", "Gagal");
       }
     }

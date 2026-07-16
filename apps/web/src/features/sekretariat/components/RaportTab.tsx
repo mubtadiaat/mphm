@@ -8,7 +8,7 @@ import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { IdentityCell } from "@/components/shared/IdentityCell";
 
 import { useClasses } from "../queries/useClasses";
-import { useAssessmentMatrix, SubjectData } from "../queries/useManajemenNilai";
+import { useAssessmentMatrix } from "../queries/useManajemenNilai";
 
 interface StudentScore {
   id: string;
@@ -16,8 +16,8 @@ interface StudentScore {
   stambuk?: string;
   avatarUrl?: string;
   class: string;
-  scores: Record<string, any>;
-  [key: string]: any;
+  scoresKwartal: Record<string, number>;
+  scoresUjian: Record<string, number>;
 }
 
 export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
@@ -28,7 +28,9 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
 
   useEffect(() => {
     if (classes.length > 0 && !selectedClassId) {
-      setSelectedClassId(classes[0].id);
+      queueMicrotask(() => {
+        setSelectedClassId(classes[0].id);
+      });
     }
   }, [classes, selectedClassId]);
 
@@ -56,7 +58,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
   }, [matrixKwartal]);
 
   const [showPreview, setShowPreview] = useState(false);
-  const [previewStudent, setPreviewStudent] = useState<any>(null); 
+  const [previewStudent, setPreviewStudent] = useState<StudentScore | null>(null); 
 
   const [raportFormula, setRaportFormula] = useState<{type: string; value: string}[] | null>(null);
 
@@ -71,7 +73,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
     }
   }, []);
 
-  const handleCetak = (student: any) => {
+  const handleCetak = (student: StudentScore) => {
     setPreviewStudent(student);
     setShowPreview(true);
   };
@@ -169,8 +171,8 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
       </div>
 
       <UniversalDataGrid
-        columns={columns as any}
-        data={displayedStudents as any}
+        columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
+        data={displayedStudents as unknown as Record<string, unknown>[]}
         pageCount={1} pageIndex={0} pageSize={100} loading={isLoading1 || isLoading2}
         onRowClick={() => {}}
         tableName="raport"

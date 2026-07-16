@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, MapPin, UploadCloud, Camera, User, Heart, Award } from "lucide-react";
+import { X, MapPin, UploadCloud, Camera, User, Heart, Award } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { PillBadge } from "@/components/shared/PillBadge";
@@ -25,7 +25,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "khidmah");
+  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "khidmah");
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
@@ -77,20 +77,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
 
-  // Open Add Modal
-  const handleOpenAdd = () => {
-    setEditingSantri(null);
-    const resetForm = () => {
-      setNewName(""); setNewNik(""); setNewGender("P"); setNewBirthPlace(""); setNewBirthDate("");
-      setNewPhoneNumber(""); setAvatarUrl(null); setNewStambuk(""); setNewNis(""); setNewNisn("");
-      setNewClass("Tsanawiyyah I-A"); setNewEnrollmentYear(new Date().getFullYear()); setNewGraduationYear(undefined);
-      setNewStatus("KHIDMAH"); setNewAddress(""); setNewGuardianName(""); setNewGuardianNik("");
-      setNewGuardianPhone(""); setNewGuardianRelation("AYAH"); setNewFamilyCardNumber("");
-      setNewKhidmahPlacement("");
-    };
-    resetForm();
-    setShowFormModal(true);
-  };
+
 
   const handleOpenEdit = (santri: Santri) => {
     setEditingSantri(santri);
@@ -113,7 +100,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
       try {
         await deleteSantri(id);
         toast("Data santri berhasil dihapus!", "success");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus data santri", "error");
       }
     }
@@ -166,7 +153,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
       } else {
         throw new Error("Invalid signature response");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Cloudinary upload error:", err);
       toast("Gagal mengunggah foto ke server. Silahkan hubungi developer.", "error", "Unggah Gagal");
       setUploadFeedback("Upload gagal. Silakan coba lagi.");
@@ -220,7 +207,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
         toast("Santri baru berhasil didaftarkan!", "success", "Data Ditambahkan");
       }
       setShowFormModal(false);
-    } catch (err) {
+    } catch (_err) {
       toast("Terjadi kesalahan saat menyimpan data", "error");
     }
   };
@@ -286,112 +273,6 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
     },
   ];
 
-  // Columns definition: Alumni
-  const alumniColumns: ColumnDef<Santri, unknown>[] = [
-    {
-      accessorKey: "name",
-      header: "Nama Alumni",
-      cell: (info) => (
-        <IdentityCell 
-          name={info.getValue() as string} 
-          subInfo={`Lulus: Th. ${info.row.original.graduationYear || "-"}`} 
-          stambuk={info.row.original.stambuk}
-          avatarUrl={info.row.original.avatarUrl}
-        />
-      ),
-    },
-    {
-      accessorKey: "stambuk",
-      header: "Stambuk",
-      cell: (info) => <span className="font-mono text-xs text-zinc-700 dark:text-zinc-300">{info.getValue() as string}</span>,
-    },
-    {
-      accessorKey: "graduationYear",
-      header: "Tahun Kelulusan",
-      cell: (info) => <span className="font-bold text-zinc-900 dark:text-zinc-100">{info.getValue() as number || "-"}</span>,
-    },
-    {
-      accessorKey: "enrollmentYear",
-      header: "Tahun Masuk",
-      cell: (info) => <span className="text-zinc-500 dark:text-zinc-400 text-xs">{info.getValue() as number}</span>,
-    },
-    {
-      accessorKey: "address",
-      header: "Alamat Asal",
-      cell: (info) => <span className="text-xs text-zinc-500 max-w-[150px] truncate block">{info.getValue() as string}</span>,
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: () => <PillBadge label="ALUMNI" variant="gold" />,
-    },
-    {
-      id: "actions",
-      header: "Aksi",
-      cell: (info) => (
-        <TableActions 
-          onEdit={() => handleOpenEdit(info.row.original)} 
-          onDelete={() => handleDeleteSantri(info.row.original.id)} 
-          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
-          isReadOnly={isReadOnly}
-        />
-      ),
-    },
-  ];
-
-  // Columns definition: Mutasi & Keluar
-  const mutasiColumns: ColumnDef<Santri, unknown>[] = [
-    {
-      accessorKey: "name",
-      header: "Nama Lengkap",
-      cell: (info) => (
-        <IdentityCell 
-          name={info.getValue() as string} 
-          subInfo={`Stambuk: ${info.row.original.stambuk}`} 
-          stambuk={info.row.original.stambuk}
-          avatarUrl={info.row.original.avatarUrl}
-        />
-      ),
-    },
-    {
-      accessorKey: "class",
-      header: "Kelas Terakhir",
-      cell: (info) => <span className="text-zinc-700 dark:text-zinc-300 text-sm">{info.getValue() as string}</span>,
-    },
-    {
-      accessorKey: "status",
-      header: "Status Mutasi",
-      cell: (info) => {
-        const val = info.getValue() as string;
-        let variant: "danger" | "warning" | "info" = "danger";
-        if (val === "BOYONG") variant = "warning";
-        if (val === "KHIDMAH") variant = "info";
-        return <PillBadge label={val} variant={variant} />;
-      },
-    },
-    {
-      accessorKey: "enrollmentYear",
-      header: "Tahun Masuk",
-      cell: (info) => <span className="text-zinc-500 text-xs">{info.getValue() as number}</span>,
-    },
-    {
-      accessorKey: "address",
-      header: "Alamat Terakhir",
-      cell: (info) => <span className="text-xs text-zinc-500 max-w-[200px] truncate block">{info.getValue() as string}</span>,
-    },
-    {
-      id: "actions",
-      header: "Aksi",
-      cell: (info) => (
-        <TableActions 
-          onEdit={() => handleOpenEdit(info.row.original)} 
-          onDelete={() => handleDeleteSantri(info.row.original.id)} 
-          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
-          isReadOnly={isReadOnly}
-        />
-      ),
-    },
-  ];
 
   return (
     <div className="flex flex-col gap-6">

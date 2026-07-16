@@ -74,7 +74,8 @@ export function SystemSettingsCockpit() {
   const { toast } = useToast();
   
   const updateSettingsMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    mutationFn: async (payload: Record<string, any>) => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.m.p3hm.my.id";
       const res = await fetch(`${apiUrl}/api/settings`, {
         method: "PUT",
@@ -217,35 +218,20 @@ export function SystemSettingsCockpit() {
   
   const [settingsSaved, setSettingsSaved] = useState(false);
 
-  // Sync DB settings to local state on mount
-  useEffect(() => {
-    if (Object.keys(settings).length > 0) {
-      if (settings.showMustahiqScores !== undefined) setShowMustahiqScores(settings.showMustahiqScores === "true" || settings.showMustahiqScores === true);
-      if (settings.showMustahiqAttendance !== undefined) setShowMustahiqAttendance(settings.showMustahiqAttendance === "true" || settings.showMustahiqAttendance === true);
-      if (settings.showGuardianScores !== undefined) setShowGuardianScores(settings.showGuardianScores === "true" || settings.showGuardianScores === true);
-      if (settings.showGuardianDiscipline !== undefined) setShowGuardianDiscipline(settings.showGuardianDiscipline === "true" || settings.showGuardianDiscipline === true);
-      if (settings.showKeamananLookup !== undefined) setShowKeamananLookup(settings.showKeamananLookup === "true" || settings.showKeamananLookup === true);
-      
-      if (settings.allowMustahiqAkhlaqOverride !== undefined) setAllowMustahiqAkhlaqOverride(settings.allowMustahiqAkhlaqOverride === "true" || settings.allowMustahiqAkhlaqOverride === true);
-      if (settings.allowGuardianPermits !== undefined) setAllowGuardianPermits(settings.allowGuardianPermits === "true" || settings.allowGuardianPermits === true);
-      if (settings.allowMufattisyApproval !== undefined) setAllowMufattisyApproval(settings.allowMufattisyApproval === "true" || settings.allowMufattisyApproval === true);
-      if (settings.allowKeamananEscalation !== undefined) setAllowKeamananEscalation(settings.allowKeamananEscalation === "true" || settings.allowKeamananEscalation === true);
-      
-      if (settings.systemMaintenance !== undefined) setSystemMaintenance(settings.systemMaintenance === "true" || settings.systemMaintenance === true);
-      if (settings.enforceHttps !== undefined) setEnforceHttps(settings.enforceHttps === "true" || settings.enforceHttps === true);
-      if (settings.ssoActive !== undefined) setSsoActive(settings.ssoActive === "true" || settings.ssoActive === true);
-      
-      if (settings.cookieLifetime !== undefined) setCookieLifetime(Number(settings.cookieLifetime));
-      if (settings.whatsappContact !== undefined) setWhatsappContact(settings.whatsappContact);
-      if (settings.regionApiSource !== undefined) setRegionApiSource(settings.regionApiSource);
-      if (settings.binderbyteApiKey !== undefined) setBinderbyteApiKey(settings.binderbyteApiKey);
-      
-      if (settings.system_role_ui_configs) setRoleConfigs(settings.system_role_ui_configs);
-      if (settings.job_titles_mundzir) setMundzirTitles(settings.job_titles_mundzir);
-      if (settings.job_titles_pengurus) setPengurusTitles(settings.job_titles_pengurus);
+  const [selectedConfigRole, setSelectedConfigRole] = useState<RoleTypes>("mustahiq");
+  const [roleConfigs, setRoleConfigs] = useState<Record<RoleTypes, RoleUIConfig>>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("system_role_ui_configs");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to load saved role configs, resetting to default", e);
+        }
+      }
     }
-  }, [settings]);
-
+    return JSON.parse(JSON.stringify(DEFAULT_ROLE_CONFIGS));
+  });
 
   // Job Titles State
   const [mundzirTitles, setMundzirTitles] = useState<string[]>(() => {
@@ -264,6 +250,37 @@ export function SystemSettingsCockpit() {
   });
   const [newMundzirTitle, setNewMundzirTitle] = useState("");
   const [newPengurusTitle, setNewPengurusTitle] = useState("");
+
+  // Sync DB settings to local state on mount
+  useEffect(() => {
+    if (Object.keys(settings).length > 0) {
+      queueMicrotask(() => {
+        if (settings.showMustahiqScores !== undefined) setShowMustahiqScores(settings.showMustahiqScores === "true" || settings.showMustahiqScores === true);
+        if (settings.showMustahiqAttendance !== undefined) setShowMustahiqAttendance(settings.showMustahiqAttendance === "true" || settings.showMustahiqAttendance === true);
+        if (settings.showGuardianScores !== undefined) setShowGuardianScores(settings.showGuardianScores === "true" || settings.showGuardianScores === true);
+        if (settings.showGuardianDiscipline !== undefined) setShowGuardianDiscipline(settings.showGuardianDiscipline === "true" || settings.showGuardianDiscipline === true);
+        if (settings.showKeamananLookup !== undefined) setShowKeamananLookup(settings.showKeamananLookup === "true" || settings.showKeamananLookup === true);
+        
+        if (settings.allowMustahiqAkhlaqOverride !== undefined) setAllowMustahiqAkhlaqOverride(settings.allowMustahiqAkhlaqOverride === "true" || settings.allowMustahiqAkhlaqOverride === true);
+        if (settings.allowGuardianPermits !== undefined) setAllowGuardianPermits(settings.allowGuardianPermits === "true" || settings.allowGuardianPermits === true);
+        if (settings.allowMufattisyApproval !== undefined) setAllowMufattisyApproval(settings.allowMufattisyApproval === "true" || settings.allowMufattisyApproval === true);
+        if (settings.allowKeamananEscalation !== undefined) setAllowKeamananEscalation(settings.allowKeamananEscalation === "true" || settings.allowKeamananEscalation === true);
+        
+        if (settings.systemMaintenance !== undefined) setSystemMaintenance(settings.systemMaintenance === "true" || settings.systemMaintenance === true);
+        if (settings.enforceHttps !== undefined) setEnforceHttps(settings.enforceHttps === "true" || settings.enforceHttps === true);
+        if (settings.ssoActive !== undefined) setSsoActive(settings.ssoActive === "true" || settings.ssoActive === true);
+        
+        if (settings.cookieLifetime !== undefined) setCookieLifetime(Number(settings.cookieLifetime));
+        if (settings.whatsappContact !== undefined) setWhatsappContact(settings.whatsappContact);
+        if (settings.regionApiSource !== undefined) setRegionApiSource(settings.regionApiSource);
+        if (settings.binderbyteApiKey !== undefined) setBinderbyteApiKey(settings.binderbyteApiKey);
+        
+        if (settings.system_role_ui_configs) setRoleConfigs(settings.system_role_ui_configs);
+        if (settings.job_titles_mundzir) setMundzirTitles(settings.job_titles_mundzir);
+        if (settings.job_titles_pengurus) setPengurusTitles(settings.job_titles_pengurus);
+      });
+    }
+  }, [settings]);
 
   const handleAddMundzirTitle = () => {
     if (newMundzirTitle.trim() && !mundzirTitles.includes(newMundzirTitle.trim())) {
@@ -357,21 +374,6 @@ export function SystemSettingsCockpit() {
       return saved ? JSON.parse(saved) : [];
     }
     return [];
-  });
-
-  const [selectedConfigRole, setSelectedConfigRole] = useState<RoleTypes>("mustahiq");
-  const [roleConfigs, setRoleConfigs] = useState<Record<RoleTypes, RoleUIConfig>>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("system_role_ui_configs");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error("Failed to load saved role configs, resetting to default", e);
-        }
-      }
-    }
-    return JSON.parse(JSON.stringify(DEFAULT_ROLE_CONFIGS));
   });
 
   const getRoleMenus = (role: RoleTypes) => {

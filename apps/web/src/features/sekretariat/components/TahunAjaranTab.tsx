@@ -17,7 +17,7 @@ interface TahunAjaranTabProps {
 }
 
 export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaranTabProps) {
-  const { data: remoteData, activateYear, deactivateYear, createYear, updateYear, deleteYear, isLoading } = useAcademicYears();
+  const { data: remoteData, activateYear, createYear, updateYear, isLoading } = useAcademicYears();
   const [yearsData, setYearsData] = useState<AcademicYear[]>([]);
   const { toast } = useToast();
 
@@ -64,17 +64,8 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
     try {
       await activateYear(id);
       toast("Tahun akademik berhasil diaktifkan!", "success", "Tahun Ajaran Aktif");
-    } catch (err) {
+    } catch (_err) {
       toast("Gagal mengaktifkan tahun akademik", "error", "Gagal");
-    }
-  };
-
-  const handleDeactivate = async (id: string) => {
-    try {
-      await deactivateYear(id);
-      toast("Tahun akademik berhasil dinonaktifkan!", "success", "Tahun Ajaran Non-Aktif");
-    } catch (err) {
-      toast("Gagal menonaktifkan tahun akademik", "error", "Gagal");
     }
   };
 
@@ -94,7 +85,7 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
         toast("Tahun akademik baru berhasil dibuat!", "success", "Data Ditambahkan");
       }
       setShowModal(false);
-    } catch (err) {
+    } catch (_err) {
       toast(editingYear ? "Gagal mengubah data" : "Gagal membuat tahun akademik baru", "error", "Gagal");
     }
   };

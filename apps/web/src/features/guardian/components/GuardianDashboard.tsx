@@ -1,9 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, GraduationCap, AlertCircle, HeartPulse } from "lucide-react";
+import { Users, AlertCircle, HeartPulse } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
+
+interface GuardianStats {
+  totalChildren: number;
+  averageAttendance: number;
+  totalViolations: number;
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -19,7 +25,7 @@ export function GuardianDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["guardian-dashboard-stats"],
     queryFn: async () => {
-      const res = await apiRequest<{ data: any }>("/api/guardian/stats");
+      const res = await apiRequest<{ data: GuardianStats }>("/api/guardian/stats");
       return res.data;
     },
   });

@@ -30,8 +30,8 @@ export function ForcePasswordChangeModal() {
       toast("Password berhasil diubah!", "success");
       queryClient.invalidateQueries({ queryKey: ["auth-session"] });
     },
-    onError: (err: any) => {
-      toast(err.message || "Gagal mengubah password.", "error");
+    onError: (err: unknown) => {
+      toast(err instanceof Error ? err.message : "Gagal mengubah password.", "error");
     },
   });
 

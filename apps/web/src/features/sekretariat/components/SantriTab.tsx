@@ -26,7 +26,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: queryResult, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, activeSubTab);
+  const { data: queryResult, isLoading, createSantri, updateSantri, deleteSantri } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, activeSubTab);
   
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -34,7 +34,9 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
 
   // Reset page when tab changes
   useEffect(() => {
-    setPageIndex(0);
+    queueMicrotask(() => {
+      setPageIndex(0);
+    });
   }, [activeSubTab]);
 
   // Sync with TanStack Query data
@@ -143,7 +145,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
       try {
         await deleteSantri(id);
         toast("Data santri berhasil dihapus!", "success");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus data santri", "error");
       }
     }
@@ -196,7 +198,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
       } else {
         throw new Error("Invalid signature response");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Cloudinary upload error:", err);
       toast("Gagal mengunggah foto ke server. Silahkan hubungi developer.", "error", "Unggah Gagal");
       setUploadFeedback("Upload gagal. Silakan coba lagi.");
@@ -249,7 +251,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
         toast("Santri baru berhasil didaftarkan!", "success", "Data Ditambahkan");
       }
       setShowFormModal(false);
-    } catch (err) {
+    } catch (_err) {
       toast("Terjadi kesalahan saat menyimpan data", "error");
     }
   };

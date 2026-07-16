@@ -5,13 +5,19 @@ import { ManajemenNilaiTab } from "@/features/sekretariat/components/ManajemenNi
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface MyClassWithName {
+  class: {
+    fullName: string;
+  };
+}
+
 export function MustahiqManajemenNilai() {
   const { selectedYearId, isReadOnly } = useAcademicYear();
 
   const { data: myClass, isLoading } = useQuery({
     queryKey: ["mustahiq-my-class"],
     queryFn: async () => {
-      const res = await apiRequest<{ data: any }>("/api/mustahiq/class/my-class");
+      const res = await apiRequest<{ data: MyClassWithName }>("/api/mustahiq/class/my-class");
       return res.data;
     },
     retry: false,

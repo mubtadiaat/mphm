@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash2, RefreshCcw } from "lucide-react";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
@@ -18,7 +17,7 @@ export function RecycleBinTab() {
       try {
         await restoreItem(id);
         toast("Data berhasil dikembalikan", "success", "Sukses");
-      } catch (e) {
+      } catch {
         toast("Gagal mengembalikan data", "error", "Gagal");
       }
     }
@@ -29,7 +28,7 @@ export function RecycleBinTab() {
       try {
         await forceDeleteItem(id);
         toast("Data dihapus permanen", "success", "Terhapus");
-      } catch (e) {
+      } catch {
         toast("Gagal menghapus data", "error", "Gagal");
       }
     }

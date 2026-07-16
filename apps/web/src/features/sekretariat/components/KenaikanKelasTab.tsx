@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle2, Award, ChevronRight, Check, AlertCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, Award, ChevronRight, AlertCircle, RefreshCw } from "lucide-react";
 import { useToast } from "@/components/shared/ToastContext";
 import { useClasses } from "@/features/sekretariat/queries/useClasses";
 import { apiRequest } from "@/lib/api";
@@ -31,7 +31,9 @@ export function KenaikanKelasTab({ isReadOnly = false, selectedYearId, fixedClas
   // Sync active class as default
   useEffect(() => {
     if (classes.length > 0 && !selectedClassId) {
-      setSelectedClassId(classes[0].id);
+      queueMicrotask(() => {
+        setSelectedClassId(classes[0].id);
+      });
     }
   }, [classes, selectedClassId]);
 
@@ -60,7 +62,7 @@ export function KenaikanKelasTab({ isReadOnly = false, selectedYearId, fixedClas
     }
     setIsLoadingCandidates(true);
     try {
-      const res = await apiRequest<{ data: any[] }>(`/api/promotion/candidates/${selectedClassId}`);
+      const res = await apiRequest<{ data: Omit<Candidate, 'isApproved' | 'status'>[] }>(`/api/promotion/candidates/${selectedClassId}`);
       if (res.data) {
         setCandidates(res.data.map((c) => ({
           ...c,
@@ -71,8 +73,8 @@ export function KenaikanKelasTab({ isReadOnly = false, selectedYearId, fixedClas
       } else {
         toast("Gagal memuat kandidat.", "error", "Promotion Engine");
       }
-    } catch (err: any) {
-      toast(err.message || "Gagal memuat kandidat.", "error", "Promotion Engine");
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : "Gagal memuat kandidat.", "error", "Promotion Engine");
     } finally {
       setIsLoadingCandidates(false);
     }
@@ -107,8 +109,8 @@ export function KenaikanKelasTab({ isReadOnly = false, selectedYearId, fixedClas
       } else {
         toast(res.message || "Gagal melakukan rollover.", "error", "Rollover Gagal");
       }
-    } catch (err: any) {
-      toast(err.message || "Gagal melakukan rollover.", "error", "Rollover Gagal");
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : "Gagal melakukan rollover.", "error", "Rollover Gagal");
     } finally {
       setIsProcessing(false);
     }

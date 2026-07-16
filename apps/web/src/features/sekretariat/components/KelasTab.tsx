@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Layers, Users, ShieldCheck } from "lucide-react";
+import { Layers } from "lucide-react";
 import { DataKelasGrid } from "./DataKelasGrid";
-import { MustahiqTab } from "./MustahiqTab";
-import { MufattisyTab } from "./MufattisyTab";
 
 interface KelasTabProps {
   onViewDetail?: (data: Record<string, unknown>) => void;

@@ -1,13 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext } from "react";
 import { MaintenanceScreen } from "../shared/MaintenanceScreen";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/lib/auth"; // Assuming useAuth exists and provides user role
-// Wait, I need to check where useAuth is. Let's create it without useAuth first and fetch it manually if needed.
-// Actually, `useQuery(["auth-session"])` is what the app uses.
 
 interface SystemSettingsContextType {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   settings: Record<string, any>;
   isLoading: boolean;
   refetchSettings: () => void;
@@ -39,7 +37,7 @@ export function SystemSettingsProvider({ children }: { children: React.ReactNode
   });
 
   // 2. Fetch User Session to check if Admin
-  const { data: authSession, isLoading: isLoadingAuth } = useQuery({
+  const { data: authSession } = useQuery({
     queryKey: ["auth-session"],
     queryFn: async () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.m.p3hm.my.id";

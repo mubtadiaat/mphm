@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, X, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,7 +17,7 @@ interface KurikulumTabProps {
 }
 
 export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabProps) {
-  const { data: remoteData = [], isLoading, createSubject, updateSubject, deleteSubject, isCreating, isUpdating } = useSubjects();
+  const { data: remoteData = [], isLoading, createSubject, updateSubject, deleteSubject } = useSubjects();
   const { toast } = useToast();
 
   // Modal States
@@ -57,7 +57,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
       try {
         await deleteSubject(id);
         toast("Mata pelajaran berhasil dihapus!", "success", "Data Dihapus");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus mata pelajaran", "error", "Error");
       }
     }
@@ -79,7 +79,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
         toast("Mata pelajaran baru berhasil ditambahkan!", "success", "Data Ditambahkan");
       }
       setShowModal(false);
-    } catch (err) {
+    } catch (_err) {
       toast("Terjadi kesalahan saat menyimpan data", "error", "Error");
     }
   };

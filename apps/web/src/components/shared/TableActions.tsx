@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit2, Trash2, Eye, ArrowRightLeft } from "lucide-react";
+import { Edit2, Trash2, ArrowRightLeft } from "lucide-react";
 
 interface TableActionsProps {
   onEdit?: () => void;
@@ -17,11 +17,11 @@ interface TableActionsProps {
 export function TableActions({
   onEdit,
   onDelete,
-  onDetail,
+  onDetail: _onDetail,
   onMutasi,
   editLabel = "Edit",
   deleteLabel = "Hapus",
-  detailLabel = "Detail",
+  detailLabel: _detailLabel = "Detail",
   mutasiLabel = "Mutasi",
   isReadOnly = false
 }: TableActionsProps) {

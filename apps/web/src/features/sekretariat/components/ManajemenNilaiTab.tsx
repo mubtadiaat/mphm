@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { AlertCircle, CheckCircle, Loader2, ClipboardList } from "lucide-react";
 import { PillBadge } from "@/components/shared/PillBadge";
-import { useMutation } from "@tanstack/react-query";
 import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 
 import { useClasses } from "../queries/useClasses";
-import { useAssessmentMatrix, useSaveScoreMutation, StudentScore, SubjectData } from "../queries/useManajemenNilai";
+import { useAssessmentMatrix, useSaveScoreMutation, StudentScore } from "../queries/useManajemenNilai";
 
 export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId, fixedClass }: { isReadOnly?: boolean; selectedYearId?: string; fixedClass?: string }) {
   const context = useAcademicYear();
@@ -19,16 +18,18 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
   const [selectedKwartal, setSelectedKwartal] = useState<number>(1);
   
   const { data: classes = [] } = useClasses(selectedYearId);
-  const [selectedClassId, setSelectedClassId] = useState<string>("");
+  const [selectedClassId, setSelectedClassId] = useState<string>(fixedClass || "");
 
   useEffect(() => {
     if (classes.length > 0 && !selectedClassId) {
-      if (fixedClass) {
-        const found = classes.find(c => c.name === fixedClass);
-        if (found) setSelectedClassId(found.id);
-      } else {
-        setSelectedClassId(classes[0].id);
-      }
+      queueMicrotask(() => {
+        if (fixedClass) {
+          const found = classes.find(c => c.name === fixedClass);
+          if (found) setSelectedClassId(found.id);
+        } else {
+          setSelectedClassId(classes[0].id);
+        }
+      });
     }
   }, [classes, selectedClassId, fixedClass]);
 
@@ -39,9 +40,13 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
 
   useEffect(() => {
     if (matrixData?.students) {
-      setLocalStudents(matrixData.students);
+      queueMicrotask(() => {
+        setLocalStudents(matrixData.students);
+      });
     } else {
-      setLocalStudents([]);
+      queueMicrotask(() => {
+        setLocalStudents([]);
+      });
     }
   }, [matrixData]);
 
@@ -100,7 +105,7 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [pendingSave, saveMutation]);
+  }, [pendingSave, saveMutation, selectedClassId, selectedKwartal]);
 
   return (
     <div className="flex flex-col gap-6">

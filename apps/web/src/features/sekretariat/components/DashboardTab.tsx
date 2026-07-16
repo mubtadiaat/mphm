@@ -2,10 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Users, GraduationCap, Calendar, ShieldAlert } from "lucide-react";
-import { formatAcademicYearHijri } from "@/lib/hijri";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
 import { useAcademicYear } from "@/components/shared/AcademicYearContext";
-import { Activity } from "lucide-react"; // add an icon for GPA or similar if needed
 
 const containerVariants = {
   hidden: { opacity: 0 },

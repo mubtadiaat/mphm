@@ -120,9 +120,9 @@ export function DocumentTemplateBuilder() {
       // 4. Insert into TipTap
       editor?.chain().focus().setImage({ src: secureUrl }).run();
       toast("Gambar berhasil diunggah!", "success", "Berhasil");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast(err.message || "Terjadi kesalahan saat mengunggah gambar.", "error", "Gagal");
+      toast(err instanceof Error ? err.message : "Terjadi kesalahan saat mengunggah gambar.", "error", "Gagal");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

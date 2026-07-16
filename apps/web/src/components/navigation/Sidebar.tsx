@@ -21,24 +21,33 @@ interface RegistryTable {
   name: string;
 }
 
+interface OnboardingStatus {
+  hasMundzir: boolean;
+  hasMufattisy: boolean;
+  hasMustahiq: boolean;
+  hasClasses: boolean;
+  hasSantri: boolean;
+}
+
 export function Sidebar({ role }: { role: RoleTypes }) {
   const pathname = usePathname();
   const [customItems, setCustomItems] = useState<CustomNavItem[]>([]);
   const { config } = useRoleUIConfig(role);
   const { toast } = useToast();
-  const [onboardingStatus, setOnboardingStatus] = useState({
+  const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({
     hasMundzir: true,
     hasMufattisy: true,
     hasMustahiq: true,
     hasClasses: true,
     hasSantri: true
   });
-  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [loadingStatus, setLoadingStatus] = useState(role !== "sekretariat" ? false : true);
+  const [showQRModal, setShowQRModal] = useState(false);
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await apiRequest<{ data: any }>("/api/admin/onboarding/status");
+        const res = await apiRequest<{ data: OnboardingStatus }>("/api/admin/onboarding/status");
         if (res?.data) {
           setOnboardingStatus(res.data);
         }
@@ -50,8 +59,6 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     };
     if (role === "sekretariat") {
       fetchStatus();
-    } else {
-      setLoadingStatus(false);
     }
   }, [role]);
 
@@ -87,10 +94,6 @@ export function Sidebar({ role }: { role: RoleTypes }) {
   }
 
   const filteredStaticItems = (NAVIGATION_CONFIG[role] || []);
-
-  const filteredCustomItems = customItems.filter((item) => {
-    return config.enabledMenus.includes(item.href);
-  });
 
   let navItems: NavMenu[] = [];
   if (role === "sekretariat") {
@@ -131,7 +134,6 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     }
   };
 
-  const [showQRModal, setShowQRModal] = useState(false);
 
   return (
     <aside className="w-64 bg-slate-950 border-r border-slate-900 hidden xl:flex flex-col text-slate-300 sticky top-0 h-screen overflow-hidden">

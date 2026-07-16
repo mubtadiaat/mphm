@@ -5,13 +5,19 @@ import { KenaikanKelasTab } from "@/features/sekretariat/components/KenaikanKela
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
+interface MyClassBrief {
+  class: {
+    id: string;
+  };
+}
+
 export function MustahiqKenaikanKelas() {
   const { selectedYearId, isReadOnly } = useAcademicYear();
 
   const { data: myClass, isLoading } = useQuery({
     queryKey: ["mustahiq-my-class"],
     queryFn: async () => {
-      const res = await apiRequest<{ data: any }>("/api/mustahiq/class/my-class");
+      const res = await apiRequest<{ data: MyClassBrief }>("/api/mustahiq/class/my-class");
       return res.data;
     },
     retry: false,

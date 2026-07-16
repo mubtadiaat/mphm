@@ -35,11 +35,13 @@ export default function RekapAbsensiPage() {
       queueMicrotask(() => setShowAttendance(saved !== "false"));
       
       const hijri = getHijriDate();
-      setHijriInfo({ day: hijri.day, monthName: hijri.monthName });
-      // Lock if before the 23rd day of the Hijri month
-      if (hijri.day < 23) {
-        setIsLocked(true);
-      }
+      queueMicrotask(() => {
+        setHijriInfo({ day: hijri.day, monthName: hijri.monthName });
+        // Lock if before the 23rd day of the Hijri month
+        if (hijri.day < 23) {
+          setIsLocked(true);
+        }
+      });
     }
   }, []);
 

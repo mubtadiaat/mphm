@@ -26,27 +26,29 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("Staf Keamanan");
-  const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">("ACTIVE");
 
-  const [pengurusTitles, setPengurusTitles] = useState<string[]>([
-    "Kepala Keamanan", "Staf Keamanan", "Staf IT & Sistem", "Staf Kebersihan / Operasional"
-  ]);
+  const [pengurusTitles, setPengurusTitles] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("job_titles_pengurus");
+      return saved ? JSON.parse(saved) : [
+        "Kepala Keamanan", "Staf Keamanan", "Staf IT & Sistem", "Staf Kebersihan / Operasional"
+      ];
+    }
+    return [
+      "Kepala Keamanan", "Staf Keamanan", "Staf IT & Sistem", "Staf Kebersihan / Operasional"
+    ];
+  });
 
   useEffect(() => {
     if (remoteData) {
       queueMicrotask(() => {
-        setPengurusData(remoteData.data as any[]);
+        setPengurusData(remoteData.data as Pengurus[]);
         setTotalCount(remoteData.total);
       });
     }
   }, [remoteData]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("job_titles_pengurus");
-    if (saved) {
-      setPengurusTitles(JSON.parse(saved));
-    }
-    
     const handleJobTitlesChanged = () => {
       const updated = localStorage.getItem("job_titles_pengurus");
       if (updated) {
@@ -57,10 +59,8 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     return () => window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
   }, []);
 
-
-
   const resetForm = () => {
-    setName(""); setPhone(""); setRole("Staf Keamanan"); setStatus("ACTIVE");
+    setName(""); setPhone(""); setRole("Staf Keamanan");
   };
 
   const handleOpenAdd = () => {
@@ -69,7 +69,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
   const handleOpenEdit = (item: Pengurus) => {
     setEditingData(item);
-    setName(item.name); setPhone(item.phone); setRole(item.role); setStatus(item.status);
+    setName(item.name); setPhone(item.phone || ""); setRole(item.role || "");
     setShowModal(true);
   };
 
@@ -78,7 +78,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
       try {
         await deletePengurus(id);
         toast("Data dihapus", "success", "Sukses");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus data", "error", "Gagal");
       }
     }
@@ -103,7 +103,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     )},
     {
       id: "actions", header: "Aksi",
-      cell: info => <TableActions onEdit={() => handleOpenEdit(info.row.original)} onDelete={() => handleDelete(info.row.original.id)} onDetail={() => onViewDetail(info.row.original as unknown as Record<string, unknown>)} isReadOnly={false} />
+      cell: info => <TableActions onEdit={() => handleOpenEdit(info.row.original)} onDelete={() => handleDelete(info.row.original.id)} onDetail={() => onViewDetail(info.row.original as unknown as Record<string, unknown>)} isReadOnly={isReadOnly} />
     }
   ];
 

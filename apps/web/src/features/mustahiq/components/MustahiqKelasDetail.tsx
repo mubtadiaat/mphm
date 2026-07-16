@@ -4,11 +4,28 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { Users, Layers, AlertCircle } from "lucide-react";
 
+interface StudentInfo {
+  studentId: string;
+  fullName: string;
+  nis: string;
+  nisn?: string;
+}
+
+interface MyClassDetail {
+  class: {
+    id: string;
+    fullName: string;
+    institutionLevel: string;
+    capacity: number;
+  };
+  students: StudentInfo[];
+}
+
 export function MustahiqKelasDetail() {
   const { data: myClass, isLoading, isError } = useQuery({
     queryKey: ["mustahiq-my-class"],
     queryFn: async () => {
-      const res = await apiRequest<{ data: any }>("/api/mustahiq/class/my-class");
+      const res = await apiRequest<{ data: MyClassDetail }>("/api/mustahiq/class/my-class");
       return res.data;
     },
     retry: false,
@@ -73,7 +90,7 @@ export function MustahiqKelasDetail() {
                   <td colSpan={4} className="text-center py-8 text-zinc-500">Belum ada santri terdaftar di kelas ini.</td>
                 </tr>
               ) : (
-                myClass.students.map((student: any, i: number) => (
+                myClass.students.map((student: StudentInfo, i: number) => (
                   <tr key={student.studentId} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                     <td className="px-4 py-3 text-zinc-500">{i + 1}</td>
                     <td className="px-4 py-3 font-medium">{student.fullName}</td>

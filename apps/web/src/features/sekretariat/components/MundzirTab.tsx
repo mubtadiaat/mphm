@@ -31,28 +31,29 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("Mundzir Asrama");
-  const [asrama, setAsrama] = useState("");
-  const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">("ACTIVE");
 
-  const [mundzirTitles, setMundzirTitles] = useState<string[]>([
-    "Mundzir Utama", "Mundzir Asrama Putra", "Mundziroh Asrama Putri", "Mundzir Asrama (Umum)"
-  ]);
+  const [mundzirTitles, setMundzirTitles] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("job_titles_mundzir");
+      return saved ? JSON.parse(saved) : [
+        "Mundzir Utama", "Mundzir Asrama Putra", "Mundziroh Asrama Putri", "Mundzir Asrama (Umum)"
+      ];
+    }
+    return [
+      "Mundzir Utama", "Mundzir Asrama Putra", "Mundziroh Asrama Putri", "Mundzir Asrama (Umum)"
+    ];
+  });
 
   useEffect(() => {
     if (remoteData) {
       queueMicrotask(() => {
-        setMundzirList(remoteData.data as any[]);
+        setMundzirList(remoteData.data as Pengurus[]);
         setTotalCount(remoteData.total);
       });
     }
   }, [remoteData]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("job_titles_mundzir");
-    if (saved) {
-      setMundzirTitles(JSON.parse(saved));
-    }
-    
     const handleJobTitlesChanged = () => {
       const updated = localStorage.getItem("job_titles_mundzir");
       if (updated) {
@@ -63,19 +64,17 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
     return () => window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
   }, []);
 
-
-
   const resetForm = () => {
-    setName(""); setPhone(""); setRole("Mundzir Asrama"); setAsrama(""); setStatus("ACTIVE");
+    setName(""); setPhone(""); setRole("Mundzir Asrama");
   };
 
   const handleOpenAdd = () => {
     setEditingData(null); resetForm(); setShowModal(true);
   };
 
-  const handleOpenEdit = (item: any) => {
+  const handleOpenEdit = (item: Pengurus) => {
     setEditingData(item);
-    setName(item.name); setPhone(item.phone); setRole(item.role); setAsrama(item.asrama); setStatus(item.status);
+    setName(item.name); setPhone(item.phone || ""); setRole(item.role || "");
     setShowModal(true);
   };
 
@@ -84,7 +83,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
       try {
         await deletePengurus(id);
         toast("Data dihapus", "success", "Sukses");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus data", "error", "Gagal");
       }
     }

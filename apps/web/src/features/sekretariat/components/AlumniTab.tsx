@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, MapPin, UploadCloud, Camera, User, Heart, Award } from "lucide-react";
+import { X, MapPin, UploadCloud, Camera, User, Heart, Award } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { PillBadge } from "@/components/shared/PillBadge";
@@ -25,7 +25,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   
-  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri, isCreating, isUpdating, isDeleting } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "alumni");
+  const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "alumni");
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
@@ -74,33 +74,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
 
-  // Open Add Modal
-  const handleOpenAdd = () => {
-    setEditingSantri(null);
-    // Reset Form to Empty
-    setNewName("");
-    setNewNik("");
-    setNewGender("P");
-    setNewBirthPlace("");
-    setNewBirthDate("");
-    setNewPhoneNumber("");
-    setAvatarUrl(null);
-    setNewStambuk("");
-    setNewNis("");
-    setNewNisn("");
-    setNewClass("Tsanawiyyah I-A");
-    setNewEnrollmentYear(new Date().getFullYear());
-    setNewGraduationYear(undefined);
-    setNewStatus("ACTIVE");
-    setNewAddress("");
-    setNewGuardianName("");
-    setNewGuardianNik("");
-    setNewGuardianPhone("");
-    setNewGuardianRelation("AYAH");
-    setNewFamilyCardNumber("");
-    setUploadFeedback(null);
-    setShowFormModal(true);
-  };
+
 
   // Open Edit Modal
   const handleOpenEdit = (student: Santri) => {
@@ -136,7 +110,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
       try {
         await deleteSantri(id);
         toast("Data santri berhasil dihapus!", "success");
-      } catch (err) {
+      } catch (_err) {
         toast("Gagal menghapus data santri", "error");
       }
     }
@@ -189,7 +163,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
       } else {
         throw new Error("Invalid signature response");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Cloudinary upload error:", err);
       toast("Gagal mengunggah foto ke server. Silahkan hubungi developer.", "error", "Unggah Gagal");
       setUploadFeedback("Upload gagal. Silakan coba lagi.");
@@ -242,7 +216,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
         toast("Santri baru berhasil didaftarkan!", "success", "Data Ditambahkan");
       }
       setShowFormModal(false);
-    } catch (err) {
+    } catch (_err) {
       toast("Terjadi kesalahan saat menyimpan data", "error");
     }
   };
@@ -349,7 +323,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
 
       <UniversalDataGrid
         columns={alumniColumns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={santriData as unknown as Record<string, unknown>[]}
+        data={filteredData as unknown as Record<string, unknown>[]}
         pageCount={Math.ceil(totalCount / pageSize) || 1}
         pageIndex={pageIndex}
         pageSize={pageSize}

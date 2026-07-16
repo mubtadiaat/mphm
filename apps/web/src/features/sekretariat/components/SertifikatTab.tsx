@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { FileBadge, X, Printer, Award } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,7 +57,7 @@ export function SertifikatTab() {
   return (
     <div className="flex flex-col gap-6 mt-4">
       {/* Header Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-amber-500 to-orange-500 rounded-2xl flex flex-col justify-between gap-6 shadow-md text-white">
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-amber-50 to-orange-500 rounded-2xl flex flex-col justify-between gap-6 shadow-md text-white">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="z-10">
           <div className="flex items-center gap-2 text-amber-100 text-xs font-bold uppercase tracking-wider mb-2">
@@ -74,7 +74,7 @@ export function SertifikatTab() {
       </div>
 
       <UniversalDataGrid
-        columns={columns as any}
+        columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
         data={displayedStudents as unknown as Record<string, unknown>[]}
         pageCount={Math.ceil(remoteData.total / pageSize) || 1}
         pageIndex={pageIndex}

@@ -71,7 +71,7 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
       try {
         await deleteViolation(id);
         toast("Master pelanggaran berhasil dihapus!", "success", "Data Dihapus");
-      } catch (e) {
+      } catch {
         toast("Gagal menghapus pelanggaran", "error", "Gagal");
       }
     }
@@ -92,7 +92,7 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
       });
       toast("Berhasil menyimpan data master pelanggaran", "success", "Berhasil");
       setShowModal(false);
-    } catch (err) {
+    } catch {
       toast("Gagal menyimpan data", "error", "Gagal");
     }
   };

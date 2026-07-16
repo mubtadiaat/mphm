@@ -21,7 +21,7 @@ export function useScores(classId?: string, kwartal?: number) {
           `/api/assessment/scores/${classId}?kwartal=${kwartal || 1}`
         );
         return res.data;
-      } catch (e) {
+      } catch {
         return [];
       }
     },

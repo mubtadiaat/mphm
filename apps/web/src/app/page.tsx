@@ -128,6 +128,7 @@ export default function Page() {
           <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-2 sm:mb-3 shadow-2xl rounded-full bg-white/5 p-2 sm:p-3 border border-white/10 backdrop-blur-md">
             {/* Fallback shadow block to give 3D floating effect */}
             <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl -z-10 animate-pulse"></div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src="/logo.png" 
               alt="Logo Lirboyo" 

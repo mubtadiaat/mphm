@@ -15,11 +15,17 @@ const cardVariants = {
   show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } },
 };
 
+interface MustahiqStats {
+  totalSantri: number;
+  averageGpa: number;
+  totalViolations: number;
+}
+
 export function MustahiqDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["mustahiq-dashboard-stats"],
     queryFn: async () => {
-      const res = await apiRequest<{ data: any }>("/api/mustahiq/dashboard/stats");
+      const res = await apiRequest<{ data: MustahiqStats }>("/api/mustahiq/dashboard/stats");
       return res.data;
     },
   });

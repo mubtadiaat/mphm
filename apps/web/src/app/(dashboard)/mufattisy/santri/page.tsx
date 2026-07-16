@@ -4,7 +4,7 @@ import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 import { SantriTab } from "@/features/sekretariat/components/SantriTab";
 
 export default function MufattisySantriPage() {
-  const { selectedYearId, isReadOnly } = useAcademicYear();
+  const { selectedYearId } = useAcademicYear();
   
   return <SantriTab selectedYearId={selectedYearId} isReadOnly={true} onViewDetail={() => {}} />;
 }
