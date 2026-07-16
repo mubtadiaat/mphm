@@ -24,6 +24,7 @@ export function IdentityCell({ name, subInfo, stambuk, avatarUrl }: IdentityCell
               height={40}
               className="object-cover w-full h-full"
               priority={false}
+              unoptimized
             />
           </div>
         ) : (
