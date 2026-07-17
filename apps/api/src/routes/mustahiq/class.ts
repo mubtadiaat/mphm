@@ -55,6 +55,7 @@ classMustahiq.get("/my-class", async (c) => {
     status: "Success",
     data: {
       classInfo: cls,
+      class: cls,
       students
     }
   });
