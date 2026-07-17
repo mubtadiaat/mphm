@@ -28,6 +28,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Cloudflare OpenNext Bundle
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.m.p3hm.my.id' }}
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'r9f9o3jm' }}
         run: pnpm --filter @mphm/web run pages:build
 
       - name: Deploy to Cloudflare

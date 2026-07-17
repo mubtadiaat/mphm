@@ -14,6 +14,10 @@
       "custom_domain": true
     }
   ],
+  "vars": {
+    "NEXT_PUBLIC_API_URL": "https://api.m.p3hm.my.id",
+    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "r9f9o3jm"
+  },
   "observability": {
     "logs": {
       "enabled": true,

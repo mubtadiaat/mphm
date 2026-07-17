@@ -35,8 +35,13 @@ export default function DashboardLayout({
   const correctBasePath = roleInfo?.basePath ?? "/sekretariat";
 
   useEffect(() => {
-    // Jangan redirect saat masih loading atau user belum ter-resolve
-    if (isLoading || !user) return;
+    if (isLoading) return;
+
+    // Jika user tidak login, redirect ke halaman login
+    if (!user) {
+      router.replace("/");
+      return;
+    }
 
     // User mengakses dashboard yang bukan milik role-nya → redirect ke dashboard yang benar
     const isOnCorrectPath = pathname === correctBasePath || pathname.startsWith(correctBasePath + "/");
