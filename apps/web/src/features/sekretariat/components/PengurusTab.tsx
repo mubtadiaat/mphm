@@ -17,7 +17,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [pengurusData, setPengurusData] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
+  const { data: remoteData = { data: [], total: 0 }, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -86,10 +86,23 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast("Lengkapi form", "warning", "Peringatan");
-    // API creation is not fully implemented in usePengurus yet
-    toast("Fitur simpan sedang dalam pengembangan untuk pengurus", "info", "Info");
-    setShowModal(false);
+    if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
+    
+    try {
+      if (editingData) {
+        if (!editingData.personId) {
+          throw new Error("ID orang tidak ditemukan pada data ini.");
+        }
+        await updatePengurus({ personId: editingData.personId, name, phone });
+        toast("Data Pengurus berhasil diperbarui!", "success", "Sukses");
+      } else {
+        await createPengurus({ name, phone, roleName: role });
+        toast("Pengurus baru berhasil didaftarkan!", "success", "Sukses");
+      }
+      setShowModal(false);
+    } catch (err: any) {
+      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
+    }
   };
 
   const columns: ColumnDef<Pengurus, unknown>[] = [

@@ -18,7 +18,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   const [mufattisyList, setMufattisyList] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
+  const { data: remoteData = { data: [], total: 0 }, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +26,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [supervisedLevel, setSupervisedLevel] = useState("Tsanawiyyah");
 
   useEffect(() => {
     if (remoteData) {
@@ -37,7 +38,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   }, [remoteData]);
 
   const resetForm = () => {
-    setName(""); setPhone("");
+    setName(""); setPhone(""); setSupervisedLevel("Tsanawiyyah");
   };
 
   const handleOpenAdd = () => {
@@ -46,7 +47,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
 
   const handleOpenEdit = (item: Pengurus) => {
     setEditingData(item);
-    setName(item.name); setPhone(item.phone || "");
+    setName(item.name); setPhone(item.phone || ""); setSupervisedLevel(item.supervisedLevel || "Tsanawiyyah");
     setShowModal(true);
   };
 
@@ -63,9 +64,23 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast("Lengkapi form", "warning", "Peringatan");
-    toast("Fitur simpan sedang dalam pengembangan", "info", "Info");
-    setShowModal(false);
+    if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
+    
+    try {
+      if (editingData) {
+        if (!editingData.personId) {
+          throw new Error("ID orang tidak ditemukan pada data ini.");
+        }
+        await updatePengurus({ personId: editingData.personId, name, phone });
+        toast("Data Mufattisy berhasil diperbarui!", "success", "Sukses");
+      } else {
+        await createPengurus({ name, phone, roleName: "Mufattisy", supervisedLevel });
+        toast("Mufattisy baru berhasil didaftarkan!", "success", "Sukses");
+      }
+      setShowModal(false);
+    } catch (err: any) {
+      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
+    }
   };
 
   const columns: ColumnDef<Pengurus, unknown>[] = [
@@ -143,6 +158,17 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
                   <label className="text-xs font-bold">No. HP / WhatsApp</label>
                   <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
+                {!editingData && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold">Jenjang Pengawasan</label>
+                    <select value={supervisedLevel} onChange={e => setSupervisedLevel(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                      <option value="I'dadiyyah">I&apos;dadiyyah</option>
+                      <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
+                      <option value="Tsanawiyyah">Tsanawiyyah</option>
+                      <option value="Aliyyah">Aliyyah</option>
+                    </select>
+                  </div>
+                )}
                 <div className="flex justify-end gap-2 pt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold">Batal</button>
                   <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Simpan</button>

@@ -205,7 +205,8 @@ export default function Page() {
             )}
 
             {viewMode === "login" ? (
-              <form onSubmit={handleLoginSubmit} className="space-y-2 sm:space-y-4">
+              <>
+                <form onSubmit={handleLoginSubmit} className="space-y-2 sm:space-y-4">
                 <div className="space-y-1 sm:space-y-1.5">
                   <label className="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider ml-1">Username</label>
                   <div className="relative group/input">
@@ -268,8 +269,19 @@ export default function Page() {
                   </button>
                 </div>
               </form>
+              
+              {/* Helper Kredensial Uji Coba */}
+              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-[10px] text-blue-300 space-y-1">
+                <div className="font-bold uppercase tracking-wider">Kredensial Demo / Uji Coba:</div>
+                <div>• Sekretariat (Admin): <span className="font-mono text-white font-bold select-all">admin_mphm</span> / <span className="font-mono text-white font-bold select-all">madrasahp3hm123</span></div>
+                <div>• Mustahiq (Wali Kelas): <span className="font-mono text-white font-bold select-all">mustahiq01</span> / <span className="font-mono text-white font-bold select-all">mphm123</span></div>
+                <div>• Mufattisy (Pengawas): <span className="font-mono text-white font-bold select-all">mufattisy01</span> / <span className="font-mono text-white font-bold select-all">mphm123</span></div>
+                <div>• Wali Santri: <span className="font-mono text-white font-bold select-all">wali01</span> / <span className="font-mono text-white font-bold select-all">mphm123</span></div>
+              </div>
+              </>
             ) : (
-              <form onSubmit={handleRegisterSubmit} className="space-y-2 sm:space-y-4">
+              <>
+                <form onSubmit={handleRegisterSubmit} className="space-y-2 sm:space-y-4">
                 <div className="space-y-1 sm:space-y-1.5">
                   <label className="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider ml-1">Nomor WhatsApp</label>
                   <div className="relative group/input">
@@ -325,6 +337,15 @@ export default function Page() {
                   </button>
                 </div>
               </form>
+
+              {/* Helper KK Registrasi */}
+              <div className="mt-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-[10px] text-indigo-300 space-y-1">
+                <div className="font-bold uppercase tracking-wider">Petunjuk Uji Coba Registrasi Wali:</div>
+                <div>Gunakan data dummy yang terdaftar di database:</div>
+                <div>• No. WhatsApp: <span className="font-mono text-white font-bold select-all">081200000005</span> (Ayah) atau <span className="font-mono text-white font-bold select-all">081200000006</span> (Ibu)</div>
+                <div>• Nomor KK (Kartu Keluarga): <span className="font-mono text-white font-bold select-all">3200001111111111</span></div>
+              </div>
+              </>
             )}
           </div>
         </div>

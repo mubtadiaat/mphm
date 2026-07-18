@@ -11,6 +11,9 @@ export interface AcademicClass {
   classLevel?: string;
   section?: string;
   mustahiqId?: string;
+  academicYearId?: string;
+  curriculumId?: string;
+  personId?: string;
 }
 
 export function useClasses(academicYearId?: string) {
@@ -40,9 +43,36 @@ export function useClasses(academicYearId?: string) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest<{ status: string }>(`/api/admin/classes/${id}`, {
+        method: "DELETE",
+      });
+      return res.status;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-classes"] });
+    },
+  });
+
   return {
     ...query,
     createClass: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
+    deleteClass: deleteMutation.mutateAsync,
+    isDeleting: deleteMutation.isPending,
   };
+}
+
+export function useClassDetails(classId: string) {
+  return useQuery<{ class: AcademicClass; students: any[] }>({
+    queryKey: ["sekretariat-class-details", classId],
+    queryFn: async () => {
+      const res = await apiRequest<{ data: { class: AcademicClass; students: any[] } }>(
+        `/api/admin/classes/${classId}`
+      );
+      return res.data;
+    },
+    enabled: !!classId,
+  });
 }

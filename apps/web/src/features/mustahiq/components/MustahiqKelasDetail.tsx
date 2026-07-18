@@ -78,10 +78,10 @@ export function MustahiqKelasDetail() {
           <table className="w-full text-sm text-left">
             <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
               <tr>
-                <th className="px-4 py-3">No</th>
-                <th className="px-4 py-3">Nama Santri</th>
-                <th className="px-4 py-3">NIS</th>
-                <th className="px-4 py-3">NISN</th>
+                <th className="px-4 py-3 text-left">No</th>
+                <th className="px-4 py-3 text-left">Nama Santri</th>
+                <th className="px-4 py-3 text-left">NIS</th>
+                <th className="px-4 py-3 text-left">NISN</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">

@@ -8,7 +8,9 @@ import { requireRole } from "../../middlewares/rbacMiddleware";
 
 const violationsAdmin = new Hono<AppEnv>();
 
-violationsAdmin.use("*", requireRole(["Sekretariat"]));
+violationsAdmin.post("*", requireRole(["Sekretariat"]));
+violationsAdmin.delete("*", requireRole(["Sekretariat"]));
+violationsAdmin.get("*", requireRole(["Sekretariat", "Mustahiq", "Mufattisy", "Mundzir", "Petugas Keamanan"]));
 
 const createCategorySchema = z.object({
   name: z.string().min(3),

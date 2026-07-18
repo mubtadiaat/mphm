@@ -22,7 +22,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   const [mundzirList, setMundzirList] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, deletePengurus } = usePengurus(searchQuery || "Mundzir", pageIndex, pageSize);
+  const { data: remoteData = { data: [], total: 0 }, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mundzir", pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -91,9 +91,23 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast("Lengkapi form", "warning", "Peringatan");
-    toast("Fitur simpan sedang dalam pengembangan", "info", "Info");
-    setShowModal(false);
+    if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
+    
+    try {
+      if (editingData) {
+        if (!editingData.personId) {
+          throw new Error("ID orang tidak ditemukan pada data ini.");
+        }
+        await updatePengurus({ personId: editingData.personId, name, phone });
+        toast("Data Mundzir berhasil diperbarui!", "success", "Sukses");
+      } else {
+        await createPengurus({ name, phone, roleName: role });
+        toast("Mundzir baru berhasil didaftarkan!", "success", "Sukses");
+      }
+      setShowModal(false);
+    } catch (err: any) {
+      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
+    }
   };
 
   const columns: ColumnDef<Pengurus, unknown>[] = [

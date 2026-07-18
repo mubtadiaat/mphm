@@ -66,10 +66,10 @@ export function UsersManagementTab() {
               <table className="w-full text-sm text-left">
                 <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
                   <tr>
-                    <th className="px-4 py-3 rounded-tl-xl">Username</th>
-                    <th className="px-4 py-3">Nama</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3 rounded-tl-xl text-left">Username</th>
+                    <th className="px-4 py-3 text-left">Nama</th>
+                    <th className="px-4 py-3 text-left">Role</th>
+                    <th className="px-4 py-3 text-left">Status</th>
                     <th className="px-4 py-3 rounded-tr-xl text-right">Aksi</th>
                   </tr>
                 </thead>

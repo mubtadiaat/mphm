@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreVertical, BookOpen, Layers, Plus, X, Save } from "lucide-react";
+import { Trash2, BookOpen, Layers, Plus, X, Save } from "lucide-react";
 import { useClasses } from "@/features/sekretariat/queries/useClasses";
 import { useGuru } from "@/features/sekretariat/queries/useGuru";
 import { usePengurus } from "@/features/sekretariat/queries/usePengurus";
@@ -15,7 +15,7 @@ const CLASS_LEVELS_MAP: Record<string, string[]> = {
 };
 
 export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false }: { onViewDetail?: (data: Record<string, unknown>) => void, selectedYearId?: string, isReadOnly?: boolean }) {
-  const { data: remoteData, isLoading, createClass, isCreating } = useClasses(selectedYearId);
+  const { data: remoteData, isLoading, createClass, isCreating, deleteClass } = useClasses(selectedYearId);
   
   const { data: mustahiqListRemote = { data: [], total: 0 } } = useGuru("", 0, 100);
   const mustahiqList = mustahiqListRemote.data;
@@ -122,7 +122,7 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
               >
                 <option value="">Pilih Mustahiq...</option>
                 {mustahiqList.map((guru) => (
-                  <option key={guru.id} value={guru.name}>{guru.name}</option>
+                  <option key={guru.id} value={guru.id}>{guru.name}</option>
                 ))}
               </select>
             </div>
@@ -151,15 +151,16 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
           </div>
           <div className="flex justify-end mt-4">
             <button 
-              disabled={isCreating || !newRuang}
+              disabled={isCreating || !newRuang || !newMustahiq}
               onClick={async () => {
-                const finalName = `${newJenjang} ${newTingkat}-${newRuang}`;
                 await createClass({
-                  name: finalName,
-                  mustahiq: newMustahiq || "Belum Ditentukan",
-                  mufattisy: newMufattisy || "Belum Ditentukan",
+                  academicYearId: selectedYearId,
+                  institutionLevel: newJenjang,
+                  classLevel: newTingkat,
+                  section: newRuang,
+                  mustahiqId: newMustahiq,
                   capacity: newCapacity
-                });
+                } as any);
                 setShowForm(false);
                 setNewRuang("");
                 setNewMustahiq("");
@@ -202,9 +203,20 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                       Lokal / Ruang Aktif
                     </span>
                   </div>
-                  <button className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-zinc-400 transition-colors">
-                    <MoreVertical className="w-5 h-5" />
-                  </button>
+                  {!isReadOnly && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Apakah Anda yakin ingin menghapus kelas ${cls.name}?`)) {
+                          deleteClass(cls.id);
+                        }
+                      }}
+                      className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md text-zinc-400 hover:text-rose-600 transition-colors cursor-pointer"
+                      title="Hapus Kelas"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
                 <div className="p-5 flex-1 flex flex-col gap-3">
                   <div className="flex justify-between items-center text-sm">

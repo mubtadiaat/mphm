@@ -17,7 +17,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [teachers, setTeachers] = useState<Guru[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, deleteGuru } = useGuru(searchQuery, pageIndex, pageSize);
+  const { data: remoteData = { data: [], total: 0 }, isLoading, createGuru, updateGuru, deleteGuru } = useGuru(searchQuery, pageIndex, pageSize);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -62,9 +62,23 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast("Lengkapi form", "warning", "Peringatan");
-    toast("Fitur simpan sedang dalam pengembangan", "info", "Info");
-    setShowModal(false);
+    if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
+    
+    try {
+      if (editingData) {
+        if (!editingData.personId) {
+          throw new Error("ID orang tidak ditemukan pada data ini.");
+        }
+        await updateGuru({ personId: editingData.personId, name, phone });
+        toast("Data Mustahiq berhasil diperbarui!", "success", "Sukses");
+      } else {
+        await createGuru({ name, phone });
+        toast("Mustahiq baru berhasil didaftarkan!", "success", "Sukses");
+      }
+      setShowModal(false);
+    } catch (err: any) {
+      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
+    }
   };
 
   const columns: ColumnDef<Guru, unknown>[] = [

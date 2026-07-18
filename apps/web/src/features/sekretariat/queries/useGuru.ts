@@ -3,6 +3,7 @@ import { apiRequest } from "../../../lib/api";
 
 export interface Guru {
   id: string;
+  personId?: string;
   name: string;
   teacherCode: string;
   phone: string;
@@ -24,9 +25,49 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
     },
   });
 
+  const createMutation = useMutation({
+    mutationFn: async (data: { name: string; phone?: string; gender?: "L" | "P" }) => {
+      const personRes = await apiRequest<{ data: { id: string } }>("/api/admin/people", {
+        method: "POST",
+        body: JSON.stringify({
+          fullName: data.name,
+          phoneNumber: data.phone || null,
+          gender: data.gender || "L",
+        }),
+      });
+      const personId = personRes.data.id;
+      const teacherCode = `UST-${Math.floor(100 + Math.random() * 900)}`;
+      await apiRequest(`/api/admin/people/${personId}/assign-role`, {
+        method: "POST",
+        body: JSON.stringify({
+          role: "teacher",
+          teacherCode,
+        }),
+      });
+      return personRes.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-guru"] });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: { personId: string; name: string; phone?: string }) => {
+      return await apiRequest(`/api/admin/people/${data.personId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          fullName: data.name,
+          phoneNumber: data.phone || null,
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-guru"] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Assuming id is the person_id, we soft delete the profile
       const res = await apiRequest<{ status: string }>(`/api/admin/people/${id}`, {
         method: "DELETE",
       });
@@ -39,6 +80,10 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
 
   return {
     ...queryReq,
+    createGuru: createMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    updateGuru: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
     deleteGuru: deleteMutation.mutateAsync,
     isDeleting: deleteMutation.isPending,
   };

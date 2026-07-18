@@ -30,7 +30,7 @@ const createPersonSchema = z.object({
 });
 
 const assignProfileSchema = z.object({
-  role: z.enum(["student", "teacher", "guardian"]),
+  role: z.enum(["student", "teacher", "guardian", "pengurus"]),
   // Student specific
   nis: z.string().optional(),
   nisn: z.string().optional(),
@@ -40,6 +40,9 @@ const assignProfileSchema = z.object({
   // Guardian specific
   familyCardNumber: z.string().optional(),
   relation: z.enum(["AYAH", "IBU", "WALI"]).optional(),
+  // Pengurus specific
+  roleName: z.string().optional(),
+  supervisedLevel: z.string().nullable().optional(),
 });
 
 // ============================================================
@@ -181,6 +184,7 @@ peopleAdmin.get("/", async (c) => {
     const result = await db.run(sql`
       SELECT 
         tp.id as id,
+        tp.person_id as personId,
         p.full_name as name,
         tp.teacher_code as teacherCode,
         p.nik as nik,
@@ -214,8 +218,10 @@ peopleAdmin.get("/", async (c) => {
     const result = await db.run(sql`
       SELECT 
         om.id as id,
+        om.person_id as personId,
         p.full_name as name,
         om.role_name as role,
+        om.supervised_level as supervisedLevel,
         p.phone_number as phone,
         om.status as status,
         p.gender as gender,
@@ -375,6 +381,16 @@ peopleAdmin.post("/:id/assign-role", zValidator("json", assignProfileSchema), as
       return c.json({ status: "Error", message: "familyCardNumber dan relation diperlukan untuk profil wali." }, 400);
     }
     profile = await peopleService.createGuardianProfile(id, data.familyCardNumber, data.relation);
+  } else if (data.role === "pengurus") {
+    if (!data.roleName) {
+      return c.json({ status: "Error", message: "roleName diperlukan untuk profil pengurus." }, 400);
+    }
+    profile = await db.insert(organizationMemberships).values({
+      personId: id,
+      roleName: data.roleName,
+      supervisedLevel: data.supervisedLevel || null,
+      status: "ACTIVE",
+    }).returning().get();
   }
 
   return c.json({ status: "Success", message: `Profil peran ${data.role} berhasil dipasang.`, data: profile });

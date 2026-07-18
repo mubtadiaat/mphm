@@ -32,12 +32,12 @@ INSERT INTO people (id, nik, full_name, gender, birth_place, birth_date, address
 ('person-wali-2', '3200000000000006', 'Ibu Aminah Wali', 'P', 'Semarang', '1978-10-02', 'Jl. Pahlawan No.5', '081200000006');
 
 INSERT INTO user_accounts (id, person_id, username, password_hash, role, is_active, created_at) VALUES
-('acc-mundzir', 'person-mundzir', 'mundzir01', '$2a$10$X8H.h.OQ5lD9R3K.gO9a.OM9S0T6v.q8I8V4uJq2i5Z9C', 'Mundzir', 1, strftime('%s', 'now')),
-('acc-mufattisy', 'person-mufattisy', 'mufattisy01', '$2a$10$X8H.h.OQ5lD9R3K.gO9a.OM9S0T6v.q8I8V4uJq2i5Z9C', 'Mufattisy', 1, strftime('%s', 'now')),
-('acc-mustahiq', 'person-mustahiq', 'mustahiq01', '$2a$10$X8H.h.OQ5lD9R3K.gO9a.OM9S0T6v.q8I8V4uJq2i5Z9C', 'Mustahiq', 1, strftime('%s', 'now')),
-('acc-keamanan', 'person-keamanan', 'keamanan01', '$2a$10$X8H.h.OQ5lD9R3K.gO9a.OM9S0T6v.q8I8V4uJq2i5Z9C', 'Petugas Keamanan', 1, strftime('%s', 'now')),
-('acc-wali-1', 'person-wali-1', 'wali01', '$2a$10$X8H.h.OQ5lD9R3K.gO9a.OM9S0T6v.q8I8V4uJq2i5Z9C', 'Wali Santri', 1, strftime('%s', 'now')),
-('acc-wali-2', 'person-wali-2', 'wali02', '$2a$10$X8H.h.OQ5lD9R3K.gO9a.OM9S0T6v.q8I8V4uJq2i5Z9C', 'Wali Santri', 1, strftime('%s', 'now'));
+('acc-mundzir', 'person-mundzir', 'mundzir01', '703cff8de3ac9a397d82b78b3a673d1b:1dab951a2f3bb9cf03a37ff17f63bdbbac2f6fc453cbb126c0b2d6410c12e6bc', 'Mundzir', 1, strftime('%s', 'now')),
+('acc-mufattisy', 'person-mufattisy', 'mufattisy01', '703cff8de3ac9a397d82b78b3a673d1b:1dab951a2f3bb9cf03a37ff17f63bdbbac2f6fc453cbb126c0b2d6410c12e6bc', 'Mufattisy', 1, strftime('%s', 'now')),
+('acc-mustahiq', 'person-mustahiq', 'mustahiq01', '703cff8de3ac9a397d82b78b3a673d1b:1dab951a2f3bb9cf03a37ff17f63bdbbac2f6fc453cbb126c0b2d6410c12e6bc', 'Mustahiq', 1, strftime('%s', 'now')),
+('acc-keamanan', 'person-keamanan', 'keamanan01', '703cff8de3ac9a397d82b78b3a673d1b:1dab951a2f3bb9cf03a37ff17f63bdbbac2f6fc453cbb126c0b2d6410c12e6bc', 'Petugas Keamanan', 1, strftime('%s', 'now')),
+('acc-wali-1', 'person-wali-1', 'wali01', '703cff8de3ac9a397d82b78b3a673d1b:1dab951a2f3bb9cf03a37ff17f63bdbbac2f6fc453cbb126c0b2d6410c12e6bc', 'Wali Santri', 1, strftime('%s', 'now')),
+('acc-wali-2', 'person-wali-2', 'wali02', '703cff8de3ac9a397d82b78b3a673d1b:1dab951a2f3bb9cf03a37ff17f63bdbbac2f6fc453cbb126c0b2d6410c12e6bc', 'Wali Santri', 1, strftime('%s', 'now'));
 
 -- 2. ORGANIZATION & TEACHER PROFILES
 INSERT INTO organization_memberships (id, person_id, role_name, status, supervised_level) VALUES
