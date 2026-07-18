@@ -20,6 +20,7 @@ import auditLogsAdmin from './routes/admin/audit-logs'
 import dashboardAdmin from './routes/admin/dashboard'
 import onboardingAdmin from './routes/admin/onboarding'
 import { usersAdmin } from './routes/admin/users'
+import roomsAdmin from './routes/admin/rooms'
 
 // Mustahiq route imports
 import classMustahiq from './routes/mustahiq/class'
@@ -110,6 +111,7 @@ app.use('/api/admin/classes/*', auditLogMiddleware('ADMIN_CLASSES'))
 app.use('/api/admin/subjects/*', auditLogMiddleware('ADMIN_SUBJECTS'))
 app.use('/api/admin/violations/*', auditLogMiddleware('ADMIN_VIOLATIONS'))
 app.use('/api/admin/users/*', auditLogMiddleware('ADMIN_USERS'))
+app.use('/api/admin/rooms/*', auditLogMiddleware('ADMIN_ROOMS'))
 app.use('/api/mustahiq/scores/*', auditLogMiddleware('MUSTAHIQ_SCORES'))
 app.use('/api/mustahiq/attendance/*', auditLogMiddleware('MUSTAHIQ_ATTENDANCE'))
 
@@ -129,6 +131,7 @@ app.route('/api/admin/audit-logs', auditLogsAdmin)
 app.route('/api/admin/dashboard', dashboardAdmin)
 app.route('/api/admin/onboarding', onboardingAdmin)
 app.route('/api/admin/users', usersAdmin)
+app.route('/api/admin/rooms', roomsAdmin)
 
 // Mendaftarkan modul mustahiq
 app.route('/api/mustahiq/class', classMustahiq)

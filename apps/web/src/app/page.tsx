@@ -352,7 +352,7 @@ export default function Page() {
               <div className="text-xs text-slate-500 mb-1">Username (No WA):</div>
               <div className="font-mono text-sm text-blue-400 font-bold mb-3">{regSuccess.username}</div>
               <div className="text-xs text-slate-500 mb-1">Password Default:</div>
-              <div className="font-mono text-sm text-emerald-400 font-bold">Dikirim via WhatsApp / Hubungi Admin</div>
+              <div className="font-mono text-sm text-emerald-400 font-bold">mphm123</div>
             </div>
             <button
               type="button"

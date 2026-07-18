@@ -191,7 +191,7 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
         onRowClick={(row) => onViewDetail(row as unknown as Record<string, unknown>)}
         importExportProps={{
           title: "Data Pelanggaran",
-          headers: ["studentName", "type", "description", "points"],
+          headers: ["Nama Aturan Pelanggaran", "Kategori Kedisiplinan", "Tingkat Keparahan", "Poin Penalty"],
           onImportSuccess: (rows) => console.log("Imported:", rows)
         }}
       />

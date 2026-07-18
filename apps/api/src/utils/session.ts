@@ -36,7 +36,7 @@ export async function rotateSessionIfStale(
     setCookie(c, "session_token", newToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
+      sameSite: "Lax",
       path: "/",
       maxAge: 3600,
       domain: c.env.ENVIRONMENT === "production" ? "m.p3hm.my.id" : undefined,

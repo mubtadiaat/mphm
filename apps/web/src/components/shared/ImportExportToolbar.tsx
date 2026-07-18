@@ -4,6 +4,92 @@ import { useState, useRef } from "react";
 import { Download, Upload, FileSpreadsheet, FileText, ChevronDown, Check, AlertCircle } from "lucide-react";
 
 
+function resolveValue(item: any, h: string): string {
+  const lowerH = h.toLowerCase().trim();
+  const cleanH = lowerH.replace(/\s+/g, "");
+
+  // 1. Direct match on clean header name (lowercase)
+  const directKey = Object.keys(item).find(k => k.toLowerCase() === cleanH);
+  if (directKey !== undefined) {
+    const v = item[directKey];
+    if (typeof v === "boolean") return v ? "AKTIF" : "NON-AKTIF";
+    return String(v ?? "");
+  }
+
+  // 2. Fuzzy matches
+  if (lowerH.includes("nama") || lowerH.includes("wali santri")) {
+    return String(item.name || item.fullName || item.guardianName || "");
+  }
+  if (lowerH.includes("nik")) {
+    return String(item.nik || item.guardianNik || "");
+  }
+  if (lowerH.includes("kk") || lowerH.includes("card") || lowerH.includes("keluarga")) {
+    return String(item.familyCardNumber || "");
+  }
+  if (lowerH.includes("telepon") || lowerH.includes("phone") || lowerH.includes("hp")) {
+    return String(item.phone || item.phoneNumber || item.guardianPhone || "");
+  }
+  if (lowerH.includes("stambuk")) {
+    return String(item.stambuk || item.stambukNumber || "");
+  }
+  if (lowerH.includes("kelas") || lowerH.includes("rombel")) {
+    return String(item.class || item.level || "");
+  }
+  if (lowerH.includes("alamat") || lowerH.includes("address")) {
+    return String(item.address || "");
+  }
+  if (lowerH.includes("kode")) {
+    return String(item.code || item.teacherCode || "");
+  }
+  if (lowerH.includes("tipe") || lowerH.includes("kategori") || lowerH.includes("jenis")) {
+    return String(item.subjectType || item.type || item.category || "");
+  }
+  if (lowerH.includes("keparahan") || lowerH.includes("severity") || lowerH.includes("tingkat")) {
+    return String(item.severity || "");
+  }
+  if (lowerH.includes("poin") || lowerH.includes("point")) {
+    return String(item.points || "");
+  }
+  if (lowerH.includes("mulai")) {
+    return String(item.startDate || "");
+  }
+  if (lowerH.includes("berakhir")) {
+    return String(item.endDate || "");
+  }
+  if (lowerH.includes("tahun") || lowerH.includes("akademik") || lowerH.includes("ajaran")) {
+    return String(item.name || item.academicYear || "");
+  }
+  if (lowerH.includes("mustahiq") || lowerH.includes("guru") || lowerH.includes("wali kamar") || lowerH.includes("ust")) {
+    return String(item.mustahiq || item.teacherCode || item.supervisorName || "");
+  }
+  if (lowerH.includes("mufattisy")) {
+    return String(item.mufattisy || "");
+  }
+  if (lowerH.includes("status")) {
+    if (item.isActive !== undefined) return item.isActive ? "AKTIF" : "NON-AKTIF";
+    return String(item.status || "");
+  }
+  if (lowerH.includes("nilai") || lowerH.includes("gpa") || lowerH.includes("ipk")) {
+    return String(item.score || item.averageScore || item.averageGpa || "");
+  }
+  if (lowerH.includes("kehadiran") || lowerH.includes("absen")) {
+    return String(item.attendance || item.attendanceRate || "");
+  }
+  if (lowerH.includes("deskripsi") || lowerH.includes("keterangan") || lowerH.includes("detail")) {
+    return String(item.description || item.detailDescription || "");
+  }
+
+  // 3. Last fallback: search for keys containing substring
+  const fuzzyKey = Object.keys(item).find(k => cleanH.includes(k.toLowerCase()) || k.toLowerCase().includes(cleanH));
+  if (fuzzyKey !== undefined) {
+    const v = item[fuzzyKey];
+    if (typeof v === "boolean") return v ? "AKTIF" : "NON-AKTIF";
+    return String(v ?? "");
+  }
+
+  return "";
+}
+
 interface ImportExportToolbarProps {
   headers: string[]; // e.g. ["Nama Lengkap", "NIK", "Nomor Stambuk", "Kelas", "Alamat"]
   data: Record<string, string | number | boolean | null | undefined>[]; // current data to export
@@ -202,20 +288,7 @@ export function ImportExportToolbar({
     data.forEach(item => {
       const rowData: Record<string, string> = {};
       headers.forEach(h => {
-        let val = "";
-        const lowerH = h.toLowerCase();
-        if (lowerH.includes("nama")) val = String(item.name || item.fullName || "");
-        else if (lowerH.includes("nik")) val = String(item.nik || "");
-        else if (lowerH.includes("stambuk")) val = String(item.stambuk || item.stambukNumber || "");
-        else if (lowerH.includes("kelas")) val = String(item.class || item.level || "");
-        else if (lowerH.includes("alamat")) val = String(item.address || "");
-        else if (lowerH.includes("mustahiq") || lowerH.includes("wali kelas")) val = String(item.mustahiq || "");
-        else if (lowerH.includes("mufattisy")) val = String(item.mufattisy || "");
-        else if (lowerH.includes("status")) val = String(item.status || "");
-        else if (lowerH.includes("nilai")) val = String(item.score || item.averageScore || "");
-        else if (lowerH.includes("kehadiran")) val = String(item.attendance || "");
-        else val = String(item[h] || "");
-        rowData[h] = val;
+        rowData[h] = resolveValue(item, h);
       });
       sheet.addRow(rowData);
     });
@@ -238,18 +311,7 @@ export function ImportExportToolbar({
     // Map data values to arrays
     const exportRows = data.map(item => {
       return headers.map(h => {
-        const lowerH = h.toLowerCase();
-        if (lowerH.includes("nama")) return String(item.name || item.fullName || "");
-        if (lowerH.includes("nik")) return String(item.nik || "");
-        if (lowerH.includes("stambuk")) return String(item.stambuk || item.stambukNumber || "");
-        if (lowerH.includes("kelas")) return String(item.class || item.level || "");
-        if (lowerH.includes("alamat")) return String(item.address || "");
-        if (lowerH.includes("mustahiq") || lowerH.includes("wali kelas")) return String(item.mustahiq || "");
-        if (lowerH.includes("mufattisy")) return String(item.mufattisy || "");
-        if (lowerH.includes("status")) return String(item.status || "");
-        if (lowerH.includes("nilai")) return String(item.score || item.averageScore || "");
-        if (lowerH.includes("kehadiran")) return String(item.attendance || "");
-        return String(item[h] || "");
+        return resolveValue(item, h);
       });
     });
 

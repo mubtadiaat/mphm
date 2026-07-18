@@ -31,6 +31,7 @@ export type SessionPayload = {
   username: string;
   assignedClassId?: string;    // Untuk Mustahiq
   familyCardNumber?: string;   // Untuk Wali Santri
+  supervisedLevel?: string;    // Untuk Mufattisy
 };
 
 // ============================================================

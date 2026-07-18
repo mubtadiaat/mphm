@@ -48,6 +48,8 @@ export function useGlobalViolations(academicYearId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["global-violations"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["guardian-dashboard-stats"] });
     },
   });
 

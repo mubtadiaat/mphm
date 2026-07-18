@@ -30,6 +30,8 @@ export function useAttendance(classId?: string) {
     onSuccess: () => {
       // Invalidate related lists
       queryClient.invalidateQueries({ queryKey: ["mustahiq-my-class"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["guardian-dashboard-stats"] });
     },
   });
 

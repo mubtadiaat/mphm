@@ -52,7 +52,7 @@ mustahiqDashboard.get("/stats", requireRole(["Mustahiq"]), async (c) => {
     .where(
       and(
         eq(studentScores.classId, user.assignedClassId),
-        eq(subjects.subjectType, "NON_MAPEL")
+        eq(subjects.subjectType, "MAPEL")
       )
     )
     .get();

@@ -98,8 +98,8 @@ export class GradeService {
     const studentGradesMap: Record<string, { total: number; count: number }> = {};
 
     for (const row of scores) {
-      if (row.subjectType === "MAPEL") {
-        continue; // Exclude mapel mapel dari ranking
+      if (row.subjectType === "NON_MAPEL") {
+        continue; // Exclude pelajaran sakral (NON_MAPEL) dari ranking
       }
 
       if (!studentGradesMap[row.studentId]) {

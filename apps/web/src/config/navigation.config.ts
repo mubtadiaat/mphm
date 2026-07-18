@@ -14,7 +14,8 @@ import {
   Heart,
   CheckSquare,
   Archive,
-  Trash2
+  Trash2,
+  Home
 } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { LucideProps } from "lucide-react";
@@ -45,6 +46,7 @@ export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
       items: [
         { label: "Data Santri", href: "/sekretariat/santri", icon: Users },
         { label: "Data Wali Santri", href: "/sekretariat/wali-santri", icon: UserCircle },
+        { label: "Data Kamar & Asrama", href: "/sekretariat/rooms", icon: Home },
         { label: "Data Mustahiq", href: "/sekretariat/mustahiq", icon: Users },
         { label: "Data Mufatish", href: "/sekretariat/mufattisy", icon: Users },
         { label: "Data Mundzir", href: "/sekretariat/mundzir", icon: Users },

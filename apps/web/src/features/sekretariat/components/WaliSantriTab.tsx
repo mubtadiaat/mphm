@@ -111,7 +111,7 @@ export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
         tableName="wali_santri"
         importExportProps={{
           title: "Data Wali Santri",
-          headers: ["name", "nik", "phone", "address"],
+          headers: ["Nama Wali", "NIK", "No Telepon", "Nomor KK"],
           onImportSuccess: (rows) => {
             console.log("Imported rows:", rows);
             // toast(`Berhasil mengimpor ${rows.length} baris data`, "success", "Import Data");

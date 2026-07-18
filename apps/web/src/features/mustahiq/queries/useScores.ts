@@ -40,6 +40,8 @@ export function useScores(classId?: string, kwartal?: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mustahiq-scores", classId, kwartal] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["guardian-dashboard-stats"] });
     },
   });
 

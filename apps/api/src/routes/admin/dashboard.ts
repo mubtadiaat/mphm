@@ -42,7 +42,7 @@ dashboardAdmin.get("/stats", async (c) => {
     .innerJoin(subjects, eq(studentScores.subjectId, subjects.id))
     .innerJoin(academicClasses, eq(studentScores.classId, academicClasses.id))
     .where(and(
-      eq(subjects.subjectType, "NON_MAPEL"),
+      eq(subjects.subjectType, "MAPEL"),
       eq(academicClasses.academicYearId, targetYearId)
     ))
     .get();

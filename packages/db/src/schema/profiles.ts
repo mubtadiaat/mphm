@@ -1,6 +1,18 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { people } from "./people";
 
+// 0. MASTER KAMAR / ASRAMA (DORMITORY ROOM)
+export const rooms = sqliteTable("rooms", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull().unique(), // Cth: "Kamar Al-Ghozali 01"
+  buildingName: text("building_name").notNull(), // Cth: "Gedung A"
+  capacity: integer("capacity").notNull().default(10),
+  gender: text("gender", { enum: ["L", "P"] }).notNull(), // Asrama L/P
+  supervisorId: text("supervisor_id").references(() => teacherProfiles.id, { onDelete: "set null" }), // Wali Kamar
+  isActive: integer("is_active", { mode: "boolean" }).default(true),
+  deletedAt: integer("deleted_at", { mode: "timestamp" }),
+});
+
 // 1. PROFIL SANTRI
 export const studentProfiles = sqliteTable("student_profiles", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -11,6 +23,7 @@ export const studentProfiles = sqliteTable("student_profiles", {
   enrollmentYear: integer("enrollment_year").notNull(),
   status: text("status", { enum: ["ACTIVE", "GRADUATED", "DROPPED", "BOYONG", "KHIDMAH"] }).default("ACTIVE"),
   khidmahPlacement: text("khidmah_placement"),
+  roomId: text("room_id").references(() => rooms.id, { onDelete: "set null" }),
   deletedAt: integer("deleted_at", { mode: "timestamp" }),
 });
 
@@ -46,5 +59,6 @@ export const organizationMemberships = sqliteTable("organization_memberships", {
   personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
   roleName: text("role_name").notNull(), // cth: "Mufattisy", "Pimpinan"
   status: text("status", { enum: ["ACTIVE", "INACTIVE"] }).default("ACTIVE"),
+  supervisedLevel: text("supervised_level"), // Cth: "Tsanawiyyah", "Aliyyah"
   deletedAt: integer("deleted_at", { mode: "timestamp" }),
 });

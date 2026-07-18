@@ -71,6 +71,8 @@ export function useSantri(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-santri"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["guardian-dashboard-stats"] });
     },
   });
 
@@ -84,6 +86,8 @@ export function useSantri(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-santri"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["guardian-dashboard-stats"] });
     },
   });
 
@@ -96,6 +100,8 @@ export function useSantri(
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-santri"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["guardian-dashboard-stats"] });
     },
   });
 

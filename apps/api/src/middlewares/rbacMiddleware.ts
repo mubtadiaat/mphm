@@ -1,5 +1,7 @@
 import { Context, Next } from "hono";
 import type { AppEnv } from "../types";
+import { eq } from "drizzle-orm";
+import { createDb, academicClasses } from "@mphm/db";
 
 // ============================================================
 import { ROLES, RoleType } from "@mphm/utils";
@@ -46,9 +48,39 @@ export const requireDataScope = (targetType: "CLASS" | "GUARDIAN") => {
       return await next();
     }
 
-    // Mufattisy juga punya akses luas (tingkatan, bukan individual class)
-    if (user.role === "Mufattisy") {
-      return await next();
+    // ---- CLASS SCOPE LOCK (Mufattisy) ----
+    if (targetType === "CLASS" && user.role === "Mufattisy") {
+      const requestedClassId = c.req.param("classId") || c.req.query("classId");
+      if (!requestedClassId) {
+        return await next();
+      }
+
+      if (!user.supervisedLevel) {
+        return c.json(
+          {
+            status: "Error",
+            message: "Data Scope Forbidden: Tidak ada jenjang pendidikan yang ditugaskan untuk diawasi.",
+          },
+          403
+        );
+      }
+
+      const db = createDb(c.env.DB);
+      const targetClass = await db
+        .select({ institutionLevel: academicClasses.institutionLevel })
+        .from(academicClasses)
+        .where(eq(academicClasses.id, requestedClassId))
+        .get();
+
+      if (!targetClass || targetClass.institutionLevel !== user.supervisedLevel) {
+        return c.json(
+          {
+            status: "Error",
+            message: `Data Scope Forbidden: Anda hanya diizinkan mengakses data jenjang ${user.supervisedLevel}.`,
+          },
+          403
+        );
+      }
     }
 
     // ---- CLASS SCOPE LOCK (Mustahiq) ----

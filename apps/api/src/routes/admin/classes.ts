@@ -14,6 +14,7 @@ classesAdmin.use("*", requireRole(["Sekretariat", "Mufattisy", "Mundzir", "Musta
 classesAdmin.get("/", async (c) => {
   const academicYearId = c.req.query("academicYearId") || undefined;
   const db = createDb(c.env.DB);
+  const user = c.get("user");
 
   // Resolve target academic year
   let targetYearId = academicYearId;
@@ -24,6 +25,15 @@ classesAdmin.get("/", async (c) => {
       .where(eq(academicYears.isActive, true))
       .get();
     targetYearId = activeYear?.id || "";
+  }
+
+  const conditions = [
+    isNull(academicClasses.deletedAt),
+    eq(academicClasses.academicYearId, targetYearId)
+  ];
+
+  if (user?.role === "Mufattisy" && user.supervisedLevel) {
+    conditions.push(eq(academicClasses.institutionLevel, user.supervisedLevel));
   }
 
   const list = await db
@@ -40,10 +50,7 @@ classesAdmin.get("/", async (c) => {
     .from(academicClasses)
     .innerJoin(teacherProfiles, eq(academicClasses.mustahiqId, teacherProfiles.id))
     .innerJoin(people, eq(teacherProfiles.personId, people.id))
-    .where(and(
-      isNull(academicClasses.deletedAt),
-      eq(academicClasses.academicYearId, targetYearId)
-    ))
+    .where(and(...conditions))
     .all();
 
   return c.json({ status: "Success", data: list });

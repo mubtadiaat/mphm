@@ -1,7 +1,7 @@
 import { Context, Next } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import { eq, and, gt } from "drizzle-orm";
-import { createDb, userSessions, userAccounts, teacherProfiles, guardianProfiles, academicClasses, academicYears } from "@mphm/db";
+import { createDb, userSessions, userAccounts, teacherProfiles, guardianProfiles, academicClasses, academicYears, organizationMemberships } from "@mphm/db";
 import type { AppEnv, SessionPayload } from "../types";
 import { rotateSessionIfStale } from "../utils/session";
 
@@ -104,6 +104,24 @@ export const requireAuth = async (c: Context<AppEnv>, next: Next) => {
 
     if (guardian) {
       payload.familyCardNumber = guardian.familyCardNumber;
+    }
+  }
+
+  if (account.role === "Mufattisy") {
+    // Ambil supervised_level dari organization_memberships
+    const membership = await db
+      .select({ supervisedLevel: organizationMemberships.supervisedLevel })
+      .from(organizationMemberships)
+      .where(
+        and(
+          eq(organizationMemberships.personId, account.personId),
+          eq(organizationMemberships.status, "ACTIVE")
+        )
+      )
+      .get();
+
+    if (membership?.supervisedLevel) {
+      payload.supervisedLevel = membership.supervisedLevel;
     }
   }
 

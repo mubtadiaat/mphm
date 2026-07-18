@@ -104,10 +104,10 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
       header: "Tipe Pelajaran",
       cell: (info) => {
         const val = info.getValue() as string;
-        const isSacred = val === "MAPEL";
+        const isSacred = val === "NON_MAPEL";
         return (
           <PillBadge
-            label={isSacred ? "MAPEL" : "NON_MAPEL"}
+            label={isSacred ? "NON_MAPEL" : "MAPEL"}
             variant={isSacred ? "gold" : "info"}
           />
         );

@@ -21,7 +21,9 @@ import { MathFormulaBuilder } from "./MathFormulaBuilder";
 const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: string }>> = {
   sekretariat: [
     { label: "Dashboard", href: "/sekretariat" },
-    { label: "Siswa & Wali (Data Induk)", href: "/sekretariat/siswa" },
+    { label: "Data Santri", href: "/sekretariat/santri" },
+    { label: "Data Wali Santri", href: "/sekretariat/wali-santri" },
+    { label: "Data Kamar & Asrama", href: "/sekretariat/rooms" },
     { label: "Kelas & Rombel", href: "/sekretariat/kelas" },
     { label: "Manajemen Nilai", href: "/sekretariat/penilaian" },
     { label: "Kurikulum Builder", href: "/sekretariat/kurikulum" },

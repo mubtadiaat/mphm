@@ -47,6 +47,7 @@ const assignProfileSchema = z.object({
 // ============================================================
 peopleAdmin.get("/", async (c) => {
   try {
+  const user = c.get("user");
   const query = c.req.query("q") || undefined;
   const role = c.req.query("role") || undefined;
   const academicYearId = c.req.query("academicYearId") || undefined;
@@ -97,6 +98,7 @@ peopleAdmin.get("/", async (c) => {
       WHERE ac.academic_year_id = ${targetYearId}
       AND p.deleted_at IS NULL
       AND sp.deleted_at IS NULL
+      AND (${user?.role === "Mufattisy" ? 1 : 0} = 0 OR ac.institution_level = ${user?.supervisedLevel || ""})
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR sp.stambuk_number LIKE ${searchPattern})
       AND (
         ${statusPattern} IS NULL 
@@ -148,6 +150,7 @@ peopleAdmin.get("/", async (c) => {
       WHERE ac.academic_year_id = ${targetYearId}
       AND p.deleted_at IS NULL
       AND sp.deleted_at IS NULL
+      AND (${user?.role === "Mufattisy" ? 1 : 0} = 0 OR ac.institution_level = ${user?.supervisedLevel || ""})
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR sp.stambuk_number LIKE ${searchPattern})
       AND (
         ${statusPattern} IS NULL 

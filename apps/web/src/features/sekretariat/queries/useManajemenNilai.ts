@@ -47,6 +47,8 @@ export function useSaveScoreMutation() {
       // Invalidate the specific matrix query so that UI updates correctly on fresh fetch if needed.
       // But usually local state is already updated optimally before mutation
       queryClient.invalidateQueries({ queryKey: ["assessmentMatrix", variables.classId, variables.kwartal] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["guardian-dashboard-stats"] });
     }
   });
 }

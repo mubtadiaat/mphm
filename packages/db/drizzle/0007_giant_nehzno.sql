@@ -1,0 +1,1 @@
+ALTER TABLE organization_memberships ADD `supervised_level` text;

@@ -95,21 +95,52 @@ auth.post(
     const { whatsapp, kk } = c.req.valid("json");
     const db = createDb(c.env.DB);
 
-    // 1. Cari guardianProfiles yang cocok dengan Nomor KK
-    const guardian = await db
-      .select()
+    // 1. Cari semua guardianProfiles yang cocok dengan Nomor KK beserta data HP-nya
+    const guardians = await db
+      .select({
+        id: guardianProfiles.id,
+        personId: guardianProfiles.personId,
+        relation: guardianProfiles.relation,
+        phoneNumber: people.phoneNumber,
+      })
       .from(guardianProfiles)
+      .innerJoin(people, eq(guardianProfiles.personId, people.id))
       .where(eq(guardianProfiles.familyCardNumber, kk))
-      .get();
+      .all();
 
-    if (!guardian) {
+    if (guardians.length === 0) {
       return c.json(
         { status: "Error", message: "Data Wali Santri tidak ditemukan. Pastikan Nomor KK sesuai dengan yang didaftarkan ke Sekretariat." },
         404
       );
     }
 
-    // 2. Cek apakah userAccount sudah ada untuk person ini
+    // Cari guardian yang nomor HP-nya sama dengan whatsapp
+    let guardian = guardians.find(g => g.phoneNumber === whatsapp);
+
+    // Jika tidak ada yang cocok dengan nomor HP, cari guardian yang belum memiliki akun
+    if (!guardian) {
+      for (const g of guardians) {
+        const existingAccount = await db
+          .select()
+          .from(userAccounts)
+          .where(eq(userAccounts.personId, g.personId))
+          .get();
+        if (!existingAccount) {
+          guardian = g;
+          break;
+        }
+      }
+    }
+
+    if (!guardian) {
+      return c.json(
+        { status: "Error", message: "Semua Wali Santri dengan Nomor KK ini sudah terdaftar." },
+        400
+      );
+    }
+
+    // 2. Cek apakah userAccount sudah ada untuk person terpilih
     const existingAccount = await db
       .select()
       .from(userAccounts)
@@ -118,7 +149,7 @@ auth.post(
 
     if (existingAccount) {
       return c.json(
-        { status: "Error", message: "Akun Wali Santri untuk Nomor KK tersebut sudah terdaftar. Silakan langsung login." },
+        { status: "Error", message: `Akun Wali Santri (${guardian.relation}) untuk Nomor KK tersebut sudah terdaftar. Silakan langsung login.` },
         409
       );
     }
@@ -225,7 +256,7 @@ auth.post(
     setCookie(c, "session_token", sessionToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
+      sameSite: "Lax",
       path: "/",
       maxAge: 3600, // 1 jam
       domain: c.env.ENVIRONMENT === "production" ? "m.p3hm.my.id" : undefined,
