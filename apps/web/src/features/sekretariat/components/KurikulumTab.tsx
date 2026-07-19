@@ -293,6 +293,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
               </form>
             </motion.div>
           </div>
+        )}
       </AnimatePresence>
 
       {/* Detail Modal */}
