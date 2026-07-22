@@ -43,12 +43,10 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
   // Sync with TanStack Query data
   useEffect(() => {
     if (queryResult) {
-      queueMicrotask(() => {
-        setSantriData(queryResult.data);
-        setTotalCount(queryResult.total);
-      });
+      setSantriData(queryResult.data);
+      setTotalCount(queryResult.total);
     }
-  }, [queryResult]);
+  }, [queryResult?.data, queryResult?.total]);
 
   // Modal States
   const [showFormModal, setShowFormModal] = useState(false);

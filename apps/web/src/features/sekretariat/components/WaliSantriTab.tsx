@@ -13,25 +13,25 @@ interface SiswaTabProps {
   selectedYearId?: string;
 }
 
+const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
+
 export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [detailData, setDetailData] = useState<Record<string, any> | null>(null);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading } = useGuardians(searchQuery, pageIndex, pageSize);
+  const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading } = useGuardians(searchQuery, pageIndex, pageSize);
   const [guardiansList, setGuardiansList] = useState<Guardian[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
   // Sync with TanStack Query data
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setGuardiansList(remoteData.data);
-        setTotalCount(remoteData.total);
-      });
+      setGuardiansList(remoteData.data);
+      setTotalCount(remoteData.total);
     }
-  }, [remoteData]);
+  }, [remoteData.data, remoteData.total]);
 
   // Columns definition: Wali Santri (Smart KK Mapping)
   const guardianColumns: ColumnDef<typeof guardiansList[number], unknown>[] = [

@@ -11,6 +11,8 @@ import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 
+const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
+
 export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetail: (data: Record<string, unknown>) => void, isReadOnly?: boolean }) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -18,7 +20,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   const [mufattisyList, setMufattisyList] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
+  const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -31,12 +33,10 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
 
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setMufattisyList(remoteData.data as Pengurus[]);
-        setTotalCount(remoteData.total);
-      });
+      setMufattisyList(remoteData.data as Pengurus[]);
+      setTotalCount(remoteData.total);
     }
-  }, [remoteData]);
+  }, [remoteData.data, remoteData.total]);
 
   const resetForm = () => {
     setName(""); setPhone(""); setSupervisedLevel("Tsanawiyyah");

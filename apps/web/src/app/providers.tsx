@@ -6,6 +6,8 @@ import { ToastProvider } from "@/components/shared/ToastContext";
 import { SystemSettingsProvider } from "@/components/providers/SystemSettingsProvider";
 import { ForcePasswordChangeModal } from "@/components/shared/ForcePasswordChangeModal";
 
+import { AuthProvider } from "@/components/providers/AuthProvider";
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -21,12 +23,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <SystemSettingsProvider>
-          {children}
-          <ForcePasswordChangeModal />
-        </SystemSettingsProvider>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <SystemSettingsProvider>
+            {children}
+            <ForcePasswordChangeModal />
+          </SystemSettingsProvider>
+        </ToastProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

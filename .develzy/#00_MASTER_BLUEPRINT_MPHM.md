@@ -8,15 +8,16 @@ Sistem Informasi Akademik MPHM dibangun sebagai platform **Enterprise Internal S
 
 **1. Tech Stack Mutlak (The New Stack):**
 
-* **Frontend Layer (Web & 3D Presentation):** Next.js 15+ (App Router), React 19. Di-deploy ke ekosistem **Vercel**.
-* **Backend API Gateway (Business Logic):** **Hono.js** berjalan di atas **Vercel Edge/Serverless Functions** (di dalam `apps/web/src/server`). (Zero HTML rendering di backend, murni JSON REST API).
-* **Pusat Data (Database):** **Neon Postgres** (Serverless PostgreSQL) dikelola dengan Drizzle ORM.
-* **Media & Asset Storage:** **Cloudinary**. Seluruh foto profil, aset 3D, dokumen bukti, wajib diunggah langsung ke Cloudinary (bukan ke server Vercel).
+* **Frontend Layer (PWA & Visual Presentation):** Next.js 15+ (App Router), React 19, TypeScript, Progressive Web App (PWA). Di-deploy ke ekosistem **Vercel**.
+* **Backend API Gateway (Business Logic):** **Next.js Native Route Handlers** (`apps/web/src/app/api/.../route.ts`). (Murni JSON REST API).
+* **Pusat Data (Database & ORM):** **Neon Postgres** (Serverless PostgreSQL) dikelola dengan **Prisma ORM 7** (`@prisma/adapter-neon`, `prisma/schema.prisma`).
+* **Autentikasi:** **Firebase Authentication** (Google Login & Email/Password) diikat ke `firebase_uid` pada tabel `user_accounts` & `people`.
+* **Media & Asset Storage:** **Cloudinary**. Seluruh foto profil, aset 3D, dokumen bukti, wajib diunggah langsung ke Cloudinary (Direct Signed Upload).
 
 **2. Aturan Deployment & Domain Produksi:**
 
 * **Domain Utama:** Seluruh sistem beroperasi HANYA di `https://m.p3hm.my.id`.
-* **API Base URL:** `https://m.p3hm.my.id/api/*` (API Edge Endpoint via Next.js).
+* **API Base URL:** `https://m.p3hm.my.id/api/*` (API Edge/Serverless Endpoint via Next.js Route Handlers).
 * Tidak ada referensi ke domain `*.vercel.app` pada konfigurasi produksi.
 
 ---
@@ -27,7 +28,7 @@ Seluruh antarmuka WAJIB **100% Responsive (Mobile-First, Tablet, Desktop)** dan 
 
 **1. Desain Visual & Komponen:**
 
-* Menggunakan **Tailwind CSS v4** dan **shadcn/ui** (kustomisasi premium).
+* Menggunakan **Tailwind CSS v4**, **shadcn/ui**, **Magic UI** (Bento Grid, Animated List), dan **Aceternity UI** (Spotlight Cards, Glowing Effects).
 * Karakteristik visual: *Glassmorphism* halus, *soft shadow*, *thin border*, *hover elevation*, dan tipografi bersih.
 * **Universal Data Grid:** Tabel wajib memiliki *Realtime Search* (tanpa tombol cari), *Column Manager*, *Server-Side Pagination*, dan format sel identitas (Avatar bulat + Nama Tebal + Sub-info).
 

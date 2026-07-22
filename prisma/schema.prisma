@@ -1,0 +1,270 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Person {
+  id          String    @id @default(uuid())
+  nik         String?
+  fullName    String    @map("full_name")
+  gender      String    // L or P
+  birthPlace  String?   @map("birth_place")
+  birthDate   String?   @map("birth_date")
+  address     String?
+  phoneNumber String?   @map("phone_number")
+  avatarUrl   String?   @map("avatar_url")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  userAccount             UserAccount?
+  studentProfile          StudentProfile?
+  teacherProfile          TeacherProfile?
+  guardianProfiles        GuardianProfile[]
+  organizationMemberships OrganizationMembership[]
+  alumniRecord            AlumniRecord?
+
+  @@map("people")
+}
+
+model UserAccount {
+  id           String    @id @default(uuid())
+  personId     String    @unique @map("person_id")
+  username     String    @unique
+  email        String?   @unique
+  firebaseUid  String?   @unique @map("firebase_uid")
+  passwordHash String?   @map("password_hash")
+  role         String    // Sekretariat, Mustahiq, Mufattisy, Mundzir, Keamanan, Wali Santri
+  status       String    @default("ACTIVE")
+  deletedAt    DateTime? @map("deleted_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@map("user_accounts")
+}
+
+model StudentProfile {
+  id             String    @id @default(uuid())
+  personId       String    @unique @map("person_id")
+  stambukNumber  String    @map("stambuk_number")
+  nis            String    @unique
+  nisn           String?
+  enrollmentYear Int       @map("enrollment_year")
+  status         String    @default("ACTIVE")
+  deletedAt      DateTime? @map("deleted_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  enrollments   ClassEnrollment[]
+  studentScores StudentScore[]
+  attendances   StudentAttendance[]
+  violations    StudentViolation[]
+
+  @@map("student_profiles")
+}
+
+model TeacherProfile {
+  id          String    @id @default(uuid())
+  personId    String    @unique @map("person_id")
+  teacherCode String    @unique @map("teacher_code")
+  status      String    @default("ACTIVE")
+  deletedAt   DateTime? @map("deleted_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@map("teacher_profiles")
+}
+
+model GuardianProfile {
+  id               String    @id @default(uuid())
+  personId         String    @map("person_id")
+  familyCardNumber String    @map("family_card_number")
+  relation         String    // AYAH, IBU, WALI, ANAK
+  deletedAt        DateTime? @map("deleted_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@map("guardian_profiles")
+}
+
+model OrganizationMembership {
+  id              String    @id @default(uuid())
+  personId        String    @map("person_id")
+  role            String    // Mufattisy, Mundzir, Sekretariat, Keamanan, Pimpinan
+  serviceYear     String    @map("service_year")
+  status          String    @default("ACTIVE")
+  supervisedLevel String?   @map("supervised_level")
+  deletedAt       DateTime? @map("deleted_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@map("organization_memberships")
+}
+
+model AlumniRecord {
+  id              String    @id @default(uuid())
+  personId        String    @unique @map("person_id")
+  graduationYear  Int       @map("graduation_year")
+  khidmahStatus   String    @default("TIDAK_KHIDMAH") @map("khidmah_status")
+  khidmahLocation String?   @map("khidmah_location")
+  ijazahTaken     String    @default("BELUM") @map("ijazah_taken")
+  notes           String?
+  deletedAt       DateTime? @map("deleted_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@map("alumni_records")
+}
+
+model AcademicYear {
+  id        String    @id @default(uuid())
+  name      String    // Cth: "2024/2025"
+  isActive  Boolean   @default(false) @map("is_active")
+  deletedAt DateTime? @map("deleted_at")
+
+  classes AcademicClass[]
+
+  @@map("academic_years")
+}
+
+model AcademicClass {
+  id               String    @id @default(uuid())
+  academicYearId   String    @map("academic_year_id")
+  name             String
+  fullName         String    @map("full_name")
+  institutionLevel String    @map("institution_level") // I'dadiyyah, Ibtida'iyyah, Tsanawiyyah, Aliyyah
+  levelNumber      Int       @map("level_number")
+  mustahiqId       String?   @map("mustahiq_id")
+  curriculumId     String?   @map("curriculum_id")
+  deletedAt        DateTime? @map("deleted_at")
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  curriculum   Curriculum?   @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+
+  enrollments   ClassEnrollment[]
+  studentScores StudentScore[]
+
+  @@map("academic_classes")
+}
+
+model ClassEnrollment {
+  id        String    @id @default(uuid())
+  classId   String    @map("class_id")
+  studentId String    @map("student_id")
+  status    String    @default("ACTIVE")
+  deletedAt DateTime? @map("deleted_at")
+
+  academicClass AcademicClass  @relation(fields: [classId], references: [id], onDelete: Restrict)
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
+
+  @@unique([classId, studentId])
+  @@map("class_enrollments")
+}
+
+model Subject {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  name        String
+  subjectType String    @map("subject_type") // MAPEL or NON_MAPEL
+  deletedAt   DateTime? @map("deleted_at")
+
+  curriculumSubjects CurriculumSubject[]
+  studentScores      StudentScore[]
+
+  @@map("subjects")
+}
+
+model Curriculum {
+  id               String    @id @default(uuid())
+  name             String
+  institutionLevel String    @map("institution_level")
+  deletedAt        DateTime? @map("deleted_at")
+
+  classes            AcademicClass[]
+  curriculumSubjects CurriculumSubject[]
+
+  @@map("curriculums")
+}
+
+model CurriculumSubject {
+  id           String @id @default(uuid())
+  curriculumId String @map("curriculum_id")
+  subjectId    String @map("subject_id")
+  orderNumber  Int    @default(0) @map("order_number")
+
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+  subject    Subject    @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+
+  @@unique([curriculumId, subjectId])
+  @@map("curriculum_subjects")
+}
+
+model StudentScore {
+  id        String   @id @default(uuid())
+  classId   String   @map("class_id")
+  studentId String   @map("student_id")
+  subjectId String   @map("subject_id")
+  kwartal   Int      // 1, 2, 3, 4
+  score     Float
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  academicClass AcademicClass  @relation(fields: [classId], references: [id], onDelete: Restrict)
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  subject       Subject        @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+
+  @@unique([classId, studentId, subjectId, kwartal])
+  @@map("student_scores")
+}
+
+model StudentAttendance {
+  id        String @id @default(uuid())
+  studentId String @map("student_id")
+  month     Int
+  year      Int
+  sick      Int    @default(0)
+  permitted Int    @default(0)
+  unexcused Int    @default(0)
+
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
+
+  @@map("student_attendances")
+}
+
+model StudentViolation {
+  id              String    @id @default(uuid())
+  studentId       String    @map("student_id")
+  violationTypeId String    @map("violation_type_id")
+  date            DateTime  @default(now())
+  penalty         String?
+  evidenceUrl     String?   @map("evidence_url")
+  notes           String?
+  deletedAt       DateTime? @map("deleted_at")
+
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
+
+  @@map("student_violations")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?  @map("user_id")
+  action      String
+  entity      String
+  entityId    String?  @map("entity_id")
+  beforeState String?  @map("before_state")
+  afterState  String?  @map("after_state")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("system_settings")
+}

@@ -40,12 +40,10 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
   // Sync with TanStack Query data
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setSantriData(remoteData.data);
-        setTotalCount(remoteData.total);
-      });
+      setSantriData(remoteData.data);
+      setTotalCount(remoteData.total);
     }
-  }, [remoteData]);
+  }, [remoteData?.data, remoteData?.total]);
 
   // Form States - Pribadi
   const [newName, setNewName] = useState("");

@@ -10,6 +10,8 @@ import { useToast } from "@/components/shared/ToastContext";
 
 import { useGuru, Guru } from "../queries/useGuru";
 
+const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
+
 export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail: (data: Record<string, unknown>) => void, isReadOnly?: boolean }) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -17,17 +19,15 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [teachers, setTeachers] = useState<Guru[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, createGuru, updateGuru, deleteGuru } = useGuru(searchQuery, pageIndex, pageSize);
+  const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createGuru, updateGuru, deleteGuru } = useGuru(searchQuery, pageIndex, pageSize);
   const { toast } = useToast();
 
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setTeachers(remoteData.data as Guru[]);
-        setTotalCount(remoteData.total);
-      });
+      setTeachers(remoteData.data as Guru[]);
+      setTotalCount(remoteData.total);
     }
-  }, [remoteData]);
+  }, [remoteData.data, remoteData.total]);
   
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Guru | null>(null);

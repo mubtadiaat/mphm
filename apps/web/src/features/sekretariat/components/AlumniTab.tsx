@@ -33,12 +33,10 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
   // Sync with TanStack Query data
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setSantriData(remoteData.data);
-        setTotalCount(remoteData.total);
-      });
+      setSantriData(remoteData.data);
+      setTotalCount(remoteData.total);
     }
-  }, [remoteData]);
+  }, [remoteData?.data, remoteData?.total]);
 
   // Modal States
   const [showFormModal, setShowFormModal] = useState(false);

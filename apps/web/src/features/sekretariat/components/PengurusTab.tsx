@@ -10,14 +10,21 @@ import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 
-export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail: (data: Record<string, unknown>) => void, isReadOnly?: boolean }) {
+const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
+
+interface PengurusTabProps {
+  onViewDetail: (data: Record<string, unknown>) => void;
+  isReadOnly?: boolean;
+}
+
+export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [pengurusData, setPengurusData] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
+  const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -42,12 +49,10 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setPengurusData(remoteData.data as Pengurus[]);
-        setTotalCount(remoteData.total);
-      });
+      setPengurusData(remoteData.data as Pengurus[]);
+      setTotalCount(remoteData.total);
     }
-  }, [remoteData]);
+  }, [remoteData.data, remoteData.total]);
 
   useEffect(() => {
     const handleJobTitlesChanged = () => {

@@ -7,9 +7,11 @@ Dokumen ini adalah Ringkasan Eksekutif (Omnibus) yang merangkum 100% inti sari d
 
 ## 1. INFRASTRUKTUR & DEPLOYMENT (Modul #00, #09, #11)
 Arsitektur sistem mematuhi **Vercel Ecosystem** dan **Turborepo** (Monorepo) untuk isolasi yang rapi.
-- **Frontend Layer:** Next.js 15+ (App Router), React 19.
-- **Backend API Gateway:** Hono.js berjalan pada Vercel Edge/Serverless Functions (berada di `apps/web/src/server/routes`).
-- **Database Mutlak:** Neon Postgres (Serverless PostgreSQL) dikelola menggunakan Drizzle ORM (`packages/db`).
+- **Frontend Layer & PWA:** Next.js 15+ (App Router), React 19, TypeScript, Progressive Web App (PWA).
+- **Backend API Gateway:** Next.js Native Route Handlers (`apps/web/src/app/api/.../route.ts`).
+- **Database & ORM:** Neon Postgres (Serverless PostgreSQL) dikelola menggunakan Prisma ORM 7 (`@prisma/adapter-neon`, `prisma/schema.prisma`).
+- **Autentikasi:** Firebase Authentication (Google OAuth & Email/Password) yang dipetakan langsung ke entitas pengguna di Neon Postgres (`firebase_uid`).
+- **UI/UX & Animation:** Tailwind CSS v4, shadcn/ui, Framer Motion, **Magic UI** (Bento Grid, Animated List), **Aceternity UI** (Spotlight Card, Glowing Effects), Lucide React.
 - **Pipeline Media:** Cloudinary. Tidak ada gambar masuk ke server, Frontend menggunakan *Direct Signed Upload*.
 - **Domain Produksi Tunggal:** Seluruh sistem wajib diakses melalui `https://m.p3hm.my.id`. Tidak ada subdomain bawaan Vercel di mode produksi. API diakses via `/api/*`.
 - **Environment:** Terdapat pemisahan tegas antara Production, Preview (ter-bind ke branch db Neon), dan Development.
@@ -17,12 +19,12 @@ Arsitektur sistem mematuhi **Vercel Ecosystem** dan **Turborepo** (Monorepo) unt
 ## 2. DATA ARCHITECTURE & KEAMANAN MILITER (Modul #02, #08, #13)
 Sistem menggunakan hukum tata kelola data yang tidak bisa dinegosiasikan.
 - **Person-Centric (Single Source of Truth):** Data entitas manusia hanya satu (tabel `people`). Perannya bisa banyak (Santri, Pengajar, Wali).
-- **Otentikasi:** Wajib menggunakan HTTP-Only Secure Session Cookie. Dilarang menggunakan JWT di Local Storage untuk mencegah XSS.
+- **Otentikasi Firebase & Otorisasi Roles:** Otentikasi terkelola via Firebase Auth (Google Login & Email) dengan verifikasi token serverless yang diikat ke tabel `user_accounts` (`firebase_uid`).
 - **Role-Based Access Control (RBAC):** Hanya ada 6 peran resmi: Sekretariat, Mustahiq (Wali Kelas), Mufattisy, Mundzir, Keamanan, dan Wali Santri.
 - **Data Scope Authorization (Penyekatan Data):** 
   - *Mustahiq* hanya bisa mengakses data kelas miliknya.
   - *Wali Santri* hanya bisa melihat data yang cocok dengan Nomor KK-nya.
-- **Automated Audit Log:** Middleware Hono secara otomatis mencatat setiap mutasi data (POST, PUT, DELETE) dengan skema *Before/After Data* untuk keperluan forensik (Anti-Manipulasi Nilai).
+- **Automated Audit Log:** Route Handler Next.js secara otomatis mencatat setiap mutasi data (POST, PUT, DELETE) dengan skema *Before/After Data* untuk keperluan forensik (Anti-Manipulasi Nilai).
 - **Soft Delete Mutlak:** Seluruh relasi database menggunakan `onDelete: "restrict"`. Dilarang ada penghapusan baris permanen jika masih memiliki riwayat akademik/pelanggaran.
 
 ## 3. AKADEMIK, ROMBEL & KURIKULUM (Modul #03, #10)

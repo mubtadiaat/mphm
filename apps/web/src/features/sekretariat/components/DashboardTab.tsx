@@ -8,6 +8,7 @@ import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
 import { SEKRETARIAT_MADRASAH_NAV, SEKRETARIAT_PONDOK_NAV } from "@/config/navigation.config";
 import Link from "next/link";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -77,22 +78,20 @@ export function DashboardTab() {
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <motion.div
-              key={i}
-              variants={cardVariants}
-              className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm flex items-center justify-between hover:shadow-md transition-shadow duration-200"
-            >
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-zinc-400 dark:text-zinc-500">
-                  {stat.label}
-                </span>
-                <span className="text-2xl font-bold text-zinc-900 dark:text-white">
-                  {isLoading ? "..." : stat.value}
-                </span>
-              </div>
-              <div className={`p-3 rounded-xl ${stat.color}`}>
-                <Icon className="w-6 h-6" />
-              </div>
+            <motion.div key={i} variants={cardVariants}>
+              <SpotlightCard className="p-6 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-lg transition-all duration-300">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                    {stat.label}
+                  </span>
+                  <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+                    {isLoading ? "..." : stat.value}
+                  </span>
+                </div>
+                <div className={`p-3 rounded-xl ${stat.color}`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+              </SpotlightCard>
             </motion.div>
           );
         })}

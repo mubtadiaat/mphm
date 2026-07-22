@@ -15,6 +15,8 @@ interface MundzirTabProps {
   isReadOnly?: boolean;
 }
 
+const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
+
 export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -22,7 +24,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   const [mundzirList, setMundzirList] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const { data: remoteData = { data: [], total: 0 }, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mundzir", pageIndex, pageSize);
+  const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mundzir", pageIndex, pageSize);
   const { toast } = useToast();
   
   const [showModal, setShowModal] = useState(false);
@@ -47,12 +49,10 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
 
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setMundzirList(remoteData.data as Pengurus[]);
-        setTotalCount(remoteData.total);
-      });
+      setMundzirList(remoteData.data as Pengurus[]);
+      setTotalCount(remoteData.total);
     }
-  }, [remoteData]);
+  }, [remoteData.data, remoteData.total]);
 
   useEffect(() => {
     const handleJobTitlesChanged = () => {

@@ -25,9 +25,7 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
   // Sync with TanStack Query data
   useEffect(() => {
     if (remoteData) {
-      queueMicrotask(() => {
-        setYearsData(remoteData);
-      });
+      setYearsData(remoteData);
     }
   }, [remoteData]);
 

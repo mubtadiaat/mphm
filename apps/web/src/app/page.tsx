@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../lib/auth";
+import { signInWithGoogle } from "@/lib/firebase/client";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShieldCheck, 
   KeyRound,
@@ -11,7 +14,10 @@ import {
   Loader2,
   AlertCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2
 } from "lucide-react";
 
 export default function Page() {
@@ -24,8 +30,9 @@ export default function Page() {
   const [viewMode, setViewMode] = useState<"login" | "register">("login");
   const [regWhatsapp, setRegWhatsapp] = useState("");
   const [regKk, setRegKk] = useState("");
-  const [regSuccess, setRegSuccess] = useState<{username: string} | null>(null);
+  const [regSuccess, setRegSuccess] = useState<{ username: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const roles = [
@@ -48,7 +55,7 @@ export default function Page() {
       else if (roleStr === "mustahiq") clientRoleKey = "mustahiq";
       else if (roleStr === "petugas keamanan") clientRoleKey = "keamanan";
       else if (roleStr === "wali santri") clientRoleKey = "wali_santri";
-      
+
       const matchedRole = roles.find(r => r.id === clientRoleKey);
       if (matchedRole) {
         router.replace(matchedRole.href);
@@ -62,8 +69,7 @@ export default function Page() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-      const response = await fetch(`${apiUrl}/api/auth/login`, {
+      const response = await fetch(`/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -73,37 +79,71 @@ export default function Page() {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || "Login failed");
+        throw new Error(resData.message || "Login gagal. Silakan periksa kembali username dan password Anda.");
       }
 
-      let redirectUrl = "/";
-      const backendRole = resData.data.role;
-      let clientRoleKey = "mufattisy";
-      
-      const roleStr = String(backendRole).trim().toLowerCase();
-      
-      if (roleStr === "sekretariat") clientRoleKey = "sekretariat";
-      else if (roleStr === "mufattisy") clientRoleKey = "mufattisy";
-      else if (roleStr === "mundzir") clientRoleKey = "mundzir";
-      else if (roleStr === "mustahiq") clientRoleKey = "mustahiq";
-      else if (roleStr === "petugas keamanan") clientRoleKey = "keamanan";
-      else if (roleStr === "wali santri") clientRoleKey = "wali_santri";
-      
-      const matchedRole = roles.find(r => r.id === clientRoleKey);
-      if (matchedRole) {
-        redirectUrl = matchedRole.href;
-      }
-      
-      // Update cache immediately to prevent loop redirection
-      queryClient.setQueryData(["auth-session"], resData.data);
-      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
-      
+      await queryClient.invalidateQueries({ queryKey: ["auth_user"] });
+
+      let redirectUrl = "/sekretariat";
+      const backendRole = String(resData.data?.role || "").trim().toLowerCase();
+
+      if (backendRole === "sekretariat") redirectUrl = "/sekretariat";
+      else if (backendRole === "mufattisy") redirectUrl = "/mufattisy";
+      else if (backendRole === "mundzir") redirectUrl = "/pimpinan";
+      else if (backendRole === "mustahiq") redirectUrl = "/mustahiq";
+      else if (backendRole === "petugas keamanan" || backendRole === "keamanan") redirectUrl = "/keamanan";
+      else if (backendRole === "wali santri") redirectUrl = "/guardian";
+
       router.push(redirectUrl);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Gagal menghubungkan ke server API.";
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.message || "Gagal masuk ke akun Anda.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setGoogleLoading(true);
+
+    try {
+      const { user: fbUser, error: fbError } = await signInWithGoogle();
+      if (fbError || !fbUser) {
+        throw new Error(fbError || "Gagal melakukan otentikasi dengan Google.");
+      }
+
+      // Sync Firebase User with Backend Database
+      const res = await fetch("/api/auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: fbUser.uid,
+          email: fbUser.email,
+          displayName: fbUser.displayName,
+          photoURL: fbUser.photoURL,
+        }),
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Gagal menautkan akun Google.");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["auth_user"] });
+
+      const roleStr = String(resData.data?.role || "").trim().toLowerCase();
+      let redirectUrl = "/guardian";
+      if (roleStr === "sekretariat") redirectUrl = "/sekretariat";
+      else if (roleStr === "mufattisy") redirectUrl = "/mufattisy";
+      else if (roleStr === "mundzir") redirectUrl = "/pimpinan";
+      else if (roleStr === "mustahiq") redirectUrl = "/mustahiq";
+      else if (roleStr === "keamanan") redirectUrl = "/keamanan";
+
+      router.push(redirectUrl);
+    } catch (err: any) {
+      setError(err.message || "Login Google gagal.");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -113,283 +153,304 @@ export default function Page() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-      const response = await fetch(`${apiUrl}/api/auth/register-wali`, {
+      const response = await fetch(`/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsapp: regWhatsapp, kk: regKk }),
+        body: JSON.stringify({
+          whatsapp: regWhatsapp,
+          familyCardNumber: regKk
+        }),
       });
 
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || "Pendaftaran gagal");
+        throw new Error(resData.message || "Pendaftaran akun gagal.");
       }
 
       setRegSuccess({ username: resData.data.username });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Gagal menghubungkan ke server API.";
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.message || "Pendaftaran gagal.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="h-dvh w-full bg-slate-900 flex flex-col items-center justify-center p-4 sm:px-6 relative font-sans overflow-hidden">
-      
-      {/* Dynamic Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-blue-900/40 via-slate-900 to-black"></div>
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-600/30 rounded-full blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-10 -left-20 w-80 h-80 bg-indigo-600/20 rounded-full blur-[100px] animate-pulse delay-1000"></div>
-        
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik00MCAwaC00MHY0MGg0MFYweiIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNMCAwaDQwdjQwSDBWMHptMSAxSDM5VjFIMXptMSAxSDM4VjJIMnoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMSkiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPgo8L3N2Zz4=')] opacity-30"></div>
-      </div>
+    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-zinc-950 text-zinc-100 overflow-hidden font-sans selection:bg-emerald-500 selection:text-white">
+      {/* Background Radial Glow Effects */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-[420px] w-full z-10 flex flex-col items-center">
-        
-        {/* Header / Logo */}
-        <div className="mb-2 sm:mb-4 lg:mb-6 text-center flex flex-col items-center">
-          <div className="relative w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-2 sm:mb-3 shadow-2xl rounded-full bg-white/5 p-2 sm:p-3 border border-white/10 backdrop-blur-md">
-            {/* Fallback shadow block to give 3D floating effect */}
-            <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl -z-10 animate-pulse"></div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/logo.png" 
-              alt="Logo Lirboyo" 
-              width={100} 
-              height={100} 
-              className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
-            />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md relative z-10"
+      >
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center mb-8 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5" />
+            MPHM Enterprise v4.0
           </div>
-          
-          <div className="inline-flex items-center gap-2 px-3 py-1 sm:py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-2 sm:mb-4 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-            <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            Portal Resmi
-          </div>
-          
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-linear-to-b from-white to-white/70 tracking-tight drop-shadow-sm mb-1">
-            MPHM LIRBOYO
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Portal Informasi Santri
           </h1>
-          
-          <p className="text-blue-100/80 text-[10px] sm:text-xs lg:text-sm font-medium tracking-wide">
-            Sistem Informasi Managament Akademik
+          <p className="text-sm text-zinc-400 max-w-xs">
+            Sistem Manajemen Akademik & Pusat Data Abadi Pesantren
           </p>
         </div>
 
-        {/* 3D Glassmorphic Card */}
-        <div className="w-full relative group perspective-[1000px]">
-          {/* Card outer glow */}
-          <div className="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-indigo-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-          
-          <div className="relative w-full bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-3 sm:p-5 lg:p-6 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transform transition-transform duration-300 hover:scale-[1.01]">
-            
-            <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-white/20 to-transparent"></div>
-            
-            <div className="text-center mb-3 sm:mb-5">
-              <h2 className="text-base sm:text-lg lg:text-xl font-bold text-white mb-0.5">
-                {viewMode === "login" ? "Masuk Akun" : "Daftar Wali Santri"}
-              </h2>
-              <p className="text-[10px] sm:text-xs text-slate-400">
-                {viewMode === "login" ? "Silakan masukkan kredensial Anda" : "Masukkan Nomor WhatsApp dan KK"}
-              </p>
-            </div>
-
-            {error && (
-              <div className="mb-3 sm:mb-5 p-2 sm:p-3 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-2 text-red-400 text-[10px] sm:text-xs lg:text-sm animate-in fade-in slide-in-from-top-2">
-                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                <span className="leading-relaxed">{error}</span>
-              </div>
-            )}
-
-            {viewMode === "login" ? (
-              <>
-                <form onSubmit={handleLoginSubmit} className="space-y-2 sm:space-y-4">
-                <div className="space-y-1 sm:space-y-1.5">
-                  <label className="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider ml-1">Username</label>
-                  <div className="relative group/input">
-                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-blue-400 transition-colors">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </div>
-                    <input 
-                      type="text"
-                      required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Contoh: admin_sekretariat"
-                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-950/80 border border-slate-700/60 focus:border-blue-500 rounded-xl sm:rounded-2xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1 sm:space-y-1.5">
-                  <label className="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider ml-1">Password</label>
-                  <div className="relative group/input">
-                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-blue-400 transition-colors">
-                      <KeyRound className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </div>
-                    <input 
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full pl-9 sm:pl-11 pr-10 py-2 sm:py-3 bg-slate-950/80 border border-slate-700/60 focus:border-blue-500 rounded-xl sm:rounded-2xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 shadow-inner"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center text-slate-500 hover:text-white transition-colors cursor-pointer"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="pt-1.5 sm:pt-2 flex gap-2 sm:gap-3">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="relative flex-1 overflow-hidden group/btn rounded-xl sm:rounded-2xl p-px disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    <span className="absolute inset-0 bg-linear-to-r from-blue-600 via-indigo-600 to-blue-600 opacity-80 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
-                    <div className="relative bg-linear-to-b from-white/10 to-transparent flex items-center justify-center gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-xl sm:rounded-2xl text-white text-xs sm:text-sm lg:text-base font-bold tracking-wide shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] transition-transform active:scale-[0.98]">
-                      {loading ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-blue-200" /> : <span>Masuk</span>}
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setViewMode("register"); setError(null); }}
-                    disabled={loading}
-                    className="relative flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-xs sm:text-sm lg:text-base font-bold tracking-wide transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    Daftar
-                  </button>
-                </div>
-              </form>
-              
-              {/* Helper Kredensial Uji Coba */}
-              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-[10px] text-blue-300 space-y-1">
-                <div className="font-bold uppercase tracking-wider">Kredensial Demo / Uji Coba:</div>
-                <div>• Sekretariat (Admin): <span className="font-mono text-white font-bold select-all">admin_mphm</span> / <span className="font-mono text-white font-bold select-all">madrasahp3hm123</span></div>
-                <div>• Mustahiq (Wali Kelas): <span className="font-mono text-white font-bold select-all">mustahiq01</span> / <span className="font-mono text-white font-bold select-all">mphm123</span></div>
-                <div>• Mufattisy (Pengawas): <span className="font-mono text-white font-bold select-all">mufattisy01</span> / <span className="font-mono text-white font-bold select-all">mphm123</span></div>
-                <div>• Wali Santri: <span className="font-mono text-white font-bold select-all">wali01</span> / <span className="font-mono text-white font-bold select-all">mphm123</span></div>
-              </div>
-              </>
-            ) : (
-              <>
-                <form onSubmit={handleRegisterSubmit} className="space-y-2 sm:space-y-4">
-                <div className="space-y-1 sm:space-y-1.5">
-                  <label className="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider ml-1">Nomor WhatsApp</label>
-                  <div className="relative group/input">
-                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-blue-400 transition-colors">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </div>
-                    <input 
-                      type="text"
-                      required
-                      value={regWhatsapp}
-                      onChange={(e) => setRegWhatsapp(e.target.value)}
-                      placeholder="Cth: 08123456789"
-                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-950/80 border border-slate-700/60 focus:border-blue-500 rounded-xl sm:rounded-2xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1 sm:space-y-1.5">
-                  <label className="text-[10px] sm:text-xs font-bold text-slate-300 uppercase tracking-wider ml-1">Nomor KK (Kartu Keluarga)</label>
-                  <div className="relative group/input">
-                    <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within/input:text-blue-400 transition-colors">
-                      <KeyRound className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </div>
-                    <input 
-                      type="text"
-                      required
-                      value={regKk}
-                      onChange={(e) => setRegKk(e.target.value)}
-                      placeholder="Masukkan digit Nomor KK"
-                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-950/80 border border-slate-700/60 focus:border-blue-500 rounded-xl sm:rounded-2xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-1.5 sm:pt-2 flex gap-2 sm:gap-3">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="relative flex-1 overflow-hidden group/btn rounded-xl sm:rounded-2xl p-px disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    <span className="absolute inset-0 bg-linear-to-r from-blue-600 via-indigo-600 to-blue-600 opacity-80 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
-                    <div className="relative bg-linear-to-b from-white/10 to-transparent flex items-center justify-center gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-xl sm:rounded-2xl text-white text-xs sm:text-sm lg:text-base font-bold tracking-wide shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] transition-transform active:scale-[0.98]">
-                      {loading ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-blue-200" /> : <span>Daftar</span>}
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setViewMode("login"); setError(null); }}
-                    disabled={loading}
-                    className="relative flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-xs sm:text-sm lg:text-base font-bold tracking-wide transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    Batal
-                  </button>
-                </div>
-              </form>
-
-              {/* Helper KK Registrasi */}
-              <div className="mt-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-[10px] text-indigo-300 space-y-1">
-                <div className="font-bold uppercase tracking-wider">Petunjuk Uji Coba Registrasi Wali:</div>
-                <div>Gunakan data dummy yang terdaftar di database:</div>
-                <div>• No. WhatsApp: <span className="font-mono text-white font-bold select-all">081200000005</span> (Ayah) atau <span className="font-mono text-white font-bold select-all">081200000006</span> (Ibu)</div>
-                <div>• Nomor KK (Kartu Keluarga): <span className="font-mono text-white font-bold select-all">3200001111111111</span></div>
-              </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Footer Text */}
-        <div className="mt-3 sm:mt-6 text-center">
-          <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-widest">
-            MPHM Enterprise &bull; Basis Database Terpadu
-          </p>
-        </div>
-      </div>
-
-      {/* Registration Success Modal */}
-      {regSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-white/10 p-6 rounded-3xl max-w-sm w-full relative shadow-2xl animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-              <ShieldCheck className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Pendaftaran Sukses</h3>
-            <p className="text-sm text-slate-300 leading-relaxed mb-6">
-              Akun Wali Santri Anda telah dibuat. Silakan login menggunakan kredensial berikut:
-            </p>
-            <div className="bg-slate-950 p-4 rounded-xl text-left border border-slate-800 mb-6 shadow-inner">
-              <div className="text-xs text-slate-500 mb-1">Username (No WA):</div>
-              <div className="font-mono text-sm text-blue-400 font-bold mb-3">{regSuccess.username}</div>
-              <div className="text-xs text-slate-500 mb-1">Password Default:</div>
-              <div className="font-mono text-sm text-emerald-400 font-bold">mphm123</div>
-            </div>
+        {/* Aceternity UI Spotlight Card Container */}
+        <SpotlightCard className="p-8 border border-zinc-800/80 bg-zinc-900/90 backdrop-blur-2xl shadow-2xl rounded-3xl">
+          {/* Tab Switcher */}
+          <div className="grid grid-cols-2 p-1 mb-6 bg-zinc-950/80 rounded-2xl border border-zinc-800/80">
             <button
-              type="button"
-              onClick={() => {
-                setUsername(regSuccess.username);
-                setPassword("");
-                setRegSuccess(null);
-                setViewMode("login");
-              }}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-colors text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] cursor-pointer"
+              onClick={() => { setViewMode("login"); setError(null); }}
+              className={`py-2.5 text-xs font-bold rounded-xl transition-all duration-200 ${
+                viewMode === "login"
+                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
             >
-              Login Sekarang
+              Masuk Portal
+            </button>
+            <button
+              onClick={() => { setViewMode("register"); setError(null); }}
+              className={`py-2.5 text-xs font-bold rounded-xl transition-all duration-200 ${
+                viewMode === "register"
+                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Daftar Akun Baru
             </button>
           </div>
+
+          {/* Error Alert */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-3"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </motion.div>
+          )}
+
+          <AnimatePresence mode="wait">
+            {viewMode === "login" ? (
+              <motion.div
+                key="login-form"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
+                {/* Google Sign In Button */}
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={googleLoading}
+                  className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-2xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 group"
+                >
+                  {googleLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-zinc-900" />
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                      />
+                    </svg>
+                  )}
+                  <span>Masuk Akun Google</span>
+                </button>
+
+                <div className="relative flex items-center justify-center my-4">
+                  <div className="border-t border-zinc-800 w-full" />
+                  <span className="bg-zinc-900 px-3 text-xs text-zinc-500 font-medium">atau Username</span>
+                  <div className="border-t border-zinc-800 w-full" />
+                </div>
+
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-400">Username / ID Pengguna</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Masukkan username"
+                        className="w-full pl-10 pr-4 py-3 bg-zinc-950/80 border border-zinc-800 rounded-2xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                      />
+                      <User className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-400">Kata Sandi</label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full pl-10 pr-10 py-3 bg-zinc-950/80 border border-zinc-800 rounded-2xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                      />
+                      <KeyRound className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full mt-2 py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 group disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <span>Masuk Aplikasi</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="register-form"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
+                {regSuccess ? (
+                  <div className="text-center py-6 space-y-4">
+                    <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
+                    <h3 className="text-lg font-bold text-white">Pendaftaran Berhasil!</h3>
+                    <p className="text-xs text-zinc-400">
+                      Akun Anda berhasil dibuat dengan username: <br />
+                      <strong className="text-emerald-400 text-sm">{regSuccess.username}</strong>
+                    </p>
+                    <button
+                      onClick={() => { setViewMode("login"); setRegSuccess(null); }}
+                      className="w-full py-3 bg-emerald-600 text-white text-xs font-bold rounded-2xl hover:bg-emerald-500 transition-colors"
+                    >
+                      Kembali ke Login
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleGoogleLogin}
+                      disabled={googleLoading}
+                      className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-2xl bg-white hover:bg-zinc-100 text-zinc-900 font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50"
+                    >
+                      {googleLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-zinc-900" />
+                      ) : (
+                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                          />
+                        </svg>
+                      )}
+                      <span>Daftar Cepat dengan Google</span>
+                    </button>
+
+                    <div className="relative flex items-center justify-center my-4">
+                      <div className="border-t border-zinc-800 w-full" />
+                      <span className="bg-zinc-900 px-3 text-xs text-zinc-500 font-medium">atau Data Manual</span>
+                      <div className="border-t border-zinc-800 w-full" />
+                    </div>
+
+                    <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-zinc-400">Nomor WhatsApp Aktif</label>
+                        <input
+                          type="text"
+                          required
+                          value={regWhatsapp}
+                          onChange={(e) => setRegWhatsapp(e.target.value)}
+                          placeholder="08123456789"
+                          className="w-full px-4 py-3 bg-zinc-950/80 border border-zinc-800 rounded-2xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-zinc-400">Nomor Kartu Keluarga (KK)</label>
+                        <input
+                          type="text"
+                          required
+                          value={regKk}
+                          onChange={(e) => setRegKk(e.target.value)}
+                          placeholder="3512345678900001"
+                          className="w-full px-4 py-3 bg-zinc-950/80 border border-zinc-800 rounded-2xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full mt-2 py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Daftarkan Akun Wali"}
+                      </button>
+                    </form>
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </SpotlightCard>
+
+        {/* Footer */}
+        <div className="text-center mt-6 text-xs text-zinc-600 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <span>Sistem Informasi Terenkripsi & Dilindungi Hak Cipta MPHM</span>
         </div>
-      )}
+      </motion.div>
     </div>
   );
 }
