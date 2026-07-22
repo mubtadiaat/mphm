@@ -5,15 +5,16 @@ Modul ini adalah Syllabus Engine yang memastikan setiap santri mendapatkan mata 
 1. FILOSOFI "GLOBAL SUBJECT POOL" & TIPE MAPEL
    Sistem tidak boleh membuat mata pelajaran yang berulang-ulang untuk setiap kelas. Kita menggunakan konsep Global Subject Pool (Kolam Mata Pelajaran Terpusat) yang dikelola oleh Sekretariat.
 
-Master Mata Pelajaran (subjects): Menyimpan daftar murni (Contoh: Fath al-Mubin, Al-Ajurrumiyah, Sullam at-Taufiq, Al-Qur'an, Akhlaq).
+Master Mata Pelajaran (subjects): Menyimpan daftar murni secara global.
+**ATURAN MUTLAK PENAMAAN:** Seluruh nama mata pelajaran (Mapel/Non-Mapel) wajib diketik dan disimpan menggunakan Aksara Arab (Contoh: فتح المعين, bukan Fathul Mu'in). Hal ini diwajibkan karena nantinya sistem akan mencetak Rapor, Ijazah, dan Sertifikat sepenuhnya dalam bahasa Arab tanpa modifikasi manual.
 
 Klasifikasi Tipe Mutlak (The Sacred Flag): Di dalam database, setiap mata pelajaran wajib diklasifikasikan ke dalam 2 tipe (ENUM):
 
-MAPEL (The Holy 5): Khusus untuk Al-Qur'an, Al-Khoth / Al-Imla', Qiro'ah al-Kutub, Al-Muhafadhoh, dan Akhlaq.
+NON-MAPEL (The Holy 5): Khusus untuk Al-Qur'an (القرآن), Al-Khoth / Al-Imla' (الخط \ الإملاء), Qiro'ah al-Kutub (قراءة الكتب), Al-Muhafadhoh (المحافظة), dan Akhlaq (الأخلاق).
 
-NON-MAPEL (General): Untuk mata pelajaran selain kelima di atas.
+MAPEL (General): Untuk mata pelajaran selain kelima di atas.
 
-Integrasi Otomatis ke Engine Penilaian: Saat Mustahiq membuka form input nilai, API Hono akan membaca flag MAPEL ini. Jika terdeteksi MAPEL, kolom UI otomatis terkunci maksimal 8, dan di Backend, mapel ini langsung dikeluarkan dari komputasi Ranking.
+Integrasi Otomatis ke Engine Penilaian: Saat Mustahiq membuka form input nilai, API Hono akan membaca flag NON-MAPEL ini. Jika terdeteksi NON-MAPEL, kolom UI otomatis terkunci maksimal 8, dan di Backend, mapel ini langsung dikeluarkan dari komputasi Ranking.
 
 2. ARSITEKTUR "CURRICULUM MAPPING" (PEMETAAN SILABUS)
    Mata pelajaran tidak ditempelkan langsung ke Kelas (Rombel), melainkan ditempelkan pada Kurikulum -> Jenjang -> Tingkat.
@@ -25,15 +26,39 @@ Maka, secara otomatis seluruh lokal kelas (Lokal A hingga Lokal I pada Tsanawiyy
 
 Versioning Kurikulum: Jika tahun depan ada perubahan kitab/mapel, Administrator tidak mengedit kurikulum lama (karena akan merusak rapor tahun lalu), melainkan menggunakan fitur Clone Curriculum, mengedit yang baru, dan menerapkannya untuk Academic Year yang baru.
 
+---
+**REFERENSI KURIKULUM 2 ALIYYAH (Berdasarkan Legger Resmi):**
+Sebagai acuan, berikut adalah *mapping* mata pelajaran khusus untuk tingkat 2 Aliyyah (Kelas G, H, dll) yang wajib masuk ke sistem dalam aksara Arab:
+
+**MAPEL (Masuk Perhitungan Ranking):**
+1. تفسير الجلالين (Tafsir Jalalain)
+2. إتمام الدراية (Itmamud Diroyah)
+3. رياض الصالحين (Riyadush Sholihin)
+4. كفاية العوام (Kifayatul Awam)
+5. فتح المعين (Fathul Mu'in)
+6. تسهيل الطرقات (Tashilut Thuruqot)
+7. مبادئ قواعد الفقهية (Mabadi Qowaid Fiqhiyyah)
+8. عدة الفارض (Uddatul Farid)
+9. الفية ابن مالك (Alfiyah Ibnu Malik)
+10. بداية الهداية (Bidayatul Hidayah)
+
+**NON-MAPEL (The Holy 5 - Tidak Masuk Ranking):**
+1. الخط \ الإملاء (Al-Khoth / Al-Imla')
+2. قراءة الكتب (Qiro'ah al-Kutub)
+3. المحافظة (Al-Muhafadhoh)
+4. الأخلاق (Akhlaq) - *Catatan: Khusus Akhlaq, nilai maksimal mutlak 8.*
+*(Al-Qur'an juga masuk dalam blok ini jika diadakan di jenjang tersebut).*
+---
+
 3. SKEMA DATABASE DRIZZLE ORM (SYLLABUS ENGINE)
-   Untuk menjamin eksekusi cepat di Cloudflare D1, relasi dibangun dengan struktur berikut:
+   Untuk menjamin eksekusi cepat di Neon Postgres, relasi dibangun dengan struktur berikut:
 
 TypeScript
 // packages/db/src/schema/academic.ts
-import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, uniqueIndex } from "drizzle-orm/pg-core";
 
 // 1. MASTER MATA PELAJARAN (Global Pool)
-export const subjects = sqliteTable("subjects", {
+export const subjects = pgTable("subjects", {
 id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 code: text("code").notNull().unique(), // Cth: "MP-FQH-01"
 name: text("name").notNull(), // Cth: "Fath al-Mubin"
@@ -42,7 +67,7 @@ isActive: integer("is_active", { mode: "boolean" }).default(true), // Soft Delet
 });
 
 // 2. MASTER KURIKULUM (Wadah Silabus)
-export const curriculums = sqliteTable("curriculums", {
+export const curriculums = pgTable("curriculums", {
 id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 name: text("name").notNull(), // Cth: "Kurikulum Pesantren 2026"
 description: text("description"),
@@ -51,7 +76,7 @@ isActive: integer("is_active", { mode: "boolean" }).default(true),
 
 // 3. PEMETAAN SILABUS (Curriculum Subjects Mapping)
 // Mengikat Mapel ke Jenjang & Tingkat di dalam suatu Kurikulum
-export const curriculumSubjects = sqliteTable("curriculum_subjects", {
+export const curriculumSubjects = pgTable("curriculum_subjects", {
 id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 curriculumId: text("curriculum_id").notNull().references(() => curriculums.id, { onDelete: "cascade" }),
 subjectId: text("subject_id").notNull().references(() => subjects.id, { onDelete: "restrict" }), // ANTI HAPUS
@@ -73,7 +98,7 @@ Kolom (Columns): Tingkat Kelas (Ibtida'iyyah I, Ibtida'iyyah II, dst).
 
 Toggle / Checkbox Interaktif: Administrator hanya perlu mencentang (checklist) kotak persimpangan untuk memasukkan Fath al-Mubin ke Tsanawiyyah I.
 
-Batch Mutation API: Saat tombol "Simpan Silabus" ditekan, Frontend mengumpulkan seluruh struktur matriks dan mengirimkannya dalam satu payload JSON array ke Hono API PUT /api/curriculums/:id/subjects untuk disimpan dalam satu kali transaksi Edge Database.
+Batch Mutation API: Saat tombol "Simpan Silabus" ditekan, Frontend mengumpulkan seluruh struktur matriks dan mengirimkannya dalam satu payload JSON array ke Hono API PUT /api/curriculums/:id/subjects untuk disimpan dalam satu kali transaksi Serverless Database.
 
 5. INTEGRASI AKHIR KE KELAS (academic_classes)
    Pada tabel academic_classes (yang sudah dibahas di BAB IV), terdapat kolom curriculumId.

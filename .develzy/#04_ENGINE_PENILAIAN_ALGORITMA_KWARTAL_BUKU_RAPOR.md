@@ -6,7 +6,7 @@
 
 Modul Penilaian bukan sekadar formulir input data (CRUD) biasa, melainkan merupakan **mesin pemrosesan akademik berperforma tinggi** yang mengimplementasikan seluruh **aturan mutlak penilaian Pesantren MPHM**.
 
-Seluruh proses perhitungan nilai, agregasi total, pemeringkatan (ranking), validasi aturan akademik, serta logika bisnis wajib diproses **sepenuhnya di sisi Backend (Cloudflare Workers)** untuk menjamin integritas data, menjaga konsistensi perhitungan, serta mencegah manipulasi dari sisi Frontend.
+Seluruh proses perhitungan nilai, agregasi total, pemeringkatan (ranking), validasi aturan akademik, serta logika bisnis wajib diproses **sepenuhnya di sisi Backend (Vercel Edge/Serverless)** untuk menjamin integritas data, menjaga konsistensi perhitungan, serta mencegah manipulasi dari sisi Frontend.
 
 Frontend hanya bertugas sebagai media input dan tampilan hasil, sedangkan seluruh keputusan akademik merupakan hasil komputasi Backend.
 
@@ -77,22 +77,21 @@ Kelima mata pelajaran tersebut memperoleh perlakuan khusus dalam sistem akademik
 
 ## Ketentuan Validasi Sistem (Strict API Guard)
 
-### Batas Maksimum Nilai = 8 (Hard Limit)
+### Batas Maksimum Nilai Akhlaq = 8 (The Holy Guard Limit)
 
-Untuk kelima mata pelajaran di atas, nilai maksimal yang diperbolehkan adalah:
+Meskipun kelima mata pelajaran tersebut berstatus spesial (tidak masuk perhitungan ranking kelas), aturan **Batas Maksimal Nilai = 8 (Hard Limit)** HANYA BERLAKU MUTLAK UNTUK MATA PELAJARAN **AKHLAQ**.
 
-**8**
+Untuk nilai **Akhlaq**, Backend wajib menolak setiap data yang melebihi angka 8. 
+Mata pelajaran spesial lainnya (Al-Qur'an, Khoth, Qiro'ah, Muhafadhoh) tetap diperbolehkan mendapat nilai 9 atau lebih tinggi sesuai prestasi akademiknya.
 
-Backend wajib menolak setiap data yang melebihi angka tersebut.
-
-Contoh nilai yang harus ditolak:
+Contoh nilai Akhlaq yang harus ditolak Backend:
 
 - 8,5
 - 9
 - 9,5
 - 10
 
-Apabila ditemukan nilai di atas 8, Backend wajib mengembalikan respons:
+Apabila ditemukan nilai Akhlaq di atas 8, Backend wajib mengembalikan respons:
 
 **HTTP 400 – Bad Request**
 

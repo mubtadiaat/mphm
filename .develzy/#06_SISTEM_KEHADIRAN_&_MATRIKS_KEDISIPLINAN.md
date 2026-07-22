@@ -5,7 +5,7 @@ Modul ini adalah mesin aktif yang mengintegrasikan kedisiplinan dan absensi lang
 1. MASTER JENIS PELANGGARAN (DINAMIS & TERPUSAT)
 Berdasarkan aturan ## Master Jenis Pelanggaran.md, sistem dilarang keras mematok mati jenis pelanggaran di dalam kode. Seluruhnya dikelola secara dinamis oleh Administrator melalui Dashboard.
 
-Struktur Skema Hierarki Pelanggaran (D1 Database):
+Struktur Skema Hierarki Pelanggaran (Neon Postgres Database):
 
 Kategori Utama (violation_categories): Hanya boleh menggunakan kategori resmi yang disetujui: Adab, Ibadah, Administrasi, Perizinan, Kebersihan, Asrama, dan Keamanan.
 
@@ -20,7 +20,7 @@ Berdasarkan 10_ENTERPRISE_DATA_ARCHITECTURE.md, setiap insiden pelanggaran yang 
 
 Atribut Wajib Insiden: academicYearId, studentId, violationTypeId, incidentDate, incidentTime, location, description, reportedBy, dan status.
 
-Bukti Pelanggaran (evidenceUrl): Jika pelapor/pengurus mengunggah bukti (seperti foto), file tersebut WAJIB diunggah menggunakan mekanisme Direct Signed Upload langsung ke Cloudinary. Database D1 hanya menyimpan URL Cloudinary-nya saja.
+Bukti Pelanggaran (evidenceUrl): Jika pelapor/pengurus mengunggah bukti (seperti foto), file tersebut WAJIB diunggah menggunakan mekanisme Direct Signed Upload langsung ke Cloudinary. Database Neon hanya menyimpan URL Cloudinary-nya saja.
 
 3. ALGORITMA "WORST-CASE TIER SHIFTING" (PENURUNAN PREDIKAT AKHLAQ)
 Ini adalah jantung kedisiplinan yang berinteraksi langsung dengan Rapor. Nilai mata pelajaran Akhlaq (sebagai NON-MAPEL yang dibatasi maksimal di angka 8/80) akan menghasilkan Predikat Kualitatif (Jayyid Awwal, dll) di rapor.

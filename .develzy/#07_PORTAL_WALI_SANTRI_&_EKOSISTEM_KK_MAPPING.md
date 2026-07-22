@@ -31,7 +31,7 @@ Catatan Akhlaq & Kedisiplinan: Mengambil data langsung dari Disciplinary Engine,
 
 Grafik & Riwayat Nilai / Rapor: Menampilkan laporan agregat nilai per Kwartal. Angka pelajaran berjenis NON-MAPEL wajib dikunci maksimal angka 8 (atau 80) pada visualisasinya, serta memunculkan Predikat Akhlaq secara visual.
 
-4. ARSITEKTUR DATABASE RELASI (D1 DRIZZLE)
+4. ARSITEKTUR DATABASE RELASI (DRIZZLE NEON POSTGRES)
 Relasi Person-Centric di Backend dipetakan secara ketat untuk menopang KK Mapping Engine:
 
 Entitas wali disimpan dalam tabel inti people, dengan peran terikat pada tabel guardian_profiles.

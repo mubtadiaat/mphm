@@ -4,20 +4,20 @@
 
 ## #00: VISI STRATEGIS, ARSITEKTUR STACK & DEPLOYMENT
 
-Sistem Informasi Akademik MPHM dibangun sebagai platform **Enterprise Internal SaaS**. Arsitektur wajib dipisah sepenuhnya (*Strictly Decoupled*) untuk menjamin performa maksimal, keamanan militer, dan keandalan jangka panjang di jaringan Cloudflare.
+Sistem Informasi Akademik MPHM dibangun sebagai platform **Enterprise Internal SaaS**. Arsitektur wajib dipisah sepenuhnya (*Strictly Decoupled*) untuk menjamin performa maksimal, keamanan militer, dan keandalan jangka panjang di jaringan Vercel.
 
 **1. Tech Stack Mutlak (The New Stack):**
 
-* **Frontend Layer (Web & 3D Presentation):** Next.js 15+ (App Router), React 19. Di-deploy murni sebagai Static/Edge di **Cloudflare Pages**.
-* **Backend API Gateway (Business Logic):** **Hono.js** berjalan di atas **Cloudflare Workers**. (Zero HTML rendering di backend, murni JSON REST API).
-* **Pusat Data (Database):** **Cloudflare D1** (Serverless SQLite) dikelola dengan Drizzle ORM.
-* **Media & Asset Storage:** **Cloudinary**. Seluruh foto profil, aset 3D, dokumen bukti, wajib diunggah langsung ke Cloudinary (bukan R2/Worker).
+* **Frontend Layer (Web & 3D Presentation):** Next.js 15+ (App Router), React 19. Di-deploy ke ekosistem **Vercel**.
+* **Backend API Gateway (Business Logic):** **Hono.js** berjalan di atas **Vercel Edge/Serverless Functions** (di dalam `apps/web/src/server`). (Zero HTML rendering di backend, murni JSON REST API).
+* **Pusat Data (Database):** **Neon Postgres** (Serverless PostgreSQL) dikelola dengan Drizzle ORM.
+* **Media & Asset Storage:** **Cloudinary**. Seluruh foto profil, aset 3D, dokumen bukti, wajib diunggah langsung ke Cloudinary (bukan ke server Vercel).
 
 **2. Aturan Deployment & Domain Produksi:**
 
 * **Domain Utama:** Seluruh sistem beroperasi HANYA di `https://m.p3hm.my.id`.
-* **API Base URL:** `https://m.p3hm.my.id/api/*`.
-* Tidak ada referensi ke domain `*.pages.dev` atau `*.workers.dev` pada konfigurasi produksi.
+* **API Base URL:** `https://m.p3hm.my.id/api/*` (API Edge Endpoint via Next.js).
+* Tidak ada referensi ke domain `*.vercel.app` pada konfigurasi produksi.
 
 ---
 
@@ -45,11 +45,11 @@ Seluruh antarmuka WAJIB **100% Responsive (Mobile-First, Tablet, Desktop)** dan 
 
 ## #02: PIPELINE MEDIA CLOUDINARY (STRICTLY DECOUPLED)
 
-Untuk memastikan Cloudflare Workers tidak dibebani file berat, sistem media menggunakan **Direct Signed Upload**.
+Untuk memastikan Vercel Serverless Functions tidak dibebani file berat, sistem media menggunakan **Direct Signed Upload**.
 
 1. **Request Signature:** Frontend meminta token otorisasi ke Backend (Hono).
 2. **Direct Upload:** Frontend mengunggah file (Foto/Bukti) **langsung** ke server Cloudinary.
-3. **Save URL:** Cloudinary membalas dengan URL gambar, lalu Frontend mengirim URL tersebut ke Backend untuk disimpan di database D1.
+3. **Save URL:** Cloudinary membalas dengan URL gambar, lalu Frontend mengirim URL tersebut ke Backend untuk disimpan di database Neon Postgres.
 
 ---
 
@@ -129,13 +129,13 @@ Ini adalah jantung logika komputasi akademik MPHM.
 
 ---
 
-## #07: ATURAN KEAMANAN & PENGEMBANGAN (AI AGENT RULES)
+## #09: KEAMANAN MILITER (RBAC, OTORISASI & GLOBAL AUDIT)
 
-Ini adalah **HARGA MATI** bagi eksekusi pengembangan:
+Seluruh eksekusi logika dikunci di tingkat Middleware Hono.
 
 1. **RBAC (Role-Based Access Control):** Super Admin, Sekretariat, Operator, Mustahiq, Mufattisy, Pimpinan, Wali Santri. Setiap *role* HANYA BISA melihat data sesuai lingkup kerjanya (*Data Scope Authorization*).
 2. **Otentikasi:** Wajib menggunakan `HttpOnly Secure Cookie`.
-3. **Realtime Audit Log:** Seluruh aktivitas POST/PUT/DELETE memicu *Middleware* Worker untuk mencatat secara otomatis (Siapa, Kapan, Aksi, *Before/After*).
+3. **Realtime Audit Log:** Seluruh aktivitas POST/PUT/DELETE memicu *Middleware* untuk mencatat secara otomatis (Siapa, Kapan, Aksi, *Before/After*).
 4. **TanStack Query + Optimistic Update:** Frontend wajib menggunakan TanStack Query v5 dengan tata kelola *Cache* yang rapi. Antarmuka harus terasa realtime tanpa *reload*.
 5. **NO DUMMY LOGIC:** Dilarang keras membuat logika hardcode palsu (*mock* yang tidak bisa diganti). Backend API harus siap memvalidasi dengan *Zod Interceptors*. Seluruh penanganan *Error* membalas dengan format JSON yang konsisten.
 
@@ -145,4 +145,4 @@ Ini adalah **HARGA MATI** bagi eksekusi pengembangan:
 
 Blueprint ini adalah spesifikasi teknis tingkat *Enterprise SaaS*. Anda dapat langsung memerintahkan agen AI/Developer Anda dengan *prompt* berikut untuk memulai:
 
-> *"Berdasarkan Master Blueprint MPHM v4.0, mulai inisialisasi monorepo Turborepo. Set up Cloudflare Pages untuk Next.js 15 (Frontend) dengan Tailwind v4 dan shadcn, serta Cloudflare Workers untuk Hono.js (Backend) dengan D1 Database. Buat skema Drizzle pertama untuk tabel `people` dan `student_profiles`."*
+> *"Berdasarkan Master Blueprint MPHM v4.0, set up Vercel untuk Next.js 15 (Frontend) dengan Tailwind v4 dan shadcn, serta API Hono.js di apps/web/src/server dengan Neon Postgres Database. Buat skema Drizzle untuk tabel `people` dan `student_profiles` di packages/db/src/schema."*

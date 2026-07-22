@@ -59,7 +59,7 @@ Hissoh Tsani (Sesi 2): Setelah jeda kitab.
 Target Jadwal Fleksibel (Inheritance): Jadwal dapat diterapkan pada level "Tingkat" atau "Kelas". Jika Administrator menerapkan "Mata Pelajaran Fathul Mubin pada Hari Sabtu Hissoh Ula untuk Tingkat Tsanawiyyah I", maka otomatis Lokal A, B, C, D, dst di tingkat tersebut mewarisi jadwal yang sama, tanpa perlu diinput manual satu per satu.
 
 6. TRANSISI TAHUN AJARAN (CLONE WORKSPACE ALGORITHM)
-Setiap pergantian tahun (misal dari 2025/2026 ke 2026/2027), sistem menggunakan fitur "Clone Academic Year". Ini dijalankan melalui Background Job via Cloudflare Workers.
+Setiap pergantian tahun (misal dari 2025/2026 ke 2026/2027), sistem menggunakan fitur "Clone Academic Year". Ini dijalankan melalui Background Job via Vercel.
 
 Yang OTOMATIS DISALIN (Copied): Struktur Kelas (Jenjang, Tingkat, Bagian), Kurikulum Mata Pelajaran, Jadwal Mingguan, dan Penugasan Wali Kelas (bisa dicentang opsional).
 

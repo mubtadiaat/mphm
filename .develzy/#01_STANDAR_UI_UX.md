@@ -1,6 +1,6 @@
 🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
 #01: STANDAR UI/UX, ANIMASI 3D & KOMPONEN MODERN (THE FRONTEND MASTERPIECE)
-Frontend MPHM dirancang bukan sebagai web administrasi biasa, melainkan sebagai Ultra-Modern Enterprise Professional SaaS Dashboard (Terinspirasi dari Vercel, Linear, Supabase, dan desain premium di Uiverse.io). Sistem harus terasa sangat cepat, elegan, dan hidup, namun tetap ringan untuk dieksekusi dari Edge (Cloudflare Pages).
+Frontend MPHM dirancang bukan sebagai web administrasi biasa, melainkan sebagai Ultra-Modern Enterprise Professional SaaS Dashboard (Terinspirasi dari Vercel, Linear, Supabase, dan desain premium di Uiverse.io). Sistem harus terasa sangat cepat, elegan, dan hidup, namun tetap ringan untuk dieksekusi dari Vercel.
 
 1. SISTEM DESAIN & IDENTITAS VISUAL (DESIGN TOKENS)
 Tidak ada nilai warna atau spasi yang di-hardcode. Seluruhnya harus menggunakan Design Tokens dari Tailwind CSS v4 dengan palet warna berikut:

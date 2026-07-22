@@ -7,7 +7,6 @@ export const rooms = pgTable("rooms", {
   name: text("name").notNull().unique(), // Cth: "Kamar Al-Ghozali 01"
   buildingName: text("building_name").notNull(), // Cth: "Gedung A"
   capacity: integer("capacity").notNull().default(10),
-  gender: text("gender", { enum: ["L", "P"] }).notNull(), // Asrama L/P
   supervisorId: text("supervisor_id").references(() => teacherProfiles.id, { onDelete: "set null" }), // Wali Kamar
   isActive: boolean("is_active").default(true),
   deletedAt: timestamp("deleted_at"),
@@ -32,6 +31,8 @@ export const teacherProfiles = pgTable("teacher_profiles", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
   teacherCode: text("teacher_code").notNull().unique(), // Cth: "UST-01"
+  teacherType: text("teacher_type", { enum: ["MUSTAHIQ", "MUNAWIB", "KEDUANYA", "LAINNYA"] }).notNull().default("LAINNYA"),
+  startTeachingYear: text("start_teaching_year"), // Cth: "2021/2022"
   status: text("status", { enum: ["ACTIVE", "INACTIVE"] }).default("ACTIVE"),
   deletedAt: timestamp("deleted_at"),
 });
@@ -50,6 +51,10 @@ export const alumniRecords = pgTable("alumni_records", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
   graduationYear: integer("graduation_year").notNull(),
+  khidmahStatus: text("khidmah_status", { enum: ["KHIDMAH", "TIDAK_KHIDMAH"] }).default("TIDAK_KHIDMAH"),
+  khidmahLocation: text("khidmah_location"), // Cth: "Ustadzah", "Keamanan MPHM"
+  ijazahTaken: text("ijazah_taken", { enum: ["SUDAH", "BELUM"] }).default("BELUM"),
+  notes: text("notes"), // Cth: "Menikah", "Tidak Lulus UBK"
   deletedAt: timestamp("deleted_at"),
 });
 
@@ -57,7 +62,8 @@ export const alumniRecords = pgTable("alumni_records", {
 export const organizationMemberships = pgTable("organization_memberships", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
-  roleName: text("role_name").notNull(), // cth: "Mufattisy", "Pimpinan"
+  role: text("role").notNull(), // cth: "Mufattisy", "Pimpinan"
+  serviceYear: text("service_year").notNull(), // Cth: "2024/2025"
   status: text("status", { enum: ["ACTIVE", "INACTIVE"] }).default("ACTIVE"),
   supervisedLevel: text("supervised_level"), // Cth: "Tsanawiyyah", "Aliyyah"
   deletedAt: timestamp("deleted_at"),

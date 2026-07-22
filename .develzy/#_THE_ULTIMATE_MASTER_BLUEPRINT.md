@@ -3,23 +3,23 @@
 Status: FINAL & APPROVED FOR PRODUCTION
 
 BAB I: VISI, ARSITEKTUR INFRASTRUKTUR & DEPLOYMENT MUTLAK
-MPHM bukan sekadar web pendataan nilai, melainkan Pusat Data Abadi dengan standar Enterprise SaaS. Sistem WAJIB dipisah 100% (Strictly Decoupled) untuk menjamin performa tanpa batas di ekosistem Cloudflare.
+MPHM bukan sekadar web pendataan nilai, melainkan Pusat Data Abadi dengan standar Enterprise SaaS. Sistem WAJIB dipisah 100% (Strictly Decoupled) untuk menjamin performa tanpa batas di ekosistem Vercel.
 
 1. Tech Stack (The New Stack):
 
-Frontend (UI/UX & 3D Layer): Next.js 15+ (App Router), React 19. Di-deploy murni ke Cloudflare Pages.
+Frontend (UI/UX & 3D Layer): Next.js 15+ (App Router), React 19. Di-deploy ke Vercel.
 
-Backend (API Gateway): Hono.js berjalan di Cloudflare Workers (Zero HTML, murni JSON REST API secepat milidetik).
+Backend (API Gateway): Hono.js berjalan via Edge API Routes di dalam Next.js (`apps/web/src/server`). (Zero HTML, murni JSON REST API secepat milidetik).
 
-Database: Cloudflare D1 (Serverless SQLite) dikelola dengan Drizzle ORM.
+Database: Neon Postgres (Serverless PostgreSQL) dikelola dengan Drizzle ORM tersentralisasi di `packages/db`.
 
-Penyimpanan Media: Cloudinary. (Semua foto dan bukti wajib menggunakan Direct Signed Upload dari Frontend ke Cloudinary. Database D1 hanya menyimpan URL).
+Penyimpanan Media: Cloudinary. (Semua foto dan bukti wajib menggunakan Direct Signed Upload dari Frontend ke Cloudinary. Database Neon hanya menyimpan URL).
 
 2. Aturan Deployment Produksi:
 
 Domain mutlak HANYA di https://m.p3hm.my.id.
 
-Tidak ada referensi ke *.pages.dev di lingkungan produksi. API berjalan di https://m.p3hm.my.id/api/*.
+Tidak ada referensi ke *.vercel.app di lingkungan produksi. API berjalan di https://m.p3hm.my.id/api/*.
 
 BAB II: STANDAR UI/UX, ANIMASI 3D, & DATA GRID ENTERPRISE
 Antarmuka mengusung filosofi Premium Enterprise SaaS (Terinspirasi linear/Uiverse) yang 100% Responsif (Mobile-First).
@@ -61,7 +61,7 @@ guardian_profiles (Wali Santri)
 BAB IV: ACADEMIC WORKSPACE & ENGINE MANAJEMEN KELAS
 Semua data transaksional (Rapor, Jadwal, Absensi) terisolasi secara kedap udara di dalam ID Tahun Ajaran.
 
-1. Hierarki Mutlak: Tahun Ajaran ➔ Semester ➔ Jenjang ➔ Tingkat ➔ Kelas ➔ Jadwal.
+1. Hierarki Mutlak: Tahun Ajaran ➔ Semester ➔ Jenjang ➔ Tingkat ➔ Kelas.
 2. Master Jenjang & Tingkat (HARDCODED ENUMS, BUKAN TABEL):
 
 I'dadiyyah (Tingkat I-III, masa 1 tahun, pengecualian: tidak ada kenaikan kelas).
@@ -117,7 +117,7 @@ Otomatisasi Pendaftaran: Wali mendaftar dengan Nama, WA, dan Nomor KK.
 KK Mapping Engine: Sistem Backend akan menyisir relasi secara otomatis. Jika dalam database ada 3 santriwati yang memiliki Nomor KK identik dengan Wali tersebut, ketiga anak tersebut otomatis muncul di Dashboard Wali tanpa perlu approval admin satu per satu.
 
 BAB IX: KEAMANAN MILITER (RBAC, OTORISASI & GLOBAL AUDIT)
-Seluruh eksekusi logika dikunci di tingkat Cloudflare Edge Worker.
+Seluruh eksekusi logika dikunci di tingkat Vercel Edge/Serverless Middleware.
 
 HttpOnly Secure Cookie Session: Tidak menggunakan JWT di local storage. Anti-XSS & Anti-CSRF mutlak.
 

@@ -651,11 +651,11 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
                       <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Jenis Kelamin *</label>
                       <select 
                         value={newGender} 
-                        onChange={(e) => setNewGender(e.target.value as "L" | "P")}
+                        onChange={(e) => setNewGender(e.target.value as "P")}
                         className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
+                        disabled
                       >
                         <option value="P">Perempuan</option>
-                        <option value="L">Laki-laki</option>
                       </select>
                     </div>
 
@@ -1018,7 +1018,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500">Jenis Kelamin</span>
-                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">{selectedSantriForDetail.gender === "L" ? "Laki-laki" : "Perempuan"}</span>
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">Perempuan</span>
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500">Tempat, Tanggal Lahir</span>

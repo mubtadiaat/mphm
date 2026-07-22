@@ -1,6 +1,6 @@
 🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
 #02_ENTERPRISE_DATA_ARCHITECTURE (PERSON-CENTRIC) & API GATEWAY
-Transformasi MPHM dari sekadar "aplikasi web" menjadi "Pusat Data Abadi" bergantung sepenuhnya pada arsitektur database ini. Sistem dirancang untuk berjalan di Cloudflare D1 (Serverless SQLite) menggunakan Drizzle ORM dan Hono.js, menjamin waktu eksekusi API di bawah 10ms secara global.
+Transformasi MPHM dari sekadar "aplikasi web" menjadi "Pusat Data Abadi" bergantung sepenuhnya pada arsitektur database ini. Sistem dirancang untuk berjalan di Neon Postgres (Serverless PostgreSQL) menggunakan Drizzle ORM dan Hono.js, menjamin waktu eksekusi API di bawah 10ms secara global.
 
 1. FILOSOFI "SINGLE SOURCE OF TRUTH" (PERSON-CENTRIC CORE)
 Kelemahan aplikasi akademik tradisional adalah redundansi data. Di MPHM v4.0, satu manusia di alam nyata hanya boleh memiliki satu baris data identitas (ID) seumur hidup.
@@ -26,11 +26,11 @@ Ini adalah struktur absolut untuk dieksekusi oleh Developer / AI Agent.
 
 TypeScript
 // packages/db/src/schema/person.ts
-import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 // 1. TABEL CORE: PEOPLE
-export const people = sqliteTable("people", {
+export const people = pgTable("people", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   nik: text("nik").unique(), // Nullable (belum punya KTP/KK)
   fullName: text("full_name").notNull(),
@@ -46,36 +46,72 @@ export const people = sqliteTable("people", {
   nameIdx: uniqueIndex("name_idx").on(table.fullName), // INDEXING FOR SPEED
 }));
 
-// 2. PROFIL SANTRI
-export const studentProfiles = sqliteTable("student_profiles", {
+// 2. MASTER ASRAMA / KAMAR (Rooms)
+export const rooms = pgTable("rooms", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull().unique(), // Cth: "Kamar Al-Ghozali 01"
+  buildingName: text("building_name").notNull(), // Cth: "Gedung A"
+  capacity: integer("capacity").notNull().default(10),
+  supervisorId: text("supervisor_id").references(() => teacherProfiles.id, { onDelete: "set null" }), // Wali Kamar
+  isActive: integer("is_active", { mode: "boolean" }).default(true),
+});
+
+// 3. PROFIL SANTRI
+export const studentProfiles = pgTable("student_profiles", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   // ATURAN MUTLAK: ON DELETE RESTRICT (Anti-hapus fatal)
   personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }), 
+  stambukNumber: text("stambuk_number").notNull().unique(),
   nis: text("nis").notNull().unique(),
   nisn: text("nisn").unique(),
   enrollmentYear: integer("enrollment_year").notNull(),
   status: text("status", { enum: ["ACTIVE", "GRADUATED", "DROPPED", "BOYONG", "KHIDMAH"] }).default("ACTIVE"),
+  khidmahPlacement: text("khidmah_placement"),
+  roomId: text("room_id").references(() => rooms.id, { onDelete: "set null" }),
 });
 
-// 3. PROFIL PENGAJAR / MUSTAHIQ
-export const teacherProfiles = sqliteTable("teacher_profiles", {
+// 4. PROFIL PENGAJAR / MUSTAHIQ
+export const teacherProfiles = pgTable("teacher_profiles", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
   teacherCode: text("teacher_code").notNull().unique(), // Cth: "UST-01"
+  teacherType: text("teacher_type", { enum: ["MUSTAHIQ", "MUNAWIB", "KEDUANYA", "LAINNYA"] }).notNull().default("LAINNYA"),
+  startTeachingYear: text("start_teaching_year"), // Cth: "2021/2022"
   status: text("status", { enum: ["ACTIVE", "INACTIVE"] }).default("ACTIVE"),
 });
 
-// 4. PROFIL WALI SANTRI (Smart Guardian Mapping)
-export const guardianProfiles = sqliteTable("guardian_profiles", {
+// 5. PROFIL WALI SANTRI (Smart Guardian Mapping)
+export const guardianProfiles = pgTable("guardian_profiles", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
   familyCardNumber: text("family_card_number").notNull(), // NOMOR KK
   relation: text("relation", { enum: ["AYAH", "IBU", "WALI"] }).notNull(),
 });
-Aturan Keamanan Database (DB-01): onDelete: "restrict". SQLite di Edge Server akan otomatis menolak penghapusan baris pada tabel people jika orang tersebut masih tercatat memiliki rapor, pelanggaran, atau profil. Sistem hanya mengenal Soft Delete / Perubahan Status.
+
+// 6. PROFIL ALUMNI (Rekam Jejak Khidmah & Ijazah)
+export const alumniRecords = pgTable("alumni_records", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
+  studentProfileId: text("student_profile_id").notNull().references(() => studentProfiles.id),
+  graduationYear: text("graduation_year").notNull(),
+  khidmahStatus: text("khidmah_status", { enum: ["KHIDMAH", "TIDAK_KHIDMAH"] }).default("TIDAK_KHIDMAH"),
+  khidmahLocation: text("khidmah_location"), // Cth: "Ustadzah", "Keamanan MPHM"
+  ijazahTaken: text("ijazah_taken", { enum: ["SUDAH", "BELUM"] }).default("BELUM"),
+  notes: text("notes"), // Cth: "Menikah", "Tidak Lulus UBK"
+});
+
+// 7. PROFIL DEWAN HARIAN / ORGANISASI
+export const organizationMemberships = pgTable("organization_memberships", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  personId: text("person_id").notNull().references(() => people.id, { onDelete: "restrict" }),
+  role: text("role").notNull(), // Cth: "Sekertaris Tiga", "Ketua Umum"
+  serviceYear: text("service_year").notNull(), // Cth: "2024/2025"
+  isActive: integer("is_active", { mode: "boolean" }).default(true),
+});
+Aturan Keamanan Database (DB-01): onDelete: "restrict". Postgres di Serverless Database akan otomatis menolak penghapusan baris pada tabel people jika orang tersebut masih tercatat memiliki rapor, pelanggaran, atau profil. Sistem hanya mengenal Soft Delete / Perubahan Status.
 
 3. CLOUDINARY PIPELINE (STRICTLY DECOUPLED MEDIA)
-Untuk menjaga database Cloudflare D1 tetap sangat ringan, tidak ada file biner yang dikirim melewati Worker.
+Untuk menjaga database Neon Postgres tetap sangat ringan, tidak ada file biner yang dikirim melewati Serverless Function.
 
 Alur Keamanan Upload Media (Zero Worker Bottleneck):
 
@@ -83,11 +119,11 @@ Frontend Intercept: Pengguna memilih foto santri di antarmuka Next.js.
 
 Request Signature: Frontend memanggil GET /api/media/signature ke Hono Backend.
 
-Generate Token: Hono Worker menghasilkan SHA-1 Signature menggunakan Cloudinary Secret Key dan membalas dengan parameter rahasia.
+Generate Token: Hono Backend menghasilkan SHA-1 Signature menggunakan Cloudinary Secret Key dan membalas dengan parameter rahasia.
 
 Direct to Cloudinary: Frontend melakukan POST langsung ke https://api.cloudinary.com/v1_1/mphm/image/upload.
 
-URL Persistence: Cloudinary mengembalikan secure_url. Frontend lalu melakukan PUT /api/students/:id dengan menyisipkan URL tersebut ke database D1.
+URL Persistence: Cloudinary mengembalikan secure_url. Frontend lalu melakukan PUT /api/students/:id dengan menyisipkan URL tersebut ke database Neon Postgres.
 
 4. API GATEWAY STANDARD (HONO.JS ON EDGE)
 API Backend bukan sekadar media CRUD, melainkan gerbang hukum bisnis.
@@ -143,7 +179,7 @@ Tab 1: Biodata Inti & Pas Foto (Cloudinary).
 
 Tab 2: Riwayat Kelas (Tahun ke Tahun).
 
-Tab 3: Grafik Agregat Rapor (Dihitung langsung dari D1).
+Tab 3: Grafik Agregat Rapor (Dihitung langsung dari Neon Postgres).
 
 Tab 4: Rekam Jejak Kedisiplinan & Pelanggaran.
 
@@ -161,4 +197,4 @@ Aturan Mutlak Workflow: Perpindahan status yang melompati hierarki (misal dari D
 🚀 Cara Mengeksekusi Tahap #02 Ini ke AI Agent / Developer:
 Salin prompt ini ke AI IDE Anda (Cursor, Windsurf, dll) untuk langsung mengeksekusi arsitektur database:
 
-"Berdasarkan Blueprint MPHM Tahap #02, silakan setup Drizzle ORM di dalam folder packages/db. Buat skema people, student_profiles, teacher_profiles, dan guardian_profiles menggunakan dialect drizzle-orm/sqlite-core untuk Cloudflare D1. Terapkan indeks pada kolom pencarian dan pastikan Foreign Key menggunakan onDelete: 'restrict'. Setelah itu, setup endpoint dasar di apps/backend menggunakan Hono untuk melakukan operasi GET dan POST dengan validasi Zod."
+"Berdasarkan Blueprint MPHM Tahap #02, silakan setup Drizzle ORM di dalam folder packages/db. Buat skema people, student_profiles, teacher_profiles, dan guardian_profiles menggunakan dialect drizzle-orm/pg-core untuk Neon Postgres. Terapkan indeks pada kolom pencarian dan pastikan Foreign Key menggunakan onDelete: 'restrict'. Setelah itu, setup endpoint dasar di apps/backend menggunakan Hono untuk melakukan operasi GET dan POST dengan validasi Zod."

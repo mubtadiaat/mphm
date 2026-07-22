@@ -45,7 +45,7 @@ Fase Draft (Wali Kelas): Mustahiq melihat daftar kelasnya. Sistem menampilkan re
 
 Fase Review (Mufattisy/Pimpinan): Pimpinan tingkat memeriksa rekapitulasi massal dan menekan "Setujui".
 
-Fase Eksekusi Akhir (Finalization Lock): Setelah disetujui, Cloudflare Background Worker akan berjalan:
+Fase Eksekusi Akhir (Finalization Lock): Setelah disetujui, Vercel Background Job akan berjalan:
 
 Sistem mengunci data Kenaikan Kelas Tahun Ajaran tersebut (tidak bisa diedit tanpa Bypass Super Admin).
 
@@ -59,14 +59,15 @@ Untuk memastikan riwayat pendidikan setiap individu dari masuk hingga lulus tere
 Struktur Drizzle Skema academic_history:
 
 TypeScript
-export const academicHistory = sqliteTable("academic_history", {
+export const academicHistory = pgTable("academic_history", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   studentId: text("student_id").notNull().references(() => studentProfiles.id),
   academicYearId: text("academic_year_id").notNull(), // Misal: 2025/2026
   institutionLevel: text("institution_level").notNull(), // Jenjang (Ibtida'iyyah)
   classId: text("class_id").notNull(), // Kelas spesifik (Ibtida'iyyah II-A)
   status: text("status").notNull(), // "PROMOTED", "RETAINED", "GRADUATED"
-  promotionTransactionId: text("promotion_transaction_id"), // Bukti Audit
+  promotionTransactionId: text("promotion_transaction_id"), // Bukti Audit Batch Action
+  overrideReason: text("override_reason"), // Alasan jika ada intervensi manual (wajib diisi jika merubah paksa)
   recordedAt: integer("recorded_at", { mode: "timestamp" }).default(sql`(strftime('%s', 'now'))`),
 });
 Manfaat UI: Ketika Admin menggunakan fitur Global Command Palette (CTRL+K) dan mencari nama "Fatimah", tab Riwayat Akademik akan menampilkan timeline visual elegan dari tabel ini (seperti perjalanan dari tahun 2020 hingga lulus 2026).

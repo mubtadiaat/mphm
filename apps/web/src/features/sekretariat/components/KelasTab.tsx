@@ -98,7 +98,7 @@ export function KelasTab({ isReadOnly = false, selectedYearId }: KelasTabProps) 
                       <td className="px-5 py-3.5 font-mono text-xs">{student.nisn || "-"}</td>
                       <td className="px-5 py-3.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${student.gender === "L" ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "bg-pink-50 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400"}`}>
-                          {student.gender === "L" ? "Laki-laki" : "Perempuan"}
+                          Perempuan
                         </span>
                       </td>
                     </tr>
@@ -139,7 +139,7 @@ export function KelasTab({ isReadOnly = false, selectedYearId }: KelasTabProps) 
                       </tr>
                       <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                         <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Jenis Kelamin</td>
-                        <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left">{viewingDetail.gender === "L" ? "Laki-laki" : "Perempuan"}</td>
+                        <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left">Perempuan</td>
                       </tr>
                     </tbody>
                   </table>
