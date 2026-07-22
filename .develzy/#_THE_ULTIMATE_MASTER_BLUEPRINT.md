@@ -38,6 +38,11 @@ Identity Cell Pattern: Kolom nama orang WAJIB dirender dengan format: Avatar bun
 
 Pill Badges: Status (Aktif, Lulus) wajib menggunakan kapsul berwarna semantik.
 
+3. Dual-Workspace Architecture (Dashboard Segregation):
+Sistem memisahkan menu dan navigasi operasional menjadi dua ruang kerja terpisah menggunakan Workspace Switcher pada header:
+- Workspace Pondok: Fokus pada Kepengasuhan, Santriwati sebagai penghuni, Kamar, dan Kedisiplinan.
+- Workspace Madrasah: Fokus pada Akademik, Siswi per kelas, Rombel, dan Penilaian (Rapor).
+
 BAB III: ENTERPRISE DATA ARCHITECTURE (PERSON-CENTRIC)
 Sistem menggunakan hukum Single Source of Truth. Tidak ada duplikasi manusia seumur hidup.
 
@@ -74,13 +79,15 @@ Al-Robithoh (Khidmah/Mengabdi pasca-Aliyyah, 1 tahun).
 BAB V: ENGINE PENILAIAN & BUKU RAPOR (THE SACRED RULES)
 Ini adalah "Otak Komputasi" MPHM. API Backend bertugas keras menjaga integritas angka. Penilaian terbagi menjadi 4 Kwartal (Kwartal 1 hingga 4). Guru memasukkan Nilai Asli (mendukung desimal seperti 6.5).
 
-1. Hukum 5 Mapel:
+1. Jenis Pelajaran (MAPEL vs NON-MAPEL):
 
-Al-Qur'an, Al-Khoth/Al-Imla', Qiro'ah al-Kutub, Al-Muhafadhoh, Akhlaq.
+Manajemen pelajaran dikelola secara dinamis melalui Dashboard Admin. Pelajaran dibagi menjadi dua kategori utama:
+- MAPEL (Mata Pelajaran): Batas nilai maksimal adalah 10 (atau 100).
+- NON-MAPEL (Non-Mata Pelajaran): Batas nilai maksimal adalah 8 (atau 80). (Contoh historis: Al-Qur'an, Al-Khoth/Al-Imla', Qiro'ah al-Kutub, Al-Muhafadhoh, Akhlaq).
 
-Batas Maksimal Mutlak 8: API Worker (Zod) wajib memblokir input di atas angka 8 untuk 5 mapel ini.
+Batas Maksimal Dinamis: API Worker (Zod) wajib memblokir input nilai yang melebihi batas tipe pelajaran tersebut (10 untuk MAPEL, 8 untuk NON-MAPEL).
 
-Eliminasi Ranking: Kelima mapel ini TIDAK DIHITUNG dalam akumulasi total agregat nilai untuk menentukan Peringkat (Ranking) kelas.
+Eliminasi Ranking: Pelajaran berjenis NON-MAPEL TIDAK DIHITUNG dalam akumulasi total agregat nilai untuk menentukan Peringkat (Ranking) kelas.
 
 2. Anti-Singkatan UI: Antarmuka dilarang menggunakan singkatan malas (Haram: "K1". Wajib: "Kwartal 1"). Antarmuka Spreadsheet menggunakan Auto-Save Buffer (menahan data 500ms lalu otomatis menyimpan).
 

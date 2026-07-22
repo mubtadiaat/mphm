@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { NAVIGATION_CONFIG, RoleTypes, NavItem } from "../../config/navigation.config";
+import { NAVIGATION_CONFIG, SEKRETARIAT_MADRASAH_NAV, SEKRETARIAT_PONDOK_NAV, RoleTypes, NavItem } from "../../config/navigation.config";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 import { Database, Lock } from "lucide-react";
 import { useToast } from "@/components/shared/ToastContext";
 import { apiRequest } from "@/lib/api";
@@ -33,6 +34,7 @@ import { useRoleUIConfig } from "@/lib/useRoleUIConfig";
 export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceShow?: boolean }) {
   const pathname = usePathname();
   const [customItems, setCustomItems] = useState<CustomNavItem[]>([]);
+  const { activeWorkspace } = useWorkspace();
   const { config, accentColorClasses } = useRoleUIConfig(role);
   const { toast } = useToast();
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({
@@ -123,7 +125,11 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
     return () => window.removeEventListener("custom_tables_changed", loadCustomTables);
   }, [role]);
 
-  const flatStaticItems: NavItem[] = (NAVIGATION_CONFIG[role] || []).flatMap((item) => {
+  const baseConfig = role === "sekretariat" 
+    ? (activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
+    : (NAVIGATION_CONFIG[role] || []);
+
+  const flatStaticItems: NavItem[] = baseConfig.flatMap((item) => {
     if ("items" in item) {
       return item.items;
     }

@@ -36,6 +36,11 @@ Seluruh antarmuka WAJIB **100% Responsive (Mobile-First, Tablet, Desktop)** dan 
 * **Micro-interactions:** Menggunakan **Framer Motion** untuk transisi perpindahan halaman, *drawer collapse*, *subtle glow* pada form, dan *loading skeleton*.
 * **3D Elements:** Menggunakan **React Three Fiber / Three.js** untuk elemen interaktif di Dashboard (misal: Logo MPHM 3D, Kartu Statistik Mengambang yang bereaksi terhadap kursor/sentuhan). Animasi 3D harus ringan dan tidak mengorbankan performa.
 
+**3. Dual-Workspace Architecture (Pemilahan Dashboard):**
+* Untuk mengurangi kerumitan antarmuka bagi role admin/Sekretariat, sistem dibagi menjadi dua fokus layar (Workspace Switcher):
+  * **Hub Pondok:** Fokus pada kepengasuhan, asrama, kamar, dan kedisiplinan santriwati.
+  * **Hub Madrasah:** Fokus pada kegiatan sekolah, akademik, rapor, kelas, dan kurikulum siswi.
+
 ---
 
 ## #02: PIPELINE MEDIA CLOUDINARY (STRICTLY DECOUPLED)
@@ -96,9 +101,9 @@ Ini adalah jantung logika komputasi akademik MPHM.
 **1. Sistem Penilaian (Kwartal 1 - 4):**
 
 * Mustahiq menginput nilai asli (mendukung pecahan, misal: `6.5` atau `7.5`).
-* **Pengecualian 5 Mapel:** Al-Qur'an, Al-Khot/Al-Imla', Qiro'ah al-Kutub, Al-Muhafadhoh, dan Akhlaq.
-* **Nilai Maksimal 5 Mapel ini dibatasi mutlak di angka 8.** (API wajib menolak input > 8).
-* Kelima mapel ini **TIDAK DIHITUNG** (dieliminasi) dari total agregat nilai untuk penentuan Ranking kelas.
+* **Jenis Pelajaran (MAPEL vs NON-MAPEL):** Pelajaran diklasifikasikan secara dinamis di Dashboard Admin.
+* **Nilai Maksimal:** Untuk MAPEL batasnya adalah 10 (atau 100), sedangkan untuk NON-MAPEL batas mutlaknya adalah 8 (atau 80). (API wajib menolak input di atas ambang batas masing-masing).
+* Pelajaran berjenis NON-MAPEL **TIDAK DIHITUNG** (dieliminasi) dari total agregat nilai untuk penentuan Ranking kelas.
 
 
 

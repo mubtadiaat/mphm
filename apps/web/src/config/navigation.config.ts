@@ -38,59 +38,89 @@ export type NavMenu = NavItem | NavGroup;
 // 6 Peran Resmi Sistem (#08)
 export type RoleTypes = "sekretariat" | "mufattisy" | "mundzir" | "mustahiq" | "keamanan" | "wali_santri";
 
+export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
+  { label: "Dashboard Pondok", href: "/sekretariat", icon: LayoutGrid },
+  {
+    group: "Database Induk",
+    items: [
+      { label: "Data Santriwati", href: "/sekretariat/santri", icon: Users },
+      { label: "Data Wali Santri", href: "/sekretariat/wali-santri", icon: UserCircle },
+      { label: "Data Kamar & Asrama", href: "/sekretariat/rooms", icon: Home },
+      { label: "Data Mundzir", href: "/sekretariat/mundzir", icon: Users },
+      { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
+    ]
+  },
+  {
+    group: "Kedisiplinan",
+    items: [
+      { label: "Pelanggaran & Takzir", href: "/sekretariat/pelanggaran", icon: ShieldAlert },
+    ]
+  },
+  {
+    group: "Al-Rabithoh & Alumni",
+    items: [
+      { label: "Masa Pengabdian", href: "/sekretariat/khidmah", icon: Heart },
+      { label: "Data Alumni", href: "/sekretariat/alumni", icon: Archive },
+    ]
+  },
+  {
+    group: "Sistem & Utilitas",
+    items: [
+      { label: "Manajemen Akun (Users)", href: "/sekretariat/users", icon: Users },
+      { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
+      { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
+      { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
+    ]
+  }
+];
+
+export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
+  { label: "Dashboard Madrasah", href: "/sekretariat", icon: LayoutGrid },
+  {
+    group: "Manajemen Kelas",
+    items: [
+      { label: "Siswi per Kelas", href: "/sekretariat/santri", icon: Users },
+      { label: "Kelas & Rombel", href: "/sekretariat/kelas", icon: BookOpen },
+    ]
+  },
+  {
+    group: "Tenaga Pendidik",
+    items: [
+      { label: "Data Mufatish", href: "/sekretariat/mufattisy", icon: Users },
+      { label: "Data Mustahiq", href: "/sekretariat/mustahiq", icon: Users },
+    ]
+  },
+  {
+    group: "Akademik & Penilaian",
+    items: [
+      { label: "Manajemen Nilai", href: "/sekretariat/penilaian", icon: ClipboardList },
+      { label: "Raport", href: "/sekretariat/raport", icon: FileText },
+      { label: "Kurikulum Builder", href: "/sekretariat/kurikulum", icon: ClipboardList },
+      { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas", icon: Award },
+    ]
+  },
+  {
+    group: "Dokumen & Sertifikasi",
+    items: [
+      { label: "Sertifikat", href: "/sekretariat/sertifikat", icon: Award },
+      { label: "Ijazah", href: "/sekretariat/ijazah", icon: Award },
+      { label: "Dokumen & Template", href: "/sekretariat/document-template", icon: FileText },
+    ]
+  },
+  {
+    group: "Sistem & Utilitas",
+    items: [
+      { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran", icon: Calendar },
+      { label: "Arsip Akademik", href: "/sekretariat/arsip", icon: Archive },
+      { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
+      { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
+      { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
+    ]
+  }
+];
+
 export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
-  sekretariat: [
-    { label: "Dashboard", href: "/sekretariat", icon: LayoutGrid },
-    {
-      group: "Database Induk",
-      items: [
-        { label: "Data Santri", href: "/sekretariat/santri", icon: Users },
-        { label: "Data Wali Santri", href: "/sekretariat/wali-santri", icon: UserCircle },
-        { label: "Data Kamar & Asrama", href: "/sekretariat/rooms", icon: Home },
-        { label: "Data Mustahiq", href: "/sekretariat/mustahiq", icon: Users },
-        { label: "Data Mufatish", href: "/sekretariat/mufattisy", icon: Users },
-        { label: "Data Mundzir", href: "/sekretariat/mundzir", icon: Users },
-        { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
-      ]
-    },
-    {
-      group: "Al-Rabithoh & Alumni",
-      items: [
-        { label: "Masa Pengabdian", href: "/sekretariat/khidmah", icon: Heart },
-        { label: "Data Alumni", href: "/sekretariat/alumni", icon: Archive },
-      ]
-    },
-    {
-      group: "Manajemen Akademik",
-      items: [
-        { label: "Kelas & Rombel", href: "/sekretariat/kelas", icon: BookOpen },
-        { label: "Manajemen Nilai", href: "/sekretariat/penilaian", icon: ClipboardList },
-        { label: "Sertifikat", href: "/sekretariat/sertifikat", icon: Award },
-        { label: "Raport", href: "/sekretariat/raport", icon: FileText },
-        { label: "Ijazah", href: "/sekretariat/ijazah", icon: Award },
-        { label: "Kurikulum Builder", href: "/sekretariat/kurikulum", icon: ClipboardList },
-        { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas", icon: Award },
-      ]
-    },
-    {
-      group: "Kedisiplinan",
-      items: [
-        { label: "Pelanggaran", href: "/sekretariat/pelanggaran", icon: ShieldAlert },
-      ]
-    },
-    {
-      group: "Sistem & Utilitas",
-      items: [
-        { label: "Manajemen Akun (Users)", href: "/sekretariat/users", icon: Users },
-        { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran", icon: Calendar },
-        { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
-        { label: "Arsip Akademik", href: "/sekretariat/arsip", icon: Archive },
-        { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
-        { label: "Dokumen & Template", href: "/sekretariat/document-template", icon: FileText },
-        { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
-      ]
-    }
-  ],
+  sekretariat: [], // Di-override oleh WorkspaceContext di Sidebar.tsx
   mufattisy: [
     { label: "Dashboard", href: "/mufattisy", icon: LayoutGrid },
     { label: "Data Santri", href: "/mufattisy/santri", icon: Users },

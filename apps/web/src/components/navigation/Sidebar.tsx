@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { NAVIGATION_CONFIG, RoleTypes, NavMenu } from "../../config/navigation.config";
+import { NAVIGATION_CONFIG, SEKRETARIAT_MADRASAH_NAV, SEKRETARIAT_PONDOK_NAV, RoleTypes, NavMenu } from "../../config/navigation.config";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 import { Database, Lock } from "lucide-react";
 import { useRoleUIConfig } from "@/lib/useRoleUIConfig";
 import { useToast } from "@/components/shared/ToastContext";
@@ -32,6 +33,7 @@ interface OnboardingStatus {
 export function Sidebar({ role }: { role: RoleTypes }) {
   const pathname = usePathname();
   const [customItems, setCustomItems] = useState<CustomNavItem[]>([]);
+  const { activeWorkspace } = useWorkspace();
   const { config, accentColorClasses } = useRoleUIConfig(role);
   const { toast } = useToast();
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({
@@ -92,7 +94,9 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     return null;
   }
 
-  const filteredStaticItems = (NAVIGATION_CONFIG[role] || []);
+  const filteredStaticItems = role === "sekretariat" 
+    ? (activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
+    : (NAVIGATION_CONFIG[role] || []);
 
   let navItems: NavMenu[] = [];
   if (role === "sekretariat") {

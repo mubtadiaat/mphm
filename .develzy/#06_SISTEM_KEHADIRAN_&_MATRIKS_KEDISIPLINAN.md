@@ -23,7 +23,7 @@ Atribut Wajib Insiden: academicYearId, studentId, violationTypeId, incidentDate,
 Bukti Pelanggaran (evidenceUrl): Jika pelapor/pengurus mengunggah bukti (seperti foto), file tersebut WAJIB diunggah menggunakan mekanisme Direct Signed Upload langsung ke Cloudinary. Database D1 hanya menyimpan URL Cloudinary-nya saja.
 
 3. ALGORITMA "WORST-CASE TIER SHIFTING" (PENURUNAN PREDIKAT AKHLAQ)
-Ini adalah jantung kedisiplinan yang berinteraksi langsung dengan Rapor. Nilai mata pelajaran Akhlaq (yang dibatasi maksimal di angka 8) akan menghasilkan Predikat Kualitatif (Jayyid Awwal, dll) di rapor.
+Ini adalah jantung kedisiplinan yang berinteraksi langsung dengan Rapor. Nilai mata pelajaran Akhlaq (sebagai NON-MAPEL yang dibatasi maksimal di angka 8/80) akan menghasilkan Predikat Kualitatif (Jayyid Awwal, dll) di rapor.
 
 Trigger Penalti Otomatis: Meskipun nilai ujian Akhlaq seorang santri sempurna, jika enjin sistem mendeteksi santri tersebut memiliki rekod pelanggaran pada tingkat "Sangat Berat" atau memiliki jumlah absensi "Alfa" yang melebihi batas kewajaran, sistem akan menjatuhkan (shift down) Predikat Kualitatif Akhlaq santri tersebut secara otomatis saat Generate Raport.
 

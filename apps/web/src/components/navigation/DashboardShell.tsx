@@ -13,17 +13,50 @@ import { HeaderProfile } from "./HeaderProfile";
 import { useRoleUIConfig } from "@/lib/useRoleUIConfig";
 import { HijriDateDisplay } from "@/components/shared/HijriDateDisplay";
 import { AcademicYearProvider, useAcademicYear } from "@/components/shared/AcademicYearContext";
+import { WorkspaceProvider, useWorkspace, WorkspaceType } from "@/components/shared/WorkspaceContext";
 
 interface DashboardShellProps {
   role: RoleTypes;
   children: React.ReactNode;
 }
 
-function GlobalHeaderActions() {
+function WorkspaceSwitcher({ role }: { role: RoleTypes }) {
+  const { activeWorkspace, setActiveWorkspace } = useWorkspace();
+  
+  if (role !== "sekretariat") return null;
+
+  return (
+    <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-xl mr-4 border border-zinc-200 dark:border-zinc-700">
+      <button
+        onClick={() => setActiveWorkspace("pondok")}
+        className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold tracking-wide transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+          activeWorkspace === "pondok" 
+            ? "bg-emerald-600 text-white shadow-md" 
+            : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+        }`}
+      >
+        <span className="text-sm">🏠</span> PONDOK
+      </button>
+      <button
+        onClick={() => setActiveWorkspace("madrasah")}
+        className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold tracking-wide transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+          activeWorkspace === "madrasah" 
+            ? "bg-blue-600 text-white shadow-md" 
+            : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+        }`}
+      >
+        <span className="text-sm">🏫</span> MADRASAH
+      </button>
+    </div>
+  );
+}
+
+function GlobalHeaderActions({ role }: { role: RoleTypes }) {
   const { selectedYearId, setSelectedYearId, years } = useAcademicYear();
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2 md:gap-4">
+      <WorkspaceSwitcher role={role} />
       <div className="hidden lg:flex items-center gap-2">
         <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">TAHUN AKADEMIK:</span>
         <select
@@ -57,6 +90,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
 
   return (
     <AcademicYearProvider>
+      <WorkspaceProvider>
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex relative w-full">
         <CommandPalette />
         
@@ -67,7 +101,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
           <header className="h-20 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 flex items-center px-6 sticky top-0 z-40 justify-between">
             <div className="flex-1 font-extrabold text-xl md:hidden text-zinc-800 dark:text-zinc-200">MPHM 4.0</div>
             <div className="flex-1 hidden md:block"></div>
-            <GlobalHeaderActions />
+            <GlobalHeaderActions role={role} />
           </header>
         
         <div className="p-4 md:p-6 overflow-x-hidden flex-1 flex flex-col">
@@ -123,7 +157,8 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+      </WorkspaceProvider>
     </AcademicYearProvider>
   );
 }

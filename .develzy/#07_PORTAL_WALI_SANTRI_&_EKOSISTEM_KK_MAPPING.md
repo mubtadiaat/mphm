@@ -29,7 +29,7 @@ Rekam Jejak Kehadiran (Absensi): Menampilkan matriks persentase kehadiran (Sakit
 
 Catatan Akhlaq & Kedisiplinan: Mengambil data langsung dari Disciplinary Engine, menampilkan grafik aktivitas dan riwayat pelanggaran anak menggunakan antarmuka timeline (Garis Waktu). Jika anak melakukan pelanggaran, rinciannya langsung terlihat di sini secara real-time.
 
-Grafik & Riwayat Nilai / Rapor: Menampilkan laporan agregat nilai per Kwartal. Angka 5 Mapel (Al-Qur'an, Akhlaq, dsb) wajib dikunci maksimal angka 8 pada visualisasinya, serta memunculkan Predikat Akhlaq secara visual.
+Grafik & Riwayat Nilai / Rapor: Menampilkan laporan agregat nilai per Kwartal. Angka pelajaran berjenis NON-MAPEL wajib dikunci maksimal angka 8 (atau 80) pada visualisasinya, serta memunculkan Predikat Akhlaq secara visual.
 
 4. ARSITEKTUR DATABASE RELASI (D1 DRIZZLE)
 Relasi Person-Centric di Backend dipetakan secara ketat untuk menopang KK Mapping Engine:
