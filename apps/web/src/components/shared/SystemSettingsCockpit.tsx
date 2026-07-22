@@ -78,7 +78,7 @@ export function SystemSettingsCockpit() {
   const updateSettingsMutation = useMutation({
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     mutationFn: async (payload: Record<string, any>) => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.m.p3hm.my.id";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
       const res = await fetch(`${apiUrl}/api/settings`, {
         method: "PUT",
         headers: {

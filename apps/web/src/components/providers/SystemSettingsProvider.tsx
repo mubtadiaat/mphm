@@ -29,7 +29,7 @@ export function SystemSettingsProvider({ children }: { children: React.ReactNode
       const res = await fetch(
         process.env.NEXT_PUBLIC_API_URL 
           ? `${process.env.NEXT_PUBLIC_API_URL}/api/settings` 
-          : "https://api.m.p3hm.my.id/api/settings"
+          : "/api/settings"
       );
       if (!res.ok) throw new Error("Failed to fetch settings");
       const json = await res.json();
