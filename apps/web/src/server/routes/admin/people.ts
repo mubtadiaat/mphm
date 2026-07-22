@@ -212,7 +212,7 @@ peopleAdmin.get("/", async (c) => {
       JOIN people p ON p.id = om.person_id
       WHERE p.deleted_at IS NULL
       AND om.deleted_at IS NULL
-      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR om.role_name LIKE ${searchPattern})
+      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR om.role LIKE ${searchPattern})
     `);
     const totalCount = (countResult.rows[0] as { total: number })?.total || 0;
 
@@ -221,7 +221,7 @@ peopleAdmin.get("/", async (c) => {
         om.id as id,
         om.person_id as personId,
         p.full_name as name,
-        om.role_name as role,
+        om.role as role,
         om.supervised_level as supervisedLevel,
         p.phone_number as phone,
         om.status as status,
@@ -231,7 +231,7 @@ peopleAdmin.get("/", async (c) => {
       JOIN people p ON p.id = om.person_id
       WHERE p.deleted_at IS NULL
       AND om.deleted_at IS NULL
-      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR om.role_name LIKE ${searchPattern})
+      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR om.role LIKE ${searchPattern})
       LIMIT ${limit} OFFSET ${offset}
     `);
     const list = (result as any).rows || [];
