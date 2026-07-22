@@ -41,8 +41,9 @@ const assignProfileSchema = z.object({
   familyCardNumber: z.string().optional(),
   relation: z.enum(["AYAH", "IBU", "WALI"]).optional(),
   // Pengurus specific
-  roleName: z.string().optional(),
+  roleName: z.string().optional(), // Kept as roleName in API for backwards compatibility but we'll map it to role
   supervisedLevel: z.string().nullable().optional(),
+  serviceYear: z.string().optional(),
 });
 
 // ============================================================
@@ -387,8 +388,9 @@ peopleAdmin.post("/:id/assign-role", zValidator("json", assignProfileSchema), as
     }
     profile = await db.insert(organizationMemberships).values({
       personId: id,
-      roleName: data.roleName,
+      role: data.roleName,
       supervisedLevel: data.supervisedLevel || null,
+      serviceYear: data.serviceYear || "2024/2025",
       status: "ACTIVE",
     }).returning().then((res: any) => res[0]);
   }

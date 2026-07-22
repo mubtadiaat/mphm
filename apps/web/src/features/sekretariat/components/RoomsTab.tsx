@@ -38,14 +38,12 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
   const [name, setName] = useState("");
   const [buildingName, setBuildingName] = useState("");
   const [capacity, setCapacity] = useState<number>(10);
-  const [gender, setGender] = useState<"L" | "P">("L");
   const [supervisorId, setSupervisorId] = useState<string>("");
 
   const resetForm = () => {
     setName("");
     setBuildingName("");
     setCapacity(10);
-    setGender("L");
     setSupervisorId("");
   };
 
@@ -60,7 +58,6 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
     setName(room.name);
     setBuildingName(room.buildingName);
     setCapacity(room.capacity);
-    setGender(room.gender);
     setSupervisorId(room.supervisorId || "");
     setShowModal(true);
   };
@@ -90,7 +87,6 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
         name,
         buildingName,
         capacity,
-        gender,
         supervisorId: supervisorId || null,
       };
 
@@ -122,18 +118,6 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
       accessorKey: "buildingName",
       header: "Gedung",
       cell: (info) => <span className="font-medium text-zinc-700 dark:text-zinc-350">{info.getValue() as string}</span>
-    },
-    {
-      accessorKey: "gender",
-      header: "Kategori",
-      cell: (info) => (
-        <div className="flex justify-center">
-          <PillBadge
-            label={info.getValue() === "L" ? "PUTRA" : "PUTRI"}
-            variant={info.getValue() === "L" ? "info" : "danger"}
-          />
-        </div>
-      )
     },
     {
       accessorKey: "capacity",
@@ -249,7 +233,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
         tableName="rooms"
         importExportProps={{
           title: "Data Kamar & Asrama Santri",
-          headers: ["name", "buildingName", "gender", "capacity", "supervisorName"],
+          headers: ["name", "buildingName", "capacity", "supervisorName"],
         }}
       />
 
@@ -313,7 +297,6 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-zinc-500 uppercase">Kapasitas (Orang) *</label>
                     <input
@@ -325,19 +308,6 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                       className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white"
                     />
                   </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-zinc-500 uppercase">Kategori Asrama *</label>
-                    <select
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value as "L" | "P")}
-                      className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white"
-                    >
-                      <option value="L">PUTRA (L)</option>
-                      <option value="P">PUTRI (P)</option>
-                    </select>
-                  </div>
-                </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold text-zinc-500 uppercase font-bold">Wali Kamar / Ust. Pembimbing</label>
@@ -410,14 +380,6 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Kapasitas</td>
                       <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-mono">{(viewingDetail.filledCapacity || 0)} / {viewingDetail.capacity || 0}</td>
-                    </tr>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Kategori</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${viewingDetail.gender === "L" ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
-                          {viewingDetail.gender === "L" ? 'PUTRA (L)' : 'PUTRI (P)'}
-                        </span>
-                      </td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Ust. Pembimbing</td>

@@ -19,7 +19,6 @@ const createRoomSchema = z.object({
   name: z.string().min(3, "Nama kamar minimal 3 karakter"),
   buildingName: z.string().min(1, "Nama gedung harus diisi"),
   capacity: z.number().int().positive("Kapasitas harus berupa angka positif"),
-  gender: z.enum(["L", "P"]),
   supervisorId: z.string().uuid().nullable().optional(),
 });
 
@@ -67,7 +66,6 @@ roomsAdmin.get("/", async (c) => {
         name: rooms.name,
         buildingName: rooms.buildingName,
         capacity: rooms.capacity,
-        gender: rooms.gender,
         supervisorId: rooms.supervisorId,
         supervisorName: people.fullName,
         isActive: rooms.isActive,
@@ -131,7 +129,6 @@ roomsAdmin.post("/", zValidator("json", createRoomSchema), async (c) => {
         name: data.name,
         buildingName: data.buildingName,
         capacity: data.capacity,
-        gender: data.gender,
         supervisorId: data.supervisorId || null,
         isActive: true,
       })

@@ -12,17 +12,19 @@ attendanceMustahiq.use("*", requireRole(["Mustahiq"]));
 
 const saveAttendanceSchema = z.object({
   academicYearId: z.string().uuid(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format: YYYY-MM-DD"),
-  session: z.enum(["HISSOH_ULA", "HISSOH_TSANI"]),
+  hijriMonth: z.string(),
+  hijriYear: z.number().int().positive(),
   records: z.array(z.object({
     studentId: z.string().uuid(),
-    status: z.enum(["HADIR", "SAKIT", "IZIN", "ALFA"]),
+    sickDays: z.number().int().min(0),
+    excusedDays: z.number().int().min(0),
+    unexcusedDays: z.number().int().min(0),
     notes: z.string().optional(),
   }))
 });
 
 // ============================================================
-// POST /api/mustahiq/attendance/:classId — INPUT ABSENSI HISSOH
+// POST /api/mustahiq/attendance/:classId — INPUT ABSENSI BULANAN
 // ============================================================
 attendanceMustahiq.post(
   "/:classId",
@@ -41,15 +43,15 @@ attendanceMustahiq.post(
       const results = await attendanceService.saveClassAttendance({
         academicYearId: data.academicYearId,
         classId,
-        date: data.date,
-        session: data.session,
+        hijriMonth: data.hijriMonth,
+        hijriYear: data.hijriYear,
         records: data.records,
         recordedBy: user.userId,
       });
 
       return c.json({
         status: "Success",
-        message: "Absensi Hissoh berhasil direkam.",
+        message: "Absensi bulanan berhasil direkam.",
         data: results,
       });
     } catch (err: any) {

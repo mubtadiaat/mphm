@@ -63,7 +63,7 @@ classesAdmin.get("/", async (c) => {
     .innerJoin(people, eq(organizationMemberships.personId, people.id))
     .where(
       and(
-        eq(organizationMemberships.roleName, "Mufattisy"),
+        eq(organizationMemberships.role, "Mufattisy"),
         eq(organizationMemberships.status, "ACTIVE"),
         isNull(organizationMemberships.deletedAt)
       )
@@ -119,7 +119,7 @@ classesAdmin.get("/:id", async (c) => {
     .innerJoin(people, eq(organizationMemberships.personId, people.id))
     .where(
       and(
-        eq(organizationMemberships.roleName, "Mufattisy"),
+        eq(organizationMemberships.role, "Mufattisy"),
         eq(organizationMemberships.supervisedLevel, cls.institutionLevel),
         eq(organizationMemberships.status, "ACTIVE"),
         isNull(organizationMemberships.deletedAt)

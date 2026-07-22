@@ -6,7 +6,6 @@ export interface Room {
   name: string;
   buildingName: string;
   capacity: number;
-  gender: "L" | "P";
   supervisorId: string | null;
   supervisorName?: string | null;
   filledCapacity?: number;

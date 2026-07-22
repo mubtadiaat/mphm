@@ -81,22 +81,19 @@ guardianPortal.get("/stats", async (c) => {
   // 3. Calculate average attendance for all children in 1 query (optimized)
   const aRes = await db
     .select({
-      status: attendanceRecords.status,
-      count: count(attendanceRecords.id)
+      sick: sql<number>`sum(sick_days)`,
+      excused: sql<number>`sum(excused_days)`,
+      unexcused: sql<number>`sum(unexcused_days)`,
+      totalMonths: sql<number>`count(*)`
     })
     .from(attendanceRecords)
     .where(inArray(attendanceRecords.studentId, childrenIds))
-    .groupBy(attendanceRecords.status)
-    ;
+    .then((res: any) => res[0]);
       
-  let totalAtt = 0;
-  let presentAtt = 0;
-  for (const row of aRes) {
-    totalAtt += row.count;
-    if (row.status === "HADIR" || row.status === "SAKIT" || row.status === "IZIN") {
-      presentAtt += row.count;
-    }
-  }
+  const totalPossibleDays = (aRes?.totalMonths || 0) * 30; // Approx 30 days per month
+  const totalAbsences = (aRes?.sick || 0) + (aRes?.excused || 0) + (aRes?.unexcused || 0);
+  const presentAtt = Math.max(0, totalPossibleDays - totalAbsences);
+  const totalAtt = totalPossibleDays;
   
   const averageAttendance = totalAtt > 0 ? parseFloat(((presentAtt / totalAtt) * 100).toFixed(1)) : 100;
 
@@ -186,31 +183,24 @@ guardianPortal.get("/children/:studentId/academic", async (c) => {
     ;
 
   // 3. Tarik statistik absensi
-  const attendanceRows = await db
+  const attendanceRes = await db
     .select({
-      status: attendanceRecords.status,
-      count: sql<number>`count(*)`
+      sick: sql<number>`sum(sick_days)`,
+      excused: sql<number>`sum(excused_days)`,
+      unexcused: sql<number>`sum(unexcused_days)`,
+      totalMonths: sql<number>`count(*)`
     })
     .from(attendanceRecords)
     .where(eq(attendanceRecords.studentId, studentId))
-    .groupBy(attendanceRecords.status)
-    ;
+    .then((res: any) => res[0]);
 
-  let totalAtt = 0;
-  let presentAtt = 0;
-  let sakit = 0;
-  let izin = 0;
-  let alfa = 0;
-
-  for (const row of attendanceRows) {
-    totalAtt += row.count;
-    if (row.status === "HADIR") presentAtt += row.count;
-    if (row.status === "SAKIT") { presentAtt += row.count; sakit += row.count; }
-    if (row.status === "IZIN") { presentAtt += row.count; izin += row.count; }
-    if (row.status === "ALFA") { alfa += row.count; }
-  }
-
-  const attendanceRate = totalAtt > 0 ? parseFloat(((presentAtt / totalAtt) * 100).toFixed(1)) : 100.0;
+  const studentPossibleDays = (attendanceRes?.totalMonths || 0) * 30;
+  const sakit = attendanceRes?.sick || 0;
+  const izin = attendanceRes?.excused || 0;
+  const alfa = attendanceRes?.unexcused || 0;
+  const studentAbsences = sakit + izin + alfa;
+  const studentPresent = Math.max(0, studentPossibleDays - studentAbsences);
+  const attendanceRate = studentPossibleDays > 0 ? parseFloat(((studentPresent / studentPossibleDays) * 100).toFixed(1)) : 100.0;
 
   // 4. Tarik pelanggaran
   const violationsRes = await db

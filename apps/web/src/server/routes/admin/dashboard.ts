@@ -51,23 +51,19 @@ dashboardAdmin.get("/stats", async (c) => {
   // 3. Attendance Rate for targetYearId
   const attendanceRes = await db
     .select({
-      status: attendanceRecords.status,
-      count: sql<number>`count(*)`
+      sick: sql<number>`sum(sick_days)`,
+      excused: sql<number>`sum(excused_days)`,
+      unexcused: sql<number>`sum(unexcused_days)`,
+      totalMonths: sql<number>`count(*)`
     })
     .from(attendanceRecords)
     .where(eq(attendanceRecords.academicYearId, targetYearId))
-    .groupBy(attendanceRecords.status)
-    ;
+    .then((res: any) => res[0]);
   
-  let totalAttendance = 0;
-  let presentCount = 0;
-  for (const row of attendanceRes) {
-    totalAttendance += row.count;
-    if (row.status === "HADIR" || row.status === "SAKIT" || row.status === "IZIN") {
-      presentCount += row.count;
-    }
-  }
-  const attendanceRate = totalAttendance > 0 ? parseFloat(((presentCount / totalAttendance) * 100).toFixed(1)) : 100.0;
+  const totalPossibleDays = (attendanceRes?.totalMonths || 0) * 30; // Approx 30 days per month
+  const totalAbsences = (attendanceRes?.sick || 0) + (attendanceRes?.excused || 0) + (attendanceRes?.unexcused || 0);
+  const presentCount = Math.max(0, totalPossibleDays - totalAbsences);
+  const attendanceRate = totalPossibleDays > 0 ? parseFloat(((presentCount / totalPossibleDays) * 100).toFixed(1)) : 100.0;
 
   // 4. Active violations for targetYearId
   const violationsRes = await db

@@ -11,9 +11,9 @@ export class AttendanceService {
   async saveClassAttendance(data: {
     academicYearId: string;
     classId: string;
-    date: string; // Format YYYY-MM-DD
-    session: "HISSOH_ULA" | "HISSOH_TSANI";
-    records: { studentId: string; status: "HADIR" | "SAKIT" | "IZIN" | "ALFA"; notes?: string }[];
+    hijriMonth: string;
+    hijriYear: number;
+    records: { studentId: string; sickDays: number; excusedDays: number; unexcusedDays: number; notes?: string }[];
     recordedBy: string;
   }) {
     // 1. Fetch all existing attendance records for this class/date/session in a single query
@@ -23,8 +23,8 @@ export class AttendanceService {
       .where(
         and(
           eq(attendanceRecords.classId, data.classId),
-          eq(attendanceRecords.date, data.date),
-          eq(attendanceRecords.session, data.session)
+          eq(attendanceRecords.hijriMonth, data.hijriMonth),
+          eq(attendanceRecords.hijriYear, data.hijriYear)
         )
       )
       ;
@@ -40,7 +40,9 @@ export class AttendanceService {
           this.db
             .update(attendanceRecords)
             .set({
-              status: record.status,
+              sickDays: record.sickDays,
+              excusedDays: record.excusedDays,
+              unexcusedDays: record.unexcusedDays,
               notes: record.notes || null,
               recordedBy: data.recordedBy,
             })
@@ -55,9 +57,11 @@ export class AttendanceService {
               academicYearId: data.academicYearId,
               classId: data.classId,
               studentId: record.studentId,
-              date: data.date,
-              session: data.session,
-              status: record.status,
+              hijriMonth: data.hijriMonth,
+              hijriYear: data.hijriYear,
+              sickDays: record.sickDays,
+              excusedDays: record.excusedDays,
+              unexcusedDays: record.unexcusedDays,
               notes: record.notes || null,
               recordedBy: data.recordedBy,
             })
@@ -80,9 +84,12 @@ export class AttendanceService {
   // COMPUTE STUDENT ATTENDANCE STATS (Untuk Kenaikan Kelas)
   // ============================================================
   async getStudentAttendanceStats(studentId: string, academicYearId: string) {
-    const records = await this.db
+    const res = await this.db
       .select({
-        status: attendanceRecords.status
+        sick: sql<number>`sum(sick_days)`,
+        excused: sql<number>`sum(excused_days)`,
+        unexcused: sql<number>`sum(unexcused_days)`,
+        totalMonths: sql<number>`count(*)`
       })
       .from(attendanceRecords)
       .where(
@@ -91,30 +98,14 @@ export class AttendanceService {
           eq(attendanceRecords.academicYearId, academicYearId)
         )
       )
-      ;
+      .then((res: any) => res[0]);
 
-    const totalSessions = records.length;
-    if (totalSessions === 0) {
-      return {
-        totalSessions: 0,
-        hadir: 0,
-        sakit: 0,
-        izin: 0,
-        alfa: 0,
-        attendanceRate: 1.0 // default fully present jika belum ada record
-      };
-    }
-
-    let hadir = 0, sakit = 0, izin = 0, alfa = 0;
-    for (const record of records) {
-      if (record.status === "HADIR") hadir++;
-      else if (record.status === "SAKIT") sakit++;
-      else if (record.status === "IZIN") izin++;
-      else if (record.status === "ALFA") alfa++;
-    }
-
-    // Kehadiran rate = (Hadir + Sakit + Izin) / Total. Alfa dihitung absen murni.
-    const attendanceRate = parseFloat(((hadir + sakit + izin) / totalSessions).toFixed(4));
+    const totalSessions = (res?.totalMonths || 0) * 30; // Approx 30 days per month
+    const sakit = res?.sick || 0;
+    const izin = res?.excused || 0;
+    const alfa = res?.unexcused || 0;
+    const hadir = Math.max(0, totalSessions - (sakit + izin + alfa));
+    const attendanceRate = totalSessions > 0 ? parseFloat((hadir / totalSessions).toFixed(4)) : 1.0;
 
     return {
       totalSessions,
