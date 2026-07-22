@@ -2,7 +2,8 @@
   "name": "mphm-v4-monorepo",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
