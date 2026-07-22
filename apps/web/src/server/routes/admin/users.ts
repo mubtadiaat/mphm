@@ -41,7 +41,7 @@ usersAdmin.get("/", requireRole(["Sekretariat"]), async (c) => {
     LIMIT ${limit} OFFSET ${offset}
   `);
 
-  return c.json({ status: "Success", data: result || [] });
+  return c.json({ status: "Success", data: (result as any).rows || [] });
 });
 
 // ============================================================

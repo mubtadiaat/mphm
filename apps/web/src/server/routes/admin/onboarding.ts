@@ -47,7 +47,7 @@ onboardingAdmin.get("/status", async (c) => {
       WHERE deleted_at IS NULL
     `);
 
-    const getCount = (result: any) => ((result?.[0] as { count?: number })?.count || 0) > 0;
+    const getCount = (result: any) => ((result?.rows?.[0] as { count?: number })?.count || 0) > 0;
 
     const hasMundzir = getCount(mundzirCount);
     const hasMufattisy = getCount(mufattisyCount);

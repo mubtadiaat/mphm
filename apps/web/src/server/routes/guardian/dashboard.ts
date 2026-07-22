@@ -38,7 +38,7 @@ guardianPortal.get("/children", async (c) => {
     WHERE sp.status = 'ACTIVE'
   `);
   
-  return c.json({ status: "Success", data: result || [] });
+  return c.json({ status: "Success", data: (result as any).rows || [] });
 });
 
 // ============================================================

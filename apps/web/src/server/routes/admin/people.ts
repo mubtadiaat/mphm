@@ -165,7 +165,7 @@ peopleAdmin.get("/", async (c) => {
       AND (${classPattern} IS NULL OR ac.full_name LIKE ${classPattern})
       LIMIT ${limit} OFFSET ${offset}
     `);
-    const list = result || [];
+    const list = (result as any).rows || [];
     return c.json({ status: "Success", data: list, total: totalCount });
   }
 
@@ -199,7 +199,7 @@ peopleAdmin.get("/", async (c) => {
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR tp.teacher_code LIKE ${searchPattern})
       LIMIT ${limit} OFFSET ${offset}
     `);
-    const list = result || [];
+    const list = (result as any).rows || [];
     return c.json({ status: "Success", data: list, total: totalCount });
   }
 
@@ -233,7 +233,7 @@ peopleAdmin.get("/", async (c) => {
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR om.role_name LIKE ${searchPattern})
       LIMIT ${limit} OFFSET ${offset}
     `);
-    const list = result || [];
+    const list = (result as any).rows || [];
     return c.json({ status: "Success", data: list, total: totalCount });
   }
 
@@ -267,10 +267,10 @@ peopleAdmin.get("/", async (c) => {
       WHERE gp.deleted_at IS NULL
       AND p.deleted_at IS NULL
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})
-      GROUP BY gp.family_card_number
+      GROUP BY gp.family_card_number, p.full_name, p.phone_number, gp.relation, p.nik
       LIMIT ${limit} OFFSET ${offset}
     `);
-    const list = result || [];
+    const list = (result as any).rows || [];
     return c.json({ status: "Success", data: list, total: totalCount });
   }
   

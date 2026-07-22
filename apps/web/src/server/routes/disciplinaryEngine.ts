@@ -40,8 +40,7 @@ disciplinaryEngine.get("/violations", requireRole(["Sekretariat", "Mustahiq", "M
     ORDER BY sv.incident_date DESC, sv.incident_time DESC
     LIMIT ${limit} OFFSET ${offset}
   `);
-  const list = result || [];
-  return c.json({ status: "Success", data: list });
+  return c.json({ status: "Success", data: (result as any).rows || [] });
 });
 
 const violationSchema = z.object({
