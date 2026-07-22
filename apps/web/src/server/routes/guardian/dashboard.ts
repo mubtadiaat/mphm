@@ -61,8 +61,7 @@ guardianPortal.get("/stats", async (c) => {
     WHERE gp.family_card_number = ${user.familyCardNumber}
       AND sp.status = 'ACTIVE'
   `);
-  
-  const childrenIds = (childrenResult || []).map((r: any) => r.studentId as string);
+  const childrenIds = (childrenResult?.rows || []).map((r: any) => r.studentId as string);
   
   if (childrenIds.length === 0) {
     return c.json({ 

@@ -76,7 +76,7 @@ promotionEngine.get(
       WHERE ce.class_id = ${classId} AND ce.status = 'ACTIVE'
     `);
 
-    const candidates = (result || []).map((row: any) => ({
+    const candidates = (result?.rows || []).map((row: any) => ({
       studentId: row.studentId,
       nis: row.nis,
       name: row.name,

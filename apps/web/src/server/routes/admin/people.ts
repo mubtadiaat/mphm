@@ -112,7 +112,7 @@ peopleAdmin.get("/", async (c) => {
       )
       AND (${classPattern} IS NULL OR ac.full_name LIKE ${classPattern})
     `);
-    const totalCount = (countResult[0] as { total: number })?.total || 0;
+    const totalCount = (countResult.rows[0] as { total: number })?.total || 0;
 
     const result = await db.execute(sql`
       SELECT 
@@ -179,7 +179,7 @@ peopleAdmin.get("/", async (c) => {
       AND tp.deleted_at IS NULL
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR tp.teacher_code LIKE ${searchPattern})
     `);
-    const totalCount = (countResult[0] as { total: number })?.total || 0;
+    const totalCount = (countResult.rows[0] as { total: number })?.total || 0;
 
     const result = await db.execute(sql`
       SELECT 
@@ -213,7 +213,7 @@ peopleAdmin.get("/", async (c) => {
       AND om.deleted_at IS NULL
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR om.role_name LIKE ${searchPattern})
     `);
-    const totalCount = (countResult[0] as { total: number })?.total || 0;
+    const totalCount = (countResult.rows[0] as { total: number })?.total || 0;
 
     const result = await db.execute(sql`
       SELECT 
@@ -250,7 +250,7 @@ peopleAdmin.get("/", async (c) => {
       AND p.deleted_at IS NULL
       AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})
     `);
-    const totalCount = (countResult[0] as { total: number })?.total || 0;
+    const totalCount = (countResult.rows[0] as { total: number })?.total || 0;
 
     const result = await db.execute(sql`
       SELECT 
