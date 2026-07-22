@@ -6,6 +6,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
 import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
+import { SEKRETARIAT_MADRASAH_NAV, SEKRETARIAT_PONDOK_NAV } from "@/config/navigation.config";
+import Link from "next/link";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -137,6 +139,52 @@ export function DashboardTab() {
                Belum ada log aktivitas hari ini.
              </div>
           </div>
+        </div>
+      </div>
+
+      {/* --- QUICK LINKS / MENU UTAMA --- */}
+      <div className="flex flex-col gap-4 mt-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            Menu Utama {activeWorkspace === "pondok" ? "Kepondokan" : "Madrasah"}
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400">
+            Akses cepat ke seluruh fitur utama pada ruang kerja ini.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-8 mt-2">
+          {(activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV).map((group, groupIdx) => {
+            // Skip rendering standalone dashboard links in the grid if they have no items
+            if (!("items" in group)) return null;
+
+            return (
+              <div key={groupIdx} className="flex flex-col gap-4">
+                <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 border-b border-zinc-200 dark:border-zinc-800 pb-2">
+                  {group.group}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {group.items.map((item, itemIdx) => {
+                    const ItemIcon = item.icon;
+                    return (
+                      <Link 
+                        key={itemIdx} 
+                        href={item.href}
+                        className="flex flex-col items-center justify-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-blue-500 hover:shadow-md transition-all duration-200 group text-center"
+                      >
+                        <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 transition-colors">
+                          <ItemIcon className="w-6 h-6 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors" />
+                        </div>
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {item.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
