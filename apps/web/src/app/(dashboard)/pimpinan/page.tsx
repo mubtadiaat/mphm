@@ -2,11 +2,11 @@
 
 import dynamic from "next/dynamic";
 
-const DashboardTab = dynamic(
-  () => import("@/features/sekretariat/components/DashboardTab").then((mod) => mod.DashboardTab),
+const PimpinanDashboard = dynamic(
+  () => import("@/features/pimpinan/components/PimpinanDashboard").then((mod) => mod.PimpinanDashboard),
   { ssr: false }
 );
 
 export default function PimpinanDashboardPage() {
-  return <DashboardTab />;
+  return <PimpinanDashboard />;
 }

@@ -1,17 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, AlertCircle, HeartPulse } from "lucide-react";
+import { Users, GraduationCap, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { NAVIGATION_CONFIG } from "@/config/navigation.config";
 import Link from "next/link";
-
-interface GuardianStats {
-  totalChildren: number;
-  averageAttendance: number;
-  totalViolations: number;
-}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -23,30 +17,43 @@ const cardVariants = {
   show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } },
 };
 
-export function GuardianDashboard() {
+interface MufattisyStats {
+  totalSantri: number;
+  averageGpa: number;
+  totalViolations: number;
+}
+
+export function MufattisyDashboard() {
   const { data, isLoading } = useQuery({
-    queryKey: ["guardian-dashboard-stats"],
+    queryKey: ["mufattisy-dashboard-stats"],
     queryFn: async () => {
-      const res = await apiRequest<{ data: GuardianStats }>("/api/guardian/stats");
-      return res.data;
+      // Temporary fallback until API is implemented
+      try {
+        const res = await apiRequest<{ data: MufattisyStats }>("/api/mufattisy/dashboard/stats");
+        return res.data;
+      } catch (e) {
+        return { totalSantri: 0, averageGpa: 0, totalViolations: 0 };
+      }
     },
   });
 
   const stats = [
-    { label: "Anak Terdaftar", value: isLoading ? "..." : data?.totalChildren || 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
-    { label: "Kehadiran Rata-rata", value: isLoading ? "..." : `${data?.averageAttendance || 0}%`, icon: HeartPulse, color: "text-emerald-500 bg-emerald-500/10" },
-    { label: "Catatan Pelanggaran", value: isLoading ? "..." : data?.totalViolations || 0, icon: AlertCircle, color: "text-rose-500 bg-rose-500/10" },
+    { label: "Total Santri Bimbingan", value: isLoading ? "..." : data?.totalSantri || 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
+    { label: "Rata-rata Prestasi", value: isLoading ? "..." : data?.averageGpa || 0, icon: GraduationCap, color: "text-emerald-500 bg-emerald-500/10" },
+    { label: "Pelanggaran Ditemukan", value: isLoading ? "..." : data?.totalViolations || 0, icon: AlertCircle, color: "text-rose-500 bg-rose-500/10" },
   ];
+
+  const menus = NAVIGATION_CONFIG["mufattisy"];
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Portal Wali Santri
+            Dashboard Mufattisy
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400">
-            Pantau perkembangan akademik dan kedisiplinan putra/putri Anda.
+            Selamat datang di portal Inspektur/Mufattisy. Ringkasan pengawasan akademik dan kedisiplinan ada di sini.
           </p>
         </div>
       </div>
@@ -85,15 +92,15 @@ export function GuardianDashboard() {
       <div className="flex flex-col gap-4 mt-4">
         <div className="flex flex-col gap-1">
           <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Menu Utama
+            Menu Utama Mufattisy
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400">
-            Akses cepat ke seluruh laporan dan pencapaian anak.
+            Akses cepat ke seluruh fitur pengawasan dan inspeksi.
           </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-2">
-          {NAVIGATION_CONFIG["wali_santri"].map((item: any, itemIdx) => {
+          {menus.map((item: any, itemIdx) => {
             if (item.label === "Dashboard") return null; // Skip dashboard itself
             const ItemIcon = item.icon;
             return (
