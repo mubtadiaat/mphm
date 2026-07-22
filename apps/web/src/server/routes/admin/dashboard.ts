@@ -10,6 +10,7 @@ dashboardAdmin.use("*", requireRole(["Sekretariat", "Mundzir", "Mufattisy"]));
 
 dashboardAdmin.get("/stats", async (c) => {
   const academicYearId = c.req.query("academicYearId") || undefined;
+  const workspace = c.req.query("workspace") || "madrasah";
   const db = createDb();
 
   // Resolve target academic year
@@ -23,6 +24,85 @@ dashboardAdmin.get("/stats", async (c) => {
     targetYearId = activeYear?.id || "";
   }
 
+  if (workspace === "pondok") {
+    // 1. Total Santri Asrama (ACTIVE in academic year AND has roomId)
+    const activePondokRes = await db
+      .select({ count: sql<number>`count(distinct ${classEnrollments.studentId})` })
+      .from(classEnrollments)
+      .innerJoin(academicClasses, eq(classEnrollments.classId, academicClasses.id))
+      .innerJoin(studentProfiles, eq(classEnrollments.studentId, studentProfiles.id))
+      .where(and(
+        eq(academicClasses.academicYearId, targetYearId),
+        eq(classEnrollments.status, "ACTIVE"),
+        sql`${studentProfiles.roomId} IS NOT NULL`
+      ))
+      .then((res: any) => res[0]);
+    const totalStudents = activePondokRes?.count || 0;
+
+    // 2. Total Kamar Aktif
+    const roomsRes = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(sql`rooms`)
+      .where(eq(sql`is_active`, true))
+      .then((res: any) => res[0]);
+    const totalRooms = roomsRes?.count || 0;
+
+    // 3. Total Santri Khidmah (ACTIVE in academic year AND status KHIDMAH)
+    // Wait, KHIDMAH students might not be in classEnrollments. We just count student_profiles with KHIDMAH status.
+    const khidmahRes = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(studentProfiles)
+      .where(eq(studentProfiles.status, "KHIDMAH"))
+      .then((res: any) => res[0]);
+    const totalKhidmah = khidmahRes?.count || 0;
+
+    // 4. Active violations (maybe we can filter by type later, for now all violations)
+    const violationsRes = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(studentViolations)
+      .where(and(
+        eq(studentViolations.status, "RECORDED"),
+        eq(studentViolations.academicYearId, targetYearId)
+      ))
+      .then((res: any) => res[0]);
+    const activeViolations = violationsRes?.count || 0;
+
+    // 5. Room distributions
+    const roomDistributions = await db
+      .select({
+        roomName: sql<string>`r.name`,
+        buildingName: sql<string>`r.building_name`,
+        studentCount: sql<number>`count(distinct sp.id)`
+      })
+      .from(sql`rooms r`)
+      .innerJoin(sql`student_profiles sp`, sql`sp.room_id = r.id`)
+      .innerJoin(sql`class_enrollments ce`, sql`ce.student_id = sp.id`)
+      .innerJoin(sql`academic_classes ac`, sql`ac.id = ce.class_id`)
+      .where(and(
+        eq(sql`ac.academic_year_id`, targetYearId),
+        eq(sql`ce.status`, "ACTIVE"),
+        eq(sql`sp.status`, "ACTIVE")
+      ))
+      .groupBy(sql`r.name`, sql`r.building_name`)
+      .then((res: any) => res);
+
+    return c.json({
+      status: "Success",
+      data: {
+        totalStudents,
+        totalRooms,
+        totalKhidmah,
+        activeViolations,
+        roomDistributions: roomDistributions.map((r: any) => ({
+          roomName: r.roomName,
+          buildingName: r.buildingName,
+          studentCount: Number(r.studentCount)
+        }))
+      }
+    });
+  }
+
+  // --- MADRASAH WORKSPACE ---
   // 1. Total students for targetYearId
   const activeStudentsCountRes = await db
     .select({ count: sql<number>`count(distinct ${classEnrollments.studentId})` })

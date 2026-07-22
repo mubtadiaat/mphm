@@ -11,15 +11,25 @@ export interface DashboardStats {
     score: number;
     active: number;
   }[];
+  // Pondok specific
+  totalRooms?: number;
+  totalKhidmah?: number;
+  roomDistributions?: {
+    roomName: string;
+    buildingName: string;
+    studentCount: number;
+  }[];
 }
 
-export function useDashboardStats(academicYearId?: string) {
+export function useDashboardStats(academicYearId?: string, workspace: "madrasah" | "pondok" = "madrasah") {
   return useQuery<DashboardStats>({
-    queryKey: ["dashboard-stats", academicYearId],
+    queryKey: ["dashboard-stats", academicYearId, workspace],
     queryFn: async () => {
-      const url = academicYearId
-        ? `/api/admin/dashboard/stats?academicYearId=${academicYearId}`
-        : "/api/admin/dashboard/stats";
+      const params = new URLSearchParams();
+      if (academicYearId) params.append("academicYearId", academicYearId);
+      params.append("workspace", workspace);
+      
+      const url = `/api/admin/dashboard/stats?${params.toString()}`;
       const res = await apiRequest<{ data: DashboardStats }>(url);
       return res.data;
     },
