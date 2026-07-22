@@ -248,7 +248,7 @@ peopleAdmin.get("/", async (c) => {
       JOIN people p ON p.id = gp.person_id
       WHERE gp.deleted_at IS NULL
       AND p.deleted_at IS NULL
-      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})
+      ${searchPattern ? sql`AND (p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})` : sql``}
     `);
     const totalCount = (countResult.rows[0] as { total: number })?.total || 0;
 
@@ -266,7 +266,7 @@ peopleAdmin.get("/", async (c) => {
       LEFT JOIN student_profiles sp ON sp.person_id = gp_child.person_id
       WHERE gp.deleted_at IS NULL
       AND p.deleted_at IS NULL
-      AND (${searchPattern} IS NULL OR p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})
+      ${searchPattern ? sql`AND (p.full_name LIKE ${searchPattern} OR gp.family_card_number LIKE ${searchPattern})` : sql``}
       GROUP BY gp.family_card_number, p.full_name, p.phone_number, gp.relation, p.nik
       LIMIT ${limit} OFFSET ${offset}
     `);
