@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { setSessionCookie } from "@/lib/jwt";
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,18 +59,26 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    const sessionPayload = {
+      userId: userAccount.id,
+      accountId: userAccount.id,
+      personId: userAccount.personId,
+      username: userAccount.username,
+      role: userAccount.role,
+      fullName: userAccount.person.fullName,
+      avatarUrl: userAccount.person.avatarUrl,
+      assignedClassId: null,
+      familyCardNumber: null,
+    };
+
+    const response = NextResponse.json({
       status: "Success",
       message: "Login Google berhasil",
-      data: {
-        id: userAccount.id,
-        username: userAccount.username,
-        email: userAccount.email,
-        role: userAccount.role,
-        personName: userAccount.person.fullName,
-        avatarUrl: userAccount.person.avatarUrl,
-      },
+      data: sessionPayload,
     });
+
+    await setSessionCookie(response, sessionPayload);
+    return response;
   } catch (err: any) {
     console.error("GOOGLE_LOGIN_PRISMA_ERROR:", err.message);
     return NextResponse.json(
