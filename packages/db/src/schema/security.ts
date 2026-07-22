@@ -1,7 +1,7 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, timestamp } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-export const auditLogs = sqliteTable("audit_logs", {
+export const auditLogs = pgTable("audit_logs", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id").notNull(),          // Siapa yang mengubah
   role: text("role").notNull(),                // Peran saat bertindak
@@ -11,5 +11,5 @@ export const auditLogs = sqliteTable("audit_logs", {
   afterData: text("after_data"),               // JSON string setelah diubah (Null jika DELETE)
   ipAddress: text("ip_address").notNull(),     // IP Address Request
   userAgent: text("user_agent").notNull(),     // Browser / Device User
-  timestamp: integer("timestamp", { mode: "timestamp" }).default(sql`(strftime('%s', 'now'))`),
+  timestamp: timestamp("timestamp").default(sql`now()`),
 });

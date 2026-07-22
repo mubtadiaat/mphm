@@ -1,7 +1,7 @@
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, index, timestamp } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-export const people = sqliteTable("people", {
+export const people = pgTable("people", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   nik: text("nik").unique(),
   fullName: text("full_name").notNull(),
@@ -11,9 +11,9 @@ export const people = sqliteTable("people", {
   address: text("address"),
   phoneNumber: text("phone_number"),
   avatarUrl: text("avatar_url"), // MUTLAK URL DARI CLOUDINARY
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer("updated_at", { mode: "timestamp" }),
-  deletedAt: integer("deleted_at", { mode: "timestamp" }),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at"),
+  deletedAt: timestamp("deleted_at"),
 }, (table) => ({
   nameIdx: index("name_idx").on(table.fullName), // Non-unique: 2 orang boleh nama sama
 }));

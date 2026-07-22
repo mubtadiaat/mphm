@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, index, uniqueIndex, timestamp } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { academicYears, academicClasses } from "./academic_ops";
 import { studentProfiles } from "./profiles";
@@ -10,7 +10,7 @@ import { studentProfiles } from "./profiles";
 // - Hissoh Ula (Sesi 1)
 // - Hissoh Tsani (Sesi 2)
 // Status: HADIR (default jika tidak ada record), SAKIT, IZIN, ALFA
-export const attendanceRecords = sqliteTable("attendance_records", {
+export const attendanceRecords = pgTable("attendance_records", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   academicYearId: text("academic_year_id").notNull().references(() => academicYears.id, { onDelete: "restrict" }),
   classId: text("class_id").notNull().references(() => academicClasses.id, { onDelete: "restrict" }),
@@ -20,7 +20,7 @@ export const attendanceRecords = sqliteTable("attendance_records", {
   status: text("status", { enum: ["HADIR", "SAKIT", "IZIN", "ALFA"] }).notNull().default("HADIR"),
   notes: text("notes"), // Catatan opsional (misal: keterangan sakit)
   recordedBy: text("recorded_by").notNull(), // userId yang merekam
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(strftime('%s', 'now'))`),
+  createdAt: timestamp("created_at").default(sql`now()`),
 }, (table) => ({
   // Satu siswa hanya boleh punya 1 record per tanggal per sesi
   uniqueAttendance: uniqueIndex("unique_attendance_record").on(
