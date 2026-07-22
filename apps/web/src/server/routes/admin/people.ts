@@ -406,15 +406,15 @@ peopleAdmin.delete("/:id", async (c) => {
   const db = createDb();
   
   // Soft delete main person
-  await db.update(people).set({ deletedAt: sql`(strftime('%s', 'now'))` }).where(eq(people.id, id));
+  await db.update(people).set({ deletedAt: new Date() }).where(eq(people.id, id));
   
   // Soft delete all profiles
-  await db.update(studentProfiles).set({ deletedAt: sql`(strftime('%s', 'now'))` }).where(eq(studentProfiles.personId, id));
-  await db.update(teacherProfiles).set({ deletedAt: sql`(strftime('%s', 'now'))` }).where(eq(teacherProfiles.personId, id));
-  await db.update(guardianProfiles).set({ deletedAt: sql`(strftime('%s', 'now'))` }).where(eq(guardianProfiles.personId, id));
-  await db.update(organizationMemberships).set({ deletedAt: sql`(strftime('%s', 'now'))` }).where(eq(organizationMemberships.personId, id));
-  await db.update(alumniRecords).set({ deletedAt: sql`(strftime('%s', 'now'))` }).where(eq(alumniRecords.personId, id));
-  await db.update(userAccounts).set({ deletedAt: sql`(strftime('%s', 'now'))` }).where(eq(userAccounts.personId, id));
+  await db.update(studentProfiles).set({ deletedAt: new Date() }).where(eq(studentProfiles.personId, id));
+  await db.update(teacherProfiles).set({ deletedAt: new Date() }).where(eq(teacherProfiles.personId, id));
+  await db.update(guardianProfiles).set({ deletedAt: new Date() }).where(eq(guardianProfiles.personId, id));
+  await db.update(organizationMemberships).set({ deletedAt: new Date() }).where(eq(organizationMemberships.personId, id));
+  await db.update(alumniRecords).set({ deletedAt: new Date() }).where(eq(alumniRecords.personId, id));
+  await db.update(userAccounts).set({ deletedAt: new Date() }).where(eq(userAccounts.personId, id));
 
   return c.json({ status: "Success", message: "Data berhasil dipindahkan ke Recycling Bin." });
 });
@@ -425,23 +425,23 @@ peopleAdmin.delete("/:id", async (c) => {
 peopleAdmin.delete("/cleanup/recycle-bin", async (c) => {
   const db = createDb();
   // Menghapus record yang `deletedAt` nya lebih dari 48 jam yang lalu
-  const threshold = Math.floor(Date.now() / 1000) - (48 * 60 * 60);
+  const threshold = new Date(Date.now() - (48 * 60 * 60 * 1000));
 
   // Hapus semua data profile yang soft-deleted melewati batas waktu
-  await db.delete(studentProfiles).where(sql`deleted_at < ${threshold}`);
-  await db.delete(teacherProfiles).where(sql`deleted_at < ${threshold}`);
-  await db.delete(guardianProfiles).where(sql`deleted_at < ${threshold}`);
-  await db.delete(organizationMemberships).where(sql`deleted_at < ${threshold}`);
-  await db.delete(alumniRecords).where(sql`deleted_at < ${threshold}`);
-  await db.delete(userAccounts).where(sql`deleted_at < ${threshold}`);
+  await db.delete(studentProfiles).where(sql`deleted_at < ${threshold.toISOString()}`);
+  await db.delete(teacherProfiles).where(sql`deleted_at < ${threshold.toISOString()}`);
+  await db.delete(guardianProfiles).where(sql`deleted_at < ${threshold.toISOString()}`);
+  await db.delete(organizationMemberships).where(sql`deleted_at < ${threshold.toISOString()}`);
+  await db.delete(alumniRecords).where(sql`deleted_at < ${threshold.toISOString()}`);
+  await db.delete(userAccounts).where(sql`deleted_at < ${threshold.toISOString()}`);
   
   // Ambil daftar URL avatar orang-orang yang akan dihapus permanen
   const deletedPeople = await db.select({ avatarUrl: people.avatarUrl })
     .from(people)
-    .where(sql`deleted_at < ${threshold}`);
+    .where(sql`deleted_at < ${threshold.toISOString()}`);
 
   // Eksekusi penghapusan di database
-  await db.delete(people).where(sql`deleted_at < ${threshold}`);
+  await db.delete(people).where(sql`deleted_at < ${threshold.toISOString()}`);
 
   // Hapus semua gambar dari Cloudinary di background
   if (deletedPeople.length > 0) {
