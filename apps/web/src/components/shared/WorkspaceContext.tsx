@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 export type WorkspaceType = "madrasah" | "pondok";
 
@@ -12,15 +13,21 @@ interface WorkspaceContextType {
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
+  const { data: user } = useAuth();
   const [activeWorkspace, setActiveWorkspaceState] = useState<WorkspaceType>("madrasah");
 
   useEffect(() => {
-    // Load preference from local storage if available
-    const saved = localStorage.getItem("mphm_active_workspace");
-    if (saved === "madrasah" || saved === "pondok") {
-      setActiveWorkspaceState(saved);
+    if (user?.role === "sek.pondok") {
+      setActiveWorkspaceState("pondok");
+    } else if (user?.role === "sek.madrasah") {
+      setActiveWorkspaceState("madrasah");
+    } else {
+      const saved = localStorage.getItem("mphm_active_workspace");
+      if (saved === "madrasah" || saved === "pondok") {
+        setActiveWorkspaceState(saved);
+      }
     }
-  }, []);
+  }, [user?.role]);
 
   const setActiveWorkspace = (workspace: WorkspaceType) => {
     setActiveWorkspaceState(workspace);
