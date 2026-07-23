@@ -35,15 +35,22 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    const formatted = users.map((u) => ({
-      id: u.id,
-      username: u.username,
-      email: u.email,
-      role: u.role,
-      status: u.status,
-      personName: u.person.fullName,
-      personId: u.personId,
-    }));
+    const formatted = users.map((u) => {
+      // Online simulation: admin & active users are online, or randomly online for demo
+      const isOnline = u.status === "ACTIVE" && (u.role === "Sekretariat" || u.username.includes("admin") || u.id.charCodeAt(0) % 2 === 0);
+      return {
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        role: u.role,
+        status: u.status,
+        isActive: u.status === "ACTIVE",
+        isOnline,
+        personName: u.person.fullName,
+        personId: u.personId,
+        personPhone: u.person.phoneNumber || "",
+      };
+    });
 
     return NextResponse.json({ status: "Success", data: formatted, total });
   } catch (err: any) {

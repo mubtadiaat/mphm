@@ -49,6 +49,19 @@ export default function Page() {
     { id: "wali_santri", href: "/guardian" },
   ];
 
+  const [waContact, setWaContact] = useState("6281234567890");
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.data?.system_whatsapp_contact) {
+          setWaContact(d.data.system_whatsapp_contact);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (user) {
       const roleStr = String(user.role).trim().toLowerCase();
@@ -482,6 +495,19 @@ export default function Page() {
                         👨‍👩‍👧 Wali Santri
                       </button>
                     </div>
+                  </div>
+
+                  {/* WhatsApp Bantuan Login */}
+                  <div className="pt-4 border-t border-zinc-800/80 text-center">
+                    <a
+                      href={`https://wa.me/${waContact.replace(/[^0-9]/g, "")}?text=Assalamu'alaikum%20Sekretariat%20MPHM,%20saya%20mengalami%20kendala%20saat%20login%20ke%20sistem.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all cursor-pointer shadow-xs hover:shadow-emerald-500/10"
+                    >
+                      <Phone className="w-4 h-4 text-emerald-400" />
+                      <span>Kendala Login? Hubungi WhatsApp Sekretariat</span>
+                    </a>
                   </div>
                 </motion.div>
               ) : (

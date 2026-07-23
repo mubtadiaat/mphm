@@ -35,8 +35,18 @@ export async function POST(req: NextRequest) {
     }
 
     if (userAccount.status !== "ACTIVE") {
+      const waSetting = await prisma.systemSetting.findUnique({
+        where: { key: "system_whatsapp_contact" },
+      });
+      const waNumber = waSetting?.value || "6281234567890";
+
       return NextResponse.json(
-        { status: "Error", message: "Akun Anda sedang dinonaktifkan." },
+        {
+          status: "Error",
+          message: `Akun Anda dinonaktifkan karena lebih dari 6 bulan tidak digunakan. Silakan hubungi WhatsApp Sekretariat (${waNumber}) untuk mengaktifkan kembali.`,
+          isInactive: true,
+          waNumber,
+        },
         { status: 403 }
       );
     }

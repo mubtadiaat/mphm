@@ -5,11 +5,15 @@ export interface UserAccount {
   id: string;
   username: string;
   role: string;
+  status: string;
   isActive: boolean;
+  isOnline: boolean;
   lastLoginAt: string | null;
   createdAt: string;
   personId: string;
-  fullName: string;
+  personName: string;
+  fullName?: string;
+  personPhone?: string;
   avatarUrl: string | null;
   gender: string;
 }
@@ -52,6 +56,18 @@ export function useUsers(query?: string) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest<{ status: string }>(`/api/admin/users/${id}`, {
+        method: "DELETE",
+      });
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users"] });
+    },
+  });
+
   const resetPasswordMutation = useMutation({
     mutationFn: async ({ id, newPassword }: { id: string; newPassword: string }) => {
       const res = await apiRequest(`/api/admin/users/${id}/reset-password`, {
@@ -71,6 +87,8 @@ export function useUsers(query?: string) {
     isCreating: createMutation.isPending,
     updateUser: updateMutation.mutateAsync,
     isUpdating: updateMutation.isPending,
+    deleteUser: deleteMutation.mutateAsync,
+    isDeleting: deleteMutation.isPending,
     resetPassword: resetPasswordMutation.mutateAsync,
     isResetting: resetPasswordMutation.isPending,
   };

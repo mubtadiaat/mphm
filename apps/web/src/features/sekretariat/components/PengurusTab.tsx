@@ -39,11 +39,27 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("job_titles_pengurus");
       return saved ? JSON.parse(saved) : [
-        "Kepala Keamanan", "Staf Keamanan", "Staf IT & Sistem", "Staf Kebersihan / Operasional"
+        "Penasihat Pondok",
+        "Penasihat Madrasah",
+        "Dewan Harian Pondok",
+        "Dewan Harian Madrasah",
+        "Dewan Pleno Pondok",
+        "Dewan Pleno Madrasah",
+        "Kepala Keamanan",
+        "Staf Keamanan",
+        "Staf IT & Sistem"
       ];
     }
     return [
-      "Kepala Keamanan", "Staf Keamanan", "Staf IT & Sistem", "Staf Kebersihan / Operasional"
+      "Penasihat Pondok",
+      "Penasihat Madrasah",
+      "Dewan Harian Pondok",
+      "Dewan Harian Madrasah",
+      "Dewan Pleno Pondok",
+      "Dewan Pleno Madrasah",
+      "Kepala Keamanan",
+      "Staf Keamanan",
+      "Staf IT & Sistem"
     ];
   });
 
@@ -66,7 +82,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   }, []);
 
   const resetForm = () => {
-    setName(""); setPhone(""); setRole("Staf Keamanan");
+    setName(""); setPhone(""); setRole("Dewan Harian Pondok");
   };
 
   const handleOpenAdd = () => {
@@ -92,7 +108,8 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
+    if (!name.trim()) return toast("Nama Lengkap wajib diisi", "warning", "Peringatan");
+    if (!phone.trim()) return toast("Nomor WhatsApp Aktif wajib diisi untuk penerbitan & pengiriman akun", "warning", "Peringatan");
     
     try {
       if (editingData) {
