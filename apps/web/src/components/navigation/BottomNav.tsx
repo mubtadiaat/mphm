@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { NAVIGATION_CONFIG, SEKRETARIAT_MADRASAH_NAV, SEKRETARIAT_PONDOK_NAV, RoleTypes, NavItem } from "../../config/navigation.config";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
@@ -157,7 +156,7 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
 
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 pb-safe ${displayClass} shadow-lg`}>
-      <div className="flex items-center justify-around w-full h-16 px-2 max-w-lg mx-auto">
+      <div className="flex items-center justify-between w-full h-16 px-1 max-w-lg mx-auto">
         {navItems.map((item) => {
           const isRoleBase = ["/sekretariat", "/mufattisy", "/pimpinan", "/mustahiq", "/keamanan", "/guardian"].includes(item.href);
           const isActive = isRoleBase
@@ -169,10 +168,10 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
               key={item.href}
               href={item.href}
               onClick={(e) => checkAccess(e, item.href)}
-              className="relative flex-1 flex flex-col items-center justify-center h-full px-1 py-1 group select-none"
+              className="relative flex-1 min-w-0 flex flex-col items-center justify-center h-full px-0.5 group select-none"
             >
               <div
-                className={`relative flex flex-col items-center justify-center w-full py-1.5 px-2 rounded-2xl transition-all duration-200 z-10 ${
+                className={`relative flex flex-col items-center justify-center w-full py-1 px-1 rounded-2xl transition-all duration-200 z-10 ${
                   isActive
                     ? `${accentColorClasses.bg} ${accentColorClasses.text} ${accentColorClasses.border} border font-bold shadow-xs scale-102`
                     : "text-zinc-500 dark:text-zinc-400 font-medium hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-zinc-800/50"
@@ -181,13 +180,13 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
                 <div className="relative flex items-center justify-center">
                   <item.icon
                     strokeWidth={isActive ? 2.5 : 1.8}
-                    className="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
+                    className="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"
                   />
                   {isSekretariatRole && !loadingStatus && isMenuLocked(item.href) && (
                     <Lock className="absolute -top-1 -right-2 w-3 h-3 text-rose-500" />
                   )}
                 </div>
-                <span className="text-[11px] leading-tight text-center truncate max-w-full mt-1 tracking-tight">
+                <span className="text-[10px] sm:text-[11px] leading-[1.15] text-center max-w-full line-clamp-2 mt-0.5 tracking-tight break-words px-0.5">
                   {item.label}
                 </span>
               </div>
