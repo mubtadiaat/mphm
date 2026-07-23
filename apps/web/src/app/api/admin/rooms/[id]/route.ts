@@ -9,23 +9,37 @@ export async function PUT(
     const { id } = await params;
     const body = await req.json();
 
-    const roomsSetting = await prisma.systemSetting.findUnique({
-      where: { key: "rooms_data" },
+    const { name, roomName, buildingName, capacity, supervisorId } = body;
+
+    const prismaRoom = (prisma as any).room;
+    if (!prismaRoom) {
+      return NextResponse.json({ status: "Error", message: "Model room belum dikonfigurasi" }, { status: 500 });
+    }
+
+    const updated = await prismaRoom.update({
+      where: { id },
+      data: {
+        ...(name || roomName ? { name: name || roomName } : {}),
+        ...(buildingName ? { buildingName } : {}),
+        ...(capacity !== undefined ? { capacity: Number(capacity) } : {}),
+        ...(supervisorId !== undefined ? { supervisorId: supervisorId || null } : {}),
+      },
+      include: {
+        supervisor: {
+          select: { fullName: true },
+        },
+      },
     });
-    let rooms = roomsSetting ? JSON.parse(roomsSetting.value) : [];
 
-    rooms = rooms.map((r: any) => (r.id === id ? { ...r, ...body } : r));
-
-    await prisma.systemSetting.upsert({
-      where: { key: "rooms_data" },
-      update: { value: JSON.stringify(rooms) },
-      create: { key: "rooms_data", value: JSON.stringify(rooms) },
+    return NextResponse.json({
+      status: "Success",
+      message: "Data kamar berhasil diperbarui di database PostgreSQL.",
+      data: updated,
     });
-
-    return NextResponse.json({ status: "Success", message: "Kamar diperbarui" });
   } catch (err: any) {
+    console.error("ADMIN_ROOMS_PUT_ERROR:", err?.message || err);
     return NextResponse.json(
-      { status: "Error", message: err.message },
+      { status: "Error", message: err?.message || "Gagal memperbarui kamar" },
       { status: 500 }
     );
   }
@@ -38,23 +52,25 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const roomsSetting = await prisma.systemSetting.findUnique({
-      where: { key: "rooms_data" },
-    });
-    let rooms = roomsSetting ? JSON.parse(roomsSetting.value) : [];
+    const prismaRoom = (prisma as any).room;
+    if (!prismaRoom) {
+      return NextResponse.json({ status: "Error", message: "Model room belum dikonfigurasi" }, { status: 500 });
+    }
 
-    rooms = rooms.filter((r: any) => r.id !== id);
-
-    await prisma.systemSetting.upsert({
-      where: { key: "rooms_data" },
-      update: { value: JSON.stringify(rooms) },
-      create: { key: "rooms_data", value: JSON.stringify(rooms) },
+    // Soft delete in database
+    await prismaRoom.update({
+      where: { id },
+      data: { deletedAt: new Date() },
     });
 
-    return NextResponse.json({ status: "Success", message: "Kamar dihapus" });
+    return NextResponse.json({
+      status: "Success",
+      message: "Kamar berhasil dihapus dari database.",
+    });
   } catch (err: any) {
+    console.error("ADMIN_ROOMS_DELETE_ERROR:", err?.message || err);
     return NextResponse.json(
-      { status: "Error", message: err.message },
+      { status: "Error", message: err?.message || "Gagal menghapus kamar" },
       { status: 500 }
     );
   }

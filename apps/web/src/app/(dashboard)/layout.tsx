@@ -8,12 +8,14 @@ import { DashboardShell } from "../../components/navigation/DashboardShell";
 
 // Mapping dari role backend ke role key frontend dan base path dashboard
 const ROLE_MAP: Record<string, { key: RoleTypes; basePath: string }> = {
-  sekretariat:        { key: "sekretariat", basePath: "/sekretariat" },
-  mufattisy:          { key: "mufattisy",   basePath: "/mufattisy" },
-  mundzir:            { key: "mundzir",     basePath: "/pimpinan" },
-  mustahiq:           { key: "mustahiq",    basePath: "/mustahiq" },
-  "petugas keamanan": { key: "keamanan",    basePath: "/keamanan" },
-  "wali santri":      { key: "wali_santri", basePath: "/guardian" },
+  sekretariat:        { key: "sekretariat",   basePath: "/sekretariat" },
+  "sek.pondok":       { key: "sek.pondok",    basePath: "/sekretariat" },
+  "sek.madrasah":     { key: "sek.madrasah",  basePath: "/sekretariat" },
+  mufattisy:          { key: "mufattisy",     basePath: "/mufattisy" },
+  mundzir:            { key: "mundzir",       basePath: "/pimpinan" },
+  mustahiq:           { key: "mustahiq",      basePath: "/mustahiq" },
+  "petugas keamanan": { key: "keamanan",      basePath: "/keamanan" },
+  "wali santri":      { key: "wali_santri",   basePath: "/guardian" },
 };
 
 // Semua base path dashboard yang valid

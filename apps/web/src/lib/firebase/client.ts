@@ -8,7 +8,7 @@ import {
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCDVeuIOjg-TNAUT45hRB129CHYOXcyFfA",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || (typeof window !== "undefined" && window.location.host ? window.location.host : "m.p3hm.my.id"),
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "p3hm-2026.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "p3hm-2026",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "p3hm-2026.firebasestorage.app",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "744697513752",

@@ -27,13 +27,8 @@ export function MufattisyDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["mufattisy-dashboard-stats"],
     queryFn: async () => {
-      // Temporary fallback until API is implemented
-      try {
-        const res = await apiRequest<{ data: MufattisyStats }>("/api/mufattisy/dashboard/stats");
-        return res.data;
-      } catch (e) {
-        return { totalSantri: 0, averageGpa: 0, totalViolations: 0 };
-      }
+      const res = await apiRequest<{ data: MufattisyStats }>("/api/mufattisy/dashboard/stats");
+      return res.data;
     },
   });
 

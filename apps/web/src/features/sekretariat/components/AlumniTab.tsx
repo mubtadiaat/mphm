@@ -209,8 +209,6 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
         toast("Data santri berhasil diperbarui!", "success", "Perubahan Disimpan");
       } else {
         // Mode Tambah
-        payload.mustahiq = "Ustadz Ahmad"; // default fallback for MVP
-        payload.mufattisy = "Ustadz Mansur"; // default fallback for MVP
         await createSantri(payload as Omit<Santri, "id">);
         toast("Santri baru berhasil didaftarkan!", "success", "Data Ditambahkan");
       }
@@ -343,9 +341,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
                   name: r["Nama Lengkap"] || "",
                   nik: r["NIK"] || "",
                   stambuk: r["Nomor Stambuk"] || "",
-                  class: r["Kelas"] || "Tsanawiyyah I-A",
-                  mustahiq: "Ustadz Ahmad",
-                  mufattisy: "Ustadz Mansur",
+                  class: r["Kelas"] || "",
                   address: r["Alamat"] || "",
                   status: "GRADUATED",
                   gender: "P",

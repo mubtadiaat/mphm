@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const academicYearId = searchParams.get("academicYearId");
-    const workspace = searchParams.get("workspace") || "madrasah";
 
     // Find target academic year
     let yearFilter: any = {};
@@ -105,8 +104,9 @@ export async function GET(req: NextRequest) {
     );
 
     // Real database counts for Khidmah & Guardians
-    const totalKhidmah = (prisma as any).khidmahAssignment
-      ? await (prisma as any).khidmahAssignment.count({ where: { status: "ACTIVE", deletedAt: null } })
+    const prismaKhidmah = (prisma as any).khidmahAssignment || (prisma as any).khidmah_assignment;
+    const totalKhidmah = prismaKhidmah
+      ? await prismaKhidmah.count({ where: { status: "ACTIVE", deletedAt: null } })
       : await prisma.alumniRecord.count({ where: { khidmahStatus: { not: "TIDAK_KHIDMAH" }, deletedAt: null } });
 
     const totalGuardians = await prisma.guardianProfile.count({
@@ -114,24 +114,30 @@ export async function GET(req: NextRequest) {
     });
 
     // Real database counts for Rooms & Room Distributions
-    const totalRooms = (prisma as any).room
-      ? await (prisma as any).room.count({ where: { deletedAt: null } })
+    const prismaRoom = (prisma as any).room;
+    const totalRooms = prismaRoom
+      ? await prismaRoom.count({ where: { deletedAt: null } })
       : 0;
 
-    const dbRooms: any[] = (prisma as any).room
-      ? await (prisma as any).room.findMany({
+    const dbRooms: any[] = prismaRoom
+      ? await prismaRoom.findMany({
           where: { deletedAt: null },
           take: 6,
           orderBy: { name: "asc" },
+          include: {
+            _count: {
+              select: { students: { where: { deletedAt: null } } },
+            },
+          },
         })
       : [];
 
-    const roomDistributions = dbRooms.map((r: { name: string; capacity: number }) => ({
+    const roomDistributions = dbRooms.map((r: any) => ({
       roomName: r.name,
-      studentCount: Math.min(r.capacity, Math.floor(r.capacity * 0.8)),
+      studentCount: r._count?.students || 0,
     }));
 
-    const responseData: any = {
+    const responseData = {
       totalStudents,
       averageGpa,
       attendanceRate,
@@ -139,7 +145,7 @@ export async function GET(req: NextRequest) {
       performances,
       totalKhidmah,
       totalGuardians,
-      totalRooms: totalRooms || (dbRooms.length > 0 ? dbRooms.length : 0),
+      totalRooms,
       roomDistributions,
     };
 

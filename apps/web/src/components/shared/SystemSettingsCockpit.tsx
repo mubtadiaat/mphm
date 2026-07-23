@@ -34,6 +34,28 @@ const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: str
     { label: "Arsip Akademik", href: "/sekretariat/arsip" },
     { label: "Konfigurasi Sistem", href: "/sekretariat/settings" }
   ],
+  "sek.pondok": [
+    { label: "Dashboard Pondok", href: "/sekretariat" },
+    { label: "Data Santriwati", href: "/sekretariat/santri" },
+    { label: "Wali Santri", href: "/sekretariat/wali-santri" },
+    { label: "Data Asrama", href: "/sekretariat/rooms" },
+    { label: "Data Pengurus", href: "/sekretariat/pengurus" },
+    { label: "Alumni Pondok", href: "/sekretariat/alumni" },
+    { label: "Perizinan", href: "/sekretariat/perizinan" },
+    { label: "Pelanggaran", href: "/sekretariat/pelanggaran" },
+    { label: "Manajemen Akun", href: "/sekretariat/users" },
+    { label: "Audit Log", href: "/sekretariat/audit-log" }
+  ],
+  "sek.madrasah": [
+    { label: "Dashboard Madrasah", href: "/sekretariat" },
+    { label: "Data Siswi", href: "/sekretariat/santri" },
+    { label: "Kelas & Rombel", href: "/sekretariat/kelas" },
+    { label: "Kurikulum", href: "/sekretariat/kurikulum" },
+    { label: "Penilaian", href: "/sekretariat/penilaian" },
+    { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas" },
+    { label: "Dokumen & Raport", href: "/sekretariat/raport" },
+    { label: "Audit Log", href: "/sekretariat/audit-log" }
+  ],
   mufattisy: [
     { label: "Dashboard", href: "/mufattisy" },
     { label: "Data Santri", href: "/mufattisy/santri" },

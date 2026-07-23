@@ -106,6 +106,46 @@ export default function Page() {
     }
   };
 
+  const handleQuickLogin = async (usr: string, pwd: string) => {
+    setError(null);
+    setLoading(true);
+    setUsername(usr);
+    setPassword(pwd);
+
+    try {
+      const response = await fetch(`/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: usr, password: pwd }),
+        credentials: "include",
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(resData.message || "Login gagal.");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+
+      let redirectUrl = "/sekretariat";
+      const backendRole = String(resData.data?.role || "").trim().toLowerCase();
+
+      if (backendRole === "sekretariat" || backendRole === "sek.pondok" || backendRole === "sek.madrasah") redirectUrl = "/sekretariat";
+      else if (backendRole === "mufattisy") redirectUrl = "/mufattisy";
+      else if (backendRole === "mundzir") redirectUrl = "/pimpinan";
+      else if (backendRole === "mustahiq") redirectUrl = "/mustahiq";
+      else if (backendRole === "petugas keamanan" || backendRole === "keamanan") redirectUrl = "/keamanan";
+      else if (backendRole === "wali santri") redirectUrl = "/guardian";
+
+      router.push(redirectUrl);
+    } catch (err: any) {
+      setError(err.message || "Gagal masuk ke akun Anda.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGoogleLogin = async () => {
     setError(null);
     setGoogleLoading(true);
@@ -363,9 +403,86 @@ export default function Page() {
                     )}
                     <span>Masuk dengan Gmail</span>
                   </button>
-                  <p className="text-[11px] text-zinc-500 text-center leading-relaxed">
-                    *Gunakan tombol ini jika Anda sudah menautkan akun Gmail di Pengaturan Akun.
-                  </p>
+
+                  {/* Tombol Akses Uji Coba Role Sementara */}
+                  <div className="pt-3 space-y-2 border-t border-zinc-800/80">
+                    <span className="block text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider text-center">
+                      ⚡ Akses Uji Coba Role (Sementara)
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 justify-center">
+                      {/* Sek.Pondok (Muncul Hanya Layar Besar) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLogin("sek_pondok", "admin123")}
+                        disabled={loading}
+                        title="Sekretariat Pondok (Hanya Layar Besar / Desktop)"
+                        className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-all cursor-pointer"
+                      >
+                        🏠 Sek.Pondok
+                      </button>
+
+                      {/* Sek.Madrasah (Muncul Hanya Layar Besar) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLogin("sek_madrasah", "admin123")}
+                        disabled={loading}
+                        title="Sekretariat Madrasah (Hanya Layar Besar / Desktop)"
+                        className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold transition-all cursor-pointer"
+                      >
+                        🏫 Sek.Madrasah
+                      </button>
+
+                      {/* Mundzir (Muncul Semua Layar) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLogin("pimpinan01", "mphm123")}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-400 text-xs font-bold transition-all cursor-pointer"
+                      >
+                        👳 Mundzir
+                      </button>
+
+                      {/* Mufatish (Muncul Semua Layar) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLogin("mufattisy01", "mphm123")}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold transition-all cursor-pointer"
+                      >
+                        🔍 Mufatish
+                      </button>
+
+                      {/* Mustahiq (Muncul Semua Layar) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLogin("mustahiq01", "mphm123")}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold transition-all cursor-pointer"
+                      >
+                        📚 Mustahiq
+                      </button>
+
+                      {/* Keamanan (Muncul Semua Layar) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLogin("keamanan01", "mphm123")}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-bold transition-all cursor-pointer"
+                      >
+                        🛡️ Keamanan
+                      </button>
+
+                      {/* Wali Santri (Muncul Semua Layar) */}
+                      <button
+                        type="button"
+                        onClick={() => handleQuickLogin("wali01", "mphm123")}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-xs font-bold transition-all cursor-pointer"
+                      >
+                        👨‍👩‍👧 Wali Santri
+                      </button>
+                    </div>
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div

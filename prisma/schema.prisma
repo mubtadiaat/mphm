@@ -27,6 +27,7 @@ model Person {
   alumniRecord            AlumniRecord?
   supervisedRooms         Room[]
   khidmahAssignments      KhidmahAssignment[]
+  mustahiqClasses         AcademicClass[]          @relation("MustahiqClasses")
 
   @@map("people")
 }
@@ -55,9 +56,11 @@ model StudentProfile {
   nisn           String?
   enrollmentYear Int       @map("enrollment_year")
   status         String    @default("ACTIVE")
+  roomId         String?   @map("room_id")
   deletedAt      DateTime? @map("deleted_at")
 
   person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+  room   Room?   @relation(fields: [roomId], references: [id], onDelete: SetNull)
 
   enrollments   ClassEnrollment[]
   studentScores StudentScore[]
@@ -67,6 +70,7 @@ model StudentProfile {
 
   @@map("student_profiles")
 }
+
 
 model TeacherProfile {
   id          String    @id @default(uuid())
@@ -147,6 +151,7 @@ model AcademicClass {
 
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
   curriculum   Curriculum?  @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+  mustahiq     Person?      @relation("MustahiqClasses", fields: [mustahiqId], references: [id], onDelete: SetNull)
 
   enrollments   ClassEnrollment[]
   studentScores StudentScore[]
@@ -245,6 +250,8 @@ model ViolationType {
   points    Int       @default(5)
   deletedAt DateTime? @map("deleted_at")
 
+  violations StudentViolation[]
+
   @@map("violation_types")
 }
 
@@ -258,7 +265,8 @@ model StudentViolation {
   notes           String?
   deletedAt       DateTime? @map("deleted_at")
 
-  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  violationType ViolationType? @relation(fields: [violationTypeId], references: [id], onDelete: SetNull)
 
   @@map("student_violations")
 }
@@ -272,7 +280,8 @@ model Room {
   deletedAt    DateTime? @map("deleted_at")
   createdAt    DateTime  @default(now()) @map("created_at")
 
-  supervisor Person? @relation(fields: [supervisorId], references: [id], onDelete: SetNull)
+  supervisor Person?          @relation(fields: [supervisorId], references: [id], onDelete: SetNull)
+  students   StudentProfile[]
 
   @@map("rooms")
 }

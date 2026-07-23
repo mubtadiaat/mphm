@@ -27,13 +27,8 @@ export function PimpinanDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["pimpinan-dashboard-stats"],
     queryFn: async () => {
-      // Temporary fallback until API is implemented
-      try {
-        const res = await apiRequest<{ data: PimpinanStats }>("/api/pimpinan/dashboard/stats");
-        return res.data;
-      } catch (e) {
-        return { totalSantri: 0, attendanceRate: 100, activeViolations: 0 };
-      }
+      const res = await apiRequest<{ data: PimpinanStats }>("/api/pimpinan/dashboard/stats");
+      return res.data;
     },
   });
 

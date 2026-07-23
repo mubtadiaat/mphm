@@ -7,8 +7,8 @@ export interface Santri {
   stambuk: string;
   nik: string;
   class: string;
-  mustahiq: string;
-  mufattisy: string;
+  mustahiq?: string;
+  mufattisy?: string;
   address: string;
   status: string; // ACTIVE, GRADUATED, DROPPED, BOYONG, KHIDMAH
   gender: "L" | "P";
@@ -26,6 +26,9 @@ export interface Santri {
   guardianRelation: "AYAH" | "IBU" | "WALI";
   familyCardNumber: string;
   khidmahPlacement?: string;
+  roomName?: string;
+  buildingName?: string;
+  roomSupervisor?: string;
 }
 
 export function useSantri(

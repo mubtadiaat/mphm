@@ -24,6 +24,8 @@ export async function GET() {
         ? Math.round(((totalDays - absentDays) / totalDays) * 10000) / 100
         : 100;
 
+    const activeViolations = await prisma.studentViolation.count({ where: { deletedAt: null } });
+
     return NextResponse.json({
       status: "Success",
       data: {
@@ -32,6 +34,7 @@ export async function GET() {
         averageGpa,
         attendanceRate,
         totalClasses,
+        activeViolations,
       },
     });
   } catch (err: any) {

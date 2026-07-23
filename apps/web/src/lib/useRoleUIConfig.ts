@@ -91,9 +91,58 @@ export const DEFAULT_ROLE_CONFIGS: Record<RoleTypes, RoleUIConfig> = {
     ],
     capabilities: {}
   },
+  "sek.pondok": {
+    role: "sek.pondok",
+    navigationStyle: "sidebar",
+    gridLayout: "2-2",
+    accentColor: "emerald",
+    welcomeBanner: "Selamat datang di Portal Sekretariat Pondok Pesantren [P3HM]",
+    enabledMenus: [
+      "/sekretariat",
+      "/sekretariat/santri",
+      "/sekretariat/wali-santri",
+      "/sekretariat/rooms",
+      "/sekretariat/pengurus",
+      "/sekretariat/alumni",
+      "/sekretariat/perizinan",
+      "/sekretariat/pelanggaran",
+      "/sekretariat/users",
+      "/sekretariat/audit-log",
+      "/sekretariat/recycle-bin",
+      "/sekretariat/settings"
+    ],
+    capabilities: {}
+  },
+  "sek.madrasah": {
+    role: "sek.madrasah",
+    navigationStyle: "sidebar",
+    gridLayout: "2-2",
+    accentColor: "blue",
+    welcomeBanner: "Selamat datang di Portal Sekretariat Madrasah Diniyyah [MPHM]",
+    enabledMenus: [
+      "/sekretariat",
+      "/sekretariat/santri",
+      "/sekretariat/kelas",
+      "/sekretariat/pengurus-madrasah",
+      "/sekretariat/mundzir",
+      "/sekretariat/mufattisy",
+      "/sekretariat/mustahiq",
+      "/sekretariat/kurikulum",
+      "/sekretariat/penilaian",
+      "/sekretariat/kenaikan-kelas",
+      "/sekretariat/sertifikat",
+      "/sekretariat/raport",
+      "/sekretariat/ijazah",
+      "/sekretariat/users",
+      "/sekretariat/audit-log",
+      "/sekretariat/recycle-bin",
+      "/sekretariat/settings"
+    ],
+    capabilities: {}
+  },
   mufattisy: {
     role: "mufattisy",
-    navigationStyle: "sidebar",
+    navigationStyle: "bottom_nav",
     gridLayout: "2-2",
     accentColor: "blue",
     welcomeBanner: "Selamat datang di Portal Pengawasan Mufattisy",
@@ -109,7 +158,7 @@ export const DEFAULT_ROLE_CONFIGS: Record<RoleTypes, RoleUIConfig> = {
   },
   mundzir: {
     role: "mundzir",
-    navigationStyle: "sidebar",
+    navigationStyle: "bottom_nav",
     gridLayout: "2-2",
     accentColor: "emerald",
     welcomeBanner: "Selamat datang di Portal Pimpinan/Mundzir",
@@ -222,8 +271,8 @@ export function useRoleUIConfig(role: RoleTypes) {
    * Helper to check if a specific action is permitted for the given path
    */
   const canDoAction = (menuHref: string, action: keyof MenuCapabilities): boolean => {
-    // Sekretariat has full admin access to everything
-    if (role === "sekretariat") return true;
+    // Sekretariat roles have full admin access to everything
+    if (role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah") return true;
 
     // Normalizing paths (strip trailing slashes, keep root clear)
     const normalizedPath = menuHref.replace(/\/$/, "");

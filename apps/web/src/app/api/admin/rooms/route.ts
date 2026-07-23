@@ -4,65 +4,53 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const buildingName = searchParams.get("buildingName");
+    const buildingName = searchParams.get("buildingName") || searchParams.get("building");
+    const query = searchParams.get("q");
 
     const prismaRoom = (prisma as any).room;
-
     if (!prismaRoom) {
-      return NextResponse.json({ status: "Success", data: [] });
+      return NextResponse.json({ status: "Success", data: [], total: 0 });
     }
 
-    // Fetch directly from Neon PostgreSQL Cloud DB
-    let dbRooms: any[] = await prismaRoom.findMany({
+    const dbRooms = await prismaRoom.findMany({
       where: {
         deletedAt: null,
-        ...(buildingName ? { buildingName } : {}),
+        ...(buildingName ? { buildingName: { contains: buildingName, mode: "insensitive" } } : {}),
+        ...(query ? { name: { contains: query, mode: "insensitive" } } : {}),
       },
       include: {
         supervisor: {
-          select: { fullName: true },
+          select: { id: true, fullName: true },
+        },
+        _count: {
+          select: { students: { where: { deletedAt: null } } },
         },
       },
+      orderBy: { name: "asc" },
     });
-
-    // Auto-seed database if empty
-    if (dbRooms.length === 0 && !buildingName) {
-      await prismaRoom.createMany({
-        data: [
-          { name: "Asrama Aisyah 1", buildingName: "Gedung Aisyah", capacity: 20 },
-          { name: "Asrama Aisyah 2", buildingName: "Gedung Aisyah", capacity: 20 },
-          { name: "Asrama Fatimah 1", buildingName: "Gedung Fatimah", capacity: 25 },
-          { name: "Asrama Khadijah 1", buildingName: "Gedung Khadijah", capacity: 25 },
-        ],
-      });
-
-      dbRooms = await prismaRoom.findMany({
-        where: { deletedAt: null },
-        include: {
-          supervisor: {
-            select: { fullName: true },
-          },
-        },
-      });
-    }
 
     const rooms = dbRooms.map((r: any) => ({
       id: r.id,
       name: r.name,
       buildingName: r.buildingName,
       capacity: r.capacity,
-      studentCount: 0,
-      supervisor: r.supervisor?.fullName || "Musyrifah Asrama",
+      supervisorId: r.supervisorId,
+      supervisorName: r.supervisor?.fullName || null,
+      supervisor: r.supervisor?.fullName || "-",
+      studentCount: r._count?.students || 0,
+      filledCapacity: r._count?.students || 0,
+      isActive: true,
     }));
 
     return NextResponse.json({
       status: "Success",
       data: rooms,
+      total: rooms.length,
     });
   } catch (err: any) {
-    console.error("ADMIN_ROOMS_GET_ERROR:", err.message);
+    console.error("ADMIN_ROOMS_GET_ERROR:", err?.message || err);
     return NextResponse.json(
-      { status: "Error", message: err.message, data: [] },
+      { status: "Error", message: err?.message || "Internal server error", data: [], total: 0 },
       { status: 500 }
     );
   }
@@ -71,25 +59,40 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const prismaRoom = (prisma as any).room;
+    const { name, roomName, buildingName, capacity, supervisorId } = body;
 
+    const targetName = name || roomName;
+    if (!targetName || !buildingName) {
+      return NextResponse.json(
+        { status: "Error", message: "Nama kamar dan gedung wajib diisi." },
+        { status: 400 }
+      );
+    }
+
+    const prismaRoom = (prisma as any).room;
     if (!prismaRoom) {
-      return NextResponse.json({ status: "Error", message: "Room model unavailable" }, { status: 500 });
+      return NextResponse.json({ status: "Error", message: "Model room belum dikonfigurasi" }, { status: 500 });
     }
 
     const created = await prismaRoom.create({
       data: {
-        name: body.name || body.roomName || "Kamar Baru",
-        buildingName: body.buildingName || "Gedung Utama",
-        capacity: Number(body.capacity) || 20,
+        name: targetName,
+        buildingName,
+        capacity: Number(capacity) || 20,
+        supervisorId: supervisorId || null,
+      },
+      include: {
+        supervisor: {
+          select: { fullName: true },
+        },
       },
     });
 
     return NextResponse.json({ status: "Success", data: created });
   } catch (err: any) {
-    console.error("ADMIN_ROOMS_POST_ERROR:", err.message);
+    console.error("ADMIN_ROOMS_POST_ERROR:", err?.message || err);
     return NextResponse.json(
-      { status: "Error", message: err.message },
+      { status: "Error", message: err?.message || "Gagal membuat kamar" },
       { status: 500 }
     );
   }

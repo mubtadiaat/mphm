@@ -44,36 +44,46 @@ export async function GET(req: NextRequest) {
                 },
               },
             },
+            room: {
+              include: { supervisor: true },
+            },
             enrollments: {
               where: { deletedAt: null },
-              include: { academicClass: true },
+              include: {
+                academicClass: {
+                  include: { mustahiq: true },
+                },
+              },
               take: 1,
             },
           } as any,
         }),
       ]);
 
-      const formatted = list.map((sp: any) => {
-        const primaryEnrollment = sp.enrollments[0];
-        const primaryGuardian = sp.person.guardianProfiles[0];
+      const formatted = (list as any[]).map((sp: any) => {
+        const primaryEnrollment = sp.enrollments?.[0];
+        const primaryGuardian = sp.person?.guardianProfiles?.[0];
         return {
           id: sp.id,
           personId: sp.personId,
-          name: sp.person.fullName,
+          name: sp.person?.fullName || "-",
           stambuk: sp.stambukNumber,
           nis: sp.nis,
           nisn: sp.nisn,
-          nik: sp.person.nik,
+          nik: sp.person?.nik || "-",
           class: primaryEnrollment?.academicClass?.name || "-",
-          mustahiq: "-",
+          mustahiq: primaryEnrollment?.academicClass?.mustahiq?.fullName || "-",
           mufattisy: "-",
-          address: sp.person.address || "-",
+          roomName: sp.room?.name || "-",
+          buildingName: sp.room?.buildingName || "-",
+          roomSupervisor: sp.room?.supervisor?.fullName || "-",
+          address: sp.person?.address || "-",
           status: sp.status,
-          gender: sp.person.gender,
-          birthPlace: sp.person.birthPlace,
-          birthDate: sp.person.birthDate,
-          phoneNumber: sp.person.phoneNumber,
-          avatarUrl: sp.person.avatarUrl,
+          gender: sp.person?.gender || "P",
+          birthPlace: sp.person?.birthPlace,
+          birthDate: sp.person?.birthDate,
+          phoneNumber: sp.person?.phoneNumber,
+          avatarUrl: sp.person?.avatarUrl,
           enrollmentYear: sp.enrollmentYear,
           guardianName: primaryGuardian?.person?.fullName || "-",
           guardianPhone: primaryGuardian?.person?.phoneNumber || "-",

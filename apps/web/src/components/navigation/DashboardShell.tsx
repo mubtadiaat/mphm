@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Lock } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Lock, MonitorOff } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const CommandPalette = dynamic(() => import("../shared/CommandPalette"), { ssr: false });
@@ -20,49 +20,11 @@ interface DashboardShellProps {
   children: React.ReactNode;
 }
 
-function WorkspaceSwitcher({ role }: { role: RoleTypes }) {
-  const { activeWorkspace, setActiveWorkspace } = useWorkspace();
-  
-  if (role !== "sekretariat") return null;
-
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-xs">
-        <button
-          type="button"
-          onClick={() => setActiveWorkspace("pondok")}
-          title="Beralih ke Workspace Pondok (Asrama, Kedisiplinan, Mundzir, Khidmah, Wali Santri)"
-          className={`px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-            activeWorkspace === "pondok" 
-              ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" 
-              : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-          }`}
-        >
-          <span className="text-sm">🏠</span> PONDOK
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveWorkspace("madrasah")}
-          title="Beralih ke Workspace Madrasah (Kelas, Rombel, Mufatish, Mustahiq, Nilai, Raport, Kurikulum)"
-          className={`px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-            activeWorkspace === "madrasah" 
-              ? "bg-blue-600 text-white shadow-md shadow-blue-600/20" 
-              : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-          }`}
-        >
-          <span className="text-sm">🏫</span> MADRASAH
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function GlobalHeaderActions({ role }: { role: RoleTypes }) {
   const { selectedYearId, setSelectedYearId, years } = useAcademicYear();
 
   return (
     <div className="flex items-center gap-2 md:gap-4">
-      <WorkspaceSwitcher role={role} />
       <div className="hidden lg:flex items-center gap-2">
         <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">TAHUN AKADEMIK:</span>
         <select
@@ -88,6 +50,19 @@ function GlobalHeaderActions({ role }: { role: RoleTypes }) {
 export function DashboardShell({ role, children }: DashboardShellProps) {
   const { config } = useRoleUIConfig(role);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  const isSekretariatRole = role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah";
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   // Pad the main workspace if Bottom Nav is active (on desktop as well as mobile)
   const paddingClass = config.navigationStyle === "bottom_nav" 
@@ -99,6 +74,31 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
       <WorkspaceProvider>
       <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex relative w-full">
         <CommandPalette />
+
+        {/* Small Screen Blocking Modal for Sekretariat Roles */}
+        {isSekretariatRole && isSmallScreen && (
+          <div className="fixed inset-0 z-[99999] bg-zinc-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none">
+            <div className="max-w-md w-full bg-zinc-900 border border-rose-500/30 rounded-3xl p-8 shadow-2xl flex flex-col items-center gap-5 relative overflow-hidden">
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="w-20 h-20 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center justify-center text-rose-500 shadow-inner">
+                <MonitorOff className="w-10 h-10 animate-pulse" />
+              </div>
+              
+              <div className="space-y-2">
+                <span className="px-3 py-1 bg-rose-500/10 border border-rose-500/20 text-rose-400 font-extrabold text-[11px] uppercase tracking-wider rounded-full">
+                  AKSES TERBATAS
+                </span>
+                <h2 className="text-xl font-black text-white leading-tight">
+                  TAMPILAN TERBLOKIR KARENA TIDAK SUPORT LAYAR KECIL
+                </h2>
+              </div>
+
+              <p className="text-sm font-medium text-zinc-300 leading-relaxed bg-zinc-800/80 p-4 rounded-xl border border-zinc-700/50">
+                Mohon gunakan perangkat Komputer atau Desktop Atau PC Atau Notebook
+              </p>
+            </div>
+          </div>
+        )}
         
         {/* Sidebar - internally decides to render or return null based on navigationStyle config */}
         <Sidebar role={role} />

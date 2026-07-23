@@ -296,8 +296,16 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       header: "Kamar & Gedung Asrama",
       cell: (info) => (
         <div className="flex flex-col gap-0.5 text-left">
-          <span className="font-bold text-emerald-700 dark:text-emerald-400">Asrama Aisyah 1</span>
-          <span className="text-xs text-zinc-500 font-semibold">Gedung Aisyah</span>
+          <span className="font-bold text-emerald-700 dark:text-emerald-400">
+            {info.row.original.roomName && info.row.original.roomName !== "-"
+              ? info.row.original.roomName
+              : info.row.original.class || "Belum Ditentukan"}
+          </span>
+          <span className="text-xs text-zinc-500 font-semibold">
+            {info.row.original.buildingName && info.row.original.buildingName !== "-"
+              ? info.row.original.buildingName
+              : "Asrama"}
+          </span>
         </div>
       ),
     },
@@ -306,7 +314,11 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       header: "Musyrifah / Wali Kamar",
       cell: (info) => (
         <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-left">
-          Ustadzah Halimah
+          {info.row.original.roomSupervisor && info.row.original.roomSupervisor !== "-"
+            ? info.row.original.roomSupervisor
+            : info.row.original.mustahiq && info.row.original.mustahiq !== "-"
+            ? info.row.original.mustahiq
+            : "-"}
         </span>
       ),
     },
@@ -367,7 +379,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       header: "Mustahiq (Wali Kelas)",
       cell: (info) => (
         <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-left">
-          {info.getValue() as string || "Ustadz Ahmad"}
+          {info.getValue() as string || "-"}
         </span>
       ),
     },
@@ -680,14 +692,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                             <option key={c.id} value={c.name}>{c.name} ({c.mustahiq || "Wali Kelas"})</option>
                           ))
                         ) : (
-                          <>
-                            <option value="I'dadiyyah I-A">I&apos;dadiyyah I-A</option>
-                            <option value="I'dadiyyah I-B">I&apos;dadiyyah I-B</option>
-                            <option value="Tsanawiyyah I-A">Tsanawiyyah I-A</option>
-                            <option value="Tsanawiyyah I-B">Tsanawiyyah I-B</option>
-                            <option value="Aliyyah I-A">Aliyyah I-A</option>
-                            <option value="Aliyyah III-A">Aliyyah III-A</option>
-                          </>
+                          <option value="">-- Pilih Kelas Diniyyah --</option>
                         )}
                       </select>
                     </div>
@@ -705,12 +710,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                             <option key={r.id} value={r.name}>{r.name} ({r.buildingName})</option>
                           ))
                         ) : (
-                          <>
-                            <option value="Asrama Aisyah 1">Asrama Aisyah 1 (Gedung Aisyah)</option>
-                            <option value="Asrama Aisyah 2">Asrama Aisyah 2 (Gedung Aisyah)</option>
-                            <option value="Asrama Fatimah 1">Asrama Fatimah 1 (Gedung Fatimah)</option>
-                            <option value="Asrama Khadijah 1">Asrama Khadijah 1 (Gedung Khadijah)</option>
-                          </>
+                          <option value="">-- Pilih Kamar Asrama --</option>
                         )}
                       </select>
                     </div>
@@ -798,7 +798,11 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                       {isPondok ? (
                         <>
                           <Home className="w-3.5 h-3.5 text-emerald-300" />
-                          <span>Kamar: Asrama Aisyah 1 (Gedung Aisyah)</span>
+                          <span>
+                            Kamar: {selectedSantriForDetail.roomName && selectedSantriForDetail.roomName !== "-"
+                              ? `${selectedSantriForDetail.roomName} (${selectedSantriForDetail.buildingName || "Asrama"})`
+                              : selectedSantriForDetail.class || "Belum Ditentukan"}
+                          </span>
                         </>
                       ) : (
                         <>
@@ -875,7 +879,13 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
                       <span className="text-xs text-zinc-400 font-bold uppercase">{isPondok ? "Kamar Asrama" : "Kelas Diniyyah"}</span>
-                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{isPondok ? "Asrama Aisyah 1" : selectedSantriForDetail.class}</p>
+                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">
+                        {isPondok
+                          ? (selectedSantriForDetail.roomName && selectedSantriForDetail.roomName !== "-"
+                              ? selectedSantriForDetail.roomName
+                              : selectedSantriForDetail.class)
+                          : selectedSantriForDetail.class}
+                      </p>
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
                       <span className="text-xs text-zinc-400 font-bold uppercase">Status Keaktifan</span>

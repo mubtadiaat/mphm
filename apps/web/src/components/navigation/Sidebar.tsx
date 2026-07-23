@@ -94,12 +94,14 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     return null;
   }
 
-  const filteredStaticItems = role === "sekretariat" 
-    ? (activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
+  const isSekretariatRole = role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah";
+
+  const filteredStaticItems = isSekretariatRole
+    ? (role === "sek.pondok" || activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
     : (NAVIGATION_CONFIG[role] || []);
 
   let navItems: NavMenu[] = [];
-  if (role === "sekretariat") {
+  if (isSekretariatRole) {
     navItems = [...filteredStaticItems];
     if (customItems.length > 0) {
       navItems.push({

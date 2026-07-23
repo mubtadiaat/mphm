@@ -125,8 +125,10 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
     return () => window.removeEventListener("custom_tables_changed", loadCustomTables);
   }, [role]);
 
-  const baseConfig = role === "sekretariat" 
-    ? (activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
+  const isSekretariatRole = role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah";
+
+  const baseConfig = isSekretariatRole 
+    ? (role === "sek.pondok" || activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
     : (NAVIGATION_CONFIG[role] || []);
 
   const flatStaticItems: NavItem[] = baseConfig.flatMap((item) => {
@@ -148,7 +150,7 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
   });
 
   // Limit bottom nav items to max 5 to prevent UI overlap on mobile
-  const allItems = role === "sekretariat"
+  const allItems = isSekretariatRole
     ? [...filteredStaticItems, ...filteredCustomItems]
     : [...filteredStaticItems, ...filteredCustomItems];
   const navItems = allItems.slice(0, 5);
