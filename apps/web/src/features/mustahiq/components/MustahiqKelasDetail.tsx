@@ -60,10 +60,10 @@ export function MustahiqKelasDetail() {
             <span>Kelas Yang Diampu</span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            {myClass.class.fullName}
+            {myClass?.class?.fullName || "Kelas Diniyyah"}
           </h1>
           <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Tingkat: {myClass.class.institutionLevel} | Kapasitas: {myClass.class.capacity} Santri
+            Tingkat: {myClass?.class?.institutionLevel || "-"} | Kapasitas: {myClass?.class?.capacity || 0} Santri
           </p>
         </div>
       </div>

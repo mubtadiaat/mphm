@@ -40,7 +40,7 @@ export function MustahiqManajemenNilai() {
     <ManajemenNilaiTab 
       selectedYearId={selectedYearId} 
       isReadOnly={isReadOnly} 
-      fixedClass={myClass.class.fullName} 
+      fixedClass={myClass?.class?.fullName || "Kelas Diniyyah"} 
     />
   );
 }
