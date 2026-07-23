@@ -6,8 +6,14 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const buildingName = searchParams.get("buildingName");
 
+    const prismaRoom = (prisma as any).room;
+
+    if (!prismaRoom) {
+      return NextResponse.json({ status: "Success", data: [] });
+    }
+
     // Fetch directly from Neon PostgreSQL Cloud DB
-    let dbRooms = await prisma.room.findMany({
+    let dbRooms: any[] = await prismaRoom.findMany({
       where: {
         deletedAt: null,
         ...(buildingName ? { buildingName } : {}),
@@ -21,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     // Auto-seed database if empty
     if (dbRooms.length === 0 && !buildingName) {
-      await prisma.room.createMany({
+      await prismaRoom.createMany({
         data: [
           { name: "Asrama Aisyah 1", buildingName: "Gedung Aisyah", capacity: 20 },
           { name: "Asrama Aisyah 2", buildingName: "Gedung Aisyah", capacity: 20 },
@@ -30,7 +36,7 @@ export async function GET(req: NextRequest) {
         ],
       });
 
-      dbRooms = await prisma.room.findMany({
+      dbRooms = await prismaRoom.findMany({
         where: { deletedAt: null },
         include: {
           supervisor: {
@@ -40,7 +46,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const rooms = dbRooms.map((r) => ({
+    const rooms = dbRooms.map((r: any) => ({
       id: r.id,
       name: r.name,
       buildingName: r.buildingName,
@@ -65,8 +71,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const prismaRoom = (prisma as any).room;
 
-    const created = await prisma.room.create({
+    if (!prismaRoom) {
+      return NextResponse.json({ status: "Error", message: "Room model unavailable" }, { status: 500 });
+    }
+
+    const created = await prismaRoom.create({
       data: {
         name: body.name || body.roomName || "Kamar Baru",
         buildingName: body.buildingName || "Gedung Utama",
