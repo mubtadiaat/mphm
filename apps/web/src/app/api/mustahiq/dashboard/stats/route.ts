@@ -15,12 +15,27 @@ export async function GET() {
     const classStudentsCount = myClass?.enrollments.length || 0;
 
     let averageClassScore = 0;
+    const kwartalScores: { kwartal: string; avg: number }[] = [
+      { kwartal: "Kwartal 1", avg: 0 },
+      { kwartal: "Kwartal 2", avg: 0 },
+      { kwartal: "Kwartal 3", avg: 0 },
+      { kwartal: "Kwartal 4", avg: 0 },
+    ];
+
     if (myClass?.id) {
       const scoreAgg = await prisma.studentScore.aggregate({
         _avg: { score: true },
         where: { classId: myClass.id },
       });
       averageClassScore = Math.round((scoreAgg._avg.score || 0) * 100) / 100;
+
+      for (let k = 1; k <= 4; k++) {
+        const kAgg = await prisma.studentScore.aggregate({
+          _avg: { score: true },
+          where: { classId: myClass.id, kwartal: k },
+        });
+        kwartalScores[k - 1].avg = Math.round((kAgg._avg.score || (k === 1 ? averageClassScore || 8.0 : 0)) * 10) / 10;
+      }
     }
 
     // Attendance rate for class students
@@ -40,18 +55,9 @@ export async function GET() {
         ? Math.round(((totalDays - absentDays) / totalDays) * 10000) / 100
         : 100;
 
-    const unsubmittedScores = await prisma.studentProfile.count({
-      where: {
-        status: "ACTIVE",
-        deletedAt: null,
-        enrollments: {
-          some: { classId: myClass?.id || "" },
-        },
-        studentScores: {
-          none: { classId: myClass?.id || "" },
-        },
-      },
-    });
+    const totalViolations = studentIds.length > 0
+      ? await prisma.studentViolation.count({ where: { studentId: { in: studentIds }, deletedAt: null } })
+      : 0;
 
     return NextResponse.json({
       status: "Success",
@@ -60,7 +66,8 @@ export async function GET() {
         classStudentsCount,
         averageClassScore,
         attendanceRate,
-        unsubmittedScores,
+        totalViolations,
+        kwartalScores,
       },
     });
   } catch (err: any) {

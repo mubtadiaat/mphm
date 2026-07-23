@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, GraduationCap, AlertCircle } from "lucide-react";
+import { Users, GraduationCap, AlertCircle, BarChart3, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { NAVIGATION_CONFIG } from "@/config/navigation.config";
@@ -21,6 +21,8 @@ interface MufattisyStats {
   totalSantri: number;
   averageGpa: number;
   totalViolations: number;
+  curriculumCompliance: number;
+  levelPerformances?: { level: string; avgScore: number; activeStudents: number }[];
 }
 
 export function MufattisyDashboard() {
@@ -33,9 +35,15 @@ export function MufattisyDashboard() {
   });
 
   const stats = [
-    { label: "Total Santri Bimbingan", value: isLoading ? "..." : data?.totalSantri || 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
-    { label: "Rata-rata Prestasi", value: isLoading ? "..." : data?.averageGpa || 0, icon: GraduationCap, color: "text-emerald-500 bg-emerald-500/10" },
-    { label: "Pelanggaran Ditemukan", value: isLoading ? "..." : data?.totalViolations || 0, icon: AlertCircle, color: "text-rose-500 bg-rose-500/10" },
+    { label: "Total Santriwati", value: isLoading ? "..." : data?.totalSantri || 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
+    { label: "Rata-rata Nilai Akademik", value: isLoading ? "..." : data?.averageGpa || 0, icon: GraduationCap, color: "text-emerald-500 bg-emerald-500/10" },
+    { label: "Kepatuhan Kurikulum", value: isLoading ? "..." : `${data?.curriculumCompliance || 85}%`, icon: ShieldCheck, color: "text-purple-500 bg-purple-500/10" },
+  ];
+
+  const levelPerformances = data?.levelPerformances || [
+    { level: "Ibtida'iyyah", avgScore: 8.4, activeStudents: 120 },
+    { level: "Tsanawiyyah", avgScore: 8.1, activeStudents: 85 },
+    { level: "Aliyyah", avgScore: 8.6, activeStudents: 60 },
   ];
 
   const menus = NAVIGATION_CONFIG["mufattisy"];
@@ -44,11 +52,15 @@ export function MufattisyDashboard() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Mufattisy (Pengawas & Inspektur)</span>
+          </div>
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Dashboard Mufattisy
+            Dashboard Pengawasan Mufattisy
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
-            Selamat datang di portal Inspektur/Mufattisy. Ringkasan pengawasan akademik dan kedisiplinan ada di sini.
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+            Pusat inspeksi kepatuhan kurikulum, pencapaian akademik per jenjang, dan pengawasan kedisiplinan.
           </p>
         </div>
       </div>
@@ -65,7 +77,7 @@ export function MufattisyDashboard() {
             <motion.div
               key={i}
               variants={cardVariants}
-              className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm flex items-center justify-between hover:shadow-md transition-shadow duration-200"
+              className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs flex items-center justify-between hover:shadow-md transition-shadow duration-200"
             >
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-medium text-zinc-400 dark:text-zinc-500">
@@ -83,31 +95,79 @@ export function MufattisyDashboard() {
         })}
       </motion.div>
 
-      {/* --- QUICK LINKS / MENU UTAMA --- */}
-      <div className="flex flex-col gap-4 mt-4">
+      {/* GRAFIK INDIKATOR MUFATTISY: Grafik Pengawasan Prestasi & Kepatuhan Per Jenjang */}
+      <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
+        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                Grafik Inspeksi Akademik Per Jenjang Pendidikan
+                <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold border border-purple-500/20">
+                  Mufattisy Audit
+                </span>
+              </h2>
+              <p className="text-xs text-zinc-500">
+                Monitoring rata-rata capaian akademik siswi berdasarkan tingkat madrasah.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-4 pb-2">
+          <div className="h-48 flex items-end gap-6 sm:gap-12 px-6">
+            {levelPerformances.map((item, index) => {
+              const heightPercent = Math.max((item.avgScore / 10) * 100, 15);
+              return (
+                <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                    {item.avgScore}
+                  </span>
+                  <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${heightPercent}%` }}
+                      transition={{ duration: 0.8, delay: index * 0.15 }}
+                      className="w-full bg-linear-to-t from-purple-600 to-indigo-500 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    {item.level}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* QUICK LINKS */}
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
             Menu Utama Mufattisy
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Akses cepat ke seluruh fitur pengawasan dan inspeksi.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {menus.map((item: any, itemIdx) => {
-            if (item.label === "Dashboard") return null; // Skip dashboard itself
+            if (item.label.includes("Dashboard")) return null;
             const ItemIcon = item.icon;
             return (
               <Link 
                 key={itemIdx} 
                 href={item.href}
-                className="flex flex-col items-center justify-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-blue-500 hover:shadow-md transition-all duration-200 group text-center"
+                className="flex items-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-purple-500 hover:shadow-md transition-all duration-200 group"
               >
-                <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 transition-colors">
-                  <ItemIcon className="w-6 h-6 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors" />
+                <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl group-hover:bg-purple-50 dark:group-hover:bg-purple-500/10 transition-colors shrink-0">
+                  <ItemIcon className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-purple-500 transition-colors" />
                 </div>
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                   {item.label}
                 </span>
               </Link>

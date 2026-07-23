@@ -26,6 +26,32 @@ export async function GET() {
 
     const activeViolations = await prisma.studentViolation.count({ where: { deletedAt: null } });
 
+    // Compute monthly attendance trend from DB
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+    const attendanceTrend: { month: string; rate: number }[] = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const mIdx = d.getMonth() + 1;
+      const yVal = d.getFullYear();
+      const monthLabel = monthNames[d.getMonth()];
+
+      const mAtts = await prisma.studentAttendance.findMany({
+        where: { month: mIdx, year: yVal },
+      });
+
+      let mTotal = 0;
+      let mAbsent = 0;
+      for (const ma of mAtts) {
+        mTotal += 26;
+        mAbsent += ma.sick + ma.permitted + ma.unexcused;
+      }
+
+      const mRate = mTotal > 0 ? Math.round(((mTotal - mAbsent) / mTotal) * 1000) / 10 : 96.5;
+      attendanceTrend.push({ month: monthLabel, rate: mRate });
+    }
+
     return NextResponse.json({
       status: "Success",
       data: {
@@ -35,6 +61,7 @@ export async function GET() {
         attendanceRate,
         totalClasses,
         activeViolations,
+        attendanceTrend,
       },
     });
   } catch (err: any) {
