@@ -551,36 +551,40 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
           onImportSuccess: async (importedRows) => {
             let successCount = 0;
             for (const r of importedRows) {
+              const nameVal = r["Nama Lengkap Santriwati"] || r["Nama Lengkap"] || r["nama"] || "";
+              if (!nameVal.trim()) continue;
               try {
                 await createSantri({
-                  name: r["Nama Lengkap Santriwati"] || "",
-                  nik: r["NIK Santri (16 Digit)"] || "",
+                  name: nameVal,
+                  nik: r["NIK Santri (16 Digit)"] || r["NIK Santri"] || r["NIK"] || r["nik"] || "",
                   gender: "P",
-                  birthPlace: r["Tempat Lahir"] || "",
-                  birthDate: r["Tanggal Lahir"] || "",
-                  phoneNumber: r["No. HP / WA Santri"] || "",
-                  stambuk: r["Nomor Stambuk"] || "",
-                  nis: r["NIS"] || r["Nomor Stambuk"] || "",
+                  birthPlace: r["Tempat Lahir"] || r["tempat_lahir"] || "",
+                  birthDate: r["Tanggal Lahir"] || r["tanggal_lahir"] || "",
+                  phoneNumber: r["No. HP / WA Santri"] || r["No Telepon"] || r["phone"] || "",
+                  stambuk: r["Nomor Stambuk"] || r["stambuk"] || "",
+                  nis: r["NIS"] || r["Nomor Stambuk"] || r["stambuk"] || "",
                   nisn: r["NISN"] || "",
-                  class: r["Kelas Aktif"] || "Tsanawiyyah I-A",
-                  enrollmentYear: Number(r["Tahun Masuk"]) || 2026,
+                  class: r["Kelas Aktif"] || r["Kelas"] || "Belum Ditentukan",
+                  enrollmentYear: Number(r["Tahun Masuk"]) || new Date().getFullYear(),
                   graduationYear: r["Tahun Lulus"] ? Number(r["Tahun Lulus"]) : undefined,
                   status: r["Status Keaktifan"] || "ACTIVE",
-                  address: r["Alamat Lengkap"] || "",
+                  address: r["Alamat Lengkap"] || r["Alamat"] || "",
                   mustahiq: isPondok ? "Ustadzah Musyrifah" : "Ustadz Mustahiq",
                   mufattisy: "Ustadz Mufattisy",
-                  guardianName: r["Nama Lengkap Wali"] || "Wali Import",
-                  guardianRelation: (r["Hubungan Keluarga"] as any) || "AYAH",
-                  guardianPhone: r["No. HP / WA Wali"] || "081200000000",
-                  familyCardNumber: r["Nomor Kartu Keluarga (KK)"] || "3171010000000000",
-                  guardianNik: r["NIK Wali (16 Digit)"] || ""
+                  guardianName: r["Nama Lengkap Wali"] || r["Nama Wali"] || "Wali Santri",
+                  guardianRelation: (r["Hubungan Keluarga"] as any) || "WALI",
+                  guardianPhone: r["No. HP / WA Wali"] || r["No Telepon Wali"] || "",
+                  familyCardNumber: r["Nomor Kartu Keluarga (KK)"] || r["Nomor KK"] || "",
+                  guardianNik: r["NIK Wali (16 Digit)"] || r["NIK Wali"] || ""
                 });
                 successCount++;
               } catch (e) {
                 console.error("Gagal import baris:", r, e);
               }
             }
-            toast(`${successCount} dari ${importedRows.length} data berhasil diimpor!`, "success");
+            if (successCount > 0) {
+              toast(`${successCount} dari ${importedRows.length} data Santriwati berhasil diimpor!`, "success", "Import Berhasil");
+            }
           }
         }}
       />

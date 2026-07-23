@@ -195,6 +195,28 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
         importExportProps={{
           title: "Master Data Kurikulum dan Mata Pelajaran Diniyyah",
           headers: ["Kode Mata Pelajaran", "Nama Mata Pelajaran Diniyyah", "Tipe Mata Pelajaran", "Status Keaktifan"],
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Mata Pelajaran Diniyyah"] || r["name"] || "";
+              if (!nameVal.trim()) continue;
+              const codeVal = r["Kode Mata Pelajaran"] || r["code"] || `MP-${Math.floor(100 + Math.random() * 900)}`;
+              const typeVal = (r["Tipe Mata Pelajaran"] || r["subjectType"] || "").toUpperCase().includes("NON") ? "NON_MAPEL" : "MAPEL";
+              try {
+                await createSubject({
+                  code: codeVal,
+                  name: nameVal,
+                  subjectType: typeVal,
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} Mata Pelajaran!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 

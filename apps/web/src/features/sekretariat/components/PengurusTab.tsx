@@ -180,7 +180,28 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
         importExportProps={{
           title: "Data Pengurus dan Struktur Organisasi",
           headers: ["Nama Lengkap Pengurus", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
-          onImportSuccess: (rows) => console.log("Imported:", rows)
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Lengkap Pengurus"] || r["nama"] || "";
+              if (!nameVal.trim()) continue;
+              const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
+              try {
+                await createPengurus({
+                  name: nameVal,
+                  phone: phoneVal,
+                  roleName: "Pengurus Harian",
+                  gender: "L",
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} data Pengurus!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 

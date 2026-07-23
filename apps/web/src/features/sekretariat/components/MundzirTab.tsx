@@ -165,7 +165,28 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
         importExportProps={{
           title: "Data Mundzir dan Pimpinan Pesantren",
           headers: ["Nama Lengkap Mundzir", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
-          onImportSuccess: (rows) => console.log("Imported:", rows)
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Lengkap Mundzir"] || r["nama"] || "";
+              if (!nameVal.trim()) continue;
+              const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
+              try {
+                await createPengurus({
+                  name: nameVal,
+                  phone: phoneVal,
+                  roleName: "Mundzir Asrama",
+                  gender: "L",
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} data Mundzir!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 

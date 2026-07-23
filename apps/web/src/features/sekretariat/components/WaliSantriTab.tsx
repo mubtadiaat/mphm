@@ -5,6 +5,7 @@ import { User, X } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { useGuardians, Guardian } from "../queries/useGuardians";
+import { useToast } from "@/components/shared/ToastContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SiswaTabProps {
@@ -24,6 +25,7 @@ export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading } = useGuardians(searchQuery, pageIndex, pageSize);
   const [guardiansList, setGuardiansList] = useState<Guardian[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const { toast } = useToast();
 
   // Sync with TanStack Query data
   useEffect(() => {
@@ -114,8 +116,37 @@ export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
         importExportProps={{
           title: "Data Master Wali Santri",
           headers: ["Nama Lengkap Wali", "NIK Wali (16 Digit)", "No. HP / WA Wali", "Nomor Kartu Keluarga (KK)"],
-          onImportSuccess: (rows) => {
-            console.log("Imported rows:", rows);
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Lengkap Wali"] || r["nama"] || "";
+              if (!nameVal.trim()) continue;
+              const phoneVal = r["No. HP / WA Wali"] || r["phone"] || "";
+              const kkVal = r["Nomor Kartu Keluarga (KK)"] || r["familyCardNumber"] || "";
+              const nikVal = r["NIK Wali (16 Digit)"] || r["nik"] || "";
+              try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+                await fetch(`${apiUrl}/api/admin/people`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    fullName: nameVal,
+                    nik: nikVal || null,
+                    phoneNumber: phoneVal || null,
+                    gender: "L",
+                    guardianName: nameVal,
+                    guardianPhone: phoneVal,
+                    familyCardNumber: kkVal || `KK-${Date.now()}`,
+                  }),
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} data Wali Santri!`, "success", "Import Berhasil");
+            }
           }
         }}
       />

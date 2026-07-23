@@ -137,7 +137,28 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
         importExportProps={{
           title: "Data Mufattisy dan Dewan Pengawas",
           headers: ["Nama Lengkap Mufattisy", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
-          onImportSuccess: (rows) => console.log("Imported:", rows)
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Lengkap Mufattisy"] || r["nama"] || "";
+              if (!nameVal.trim()) continue;
+              const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
+              try {
+                await createPengurus({
+                  name: nameVal,
+                  phone: phoneVal,
+                  roleName: "Mufattisy",
+                  gender: "L",
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} data Mufattisy!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 

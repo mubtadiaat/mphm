@@ -238,6 +238,29 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
         importExportProps={{
           title: "Data Kamar dan Asrama Santriwati",
           headers: ["Nama Kamar Asrama", "Nama Gedung Blok", "Kapasitas Kamar", "Nama Pembina Kamar / Wali Asrama"],
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Kamar Asrama"] || r["name"] || "";
+              if (!nameVal.trim()) continue;
+              const buildingVal = r["Nama Gedung Blok"] || r["buildingName"] || "Gedung Utama";
+              const capacityVal = parseInt(r["Kapasitas Kamar"] || r["capacity"] || "20") || 20;
+              try {
+                await createRoom({
+                  name: nameVal,
+                  buildingName: buildingVal,
+                  capacity: capacityVal,
+                  supervisorId: null,
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} data Kamar Asrama!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 

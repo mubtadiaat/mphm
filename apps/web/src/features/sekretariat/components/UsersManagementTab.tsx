@@ -60,7 +60,7 @@ export function UsersManagementTab() {
   const [customRoles, setCustomRoles] = useState<Record<string, string>>({});
   const [generatedCredentials, setGeneratedCredentials] = useState<Array<{ name: string; username: string; password: string; role: string; phone?: string }>>([]);
 
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   // Reset password modal
   const [resetModal, setResetModal] = useState<{ userId: string; username: string; personPhone?: string } | null>(null);
@@ -162,7 +162,15 @@ export function UsersManagementTab() {
   };
 
   const handleDeleteUser = async (userId: string, username: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus akun "${username}"? Akun ini akan dipindahkan ke Keranjang Sampah.`)) {
+    const isConfirmed = await confirm({
+      title: "Hapus Akun Pengguna?",
+      message: `Apakah Anda yakin ingin menghapus akun "${username}"? Akun ini akan dipindahkan ke Keranjang Sampah.`,
+      confirmText: "Ya, Hapus Akun",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deleteUser(userId);
         toast(`Akun ${username} telah berhasil dihapus.`, "success", "Berhasil");

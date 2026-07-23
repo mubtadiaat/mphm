@@ -135,7 +135,27 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         importExportProps={{
           title: "Data Mustahiq dan Dewan Pengajar",
           headers: ["Nama Lengkap Mustahiq", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
-          onImportSuccess: (rows) => console.log("Imported:", rows)
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Lengkap Mustahiq"] || r["nama"] || "";
+              if (!nameVal.trim()) continue;
+              const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
+              try {
+                await createGuru({
+                  name: nameVal,
+                  phone: phoneVal,
+                  gender: "L",
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} data Mustahiq!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 

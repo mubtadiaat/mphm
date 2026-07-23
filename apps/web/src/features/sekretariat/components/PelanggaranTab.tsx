@@ -193,7 +193,33 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
         importExportProps={{
           title: "Master Data Aturan Pelanggaran dan Takzir",
           headers: ["Nama Aturan Pelanggaran", "Kategori Kedisiplinan", "Tingkat Keparahan", "Poin Takzir"],
-          onImportSuccess: (rows) => console.log("Imported:", rows)
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Nama Aturan Pelanggaran"] || r["name"] || "";
+              if (!nameVal.trim()) continue;
+              const pointsVal = parseInt(r["Poin Takzir"] || r["points"] || "5") || 5;
+              try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+                await fetch(`${apiUrl}/api/admin/violations/types`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    name: nameVal,
+                    points: pointsVal,
+                    categoryId: categories[0]?.id || "",
+                    severityId: severities[0]?.id || "",
+                  }),
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} Aturan Pelanggaran!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 

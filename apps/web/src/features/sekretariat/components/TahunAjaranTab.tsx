@@ -248,6 +248,28 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
         importExportProps={{
           title: "Master Data Tahun Ajaran dan Kalender Akademik",
           headers: ["Tahun Akademik", "Tanggal Mulai Ajaran", "Tanggal Berakhir Ajaran", "Status Keaktifan"],
+          onImportSuccess: async (rows) => {
+            let count = 0;
+            for (const r of rows) {
+              const nameVal = r["Tahun Akademik"] || r["name"] || "";
+              if (!nameVal.trim()) continue;
+              const startVal = r["Tanggal Mulai Ajaran"] || r["startDate"] || `${new Date().getFullYear()}-07-01`;
+              const endVal = r["Tanggal Berakhir Ajaran"] || r["endDate"] || `${new Date().getFullYear() + 1}-06-30`;
+              try {
+                await createYear({
+                  name: nameVal,
+                  startDate: startVal,
+                  endDate: endVal,
+                });
+                count++;
+              } catch (err) {
+                console.error("Import row failed:", err);
+              }
+            }
+            if (count > 0) {
+              toast(`Berhasil mengimpor ${count} Tahun Ajaran!`, "success", "Import Berhasil");
+            }
+          }
         }}
       />
 
