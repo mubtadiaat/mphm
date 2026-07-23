@@ -85,8 +85,8 @@ export function UsersManagementTab() {
                   ) : (
                     users.map(user => (
                       <tr key={user.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-                        <td className="px-4 py-3 text-left font-medium">{user.username}</td>
-                        <td className="px-4 py-3 text-left">{user.fullName}</td>
+                        <td className="px-4 py-3 text-left font-medium">{user?.username}</td>
+                        <td className="px-4 py-3 text-left">{user?.fullName || user?.username || "-"}</td>
                         <td className="px-4 py-3 text-left">
                           <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg text-xs font-semibold">
                             {user.role}

@@ -92,12 +92,12 @@ export function KelasTab({ isReadOnly = false, selectedYearId }: KelasTabProps) 
                       className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
                       onClick={() => setViewingDetail(student)}
                     >
-                      <td className="px-5 py-3.5 text-left text-zinc-500 font-mono">{i + 1}</td>
-                      <td className="px-5 py-3.5 text-left font-bold text-zinc-900 dark:text-white">{student.fullName}</td>
-                      <td className="px-5 py-3.5 text-left font-mono text-xs">{student.nis || "-"}</td>
-                      <td className="px-5 py-3.5 text-left font-mono text-xs">{student.nisn || "-"}</td>
+                      <td className="px-5 py-3.5 text-left font-mono text-zinc-500">{i + 1}</td>
+                      <td className="px-5 py-3.5 text-left font-bold text-zinc-900 dark:text-white">{student?.name || student?.fullName || "-"}</td>
+                      <td className="px-5 py-3.5 text-left font-mono text-xs">{student?.nis || "-"}</td>
+                      <td className="px-5 py-3.5 text-left font-mono text-xs">{student?.nisn || "-"}</td>
                       <td className="px-5 py-3.5 text-left">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${student.gender === "L" ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "bg-pink-50 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400"}`}>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${student?.gender === "L" ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "bg-pink-50 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400"}`}>
                           Perempuan
                         </span>
                       </td>
@@ -127,7 +127,7 @@ export function KelasTab({ isReadOnly = false, selectedYearId }: KelasTabProps) 
                     <tbody>
                       <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                         <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama Lengkap</td>
-                        <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.fullName || "-"}</td>
+                        <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail?.name || viewingDetail?.fullName || "-"}</td>
                       </tr>
                       <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                         <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">NIS</td>

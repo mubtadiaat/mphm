@@ -13,9 +13,13 @@ const ROLE_MAP: Record<string, { key: RoleTypes; basePath: string }> = {
   "sek.madrasah":     { key: "sek.madrasah",  basePath: "/sekretariat" },
   mufattisy:          { key: "mufattisy",     basePath: "/mufattisy" },
   mundzir:            { key: "mundzir",       basePath: "/pimpinan" },
+  pimpinan:           { key: "mundzir",       basePath: "/pimpinan" },
   mustahiq:           { key: "mustahiq",      basePath: "/mustahiq" },
+  keamanan:           { key: "keamanan",      basePath: "/keamanan" },
   "petugas keamanan": { key: "keamanan",      basePath: "/keamanan" },
   "wali santri":      { key: "wali_santri",   basePath: "/guardian" },
+  wali_santri:        { key: "wali_santri",   basePath: "/guardian" },
+  guardian:           { key: "wali_santri",   basePath: "/guardian" },
 };
 
 // Semua base path dashboard yang valid

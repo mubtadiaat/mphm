@@ -101,9 +101,9 @@ export function MustahiqKelasDetail() {
                     onClick={() => setViewingDetail(student)}
                   >
                     <td className="px-4 py-3 text-left text-zinc-500">{i + 1}</td>
-                    <td className="px-4 py-3 text-left font-medium">{student.fullName}</td>
-                    <td className="px-4 py-3 text-left">{student.nis || '-'}</td>
-                    <td className="px-4 py-3 text-left">{student.nisn || '-'}</td>
+                    <td className="px-4 py-3 text-left font-medium">{student?.fullName || "-"}</td>
+                    <td className="px-4 py-3 text-left">{student?.nis || '-'}</td>
+                    <td className="px-4 py-3 text-left">{student?.nisn || '-'}</td>
                   </tr>
                 ))
               )}
@@ -130,7 +130,7 @@ export function MustahiqKelasDetail() {
                   <tbody>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama Lengkap</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.fullName || "-"}</td>
+                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail?.fullName || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">NIS</td>
