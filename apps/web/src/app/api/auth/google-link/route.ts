@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionFromCookies } from "@/lib/jwt";
+import { getSessionFromCookies, setSessionCookie } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/auditLog";
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           status: "Error",
-          message: `Akun Gmail ${email} sudah ditautkan ke pengguna lain (${existingOther.username}).`,
+          message: `Akun Gmail (${email}) sudah ditautkan ke pengguna lain (${existingOther.username}).`,
         },
         { status: 400 }
       );
@@ -52,6 +52,24 @@ export async function POST(req: NextRequest) {
       include: { person: true },
     });
 
+    const updatedSession = {
+      ...session,
+      email: updated.email,
+      googleLinked: true,
+    };
+
+    const response = NextResponse.json({
+      status: "Success",
+      message: `Akun Google (${email}) berhasil ditautkan!`,
+      data: {
+        email: updated.email,
+        googleLinked: true,
+      },
+    });
+
+    // Refresh JWT session cookie
+    await setSessionCookie(response, updatedSession);
+
     await createAuditLog({
       userId: session.username,
       action: "LINK_GOOGLE",
@@ -60,14 +78,7 @@ export async function POST(req: NextRequest) {
       afterState: { email, googleLinked: true },
     });
 
-    return NextResponse.json({
-      status: "Success",
-      message: `Akun Google (${email}) berhasil ditautkan!`,
-      data: {
-        email: updated.email,
-        googleLinked: true,
-      },
-    });
+    return response;
   } catch (err: any) {
     console.error("GOOGLE_LINK_ERROR:", err.message);
     return NextResponse.json(
@@ -87,12 +98,32 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    // Set firebaseUid and email to null
     await prisma.userAccount.update({
       where: { id: session.accountId },
       data: {
         firebaseUid: null,
+        email: null,
       },
     });
+
+    const updatedSession = {
+      ...session,
+      email: null,
+      googleLinked: false,
+    };
+
+    const response = NextResponse.json({
+      status: "Success",
+      message: "Tautan akun Google berhasil dilepas.",
+      data: {
+        email: null,
+        googleLinked: false,
+      },
+    });
+
+    // Refresh JWT session cookie with unlinked state
+    await setSessionCookie(response, updatedSession);
 
     await createAuditLog({
       userId: session.username,
@@ -101,11 +132,9 @@ export async function DELETE(req: NextRequest) {
       entityId: session.accountId,
     });
 
-    return NextResponse.json({
-      status: "Success",
-      message: "Tautan akun Google berhasil dilepas.",
-    });
+    return response;
   } catch (err: any) {
+    console.error("GOOGLE_UNLINK_ERROR:", err.message);
     return NextResponse.json(
       { status: "Error", message: err.message || "Gagal melepaskan penautan." },
       { status: 500 }

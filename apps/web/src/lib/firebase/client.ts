@@ -3,9 +3,7 @@ import {
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
-  signOut as firebaseSignOut,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  signOut as firebaseSignOut
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -20,11 +18,18 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
 
 export async function signInWithGoogle() {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    
+    // Always sign out from firebase client auth before popup to ensure user selection
+    try {
+      await firebaseSignOut(auth);
+    } catch (_) {}
+
+    const result = await signInWithPopup(auth, provider);
     return { user: result.user, error: null };
   } catch (error: any) {
     return { user: null, error: error.message };

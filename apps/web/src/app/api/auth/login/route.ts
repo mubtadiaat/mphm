@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       fullName: userAccount.person?.fullName || userAccount.username,
       avatarUrl: userAccount.person?.avatarUrl || null,
       email: userAccount.email || null,
-      googleLinked: Boolean(userAccount.firebaseUid || userAccount.email),
+      googleLinked: Boolean(userAccount.firebaseUid),
       assignedClassId: null,
       familyCardNumber: null,
     };

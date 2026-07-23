@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../../lib/api";
 import { useToast } from "../shared/ToastContext";
 import { createPortal } from "react-dom";
-import { signInWithGoogle } from "@/lib/firebase/client";
+import { signInWithGoogle, logoutFirebase } from "@/lib/firebase/client";
 
 export function HeaderProfile() {
   const { data: user, isLoading } = useAuth();
@@ -117,7 +117,7 @@ export function HeaderProfile() {
         throw new Error(fbError || "Gagal melakukan otentikasi dengan Google.");
       }
 
-      const res = await apiRequest<{ status: string; message: string }>("/api/auth/google-link", {
+      const res = await apiRequest<{ status: string; message: string; data?: { email?: string; googleLinked?: boolean } }>("/api/auth/google-link", {
         method: "POST",
         body: JSON.stringify({
           uid: fbUser.uid,
@@ -125,8 +125,19 @@ export function HeaderProfile() {
         }),
       });
 
-      toast(res.message || "Akun Google berhasil ditautkan!", "success", "Berhasil Ditautkan");
+      queryClient.setQueryData<UserSession>(["auth-session"], (prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          googleLinked: true,
+          email: fbUser.email,
+        };
+      });
+
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+      await queryClient.refetchQueries({ queryKey: ["auth-session"] });
+
+      toast(res.message || "Akun Google berhasil ditautkan!", "success", "Berhasil Ditautkan");
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : "Gagal menautkan akun Google.", "error", "Penautan Gagal");
     } finally {
@@ -137,12 +148,25 @@ export function HeaderProfile() {
   const handleUnlinkGoogle = async () => {
     setGoogleLinking(true);
     try {
+      await logoutFirebase();
+
       const res = await apiRequest<{ status: string; message: string }>("/api/auth/google-link", {
         method: "DELETE",
       });
 
-      toast(res.message || "Tautan akun Google berhasil dilepas.", "success", "Berhasil");
+      queryClient.setQueryData<UserSession>(["auth-session"], (prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          googleLinked: false,
+          email: null,
+        };
+      });
+
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+      await queryClient.refetchQueries({ queryKey: ["auth-session"] });
+
+      toast(res.message || "Tautan akun Google berhasil dilepas.", "success", "Berhasil");
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : "Gagal melepaskan penautan.", "error", "Gagal");
     } finally {
