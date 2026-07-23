@@ -133,7 +133,7 @@ export default function CommandPalette() {
                   </Command.Item>
                   <Command.Item 
                     onSelect={() => { setOpen(false); router.push("/mustahiq/penilaian"); }}
-                    className="px-3 py-2 rounded-lg cursor-pointer hover:bg-zinc-150 dark:hover:bg-zinc-800 text-sm aria-selected:bg-zinc-100 dark:aria-selected:bg-zinc-800"
+                    className="px-3 py-2 rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm aria-selected:bg-zinc-100 dark:aria-selected:bg-zinc-800"
                   >
                     Input Nilai Kwartal
                   </Command.Item>

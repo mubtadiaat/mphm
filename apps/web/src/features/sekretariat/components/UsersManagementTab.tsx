@@ -119,7 +119,7 @@ export function UsersManagementTab() {
 
     for (const person of toGenerate) {
       const username = person.fullName.toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 20);
-      const password = "mphm" + Math.random().toString(36).slice(2, 8);
+      const password = "mubtadiaat123";
       const targetRole = customRoles[person.id] || person.suggestedRole || "Mustahiq";
 
       try {

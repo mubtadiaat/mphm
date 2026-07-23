@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         personId: targetPersonId,
         username,
         email: email || null,
-        passwordHash: password || null,
+        passwordHash: password || "mubtadiaat123",
         role,
         status: "ACTIVE",
       },

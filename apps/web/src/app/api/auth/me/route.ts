@@ -26,6 +26,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const isDefaultPassword = 
+      userAccount.passwordHash === "mubtadiaat123" || 
+      userAccount.passwordHash === "mphm123" || 
+      userAccount.passwordHash === "admin123";
+
     const payload = {
       userId: userAccount.id,
       accountId: userAccount.id,
@@ -38,6 +43,7 @@ export async function GET(req: NextRequest) {
       googleLinked: Boolean(userAccount.firebaseUid),
       assignedClassId: null,
       familyCardNumber: null,
+      mustChangePassword: isDefaultPassword,
     };
 
     return NextResponse.json({

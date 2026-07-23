@@ -43,7 +43,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       
       {/* Toast Portal Container */}
-      <div className="fixed top-5 right-5 z-60 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+      <div className="fixed top-5 right-5 z-[60] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
         <AnimatePresence>
           {toasts.map((t) => {
             let icon = <Info className="w-5 h-5 text-blue-500" />;
@@ -89,13 +89,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   <span className="text-sm font-bold text-zinc-900 dark:text-white">
                     {t.title || defaultTitle}
                   </span>
-                  <span className="text-xs text-zinc-650 dark:text-zinc-400 font-semibold leading-relaxed">
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold leading-relaxed">
                     {t.message}
                   </span>
                 </div>
                 <button
                   onClick={() => removeToast(t.id)}
-                  className="shrink-0 p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-455 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                  className="shrink-0 p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

@@ -17,13 +17,31 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
-  GraduationCap,
-  BookOpen,
-  Award,
   Lock,
   Phone,
   FileText
 } from "lucide-react";
+
+// Helper: Role → Redirect URL mapping (digunakan di semua login handlers)
+const ROLE_REDIRECT_MAP: Record<string, string> = {
+  "sek.pondok": "/sekretariat",
+  "sek.madrasah": "/sekretariat",
+  sekretariat: "/sekretariat",
+  mufattisy: "/mufattisy",
+  mundzir: "/pimpinan",
+  pimpinan: "/pimpinan",
+  mustahiq: "/mustahiq",
+  keamanan: "/keamanan",
+  "petugas keamanan": "/keamanan",
+  "wali santri": "/guardian",
+  wali_santri: "/guardian",
+};
+
+function getRedirectUrlByRole(role: string): string {
+  return ROLE_REDIRECT_MAP[role.trim().toLowerCase()] || "/sekretariat";
+}
+
+
 
 export default function Page() {
   const router = useRouter();
@@ -40,15 +58,6 @@ export default function Page() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const roles = [
-    { id: "sekretariat", href: "/sekretariat" },
-    { id: "mufattisy", href: "/mufattisy" },
-    { id: "mundzir", href: "/pimpinan" },
-    { id: "mustahiq", href: "/mustahiq" },
-    { id: "keamanan", href: "/keamanan" },
-    { id: "wali_santri", href: "/guardian" },
-  ];
-
   const [waContact, setWaContact] = useState("6281234567890");
 
   useEffect(() => {
@@ -64,19 +73,8 @@ export default function Page() {
 
   useEffect(() => {
     if (user) {
-      const roleStr = String(user.role).trim().toLowerCase();
-      let clientRoleKey = "mufattisy";
-      if (roleStr === "sek.pondok" || roleStr === "sek.madrasah") clientRoleKey = "sekretariat";
-      else if (roleStr === "mufattisy") clientRoleKey = "mufattisy";
-      else if (roleStr === "mundzir") clientRoleKey = "mundzir";
-      else if (roleStr === "mustahiq") clientRoleKey = "mustahiq";
-      else if (roleStr === "petugas keamanan" || roleStr === "keamanan") clientRoleKey = "keamanan";
-      else if (roleStr === "wali santri") clientRoleKey = "wali_santri";
-
-      const matchedRole = roles.find(r => r.id === clientRoleKey);
-      if (matchedRole) {
-        router.replace(matchedRole.href);
-      }
+      const redirectUrl = getRedirectUrlByRole(String(user.role));
+      router.replace(redirectUrl);
     }
   }, [user, router]);
 
@@ -101,19 +99,10 @@ export default function Page() {
 
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 
-      let redirectUrl = "/sekretariat";
-      const backendRole = String(resData.data?.role || "").trim().toLowerCase();
-
-      if (backendRole === "sek.pondok" || backendRole === "sek.madrasah") redirectUrl = "/sekretariat";
-      else if (backendRole === "mufattisy") redirectUrl = "/mufattisy";
-      else if (backendRole === "mundzir") redirectUrl = "/pimpinan";
-      else if (backendRole === "mustahiq") redirectUrl = "/mustahiq";
-      else if (backendRole === "petugas keamanan" || backendRole === "keamanan") redirectUrl = "/keamanan";
-      else if (backendRole === "wali santri") redirectUrl = "/guardian";
-
+      const redirectUrl = getRedirectUrlByRole(String(resData.data?.role || ""));
       router.push(redirectUrl);
-    } catch (err: any) {
-      setError(err.message || "Gagal masuk ke akun Anda.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Gagal masuk ke akun Anda.");
     } finally {
       setLoading(false);
     }
@@ -141,19 +130,10 @@ export default function Page() {
 
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 
-      let redirectUrl = "/sekretariat";
-      const backendRole = String(resData.data?.role || "").trim().toLowerCase();
-
-      if (backendRole === "sek.pondok" || backendRole === "sek.madrasah") redirectUrl = "/sekretariat";
-      else if (backendRole === "mufattisy") redirectUrl = "/mufattisy";
-      else if (backendRole === "mundzir") redirectUrl = "/pimpinan";
-      else if (backendRole === "mustahiq") redirectUrl = "/mustahiq";
-      else if (backendRole === "petugas keamanan" || backendRole === "keamanan") redirectUrl = "/keamanan";
-      else if (backendRole === "wali santri") redirectUrl = "/guardian";
-
+      const redirectUrl = getRedirectUrlByRole(String(resData.data?.role || ""));
       router.push(redirectUrl);
-    } catch (err: any) {
-      setError(err.message || "Gagal masuk ke akun Anda.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Gagal masuk ke akun Anda.");
     } finally {
       setLoading(false);
     }
@@ -185,17 +165,10 @@ export default function Page() {
 
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 
-      const roleStr = String(resData.data?.role || "").trim().toLowerCase();
-      let redirectUrl = "/guardian";
-      if (roleStr === "sek.pondok" || roleStr === "sek.madrasah") redirectUrl = "/sekretariat";
-      else if (roleStr === "mufattisy") redirectUrl = "/mufattisy";
-      else if (roleStr === "mundzir") redirectUrl = "/pimpinan";
-      else if (roleStr === "mustahiq") redirectUrl = "/mustahiq";
-      else if (roleStr === "keamanan") redirectUrl = "/keamanan";
-
+      const redirectUrl = getRedirectUrlByRole(String(resData.data?.role || ""));
       router.push(redirectUrl);
-    } catch (err: any) {
-      setError(err.message || "Login Google gagal.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Login Google gagal.");
     } finally {
       setGoogleLoading(false);
     }
@@ -223,8 +196,8 @@ export default function Page() {
       }
 
       setRegSuccess({ username: resData.data.username });
-    } catch (err: any) {
-      setError(err.message || "Pendaftaran gagal.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Pendaftaran gagal.");
     } finally {
       setLoading(false);
     }
@@ -534,7 +507,7 @@ export default function Page() {
                           <Lock className="w-3.5 h-3.5 text-emerald-400" />
                           <span>Langkah Selanjutnya:</span>
                         </div>
-                        <p>1. Silakan masuk menggunakan username di atas dan password default: <code className="text-emerald-400">mphm123</code></p>
+                        <p>1. Silakan masuk menggunakan username di atas dan password default: <code className="text-emerald-400">mubtadiaat123</code></p>
                         <p>2. Setelah masuk, Anda dapat menautkan akun Gmail di menu <strong>Pengaturan Akun</strong> untuk akses masuk instan selanjutnya.</p>
                       </div>
                       <button

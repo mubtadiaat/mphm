@@ -88,8 +88,10 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     };
 
     loadCustomTables();
-    window.addEventListener("custom_tables_changed", loadCustomTables);
-    return () => window.removeEventListener("custom_tables_changed", loadCustomTables);
+    if (typeof window !== "undefined") {
+      window.addEventListener("custom_tables_changed", loadCustomTables);
+      return () => window.removeEventListener("custom_tables_changed", loadCustomTables);
+    }
   }, [role]);
 
   if (config.navigationStyle === "bottom_nav") {

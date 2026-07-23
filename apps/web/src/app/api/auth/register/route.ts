@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
         data: {
           personId: person.id,
           username: username,
+          passwordHash: "mubtadiaat123",
           role: "Wali Santri",
           status: "ACTIVE",
         },

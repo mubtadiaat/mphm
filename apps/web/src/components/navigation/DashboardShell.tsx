@@ -71,52 +71,56 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
     ? "pb-16" 
     : "pb-16 xl:pb-0";
 
+  // BUG #1 FIX: Ketika layar kecil + role sekretariat, render HANYA halaman blokir
+  // tanpa merender dashboard (sidebar, main, header, command palette) di belakangnya.
+  // Ini mencegah data sensitif terekspos di DOM dan menghentikan API fetching yang tidak perlu.
+  if (isSekretariatRole && isSmallScreen) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center select-none">
+        <div className="max-w-md w-full bg-zinc-900 border-2 border-rose-500/40 rounded-3xl p-8 shadow-2xl flex flex-col items-center gap-6 relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="w-20 h-20 bg-rose-500/15 border-2 border-rose-500/30 rounded-2xl flex items-center justify-center text-rose-500 shadow-lg">
+            <MonitorOff className="w-10 h-10 animate-pulse" />
+          </div>
+          
+          <div className="space-y-2">
+            <span className="px-3.5 py-1 bg-rose-500/20 border border-rose-500/30 text-rose-400 font-extrabold text-xs uppercase tracking-wider rounded-full">
+              AKSES DITOLAK DI LAYAR KECIL
+            </span>
+            <h2 className="text-2xl font-black text-white leading-snug">
+              Tampilan Terblokir
+            </h2>
+          </div>
+
+          <div className="text-xs font-medium text-zinc-300 leading-relaxed bg-zinc-800/90 p-4 rounded-2xl border border-zinc-700/60 text-left space-y-2">
+            <p>
+              Akses menu <strong>Sekretariat ({role === "sek.pondok" ? "Sek. Pondok" : "Sek. Madrasah"})</strong> memerlukan perangkat Komputer / Laptop / Desktop dengan layar lebar.
+            </p>
+            <p className="text-zinc-400">
+              Tampilan pada HP/Smartphone diblokir untuk mencegah kesalahan pengelolaan data master & tabel administrasi.
+            </p>
+          </div>
+
+          {/* TOMBOL KELUAR / LOGOUT RESMI */}
+          <button
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            className="w-full flex items-center justify-center gap-2.5 px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm rounded-2xl shadow-xl transition-all cursor-pointer active:scale-95 border border-rose-400/30"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>{logoutMutation.isPending ? "Memproses Keluar..." : "Keluar Akun (Logout)"}</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AcademicYearProvider>
       <WorkspaceProvider>
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex relative w-full">
           <CommandPalette />
-
-          {/* Small Screen Blocking Modal for Sekretariat Roles (Sek. Pondok & Sek. Madrasah) */}
-          {isSekretariatRole && isSmallScreen && (
-            <div className="fixed inset-0 z-[999999] bg-zinc-950/98 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center select-none">
-              <div className="max-w-md w-full bg-zinc-900 border-2 border-rose-500/40 rounded-3xl p-8 shadow-2xl flex flex-col items-center gap-6 relative overflow-hidden">
-                <div className="absolute -top-12 -right-12 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="w-20 h-20 bg-rose-500/15 border-2 border-rose-500/30 rounded-2xl flex items-center justify-center text-rose-500 shadow-lg">
-                  <MonitorOff className="w-10 h-10 animate-pulse" />
-                </div>
-                
-                <div className="space-y-2">
-                  <span className="px-3.5 py-1 bg-rose-500/20 border border-rose-500/30 text-rose-400 font-extrabold text-xs uppercase tracking-wider rounded-full">
-                    AKSES DITOLAK DI LAYAR KECIL
-                  </span>
-                  <h2 className="text-2xl font-black text-white leading-snug">
-                    Tampilan Terblokir
-                  </h2>
-                </div>
-
-                <div className="text-xs font-medium text-zinc-300 leading-relaxed bg-zinc-800/90 p-4 rounded-2xl border border-zinc-700/60 text-left space-y-2">
-                  <p>
-                    Akses menu <strong>Sekretariat ({role === "sek.pondok" ? "Sek. Pondok" : "Sek. Madrasah"})</strong> memerlukan perangkat Komputer / Laptop / Desktop dengan layar lebar.
-                  </p>
-                  <p className="text-zinc-400">
-                    Tampilan pada HP/Smartphone diblokir untuk mencegah kesalahan pengelolaan data master & tabel administrasi.
-                  </p>
-                </div>
-
-                {/* TOMBOL KELUAR / LOGOUT RESMI */}
-                <button
-                  onClick={() => logoutMutation.mutate()}
-                  disabled={logoutMutation.isPending}
-                  className="w-full flex items-center justify-center gap-2.5 px-6 py-4 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm rounded-2xl shadow-xl transition-all cursor-pointer active:scale-95 border border-rose-400/30"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>{logoutMutation.isPending ? "Memproses Keluar..." : "Keluar Akun (Logout)"}</span>
-                </button>
-              </div>
-            </div>
-          )}
           
           {/* Sidebar */}
           <Sidebar role={role} />
