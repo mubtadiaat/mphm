@@ -32,8 +32,8 @@ export async function GET(req: NextRequest) {
       personId: userAccount.personId,
       username: userAccount.username,
       role: userAccount.role,
-      fullName: userAccount.person.fullName,
-      avatarUrl: userAccount.person.avatarUrl,
+      fullName: userAccount.person?.fullName || userAccount.username,
+      avatarUrl: userAccount.person?.avatarUrl || null,
       assignedClassId: null,
       familyCardNumber: null,
     };
