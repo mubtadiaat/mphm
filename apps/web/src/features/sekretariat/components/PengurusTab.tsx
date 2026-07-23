@@ -178,8 +178,8 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
         onRowClick={(row) => setViewingDetail(row as unknown as Pengurus)}
         tableName="pengurus"
         importExportProps={{
-          title: "Data Pengurus",
-          headers: ["name", "nik", "phone", "address"],
+          title: "Data Pengurus dan Struktur Organisasi",
+          headers: ["Nama Lengkap Pengurus", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: (rows) => console.log("Imported:", rows)
         }}
       />

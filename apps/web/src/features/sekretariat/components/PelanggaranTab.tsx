@@ -191,8 +191,8 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
         tableName="master_pelanggaran"
         onRowClick={(row) => setViewingDetail(row as unknown as ViolationType)}
         importExportProps={{
-          title: "Data Pelanggaran",
-          headers: ["Nama Aturan Pelanggaran", "Kategori Kedisiplinan", "Tingkat Keparahan", "Poin Penalty"],
+          title: "Master Data Aturan Pelanggaran dan Takzir",
+          headers: ["Nama Aturan Pelanggaran", "Kategori Kedisiplinan", "Tingkat Keparahan", "Poin Takzir"],
           onImportSuccess: (rows) => console.log("Imported:", rows)
         }}
       />

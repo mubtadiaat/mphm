@@ -235,10 +235,9 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
         onSearch={setSearchQuery}
         loading={isLoading}
         onRowClick={(row) => setViewingDetail(row as unknown as Room)}
-        tableName="rooms"
         importExportProps={{
-          title: "Data Kamar & Asrama Santri",
-          headers: ["name", "buildingName", "capacity", "supervisorName"],
+          title: "Data Kamar dan Asrama Santriwati",
+          headers: ["Nama Kamar Asrama", "Nama Gedung Blok", "Kapasitas Kamar", "Nama Pembina Kamar / Wali Asrama"],
         }}
       />
 

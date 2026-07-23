@@ -135,8 +135,8 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
         onRowClick={(row) => setViewingDetail(row as unknown as Pengurus)}
         tableName="mufattisy"
         importExportProps={{
-          title: "Data Mufattisy",
-          headers: ["name", "nik", "phone", "address"],
+          title: "Data Mufattisy dan Dewan Pengawas",
+          headers: ["Nama Lengkap Mufattisy", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: (rows) => console.log("Imported:", rows)
         }}
       />

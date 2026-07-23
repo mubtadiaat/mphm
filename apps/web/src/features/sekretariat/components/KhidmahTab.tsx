@@ -305,18 +305,18 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
         onRowClick={(row) => setViewingDetail(row as unknown as Santri)}
         tableName="santri_khidmah"
         importExportProps={{
-          title: `Data Induk - Masa Pengabdian (Khidmah)`,
-          headers: ["Nama Lengkap", "NIK", "Nomor Stambuk", "Kelas", "Alamat", "Status"],
+          title: "Data Induk Santriwati Masa Pengabdian (Khidmah)",
+          headers: ["Nama Lengkap Santriwati", "NIK Santri (16 Digit)", "Nomor Stambuk", "Kelas Aktif", "Alamat Lengkap", "Status Keaktifan"],
           onImportSuccess: async (importedRows) => {
             let successCount = 0;
             for (const r of importedRows) {
               try {
                 await createSantri({
-                  name: r["Nama Lengkap"] || "",
-                  nik: r["NIK"] || "",
+                  name: r["Nama Lengkap Santriwati"] || "",
+                  nik: r["NIK Santri (16 Digit)"] || "",
                   stambuk: r["Nomor Stambuk"] || "",
-                  class: r["Kelas"] || "",
-                  address: r["Alamat"] || "",
+                  class: r["Kelas Aktif"] || "",
+                  address: r["Alamat Lengkap"] || "",
                   status: "KHIDMAH",
                   gender: "P",
                   nis: r["Nomor Stambuk"] || "",

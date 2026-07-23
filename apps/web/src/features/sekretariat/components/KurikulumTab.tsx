@@ -193,8 +193,8 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
         onRowClick={(row) => setViewingDetail(row as unknown as Subject)}
         tableName="kurikulum"
         importExportProps={{
-          title: "Kurikulum Builder & Silabus",
-          headers: ["Kode Mapel", "Nama Pelajaran", "Tipe Pelajaran", "Status"],
+          title: "Master Data Kurikulum dan Mata Pelajaran Diniyyah",
+          headers: ["Kode Mata Pelajaran", "Nama Mata Pelajaran Diniyyah", "Tipe Mata Pelajaran", "Status Keaktifan"],
         }}
       />
 

@@ -133,8 +133,8 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         onRowClick={(row) => setViewingDetail(row as unknown as Guru)}
         tableName="mustahiq"
         importExportProps={{
-          title: "Data Mustahiq",
-          headers: ["name", "nik", "phone", "address"],
+          title: "Data Mustahiq dan Dewan Pengajar",
+          headers: ["Nama Lengkap Mustahiq", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: (rows) => console.log("Imported:", rows)
         }}
       />

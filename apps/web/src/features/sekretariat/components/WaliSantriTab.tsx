@@ -112,11 +112,10 @@ export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
         onRowClick={(row) => setDetailData(row as unknown as Record<string, any>)}
         tableName="wali_santri"
         importExportProps={{
-          title: "Data Wali Santri",
-          headers: ["Nama Wali", "NIK", "No Telepon", "Nomor KK"],
+          title: "Data Master Wali Santri",
+          headers: ["Nama Lengkap Wali", "NIK Wali (16 Digit)", "No. HP / WA Wali", "Nomor Kartu Keluarga (KK)"],
           onImportSuccess: (rows) => {
             console.log("Imported rows:", rows);
-            // toast(`Berhasil mengimpor ${rows.length} baris data`, "success", "Import Data");
           }
         }}
       />

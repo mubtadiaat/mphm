@@ -331,18 +331,18 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
         onRowClick={(row) => setViewingDetail(row as unknown as Santri)}
         tableName="santri_alumni"
         importExportProps={{
-          title: `Data Induk - Alumni`,
-          headers: ["Nama Lengkap", "NIK", "Nomor Stambuk", "Kelas", "Alamat", "Status"],
+          title: "Data Induk Siswi Alumni dan Lulusan Diniyyah",
+          headers: ["Nama Lengkap Santriwati", "NIK Santri (16 Digit)", "Nomor Stambuk", "Kelas Terakhir", "Alamat Lengkap", "Status Keaktifan"],
           onImportSuccess: async (importedRows) => {
             let successCount = 0;
             for (const r of importedRows) {
               try {
                 await createSantri({
-                  name: r["Nama Lengkap"] || "",
-                  nik: r["NIK"] || "",
+                  name: r["Nama Lengkap Santriwati"] || "",
+                  nik: r["NIK Santri (16 Digit)"] || "",
                   stambuk: r["Nomor Stambuk"] || "",
-                  class: r["Kelas"] || "",
-                  address: r["Alamat"] || "",
+                  class: r["Kelas Terakhir"] || "",
+                  address: r["Alamat Lengkap"] || "",
                   status: "GRADUATED",
                   gender: "P",
                   nis: r["Nomor Stambuk"] || "",

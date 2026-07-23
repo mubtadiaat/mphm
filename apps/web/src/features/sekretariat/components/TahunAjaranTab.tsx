@@ -246,8 +246,8 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
         }}
         tableName="tahun_ajaran"
         importExportProps={{
-          title: "Tahun Ajaran & Akademik",
-          headers: ["Tahun Akademik", "Tanggal Mulai", "Tanggal Berakhir", "Status Aktif"],
+          title: "Master Data Tahun Ajaran dan Kalender Akademik",
+          headers: ["Tahun Akademik", "Tanggal Mulai Ajaran", "Tanggal Berakhir Ajaran", "Status Keaktifan"],
         }}
       />
 

@@ -242,8 +242,8 @@ export function ArsipTab() {
                 onRowClick={(row) => setDetailData(row as unknown as Record<string, any>)}
                 tableName="arsip_santri"
                 importExportProps={{
-                  title: `Arsip Santri Terdaftar - ${selectedYearObj.name}`,
-                  headers: ["Nama Lengkap", "Nomor Stambuk", "Kelas (Histori)", "Status Akhir"],
+                  title: `Arsip Historis Santriwati Terdaftar - Tahun Akademik ${selectedYearObj.name}`,
+                  headers: ["Nama Lengkap Santriwati", "Nomor Stambuk", "Kelas (Riwayat Historis)", "Status Keaktifan Akhir"],
                   disableImport: true
                 }}
               />
@@ -259,8 +259,8 @@ export function ArsipTab() {
                 onRowClick={(row) => setDetailData(row as unknown as Record<string, any>)}
                 tableName="arsip_kelas"
                 importExportProps={{
-                  title: `Arsip Kelas & Rombel - ${selectedYearObj.name}`,
-                  headers: ["Nama Rombel", "Wali Kelas", "Kapasitas Rombel", "Jumlah Siswi"],
+                  title: `Arsip Rombongan Belajar dan Kelas Diniyyah - Tahun Akademik ${selectedYearObj.name}`,
+                  headers: ["Nama Rombongan Belajar", "Nama Mustahiq Wali Kelas", "Kapasitas Rombel", "Jumlah Siswi Active"],
                   disableImport: true
                 }}
               />
@@ -276,8 +276,8 @@ export function ArsipTab() {
                 onRowClick={(row) => setDetailData(row as unknown as Record<string, any>)}
                 tableName="arsip_nilai"
                 importExportProps={{
-                  title: `Arsip Nilai Kwartal - ${selectedYearObj.name}`,
-                  headers: ["Nama Lengkap", "Tauhid", "Fiqih", "Bahasa Arab", "Al-Qur'an"],
+                  title: `Arsip Nilai Kwartal Diniyyah - Tahun Akademik ${selectedYearObj.name}`,
+                  headers: ["Nama Lengkap Santriwati", "Nilai Aqidah/Tauhid", "Nilai Fiqih", "Nilai Shorof/Nahwu", "Nilai Akhlaq"],
                   disableImport: true
                 }}
               />
@@ -293,8 +293,8 @@ export function ArsipTab() {
                 onRowClick={(row) => setDetailData(row as unknown as Record<string, any>)}
                 tableName="arsip_pelanggaran"
                 importExportProps={{
-                  title: `Arsip Jurnal Pelanggaran - ${selectedYearObj.name}`,
-                  headers: ["Nama Santri", "Kategori", "Tingkat Keparahan", "Tanggal Insiden", "Keterangan"],
+                  title: `Arsip Pelanggaran dan Takzir Santriwati - Tahun Akademik ${selectedYearObj.name}`,
+                  headers: ["Nama Lengkap Santriwati", "Kategori Kedisiplinan", "Tingkat Keparahan", "Tanggal Pelanggaran", "Keterangan Takzir"],
                   disableImport: true
                 }}
               />

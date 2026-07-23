@@ -125,13 +125,19 @@ export function ImportExportToolbar({
     // Protect sheet
     await sheet.protect("mphm", { selectLockedCells: true, selectUnlockedCells: true });
 
-    // Set headers
-    sheet.columns = headers.map(h => ({ header: h, key: h, width: 25 }));
+    // Set headers & column formatting
+    sheet.columns = headers.map(h => ({ 
+      header: h, 
+      key: h, 
+      width: 28,
+      style: { numFmt: '@' } // Lock column format as TEXT to prevent scientific notation (e.g. 3,17E+15)
+    }));
+
     const headerRow = sheet.getRow(1);
 
     headerRow.eachCell((cell, colNumber) => {
       // Style headers
-      cell.font = { bold: true };
+      cell.font = { bold: true, color: { argb: 'FF1E293B' }, size: 11 };
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -140,64 +146,193 @@ export function ImportExportToolbar({
       cell.protection = { locked: true };
 
       const h = headers[colNumber - 1] || "";
-      let commentText = "Masukkan data sesuai dengan kolom yang diminta.";
-      if (h.toLowerCase().includes("nama")) commentText = "Masukkan nama lengkap santri sesuai dokumen resmi.";
-      else if (h.toLowerCase().includes("nik")) commentText = "Masukkan 16 digit Nomor Induk Kependudukan (NIK) resmi.";
-      else if (h.toLowerCase().includes("stambuk")) commentText = "Masukkan nomor stambuk induk dari madrasah.";
-      else if (h.toLowerCase().includes("kelas")) commentText = "Format kelas wajib. Contoh: Tsanawiyyah I-A.";
-      else if (h.toLowerCase().includes("alamat")) commentText = "Alamat lengkap menggunakan data wilayah.";
-      else if (h.toLowerCase().includes("nilai")) commentText = "Rentang nilai 0 - 10 (Maksimal 8 untuk mata pelajaran Diniyyah).";
+      const lowerH = h.toLowerCase();
+      
+      let commentText = `Masukkan data '${h}' sesuai dengan ketentuan dan format yang resmi.`;
+      
+      if (lowerH.includes("nik")) {
+        commentText = "Wajib diisi 16 digit angka Nomor Induk Kependudukan (NIK) resmi sesuai KTP/KK. (Format berupa Teks).";
+      } else if (lowerH.includes("kk") || lowerH.includes("keluarga")) {
+        commentText = "Wajib diisi 16 digit angka Nomor Kartu Keluarga (KK) resmi. (Format berupa Teks).";
+      } else if (lowerH.includes("stambuk")) {
+        commentText = "Nomor Induk Stambuk resmi santriwati/siswi di pondok/madrasah.";
+      } else if (lowerH.includes("nisn")) {
+        commentText = "Nomor Induk Siswa Nasional (10 digit angka jika ada).";
+      } else if (lowerH.includes("nis")) {
+        commentText = "Nomor Induk Siswa lokal Diniyyah.";
+      } else if (lowerH.includes("nama") && lowerH.includes("wali")) {
+        commentText = "Nama lengkap orang tua / wali penanggung jawab santriwati.";
+      } else if (lowerH.includes("nama")) {
+        commentText = "Nama lengkap sesuai dokumen resmi (KTP / Akta / Ijazah). Gunakan huruf kapital standar.";
+      } else if (lowerH.includes("jenis kelamin") || lowerH.includes("gender")) {
+        commentText = "Pilih / Ketik: 'P' (Perempuan / Santriwati) atau 'L' (Laki-laki).";
+      } else if (lowerH.includes("tempat lahir")) {
+        commentText = "Nama kota atau kabupaten tempat kelahiran.";
+      } else if (lowerH.includes("tanggal lahir")) {
+        commentText = "Format tanggal lahir: YYYY-MM-DD (Contoh: 2008-05-14).";
+      } else if (lowerH.includes("telepon") || lowerH.includes("hp") || lowerH.includes("wa")) {
+        commentText = "Nomor WhatsApp aktif diawali angka 08 atau 62 (Contoh: 081234567890).";
+      } else if (lowerH.includes("kelas") || lowerH.includes("rombel")) {
+        commentText = "Nama kelas / Rombel aktif (Contoh: 1 Ibtida'iyyah A, 2 Tsanawiyyah B).";
+      } else if (lowerH.includes("jenjang")) {
+        commentText = "Tingkat pendidikan Diniyyah: 'Ibtida'iyyah', 'Tsanawiyyah', atau 'Aliyyah'.";
+      } else if (lowerH.includes("asrama") || lowerH.includes("kamar") || lowerH.includes("blok")) {
+        commentText = "Nama kamar / asrama tempat tinggal santriwati (Contoh: Asrama Aisyah 1).";
+      } else if (lowerH.includes("alamat")) {
+        commentText = "Alamat domisili lengkap mencakup Jalan, RT/RW, Desa/Kelurahan, Kecamatan, dan Kabupaten.";
+      } else if (lowerH.includes("hubungan")) {
+        commentText = "Hubungan dengan santriwati (Contoh: AYAH, IBU, WALI, KAKAK).";
+      } else if (lowerH.includes("kategori")) {
+        commentText = "Pilihan kategori: 'Kedisiplinan', 'Akademik', 'Akhlaq', atau 'Pengasuhan'.";
+      } else if (lowerH.includes("keparahan") || lowerH.includes("tingkat")) {
+        commentText = "Tingkat pelanggaran: 'RINGAN', 'SEDANG', atau 'BERAT'.";
+      } else if (lowerH.includes("poin")) {
+        commentText = "Angka poin takzir / pelanggaran (Contoh: 5, 10, 25).";
+      } else if (lowerH.includes("tipe") || lowerH.includes("jenis")) {
+        commentText = "Jenis data: 'MAPEL' (Mata Pelajaran Diniyyah) atau 'NON_MAPEL' (Ekstrakurikuler/Praktek).";
+      } else if (lowerH.includes("status")) {
+        commentText = "Status keaktifan data: 'AKTIF' atau 'NON-AKTIF'.";
+      } else if (lowerH.includes("kode")) {
+        commentText = "Kode unik referensi data (Contoh: NHW-01, GURU-2026-001).";
+      } else if (lowerH.includes("nilai") || lowerH.includes("skor")) {
+        commentText = "Angka nilai Kwartal rentang 0.00 hingga 10.00 (Gunakan tanda titik '.' untuk desimal).";
+      } else if (lowerH.includes("sakit") || lowerH.includes("izin") || lowerH.includes("alfa")) {
+        commentText = "Jumlah hari / frekuensi presensi (Ketik angka bulat, contoh: 0, 1, 2).";
+      } else if (lowerH.includes("tahun")) {
+        commentText = "Format tahun ajaran / akademik (Contoh: 2026/2027 atau 2026).";
+      } else if (lowerH.includes("mustahiq") || lowerH.includes("guru") || lowerH.includes("pengajar")) {
+        commentText = "Nama pengajar / Mustahiq penanggung jawab kelas.";
+      } else if (lowerH.includes("mufattisy") || lowerH.includes("pengawas")) {
+        commentText = "Nama pengawas / Mufattisy pembina.";
+      } else if (lowerH.includes("alasan") || lowerH.includes("catatan") || lowerH.includes("keterangan")) {
+        commentText = "Uraian penjelasan atau catatan penting pendukung data.";
+      }
       
       // Add hidden note (comment) that appears on hover
       cell.note = commentText;
     });
 
-    // Add placeholder row and style as unlocked
+    // Add placeholder row and style as unlocked & text formatted
     const placeholderRowData: Record<string, string> = {};
     headers.forEach(h => {
       const lowerH = h.toLowerCase();
-      if (lowerH.includes("nama")) placeholderRowData[h] = "Contoh Nama Santri";
-      else if (lowerH.includes("nik")) placeholderRowData[h] = "3171010101990001";
-      else if (lowerH.includes("stambuk")) placeholderRowData[h] = "26071301";
-      else if (lowerH.includes("kelas")) placeholderRowData[h] = "Tsanawiyyah I-A";
-      else if (lowerH.includes("alamat")) placeholderRowData[h] = "Jl. H. Sholihin No. 45, Jakarta";
+      if (lowerH.includes("nik") && lowerH.includes("wali")) placeholderRowData[h] = "3506123456780001";
+      else if (lowerH.includes("nik")) placeholderRowData[h] = "3506123456780002";
+      else if (lowerH.includes("kk") || lowerH.includes("keluarga")) placeholderRowData[h] = "3506123456780000";
+      else if (lowerH.includes("stambuk")) placeholderRowData[h] = "2026001";
+      else if (lowerH.includes("nisn")) placeholderRowData[h] = "0081234567";
+      else if (lowerH.includes("nis")) placeholderRowData[h] = "NIS-2026-001";
+      else if (lowerH.includes("nama") && lowerH.includes("wali")) placeholderRowData[h] = "Bapak H. Mansur";
+      else if (lowerH.includes("nama") && (lowerH.includes("santri") || lowerH.includes("siswi"))) placeholderRowData[h] = "Aisyah Nabila";
+      else if (lowerH.includes("nama")) placeholderRowData[h] = "Siti Fatimah";
+      else if (lowerH.includes("jenis kelamin") || lowerH.includes("gender")) placeholderRowData[h] = "P";
+      else if (lowerH.includes("tempat lahir")) placeholderRowData[h] = "Kediri";
+      else if (lowerH.includes("tanggal lahir")) placeholderRowData[h] = "2008-05-14";
+      else if (lowerH.includes("telepon") || lowerH.includes("hp") || lowerH.includes("wa")) placeholderRowData[h] = "081234567890";
+      else if (lowerH.includes("kelas") || lowerH.includes("rombel")) placeholderRowData[h] = "1 Ibtida'iyyah A";
+      else if (lowerH.includes("jenjang")) placeholderRowData[h] = "Ibtida'iyyah";
+      else if (lowerH.includes("asrama") || lowerH.includes("kamar")) placeholderRowData[h] = "Asrama Aisyah 1";
+      else if (lowerH.includes("alamat")) placeholderRowData[h] = "Jl. KH. Abdul Karim No. 12, Lirboyo, Kediri";
+      else if (lowerH.includes("hubungan")) placeholderRowData[h] = "AYAH";
       else if (lowerH.includes("kategori")) placeholderRowData[h] = "Kedisiplinan";
-      else if (lowerH.includes("keparahan")) placeholderRowData[h] = "Sedang";
-      else if (lowerH.includes("poin")) placeholderRowData[h] = "10";
+      else if (lowerH.includes("keparahan") || lowerH.includes("tingkat")) placeholderRowData[h] = "RINGAN";
+      else if (lowerH.includes("poin")) placeholderRowData[h] = "5";
       else if (lowerH.includes("tipe") || lowerH.includes("jenis")) placeholderRowData[h] = "MAPEL";
       else if (lowerH.includes("status")) placeholderRowData[h] = "AKTIF";
-      else if (lowerH.includes("kode")) placeholderRowData[h] = "MP-001";
-      else placeholderRowData[h] = "Isi data di sini...";
+      else if (lowerH.includes("kode")) placeholderRowData[h] = "NHW-01";
+      else if (lowerH.includes("nilai") || lowerH.includes("skor")) placeholderRowData[h] = "8.50";
+      else if (lowerH.includes("sakit") || lowerH.includes("izin") || lowerH.includes("alfa")) placeholderRowData[h] = "0";
+      else if (lowerH.includes("tahun")) placeholderRowData[h] = "2026/2027";
+      else placeholderRowData[h] = "Isi data...";
     });
     
-    sheet.addRow(placeholderRowData);
+    const addedRow = sheet.addRow(placeholderRowData);
+    addedRow.eachCell((cell) => {
+      cell.numFmt = '@';
+    });
 
-    // Provide 500 unlocked rows for user input
+    // Provide 500 unlocked rows for user input formatted as text
     for (let r = 2; r <= 501; r++) {
       const row = sheet.getRow(r);
       for (let c = 1; c <= headers.length; c++) {
-        row.getCell(c).protection = { locked: false };
+        const cell = row.getCell(c);
+        cell.protection = { locked: false };
+        cell.numFmt = '@'; // Ensure any pasted or typed NIK/KK remains explicit text
       }
     }
 
     // Add a separate tab for instructions
     const wsPetunjuk = workbook.addWorksheet("Petunjuk Pengisian");
     wsPetunjuk.columns = [
-      { header: "Nama Kolom", key: "col", width: 25 },
-      { header: "Petunjuk Pengisian / Ketentuan", key: "desc", width: 80 }
+      { header: "Nama Kolom Header", key: "col", width: 30 },
+      { header: "Petunjuk Pengisian Lengkap & Ketentuan Format Data", key: "desc", width: 85 }
     ];
     
-    wsPetunjuk.getRow(1).font = { bold: true };
+    wsPetunjuk.getRow(1).font = { bold: true, color: { argb: 'FF1E293B' }, size: 11 };
     wsPetunjuk.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
 
     headers.forEach(h => {
-      let commentText = "Masukkan data sesuai dengan kolom yang diminta.";
-      if (h.toLowerCase().includes("nama")) commentText = "Masukkan nama lengkap santri sesuai dokumen resmi.";
-      else if (h.toLowerCase().includes("nik")) commentText = "Masukkan 16 digit Nomor Induk Kependudukan (NIK) resmi.";
-      else if (h.toLowerCase().includes("stambuk")) commentText = "Masukkan nomor stambuk induk dari madrasah.";
-      else if (h.toLowerCase().includes("kelas")) commentText = "Format kelas wajib. Contoh: Tsanawiyyah I-A.";
-      else if (h.toLowerCase().includes("alamat")) commentText = "Alamat lengkap menggunakan data wilayah.";
-      else if (h.toLowerCase().includes("nilai")) commentText = "Rentang nilai 0 - 10 (Maksimal 8 untuk mata pelajaran Diniyyah).";
+      const lowerH = h.toLowerCase();
+      let commentText = `Masukkan data '${h}' sesuai dengan ketentuan dan format yang resmi.`;
+      
+      if (lowerH.includes("nik")) {
+        commentText = "Wajib diisi 16 digit angka Nomor Induk Kependudukan (NIK) resmi sesuai KTP/KK.";
+      } else if (lowerH.includes("kk") || lowerH.includes("keluarga")) {
+        commentText = "Wajib diisi 16 digit angka Nomor Kartu Keluarga (KK) resmi.";
+      } else if (lowerH.includes("stambuk")) {
+        commentText = "Nomor Induk Stambuk resmi santriwati/siswi di pondok/madrasah.";
+      } else if (lowerH.includes("nisn")) {
+        commentText = "Nomor Induk Siswa Nasional (10 digit angka jika ada).";
+      } else if (lowerH.includes("nis")) {
+        commentText = "Nomor Induk Siswa lokal Diniyyah.";
+      } else if (lowerH.includes("nama") && lowerH.includes("wali")) {
+        commentText = "Nama lengkap orang tua / wali penanggung jawab santriwati.";
+      } else if (lowerH.includes("nama")) {
+        commentText = "Nama lengkap sesuai dokumen resmi (KTP / Akta / Ijazah). Gunakan huruf kapital standar.";
+      } else if (lowerH.includes("jenis kelamin") || lowerH.includes("gender")) {
+        commentText = "Pilih / Ketik: 'P' (Perempuan / Santriwati) atau 'L' (Laki-laki).";
+      } else if (lowerH.includes("tempat lahir")) {
+        commentText = "Nama kota atau kabupaten tempat kelahiran.";
+      } else if (lowerH.includes("tanggal lahir")) {
+        commentText = "Format tanggal lahir: YYYY-MM-DD (Contoh: 2008-05-14).";
+      } else if (lowerH.includes("telepon") || lowerH.includes("hp") || lowerH.includes("wa")) {
+        commentText = "Nomor WhatsApp aktif diawali angka 08 atau 62 (Contoh: 081234567890).";
+      } else if (lowerH.includes("kelas") || lowerH.includes("rombel")) {
+        commentText = "Nama kelas / Rombel aktif (Contoh: 1 Ibtida'iyyah A, 2 Tsanawiyyah B).";
+      } else if (lowerH.includes("jenjang")) {
+        commentText = "Tingkat pendidikan Diniyyah: 'Ibtida'iyyah', 'Tsanawiyyah', atau 'Aliyyah'.";
+      } else if (lowerH.includes("asrama") || lowerH.includes("kamar") || lowerH.includes("blok")) {
+        commentText = "Nama kamar / asrama tempat tinggal santriwati (Contoh: Asrama Aisyah 1).";
+      } else if (lowerH.includes("alamat")) {
+        commentText = "Alamat domisili lengkap mencakup Jalan, RT/RW, Desa/Kelurahan, Kecamatan, dan Kabupaten.";
+      } else if (lowerH.includes("hubungan")) {
+        commentText = "Hubungan dengan santriwati (Contoh: AYAH, IBU, WALI, KAKAK).";
+      } else if (lowerH.includes("kategori")) {
+        commentText = "Pilihan kategori: 'Kedisiplinan', 'Akademik', 'Akhlaq', atau 'Pengasuhan'.";
+      } else if (lowerH.includes("keparahan") || lowerH.includes("tingkat")) {
+        commentText = "Tingkat pelanggaran: 'RINGAN', 'SEDANG', atau 'BERAT'.";
+      } else if (lowerH.includes("poin")) {
+        commentText = "Angka poin takzir / pelanggaran (Contoh: 5, 10, 25).";
+      } else if (lowerH.includes("tipe") || lowerH.includes("jenis")) {
+        commentText = "Jenis data: 'MAPEL' (Mata Pelajaran Diniyyah) atau 'NON_MAPEL' (Ekstrakurikuler/Praktek).";
+      } else if (lowerH.includes("status")) {
+        commentText = "Status keaktifan data: 'AKTIF' atau 'NON-AKTIF'.";
+      } else if (lowerH.includes("kode")) {
+        commentText = "Kode unik referensi data (Contoh: NHW-01, GURU-2026-001).";
+      } else if (lowerH.includes("nilai") || lowerH.includes("skor")) {
+        commentText = "Angka nilai Kwartal rentang 0.00 hingga 10.00 (Gunakan tanda titik '.' untuk desimal).";
+      } else if (lowerH.includes("sakit") || lowerH.includes("izin") || lowerH.includes("alfa")) {
+        commentText = "Jumlah hari / frekuensi presensi (Ketik angka bulat, contoh: 0, 1, 2).";
+      } else if (lowerH.includes("tahun")) {
+        commentText = "Format tahun ajaran / akademik (Contoh: 2026/2027 atau 2026).";
+      } else if (lowerH.includes("mustahiq") || lowerH.includes("guru") || lowerH.includes("pengajar")) {
+        commentText = "Nama pengajar / Mustahiq penanggung jawab kelas.";
+      } else if (lowerH.includes("mufattisy") || lowerH.includes("pengawas")) {
+        commentText = "Nama pengawas / Mufattisy pembina.";
+      } else if (lowerH.includes("alasan") || lowerH.includes("catatan") || lowerH.includes("keterangan")) {
+        commentText = "Uraian penjelasan atau catatan penting pendukung data.";
+      }
+
       wsPetunjuk.addRow({ col: h, desc: commentText });
     });
 

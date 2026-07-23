@@ -163,8 +163,8 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
         onRowClick={(row) => setViewingDetail(row as unknown as Pengurus)}
         tableName="mundzir"
         importExportProps={{
-          title: "Data Mundzir",
-          headers: ["name", "nik", "phone", "address"],
+          title: "Data Mundzir dan Pimpinan Pesantren",
+          headers: ["Nama Lengkap Mundzir", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: (rows) => console.log("Imported:", rows)
         }}
       />
