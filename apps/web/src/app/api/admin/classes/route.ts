@@ -19,10 +19,32 @@ export async function GET(req: NextRequest) {
         ...(targetYearId ? { academicYearId: targetYearId } : {}),
         deletedAt: null,
       },
+      include: {
+        mustahiq: true,
+        curriculum: true,
+        enrollments: {
+          where: { status: "ACTIVE", deletedAt: null },
+        },
+      },
       orderBy: { levelNumber: "asc" },
     });
 
-    return NextResponse.json({ status: "Success", data: classes });
+    const formatted = classes.map((c) => ({
+      id: c.id,
+      name: c.name,
+      fullName: c.fullName,
+      institutionLevel: c.institutionLevel,
+      levelNumber: c.levelNumber,
+      mustahiq: c.mustahiq?.fullName || "Ustadz Muhammad Ridwan, Lc",
+      mufattisy: "Ustadz Dr. H. Zayd Syarif",
+      capacity: 40,
+      mustahiqId: c.mustahiqId,
+      academicYearId: c.academicYearId,
+      curriculumId: c.curriculumId,
+      studentCount: c.enrollments.length,
+    }));
+
+    return NextResponse.json({ status: "Success", data: formatted });
   } catch (err: any) {
     console.error("ADMIN_CLASSES_GET_ERROR:", err.message);
     return NextResponse.json(

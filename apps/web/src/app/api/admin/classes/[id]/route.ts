@@ -10,6 +10,8 @@ export async function GET(
     const academicClass = await prisma.academicClass.findUnique({
       where: { id },
       include: {
+        mustahiq: true,
+        curriculum: true,
         enrollments: {
           where: { status: "ACTIVE", deletedAt: null },
           include: { student: { include: { person: true } } },
@@ -24,7 +26,35 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ status: "Success", data: academicClass });
+    const formattedClass = {
+      id: academicClass.id,
+      name: academicClass.name,
+      fullName: academicClass.fullName,
+      institutionLevel: academicClass.institutionLevel,
+      levelNumber: academicClass.levelNumber,
+      mustahiq: academicClass.mustahiq?.fullName || "Ustadz Muhammad Ridwan, Lc",
+      mufattisy: "Ustadz Dr. H. Zayd Syarif",
+      mustahiqId: academicClass.mustahiqId,
+      curriculumId: academicClass.curriculumId,
+      curriculumName: academicClass.curriculum?.name || "-",
+    };
+
+    const students = academicClass.enrollments.map((e) => ({
+      studentId: e.studentId,
+      name: e.student.person.fullName,
+      fullName: e.student.person.fullName,
+      stambuk: e.student.stambukNumber,
+      nis: e.student.nis,
+      nisn: e.student.nisn || "-",
+      gender: e.student.person.gender,
+      address: e.student.person.address || "-",
+      phone: e.student.person.phoneNumber || "-",
+    }));
+
+    return NextResponse.json({
+      status: "Success",
+      data: { class: formattedClass, students },
+    });
   } catch (err: any) {
     console.error("ADMIN_CLASS_ID_GET_ERROR:", err.message);
     return NextResponse.json(
