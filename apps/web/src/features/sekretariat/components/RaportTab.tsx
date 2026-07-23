@@ -2,13 +2,14 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { FileText, X, Printer } from "lucide-react";
+import { FileText, X, Printer, Eye, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { IdentityCell } from "@/components/shared/IdentityCell";
 
 import { useClasses } from "../queries/useClasses";
 import { useAssessmentMatrix } from "../queries/useManajemenNilai";
+import { useAuth } from "@/lib/auth";
 
 interface StudentScore {
   id: string;
@@ -21,6 +22,9 @@ interface StudentScore {
 }
 
 export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
+  const { data: user } = useAuth();
+  const isSekretariat = user?.role === "Sekretariat" || user?.role === "ADMIN" || user?.role === "DEVELOPER" || user?.role === "Pimpinan";
+
   const [selectedSemester, setSelectedSemester] = useState<1 | 2>(1);
   
   const { data: classes = [] } = useClasses(selectedYearId);
@@ -117,14 +121,19 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
     },
     { accessorKey: "class", header: "Kelas", cell: info => <span className="font-semibold">{info.getValue() as string}</span> },
     {
-      id: "actions", header: "Cetak Dokumen",
+      id: "actions", 
+      header: isSekretariat ? "Cetak Dokumen" : "Pratinjau Dokumen",
       cell: info => (
         <button 
           onClick={(e) => { e.stopPropagation(); handleCetak(info.row.original); }}
-          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition-colors border border-indigo-200"
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
+            isSekretariat 
+              ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+              : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300"
+          }`}
         >
-          <Printer className="w-3.5 h-3.5" />
-          <span>Cetak Raport</span>
+          {isSekretariat ? <Printer className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          <span>{isSekretariat ? "Cetak Raport" : "Lihat Raport"}</span>
         </button>
       )
     }
@@ -188,7 +197,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
               <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-zinc-950">
                 <div className="flex items-center gap-3">
                   <Printer className="w-5 h-5 text-indigo-600" />
-                  <h3 className="font-bold text-lg">Print Preview Raport</h3>
+                  <h3 className="font-bold text-lg">{isSekretariat ? "Print Preview Raport" : "Pratinjau Raport Santri"}</h3>
                 </div>
                 <button onClick={() => setShowPreview(false)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-xl"><X className="w-5 h-5"/></button>
               </div>
@@ -254,11 +263,22 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
                 </div>
               </div>
 
-              <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-end gap-3 bg-white dark:bg-zinc-950">
-                <button onClick={() => setShowPreview(false)} className="px-5 py-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">Tutup</button>
-                <button onClick={() => window.print()} className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 transition-colors flex items-center gap-2">
-                  <Printer className="w-4 h-4" /> Cetak Fisik
-                </button>
+              <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-3 bg-white dark:bg-zinc-950">
+                {!isSekretariat ? (
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-medium bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <ShieldAlert className="w-4 h-4 shrink-0" />
+                    <span>Hanya Kesekretariatan yang memiliki akses untuk mencetak fisik Raport.</span>
+                  </div>
+                ) : <div />}
+
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setShowPreview(false)} className="px-5 py-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">Tutup</button>
+                  {isSekretariat && (
+                    <button onClick={() => window.print()} className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 transition-colors flex items-center gap-2">
+                      <Printer className="w-4 h-4" /> Cetak Fisik
+                    </button>
+                  )}
+                </div>
               </div>
             </motion.div>
           </div>
