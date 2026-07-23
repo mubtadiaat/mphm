@@ -15,6 +15,7 @@ import { FallbackAvatar } from "@/components/shared/FallbackAvatar";
 import { RegionSelector } from "@/components/shared/RegionSelector";
 import { TableActions } from "@/components/shared/TableActions";
 import { useSantri, Santri } from "../queries/useSantri";
+import { useClasses } from "../queries/useClasses";
 import { useToast } from "@/components/shared/ToastContext";
 import { useWorkspace, WorkspaceType } from "@/components/shared/WorkspaceContext";
 import { apiRequest } from "@/lib/api";
@@ -42,7 +43,18 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: queryResult, isLoading, createSantri, updateSantri, deleteSantri } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, activeSubTab);
+  const { data: dbClasses = [] } = useClasses(selectedYearId);
   
+  const [dbRooms, setDbRooms] = useState<Array<{ id: string; name: string; buildingName: string }>>([]);
+
+  useEffect(() => {
+    apiRequest<{ data: Array<{ id: string; name: string; buildingName: string }> }>("/api/admin/rooms")
+      .then((res) => {
+        if (res.data) setDbRooms(res.data);
+      })
+      .catch((err) => console.error("Failed to load rooms", err));
+  }, []);
+
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
@@ -75,7 +87,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // Form States - II. Akademis / Keasramaan
+  // Form States - II. Akademis / Keasramaan (Dynamic Dropdowns)
   const [newStambuk, setNewStambuk] = useState("");
   const [newNis, setNewNis] = useState("");
   const [newNisn, setNewNisn] = useState("");
@@ -101,9 +113,6 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       : "Madrasah Putri Hidayatul Mubtadi'aat [MPHM] Lirboyo"
   );
   const [newKhidmahRole, setNewKhidmahRole] = useState(isPondok ? "Musyrifah Asrama" : "Pengajar Diniyyah");
-  const [newKhidmahRoom, setNewKhidmahRoom] = useState("Asrama Aisyah 1");
-  const [newKhidmahStart, setNewKhidmahStart] = useState("2026");
-  const [newKhidmahEnd, setNewKhidmahEnd] = useState("2027");
 
   // Media Upload States
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -121,8 +130,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     setNewNis("");
     setNewNisn("");
     setNewJenjang("Tsanawiyyah");
-    setNewClass("Tsanawiyyah I-A");
-    setNewRoom("Asrama Aisyah 1");
+    setNewClass(dbClasses[0]?.name || "Tsanawiyyah I-A");
+    setNewRoom(dbRooms[0]?.name || "Asrama Aisyah 1");
     setNewEnrollmentYear(new Date().getFullYear());
     setNewGraduationYear(undefined);
     setNewStatus("ACTIVE");
@@ -288,7 +297,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       cell: (info) => (
         <div className="flex flex-col gap-0.5 text-left">
           <span className="font-bold text-emerald-700 dark:text-emerald-400">Asrama Aisyah 1</span>
-          <span className="text-xs text-zinc-500 font-semibold">Gedung Aisyah (Lantai 2)</span>
+          <span className="text-xs text-zinc-500 font-semibold">Gedung Aisyah</span>
         </div>
       ),
     },
@@ -464,7 +473,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         </button>
       </div>
 
-      {/* Distinct Sub-tabs Menu */}
+      {/* Sub-tabs Menu */}
       <div className="flex border-b border-zinc-200 dark:border-zinc-800 gap-1 overflow-x-auto pb-px">
         <button
           onClick={() => setActiveSubTab("aktif")}
@@ -568,7 +577,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden relative z-10 max-h-[92vh] flex flex-col"
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden relative z-10 max-h-[92vh] flex flex-col"
             >
               <div className={`p-5 border-b flex justify-between items-center ${
                 isPondok 
@@ -582,7 +591,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                       : (isPondok ? "Registrasi Santriwati Asrama Baru (P3HM)" : "Registrasi Siswi Diniyyah Baru (MPHM)")
                     }
                   </h3>
-                  <p className="text-xs text-zinc-500">Lengkapi data 6-bagian: identitas pribadi, akademis, alamat, wali (Smart KK), dan khidmah.</p>
+                  <p className="text-xs text-zinc-500">Lengkapi data 6-bagian: identitas pribadi, akademis/kamar, alamat (dropdown wilayah), wali (Smart KK), dan khidmah.</p>
                 </div>
                 <button onClick={() => setShowFormModal(false)} className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-xl transition-colors text-zinc-500 cursor-pointer">
                   <X className="w-5 h-5" />
@@ -622,55 +631,128 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   </div>
                 </div>
 
-                {/* Form Fields */}
+                {/* Form Fields - I. Pribadi */}
                 <div className="space-y-4">
                   <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">I. Informasi Pribadi</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500">Nama Lengkap *</label>
-                      <input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm" />
+                      <label className="text-xs font-bold text-zinc-500">Nama Lengkap Santriwati *</label>
+                      <input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm" />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-zinc-500">NIK (16 Digit) *</label>
-                      <input type="text" required maxLength={16} value={newNik} onChange={(e) => setNewNik(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                      <input type="text" required maxLength={16} value={newNik} onChange={(e) => setNewNik(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">Tempat Lahir</label>
+                      <input type="text" value={newBirthPlace} onChange={(e) => setNewBirthPlace(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">Tanggal Lahir</label>
+                      <input type="date" value={newBirthDate} onChange={(e) => setNewBirthDate(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm" />
+                    </div>
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
+                      <label className="text-xs font-bold text-zinc-500">No. HP / WA Santri</label>
+                      <input type="text" value={newPhoneNumber} onChange={(e) => setNewPhoneNumber(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono" />
                     </div>
                   </div>
                 </div>
 
+                {/* Form Fields - II. Akademis / Keasramaan (Dropdown Pemanggilan Database) */}
                 <div className="space-y-4">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">II. Informasi Akademik / Asrama</span>
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">II. Informasi Akademik & Asrama (Dropdown Pemanggilan Database)</span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-zinc-500">Nomor Stambuk *</label>
-                      <input type="text" required value={newStambuk} onChange={(e) => setNewStambuk(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                      <input type="text" required value={newStambuk} onChange={(e) => setNewStambuk(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono" />
                     </div>
+
+                    {/* DROPDOWN KELAS DINIYYAH DARI MENU/DATABASE */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500">{isPondok ? "Kamar Asrama" : "Kelas Diniyyah"}</label>
-                      <input type="text" value={newClass} onChange={(e) => setNewClass(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm" />
+                      <label className="text-xs font-bold text-zinc-500">Kelas Diniyyah (Database) *</label>
+                      <select 
+                        value={newClass} 
+                        onChange={(e) => setNewClass(e.target.value)}
+                        className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400"
+                      >
+                        {dbClasses.length > 0 ? (
+                          dbClasses.map((c) => (
+                            <option key={c.id} value={c.name}>{c.name} ({c.mustahiq || "Wali Kelas"})</option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="I'dadiyyah I-A">I&apos;dadiyyah I-A</option>
+                            <option value="I'dadiyyah I-B">I&apos;dadiyyah I-B</option>
+                            <option value="Tsanawiyyah I-A">Tsanawiyyah I-A</option>
+                            <option value="Tsanawiyyah I-B">Tsanawiyyah I-B</option>
+                            <option value="Aliyyah I-A">Aliyyah I-A</option>
+                            <option value="Aliyyah III-A">Aliyyah III-A</option>
+                          </>
+                        )}
+                      </select>
                     </div>
+
+                    {/* DROPDOWN KAMAR ASRAMA DARI MENU/DATABASE */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500">Nomor KK (Smart KK) *</label>
-                      <input type="text" required maxLength={16} value={newFamilyCardNumber} onChange={(e) => setNewFamilyCardNumber(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                      <label className="text-xs font-bold text-zinc-500">Kamar Asrama (Database) *</label>
+                      <select 
+                        value={newRoom} 
+                        onChange={(e) => setNewRoom(e.target.value)}
+                        className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-emerald-600 dark:text-emerald-400"
+                      >
+                        {dbRooms.length > 0 ? (
+                          dbRooms.map((r) => (
+                            <option key={r.id} value={r.name}>{r.name} ({r.buildingName})</option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="Asrama Aisyah 1">Asrama Aisyah 1 (Gedung Aisyah)</option>
+                            <option value="Asrama Aisyah 2">Asrama Aisyah 2 (Gedung Aisyah)</option>
+                            <option value="Asrama Fatimah 1">Asrama Fatimah 1 (Gedung Fatimah)</option>
+                            <option value="Asrama Khadijah 1">Asrama Khadijah 1 (Gedung Khadijah)</option>
+                          </>
+                        )}
+                      </select>
                     </div>
                   </div>
                 </div>
 
+                {/* Form Fields - III. Alamat Lengkap Dropdown Wilayah */}
                 <div className="space-y-4">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">III. Data Wali Santri</span>
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">III. Alamat Lengkap (Dropdown Wilayah Indonesia)</span>
+                  <RegionSelector onChange={(addr) => setNewAddress(addr)} />
+                  {newAddress && (
+                    <div className="p-3.5 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 rounded-xl text-xs flex items-start gap-2">
+                      <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-blue-700 dark:text-blue-400">Hasil Format Alamat Induk:</span>
+                        <p className="text-zinc-700 dark:text-zinc-300 mt-0.5 font-medium">{newAddress}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Form Fields - IV. Data Wali Santri (Smart KK) */}
+                <div className="space-y-4">
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">IV. Data Wali Santri (Smart KK Mapping)</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-zinc-500">Nama Lengkap Wali *</label>
-                      <input type="text" required value={newGuardianName} onChange={(e) => setNewGuardianName(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm" />
+                      <input type="text" required value={newGuardianName} onChange={(e) => setNewGuardianName(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm" />
                     </div>
                     <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">Nomor Kartu Keluarga (KK) *</label>
+                      <input type="text" required maxLength={16} value={newFamilyCardNumber} onChange={(e) => setNewFamilyCardNumber(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono" />
+                    </div>
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
                       <label className="text-xs font-bold text-zinc-500">No. WhatsApp Wali *</label>
-                      <input type="text" required value={newGuardianPhone} onChange={(e) => setNewGuardianPhone(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                      <input type="text" required value={newGuardianPhone} onChange={(e) => setNewGuardianPhone(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono" />
                     </div>
                   </div>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t">
-                  <button type="button" onClick={() => setShowFormModal(false)} className="px-4 py-2 text-sm font-bold bg-zinc-100 hover:bg-zinc-200 rounded-xl">Batal</button>
+                  <button type="button" onClick={() => setShowFormModal(false)} className="px-4 py-2 text-sm font-bold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 rounded-xl">Batal</button>
                   <button type="submit" className={`px-6 py-2 text-sm font-bold text-white rounded-xl shadow-md ${isPondok ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"}`}>
                     {editingSantri ? "Simpan Perubahan" : "Daftarkan"}
                   </button>
@@ -681,14 +763,14 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         )}
       </AnimatePresence>
 
-      {/* Dynamic Modal Header profil Santri (Pondok vs Madrasah) */}
+      {/* Modal Detail Profil Santri */}
       <AnimatePresence>
         {selectedSantriForDetail && (
           <div className="fixed inset-0 z-55 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedSantriForDetail(null)} className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden relative z-10 max-h-[92vh] flex flex-col">
               
-              {/* HEADER PROFIL SANTRI RESMI: FOTO - STAMBUK - NAMA LENGKAP SANTRIWATI (NAMA WALI) - KAMAR/KELAS - STATUS */}
+              {/* HEADER PROFIL SANTRI RESMI */}
               <div className={`p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md ${
                 isPondok 
                   ? "bg-linear-to-r from-emerald-700 via-teal-700 to-emerald-900" 
