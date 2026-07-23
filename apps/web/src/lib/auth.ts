@@ -17,11 +17,15 @@ export interface UserSession {
 }
 
 export function useAuth() {
-  return useQuery<UserSession>({
+  return useQuery<UserSession | null>({
     queryKey: ["auth-session"],
     queryFn: async () => {
-      const response = await apiRequest<{ data: UserSession }>("/api/auth/me");
-      return response.data;
+      try {
+        const response = await apiRequest<{ data: UserSession }>("/api/auth/me");
+        return response.data;
+      } catch (_err) {
+        return null;
+      }
     },
     staleTime: 5 * 60 * 1000,
     retry: false,
