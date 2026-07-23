@@ -123,7 +123,10 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
           
           <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${paddingClass}`}>
             <header className="h-20 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 flex items-center px-6 sticky top-0 z-40 justify-between">
-              <div className="flex-1 font-extrabold text-xl md:hidden text-zinc-800 dark:text-zinc-200">MPHM 4.0</div>
+              <div className="flex-1 flex items-center gap-2.5 md:hidden">
+                <img src="/logo.png" alt="MPHM Logo" className="w-8 h-8 object-contain rounded-lg shadow-xs" />
+                <span className="font-extrabold text-xl tracking-tight text-zinc-900 dark:text-white">MPHM 4.0</span>
+              </div>
               <div className="flex-1 hidden md:block"></div>
               <GlobalHeaderActions role={role} />
             </header>
