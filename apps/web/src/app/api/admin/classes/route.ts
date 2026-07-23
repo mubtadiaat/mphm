@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       targetYearId = activeYear?.id || null;
     }
 
-    const classes = await prisma.academicClass.findMany({
+    const classes = await (prisma.academicClass as any).findMany({
       where: {
         ...(targetYearId ? { academicYearId: targetYearId } : {}),
         deletedAt: null,
@@ -29,19 +29,19 @@ export async function GET(req: NextRequest) {
       orderBy: { levelNumber: "asc" },
     });
 
-    const formatted = classes.map((c) => ({
+    const formatted = classes.map((c: any) => ({
       id: c.id,
       name: c.name,
       fullName: c.fullName,
       institutionLevel: c.institutionLevel,
       levelNumber: c.levelNumber,
-      mustahiq: c.mustahiq?.fullName || "Ustadz Muhammad Ridwan, Lc",
-      mufattisy: "Ustadz Dr. H. Zayd Syarif",
+      mustahiq: c.mustahiq?.fullName || "-",
+      mufattisy: "-",
       capacity: 40,
       mustahiqId: c.mustahiqId,
       academicYearId: c.academicYearId,
       curriculumId: c.curriculumId,
-      studentCount: c.enrollments.length,
+      studentCount: c.enrollments?.length || 0,
     }));
 
     return NextResponse.json({ status: "Success", data: formatted });

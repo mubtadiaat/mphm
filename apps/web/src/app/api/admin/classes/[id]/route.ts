@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const academicClass = await prisma.academicClass.findUnique({
+    const academicClass: any = await (prisma.academicClass as any).findUnique({
       where: { id },
       include: {
         mustahiq: true,
@@ -32,23 +32,23 @@ export async function GET(
       fullName: academicClass.fullName,
       institutionLevel: academicClass.institutionLevel,
       levelNumber: academicClass.levelNumber,
-      mustahiq: academicClass.mustahiq?.fullName || "Ustadz Muhammad Ridwan, Lc",
-      mufattisy: "Ustadz Dr. H. Zayd Syarif",
+      mustahiq: academicClass.mustahiq?.fullName || "-",
+      mufattisy: "-",
       mustahiqId: academicClass.mustahiqId,
       curriculumId: academicClass.curriculumId,
       curriculumName: academicClass.curriculum?.name || "-",
     };
 
-    const students = academicClass.enrollments.map((e) => ({
+    const students = (academicClass.enrollments || []).map((e: any) => ({
       studentId: e.studentId,
-      name: e.student.person.fullName,
-      fullName: e.student.person.fullName,
-      stambuk: e.student.stambukNumber,
-      nis: e.student.nis,
-      nisn: e.student.nisn || "-",
-      gender: e.student.person.gender,
-      address: e.student.person.address || "-",
-      phone: e.student.person.phoneNumber || "-",
+      name: e.student?.person?.fullName || "-",
+      fullName: e.student?.person?.fullName || "-",
+      stambuk: e.student?.stambukNumber || "-",
+      nis: e.student?.nis || "-",
+      nisn: e.student?.nisn || "-",
+      gender: e.student?.person?.gender || "P",
+      address: e.student?.person?.address || "-",
+      phone: e.student?.person?.phoneNumber || "-",
     }));
 
     return NextResponse.json({
