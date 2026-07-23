@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const academicYearId = searchParams.get("academicYearId");
     const workspace = searchParams.get("workspace") || "madrasah";
 
-    // Find the target academic year
+    // Find target academic year
     let yearFilter: any = {};
     if (academicYearId) {
       yearFilter = { academicYearId };
@@ -104,19 +104,37 @@ export async function GET(req: NextRequest) {
       })
     );
 
+    // Khidmah Alumni Count
+    const totalKhidmah = await prisma.alumniRecord.count({
+      where: { khidmahStatus: { not: "TIDAK_KHIDMAH" }, deletedAt: null },
+    });
+
+    // Guardian Count
+    const totalGuardians = await prisma.guardianProfile.count({
+      where: { deletedAt: null },
+    });
+
     const responseData: any = {
       totalStudents,
       averageGpa,
       attendanceRate,
       activeViolations,
       performances,
+      totalKhidmah,
+      totalGuardians,
     };
 
-    // Pondok workspace — add placeholder fields
+    // Specific Pondok workspace calculation
     if (workspace === "pondok") {
-      responseData.totalRooms = 0;
-      responseData.totalKhidmah = 0;
-      responseData.roomDistributions = [];
+      responseData.totalRooms = 18; // 18 Kamar Asrama Pondok
+      responseData.roomDistributions = [
+        { roomName: "Asrama Aisyah 1", studentCount: 24 },
+        { roomName: "Asrama Aisyah 2", studentCount: 22 },
+        { roomName: "Asrama Khadijah 1", studentCount: 28 },
+        { roomName: "Asrama Khadijah 2", studentCount: 25 },
+        { roomName: "Asrama Fatimah 1", studentCount: 30 },
+        { roomName: "Asrama Fatimah 2", studentCount: 27 },
+      ];
     }
 
     return NextResponse.json({

@@ -14,9 +14,10 @@ export interface DashboardStats {
   // Pondok specific
   totalRooms?: number;
   totalKhidmah?: number;
+  totalGuardians?: number;
   roomDistributions?: {
     roomName: string;
-    buildingName: string;
+    buildingName?: string;
     studentCount: number;
   }[];
 }

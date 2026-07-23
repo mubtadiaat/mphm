@@ -26,27 +26,33 @@ function WorkspaceSwitcher({ role }: { role: RoleTypes }) {
   if (role !== "sekretariat") return null;
 
   return (
-    <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-xl mr-4 border border-zinc-200 dark:border-zinc-700">
-      <button
-        onClick={() => setActiveWorkspace("pondok")}
-        className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold tracking-wide transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-          activeWorkspace === "pondok" 
-            ? "bg-emerald-600 text-white shadow-md" 
-            : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-        }`}
-      >
-        <span className="text-sm">🏠</span> PONDOK
-      </button>
-      <button
-        onClick={() => setActiveWorkspace("madrasah")}
-        className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold tracking-wide transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-          activeWorkspace === "madrasah" 
-            ? "bg-blue-600 text-white shadow-md" 
-            : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-        }`}
-      >
-        <span className="text-sm">🏫</span> MADRASAH
-      </button>
+    <div className="flex items-center gap-2">
+      <div className="flex items-center bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-700 shadow-xs">
+        <button
+          type="button"
+          onClick={() => setActiveWorkspace("pondok")}
+          title="Beralih ke Workspace Pondok (Asrama, Kedisiplinan, Mundzir, Khidmah, Wali Santri)"
+          className={`px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+            activeWorkspace === "pondok" 
+              ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" 
+              : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+          }`}
+        >
+          <span className="text-sm">🏠</span> PONDOK
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveWorkspace("madrasah")}
+          title="Beralih ke Workspace Madrasah (Kelas, Rombel, Mufatish, Mustahiq, Nilai, Raport, Kurikulum)"
+          className={`px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+            activeWorkspace === "madrasah" 
+              ? "bg-blue-600 text-white shadow-md shadow-blue-600/20" 
+              : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+          }`}
+        >
+          <span className="text-sm">🏫</span> MADRASAH
+        </button>
+      </div>
     </div>
   );
 }
