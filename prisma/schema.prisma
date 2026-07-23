@@ -25,6 +25,8 @@ model Person {
   guardianProfiles        GuardianProfile[]
   organizationMemberships OrganizationMembership[]
   alumniRecord            AlumniRecord?
+  supervisedRooms         Room[]
+  khidmahAssignments      KhidmahAssignment[]
 
   @@map("people")
 }
@@ -61,6 +63,7 @@ model StudentProfile {
   studentScores StudentScore[]
   attendances   StudentAttendance[]
   violations    StudentViolation[]
+  certificates  AcademicCertificate[]
 
   @@map("student_profiles")
 }
@@ -122,6 +125,8 @@ model AcademicYear {
   id        String    @id @default(uuid())
   name      String    // Cth: "2024/2025"
   isActive  Boolean   @default(false) @map("is_active")
+  startDate String?   @map("start_date")
+  endDate   String?   @map("end_date")
   deletedAt DateTime? @map("deleted_at")
 
   classes AcademicClass[]
@@ -141,7 +146,7 @@ model AcademicClass {
   deletedAt        DateTime? @map("deleted_at")
 
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
-  curriculum   Curriculum?   @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+  curriculum   Curriculum?  @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
 
   enrollments   ClassEnrollment[]
   studentScores StudentScore[]
@@ -232,10 +237,21 @@ model StudentAttendance {
   @@map("student_attendances")
 }
 
+model ViolationType {
+  id        String    @id @default(uuid())
+  name      String
+  category  String    @default("RINGAN") // RINGAN, SEDANG, BERAT
+  severity  String    @default("RINGAN")
+  points    Int       @default(5)
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("violation_types")
+}
+
 model StudentViolation {
   id              String    @id @default(uuid())
   studentId       String    @map("student_id")
-  violationTypeId String    @map("violation_type_id")
+  violationTypeId String?   @map("violation_type_id")
   date            DateTime  @default(now())
   penalty         String?
   evidenceUrl     String?   @map("evidence_url")
@@ -245,6 +261,66 @@ model StudentViolation {
   student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
 
   @@map("student_violations")
+}
+
+model Room {
+  id           String    @id @default(uuid())
+  name         String
+  buildingName String    @map("building_name")
+  capacity     Int       @default(20)
+  supervisorId String?   @map("supervisor_id")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  supervisor Person? @relation(fields: [supervisorId], references: [id], onDelete: SetNull)
+
+  @@map("rooms")
+}
+
+model KhidmahAssignment {
+  id          String    @id @default(uuid())
+  personId    String    @map("person_id")
+  location    String
+  roleTask    String?   @map("role_task")
+  startDate   String?   @map("start_date")
+  endDate     String?   @map("end_date")
+  status      String    @default("ACTIVE")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@map("khidmah_assignments")
+}
+
+model AcademicCertificate {
+  id            String    @id @default(uuid())
+  studentId     String    @map("student_id")
+  certificateNo String    @unique @map("certificate_no")
+  title         String
+  issueDate     String    @map("issue_date")
+  type          String    @default("SERTIFIKAT") // SERTIFIKAT or IJAZAH
+  status        String    @default("ISSUED")
+  fileUrl       String?   @map("file_url")
+  deletedAt     DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict)
+
+  @@map("academic_certificates")
+}
+
+model CustomTable {
+  id          String    @id @default(uuid())
+  key         String    @unique
+  name        String
+  description String?
+  schemaJson  String    @map("schema_json")
+  rowsJson    String    @default("[]") @map("rows_json")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("custom_tables")
 }
 
 model AuditLog {
