@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const session = await getSessionFromCookies();
-    const myClass = await prisma.academicClass.findFirst({
+    const myClass = await (prisma as any).academicClass.findFirst({
       where: session?.personId ? { mustahiqId: session.personId, deletedAt: null } : { deletedAt: null },
       include: {
         enrollments: { where: { status: "ACTIVE", deletedAt: null } },
@@ -23,25 +23,25 @@ export async function GET() {
     ];
 
     if (myClass?.id) {
-      const scoreAgg = await prisma.studentScore.aggregate({
+      const scoreAgg = await (prisma as any).studentScore.aggregate({
         _avg: { score: true },
         where: { classId: myClass.id },
       });
       averageClassScore = Math.round((scoreAgg._avg.score || 0) * 100) / 100;
 
       for (let k = 1; k <= 4; k++) {
-        const kAgg = await prisma.studentScore.aggregate({
+        const kAgg = await (prisma as any).studentScore.aggregate({
           _avg: { score: true },
           where: { classId: myClass.id, kwartal: k },
         });
-        kwartalScores[k - 1].avg = Math.round((kAgg._avg.score || (k === 1 ? averageClassScore || 8.0 : 0)) * 10) / 10;
+        kwartalScores[k - 1].avg = Math.round((kAgg._avg.score || 0) * 10) / 10;
       }
     }
 
     // Attendance rate for class students
-    const studentIds = myClass?.enrollments.map((e) => e.studentId) || [];
+    const studentIds = myClass?.enrollments.map((e: any) => e.studentId) || [];
     const attendances = studentIds.length > 0
-      ? await prisma.studentAttendance.findMany({ where: { studentId: { in: studentIds } } })
+      ? await (prisma as any).studentAttendance.findMany({ where: { studentId: { in: studentIds } } })
       : [];
 
     let totalDays = 0;
@@ -56,7 +56,7 @@ export async function GET() {
         : 100;
 
     const totalViolations = studentIds.length > 0
-      ? await prisma.studentViolation.count({ where: { studentId: { in: studentIds }, deletedAt: null } })
+      ? await (prisma as any).studentViolation.count({ where: { studentId: { in: studentIds }, deletedAt: null } })
       : 0;
 
     return NextResponse.json({

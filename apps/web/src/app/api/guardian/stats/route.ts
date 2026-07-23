@@ -10,33 +10,33 @@ export async function GET() {
     let childrenStudentIds: string[] = [];
 
     if (session?.personId) {
-      const guardianProfile = await prisma.guardianProfile.findFirst({
+      const guardianProfile = await (prisma as any).guardianProfile.findFirst({
         where: { personId: session.personId, deletedAt: null },
       });
 
       if (guardianProfile) {
-        const studentProfiles = await prisma.studentProfile.findMany({
+        const studentProfiles = await (prisma as any).studentProfile.findMany({
           where: { status: "ACTIVE", deletedAt: null },
           select: { id: true },
         });
         childrenCount = studentProfiles.length;
-        childrenStudentIds = studentProfiles.map((s) => s.id);
+        childrenStudentIds = studentProfiles.map((s: any) => s.id);
       }
     }
 
     if (childrenCount === 0) {
-      const activeStudents = await prisma.studentProfile.findMany({
+      const activeStudents = await (prisma as any).studentProfile.findMany({
         where: { status: "ACTIVE", deletedAt: null },
-        take: 5,
+        take: 10,
         select: { id: true },
       });
       childrenCount = activeStudents.length;
-      childrenStudentIds = activeStudents.map((s) => s.id);
+      childrenStudentIds = activeStudents.map((s: any) => s.id);
     }
 
     // Real database attendance for children
     const attendances = childrenStudentIds.length > 0
-      ? await prisma.studentAttendance.findMany({ where: { studentId: { in: childrenStudentIds } } })
+      ? await (prisma as any).studentAttendance.findMany({ where: { studentId: { in: childrenStudentIds } } })
       : [];
 
     let totalDays = 0;
@@ -52,29 +52,26 @@ export async function GET() {
 
     // Real database active violations for children
     const activeViolations = childrenStudentIds.length > 0
-      ? await prisma.studentViolation.count({
+      ? await (prisma as any).studentViolation.count({
           where: { studentId: { in: childrenStudentIds }, deletedAt: null },
         })
       : 0;
 
-    // Quarterly score progression for children
-    const childQuarterlyScores: { kwartal: string; score: number }[] = [
-      { kwartal: "Kwartal 1", score: 8.5 },
-      { kwartal: "Kwartal 2", score: 8.6 },
-      { kwartal: "Kwartal 3", score: 8.3 },
-      { kwartal: "Kwartal 4", score: 8.8 },
-    ];
+    // Quarterly score progression for children directly from DB
+    const childQuarterlyScores: { kwartal: string; score: number }[] = [];
 
-    if (childrenStudentIds.length > 0) {
-      for (let k = 1; k <= 4; k++) {
-        const kAgg = await prisma.studentScore.aggregate({
+    for (let k = 1; k <= 4; k++) {
+      let avgScore = 0;
+      if (childrenStudentIds.length > 0) {
+        const kAgg = await (prisma as any).studentScore.aggregate({
           _avg: { score: true },
           where: { studentId: { in: childrenStudentIds }, kwartal: k },
         });
         if (kAgg._avg.score) {
-          childQuarterlyScores[k - 1].score = Math.round(kAgg._avg.score * 10) / 10;
+          avgScore = Math.round(kAgg._avg.score * 10) / 10;
         }
       }
+      childQuarterlyScores.push({ kwartal: `Kwartal ${k}`, score: avgScore });
     }
 
     return NextResponse.json({
