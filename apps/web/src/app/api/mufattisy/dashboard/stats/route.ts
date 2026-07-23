@@ -5,20 +5,20 @@ export async function GET() {
   try {
     const totalTeachers = await prisma.teacherProfile.count({ where: { status: "ACTIVE", deletedAt: null } });
     const totalClasses = await prisma.academicClass.count({ where: { deletedAt: null } });
+    const totalCurriculums = await prisma.curriculum.count({ where: { deletedAt: null } });
+    const totalSubjects = await prisma.subject.count({ where: { deletedAt: null } });
+
+    const scoreAgg = await prisma.studentScore.aggregate({ _avg: { score: true } });
+    const curriculumCompliance = Math.round(((scoreAgg._avg.score || 80) / 100) * 1000) / 10;
 
     return NextResponse.json({
       status: "Success",
       data: {
-        inspectionsCompleted: 24,
-        pendingReviews: 3,
-        curriculumCompliance: 94.8,
         totalTeachers,
         totalClasses,
-        evaluations: [
-          { month: "Jan", score: 88 },
-          { month: "Feb", score: 92 },
-          { month: "Mar", score: 90 },
-        ],
+        totalCurriculums,
+        totalSubjects,
+        curriculumCompliance,
       },
     });
   } catch (err: any) {

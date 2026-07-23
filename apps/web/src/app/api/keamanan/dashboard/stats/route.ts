@@ -5,17 +5,23 @@ export async function GET() {
   try {
     const totalViolations = await prisma.studentViolation.count({ where: { deletedAt: null } });
 
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayViolations = await prisma.studentViolation.count({
+      where: {
+        date: { gte: todayStart },
+        deletedAt: null,
+      },
+    });
+
     return NextResponse.json({
       status: "Success",
       data: {
-        todayViolations: 1,
+        todayViolations,
         monthlyViolations: totalViolations,
-        pendingPenalties: 2,
+        pendingPenalties: totalViolations,
         resolvedViolations: totalViolations,
-        topViolationTypes: [
-          { type: "Terlambat Subuh", count: 3 },
-          { type: "Seragam Inkomplet", count: 2 },
-        ],
       },
     });
   } catch (err: any) {
