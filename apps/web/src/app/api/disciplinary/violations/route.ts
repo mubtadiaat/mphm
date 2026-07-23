@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const studentId = searchParams.get("studentId");
     const limit = parseInt(searchParams.get("limit") || "20", 10);
 
-    const violations = await prisma.studentViolation.findMany({
+    const violations = await (prisma as any).studentViolation.findMany({
       where: {
         deletedAt: null,
         ...(studentId ? { studentId } : {}),
@@ -28,13 +28,13 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
-    const formatted = violations.map((v) => ({
+    const formatted = (violations as any[]).map((v) => ({
       id: v.id,
-      name: v.student?.person?.fullName || "Santriwati",
+      name: v.student?.person?.fullName || "-",
       stambuk: v.student?.stambukNumber || v.student?.nis || "-",
-      class: v.student?.enrollments?.[0]?.academicClass?.name || "Diniyyah",
-      desc: v.violationType?.name || v.penalty || v.notes || "Pelanggaran Harian",
-      category: v.violationType?.category || "Kedisiplinan",
+      class: v.student?.enrollments?.[0]?.academicClass?.name || "-",
+      desc: v.violationType?.name || v.penalty || v.notes || "-",
+      category: v.violationType?.category || "-",
       severity: v.violationType?.severity || "RINGAN",
       date: v.date ? new Date(v.date).toISOString().split("T")[0] : "-",
       penalty: v.penalty || "-",
