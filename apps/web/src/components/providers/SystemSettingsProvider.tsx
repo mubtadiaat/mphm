@@ -44,14 +44,14 @@ export function SystemSettingsProvider({ children }: { children: React.ReactNode
   const settings = settingsData || {};
   const isMaintenanceMode = settings.systemMaintenance === "true" || settings.systemMaintenance === true;
   
-  // Allow access if user is Sekretariat (Admin)
-  const isSekretariat = authSession?.role === "Sekretariat";
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const isSekretariat =
+    authSession?.role === "sek.pondok" ||
+    authSession?.role === "sek.madrasah";
 
-  // We no longer block rendering with a full-screen "Loading System..." state
-  // to allow the login/dashboard pages to mount instantly in the browser.
-
-  // Enforce Maintenance Mode
-  if (isMaintenanceMode && !isSekretariat) {
+  // Enforce Maintenance Mode: allow login page `/` to always show login form.
+  // Block non-sekretariat users when maintenance mode is active and they are accessing dashboard/other pages.
+  if (isMaintenanceMode && !isSekretariat && pathname !== "/") {
     return <MaintenanceScreen />;
   }
 

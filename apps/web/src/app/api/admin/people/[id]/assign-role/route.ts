@@ -27,7 +27,7 @@ export async function POST(
 
     // Map role string to system role
     let mappedRole = role;
-    if (role === "pengurus") mappedRole = "Sekretariat";
+    if (role === "pengurus") mappedRole = "sek.pondok";
     if (role === "teacher") mappedRole = "Mustahiq";
     if (role === "guardian") mappedRole = "Wali Santri";
 

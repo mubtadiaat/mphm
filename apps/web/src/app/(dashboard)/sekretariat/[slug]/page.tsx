@@ -11,5 +11,5 @@ export default function CustomTablePage(props: { params: Promise<{ slug: string 
   }
   
   const tableKey = slug.replace("custom-", "");
-  return <DynamicCustomTableTab tableKey={tableKey} role="sekretariat" />;
+  return <DynamicCustomTableTab tableKey={tableKey} role="sek.pondok" />;
 }

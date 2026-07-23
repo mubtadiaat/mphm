@@ -8,7 +8,7 @@ import { DashboardShell } from "../../components/navigation/DashboardShell";
 
 // Mapping dari role backend ke role key frontend dan base path dashboard
 const ROLE_MAP: Record<string, { key: RoleTypes; basePath: string }> = {
-  sekretariat:        { key: "sekretariat",   basePath: "/sekretariat" },
+  sekretariat:        { key: "sek.pondok",    basePath: "/sekretariat" },
   "sek.pondok":       { key: "sek.pondok",    basePath: "/sekretariat" },
   "sek.madrasah":     { key: "sek.madrasah",  basePath: "/sekretariat" },
   mufattisy:          { key: "mufattisy",     basePath: "/mufattisy" },
@@ -37,7 +37,7 @@ export default function DashboardLayout({
   // Tentukan role & base path user
   const backendRole = user ? String(user.role).trim().toLowerCase() : null;
   const roleInfo = backendRole ? ROLE_MAP[backendRole] : null;
-  const role: RoleTypes = roleInfo?.key ?? "sekretariat";
+  const role: RoleTypes = roleInfo?.key ?? "sek.pondok";
   const correctBasePath = roleInfo?.basePath ?? "/sekretariat";
 
   useEffect(() => {

@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     const formatted = users.map((u) => {
       // Online simulation: admin & active users are online, or randomly online for demo
-      const isOnline = u.status === "ACTIVE" && (u.role === "Sekretariat" || u.username.includes("admin") || u.id.charCodeAt(0) % 2 === 0);
+      const isOnline = u.status === "ACTIVE" && (u.role === "sek.pondok" || u.role === "sek.madrasah" || u.username.includes("admin"));
       return {
         id: u.id,
         username: u.username,

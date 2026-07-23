@@ -37,6 +37,8 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
   const { activeWorkspace } = useWorkspace();
   const { config, accentColorClasses } = useRoleUIConfig(role);
   const { toast } = useToast();
+  const isSekretariatRole = role === "sek.pondok" || role === "sek.madrasah";
+
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({
     hasMundzir: true,
     hasMufattisy: true,
@@ -44,7 +46,7 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
     hasClasses: true,
     hasSantri: true
   });
-  const [loadingStatus, setLoadingStatus] = useState(role !== "sekretariat" ? false : true);
+  const [loadingStatus, setLoadingStatus] = useState(!isSekretariatRole ? false : true);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -59,13 +61,13 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
         setLoadingStatus(false);
       }
     };
-    if (role === "sekretariat") {
+    if (isSekretariatRole) {
       fetchStatus();
     }
-  }, [role]);
+  }, [isSekretariatRole]);
 
   const isMenuLocked = (href: string): boolean => {
-    if (role !== "sekretariat") return false;
+    if (!isSekretariatRole) return false;
     if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) return true;
     if (href === "/sekretariat/mustahiq" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMufattisy)) return true;
     if (href === "/sekretariat/kelas" && !onboardingStatus.hasMustahiq) return true;
@@ -74,7 +76,7 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
   };
 
   const checkAccess = (e: React.MouseEvent, href: string) => {
-    if (role !== "sekretariat" || loadingStatus) return;
+    if (!isSekretariatRole || loadingStatus) return;
 
     if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) {
       e.preventDefault();
@@ -124,8 +126,6 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
     window.addEventListener("custom_tables_changed", loadCustomTables);
     return () => window.removeEventListener("custom_tables_changed", loadCustomTables);
   }, [role]);
-
-  const isSekretariatRole = role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah";
 
   const baseConfig = isSekretariatRole 
     ? (role === "sek.pondok" || activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
@@ -183,7 +183,7 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes, forceS
                       isActive ? accentColorClasses.text : "text-zinc-500 dark:text-zinc-400"
                     }`} 
                   />
-                  {role === "sekretariat" && !loadingStatus && isMenuLocked(item.href) && (
+                  {isSekretariatRole && !loadingStatus && isMenuLocked(item.href) && (
                     <Lock className="absolute -top-1 -right-2 w-3 h-3 text-red-500" />
                   )}
                 </div>

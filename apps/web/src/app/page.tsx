@@ -66,7 +66,7 @@ export default function Page() {
     if (user) {
       const roleStr = String(user.role).trim().toLowerCase();
       let clientRoleKey = "mufattisy";
-      if (roleStr === "sekretariat") clientRoleKey = "sekretariat";
+      if (roleStr === "sek.pondok" || roleStr === "sek.madrasah") clientRoleKey = "sekretariat";
       else if (roleStr === "mufattisy") clientRoleKey = "mufattisy";
       else if (roleStr === "mundzir") clientRoleKey = "mundzir";
       else if (roleStr === "mustahiq") clientRoleKey = "mustahiq";
@@ -104,7 +104,7 @@ export default function Page() {
       let redirectUrl = "/sekretariat";
       const backendRole = String(resData.data?.role || "").trim().toLowerCase();
 
-      if (backendRole === "sekretariat") redirectUrl = "/sekretariat";
+      if (backendRole === "sek.pondok" || backendRole === "sek.madrasah") redirectUrl = "/sekretariat";
       else if (backendRole === "mufattisy") redirectUrl = "/mufattisy";
       else if (backendRole === "mundzir") redirectUrl = "/pimpinan";
       else if (backendRole === "mustahiq") redirectUrl = "/mustahiq";
@@ -144,7 +144,7 @@ export default function Page() {
       let redirectUrl = "/sekretariat";
       const backendRole = String(resData.data?.role || "").trim().toLowerCase();
 
-      if (backendRole === "sekretariat" || backendRole === "sek.pondok" || backendRole === "sek.madrasah") redirectUrl = "/sekretariat";
+      if (backendRole === "sek.pondok" || backendRole === "sek.madrasah") redirectUrl = "/sekretariat";
       else if (backendRole === "mufattisy") redirectUrl = "/mufattisy";
       else if (backendRole === "mundzir") redirectUrl = "/pimpinan";
       else if (backendRole === "mustahiq") redirectUrl = "/mustahiq";
@@ -187,7 +187,7 @@ export default function Page() {
 
       const roleStr = String(resData.data?.role || "").trim().toLowerCase();
       let redirectUrl = "/guardian";
-      if (roleStr === "sekretariat") redirectUrl = "/sekretariat";
+      if (roleStr === "sek.pondok" || roleStr === "sek.madrasah") redirectUrl = "/sekretariat";
       else if (roleStr === "mufattisy") redirectUrl = "/mufattisy";
       else if (roleStr === "mundzir") redirectUrl = "/pimpinan";
       else if (roleStr === "mustahiq") redirectUrl = "/mustahiq";

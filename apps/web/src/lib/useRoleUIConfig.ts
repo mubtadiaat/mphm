@@ -69,28 +69,6 @@ export const ACCENT_COLOR_MAP = {
 
 // Default configs for all official roles
 export const DEFAULT_ROLE_CONFIGS: Record<RoleTypes, RoleUIConfig> = {
-  sekretariat: {
-    role: "sekretariat",
-    navigationStyle: "sidebar",
-    gridLayout: "2-2",
-    accentColor: "blue",
-    welcomeBanner: "Selamat datang di Portal Administrasi Sekretariat",
-    enabledMenus: [
-      "/sekretariat",
-      "/sekretariat/data-induk",
-      "/sekretariat/siswa",
-      "/sekretariat/kelas",
-      "/sekretariat/penilaian",
-      "/sekretariat/kurikulum",
-      "/sekretariat/pelanggaran",
-      "/sekretariat/tahun-ajaran",
-      "/sekretariat/kenaikan-kelas",
-      "/sekretariat/audit-log",
-      "/sekretariat/arsip",
-      "/sekretariat/settings"
-    ],
-    capabilities: {}
-  },
   "sek.pondok": {
     role: "sek.pondok",
     navigationStyle: "sidebar",
@@ -272,7 +250,7 @@ export function useRoleUIConfig(role: RoleTypes) {
    */
   const canDoAction = (menuHref: string, action: keyof MenuCapabilities): boolean => {
     // Sekretariat roles have full admin access to everything
-    if (role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah") return true;
+    if (role === "sek.pondok" || role === "sek.madrasah") return true;
 
     // Normalizing paths (strip trailing slashes, keep root clear)
     const normalizedPath = menuHref.replace(/\/$/, "");

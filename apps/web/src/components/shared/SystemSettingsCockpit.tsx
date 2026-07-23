@@ -19,21 +19,6 @@ import { MathFormulaBuilder } from "./MathFormulaBuilder";
 
 
 const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: string }>> = {
-  sekretariat: [
-    { label: "Dashboard", href: "/sekretariat" },
-    { label: "Data Santri", href: "/sekretariat/santri" },
-    { label: "Data Wali Santri", href: "/sekretariat/wali-santri" },
-    { label: "Data Kamar & Asrama", href: "/sekretariat/rooms" },
-    { label: "Kelas & Rombel", href: "/sekretariat/kelas" },
-    { label: "Manajemen Nilai", href: "/sekretariat/penilaian" },
-    { label: "Kurikulum Builder", href: "/sekretariat/kurikulum" },
-    { label: "Pelanggaran", href: "/sekretariat/pelanggaran" },
-    { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran" },
-    { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas" },
-    { label: "Audit Log", href: "/sekretariat/audit-log" },
-    { label: "Arsip Akademik", href: "/sekretariat/arsip" },
-    { label: "Konfigurasi Sistem", href: "/sekretariat/settings" }
-  ],
   "sek.pondok": [
     { label: "Dashboard Pondok", href: "/sekretariat" },
     { label: "Data Santriwati", href: "/sekretariat/santri" },
@@ -1417,10 +1402,11 @@ export function SystemSettingsCockpit() {
             <div className="space-y-6">
               {/* Role selector tabs */}
               <div className="flex flex-wrap gap-2 p-1.5 bg-zinc-100 dark:bg-zinc-800/60 rounded-2xl border border-zinc-200 dark:border-zinc-850">
-                {(["sekretariat", "mustahiq", "keamanan", "wali_santri", "mufattisy", "mundzir"] as const).map((r) => {
+                {(["sek.pondok", "sek.madrasah", "mustahiq", "keamanan", "wali_santri", "mufattisy", "mundzir"] as const).map((r) => {
                   const isActive = selectedConfigRole === r;
                   let label: string = r;
-                  if (r === "sekretariat") label = "Sekretariat";
+                  if (r === "sek.pondok") label = "Sekretariat Pondok";
+                  else if (r === "sek.madrasah") label = "Sekretariat Madrasah";
                   else if (r === "mustahiq") label = "Mustahiq";
                   else if (r === "keamanan") label = "Keamanan";
                   else if (r === "wali_santri") label = "Wali Santri";

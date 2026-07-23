@@ -28,7 +28,7 @@ export async function proxy(req: NextRequest) {
   if (pathname === "/" && session) {
     const roleStr = String(session.role || "").trim().toLowerCase();
     let target = "/sekretariat";
-    if (roleStr === "sekretariat") target = "/sekretariat";
+    if (roleStr === "sek.pondok" || roleStr === "sek.madrasah") target = "/sekretariat";
     else if (roleStr === "mufattisy") target = "/mufattisy";
     else if (roleStr === "mundzir" || roleStr === "pimpinan") target = "/pimpinan";
     else if (roleStr === "mustahiq") target = "/mustahiq";

@@ -40,7 +40,7 @@ export interface NavGroup {
 export type NavMenu = NavItem | NavGroup;
 
 // Peran Resmi Sistem (#08)
-export type RoleTypes = "sekretariat" | "sek.pondok" | "sek.madrasah" | "mufattisy" | "mundzir" | "mustahiq" | "keamanan" | "wali_santri";
+export type RoleTypes = "sek.pondok" | "sek.madrasah" | "mufattisy" | "mundzir" | "mustahiq" | "keamanan" | "wali_santri";
 
 // WORKSPACE PONDOK PESANTREN PUTRI [P3HM Lirboyo]
 export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
@@ -122,7 +122,6 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
 ];
 
 export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
-  sekretariat: SEKRETARIAT_MADRASAH_NAV,
   "sek.pondok": SEKRETARIAT_PONDOK_NAV,
   "sek.madrasah": SEKRETARIAT_MADRASAH_NAV,
   mufattisy: [

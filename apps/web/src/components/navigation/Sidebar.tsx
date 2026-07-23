@@ -43,7 +43,9 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     hasClasses: true,
     hasSantri: true
   });
-  const [loadingStatus, setLoadingStatus] = useState(role !== "sekretariat" ? false : true);
+  const isSekretariatRole = role === "sek.pondok" || role === "sek.madrasah";
+
+  const [loadingStatus, setLoadingStatus] = useState(!isSekretariatRole ? false : true);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -58,10 +60,10 @@ export function Sidebar({ role }: { role: RoleTypes }) {
         setLoadingStatus(false);
       }
     };
-    if (role === "sekretariat") {
+    if (isSekretariatRole) {
       fetchStatus();
     }
-  }, [role]);
+  }, [isSekretariatRole]);
 
   useEffect(() => {
     const loadCustomTables = () => {
@@ -94,8 +96,6 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     return null;
   }
 
-  const isSekretariatRole = role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah";
-
   const filteredStaticItems = isSekretariatRole
     ? (role === "sek.pondok" || activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
     : (NAVIGATION_CONFIG[role] || []);
@@ -115,7 +115,7 @@ export function Sidebar({ role }: { role: RoleTypes }) {
   }
 
   const isMenuLocked = (href: string): boolean => {
-    if (role !== "sekretariat") return false;
+    if (!isSekretariatRole) return false;
     if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) return true;
     if (href === "/sekretariat/mustahiq" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMufattisy)) return true;
     if (href === "/sekretariat/kelas" && !onboardingStatus.hasMustahiq) return true;
@@ -124,7 +124,7 @@ export function Sidebar({ role }: { role: RoleTypes }) {
   };
 
   const checkAccess = (e: React.MouseEvent, href: string) => {
-    if (role !== "sekretariat" || loadingStatus) return;
+    if (!isSekretariatRole || loadingStatus) return;
 
     if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) {
       e.preventDefault();
@@ -191,7 +191,7 @@ export function Sidebar({ role }: { role: RoleTypes }) {
                           className={`w-5 h-5 z-10 transition-colors ${isActive ? accentColorClasses.text : "text-slate-500 group-hover:text-slate-300"}`}
                         />
                         <span className="text-sm z-10 flex-1">{subItem.label}</span>
-                        {role === "sekretariat" && !loadingStatus && isMenuLocked(subItem.href) && (
+                        {isSekretariatRole && !loadingStatus && isMenuLocked(subItem.href) && (
                           <Lock className="w-3 h-3 text-red-400/70" />
                         )}
                       </Link>
@@ -225,7 +225,7 @@ export function Sidebar({ role }: { role: RoleTypes }) {
                 className={`w-5 h-5 z-10 transition-colors ${isActive ? accentColorClasses.text : "text-slate-500 group-hover:text-slate-300"}`}
               />
               <span className="text-sm z-10 flex-1">{item.label}</span>
-              {role === "sekretariat" && !loadingStatus && isMenuLocked(item.href) && (
+              {isSekretariatRole && !loadingStatus && isMenuLocked(item.href) && (
                 <Lock className="w-3 h-3 text-red-400/70" />
               )}
             </Link>

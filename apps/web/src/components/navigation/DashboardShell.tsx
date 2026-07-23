@@ -52,7 +52,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
   const [showQRModal, setShowQRModal] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
-  const isSekretariatRole = role === "sekretariat" || role === "sek.pondok" || role === "sek.madrasah";
+  const isSekretariatRole = role === "sek.pondok" || role === "sek.madrasah";
 
   useEffect(() => {
     const checkScreenSize = () => {
