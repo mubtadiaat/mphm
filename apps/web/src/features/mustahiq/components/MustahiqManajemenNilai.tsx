@@ -5,8 +5,12 @@ import { ManajemenNilaiTab } from "@/features/sekretariat/components/ManajemenNi
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 
-interface MyClassWithName {
-  class: {
+interface MyClassResponse {
+  id: string;
+  name: string;
+  fullName: string;
+  class?: {
+    id: string;
     fullName: string;
   };
 }
@@ -17,30 +21,33 @@ export function MustahiqManajemenNilai() {
   const { data: myClass, isLoading } = useQuery({
     queryKey: ["mustahiq-my-class"],
     queryFn: async () => {
-      const res = await apiRequest<{ data: MyClassWithName }>("/api/mustahiq/class/my-class");
+      const res = await apiRequest<{ data: MyClassResponse }>("/api/mustahiq/class/my-class");
       return res.data;
     },
     retry: false,
   });
 
   if (isLoading) {
-    return <div className="p-8 text-center text-zinc-500 animate-pulse">Memuat data kelas Anda...</div>;
+    return <div className="p-8 text-center text-zinc-500 animate-pulse font-semibold">Memuat data kelas Anda...</div>;
   }
 
   if (!myClass) {
     return (
-      <div className="p-8 text-center text-rose-500">
+      <div className="p-8 text-center text-rose-500 font-bold">
         Anda belum ditugaskan ke kelas manapun pada tahun ajaran aktif ini.
       </div>
     );
   }
 
-  // Pass fixedClass so ManajemenNilaiTab hides the class selector
+  const activeClassId = myClass.id || myClass.class?.id;
+  const activeClassName = myClass.fullName || myClass.name || myClass.class?.fullName;
+
   return (
     <ManajemenNilaiTab 
       selectedYearId={selectedYearId} 
       isReadOnly={isReadOnly} 
-      fixedClass={myClass?.class?.fullName || "Kelas Diniyyah"} 
+      fixedClass={activeClassName}
+      fixedClassId={activeClassId}
     />
   );
 }

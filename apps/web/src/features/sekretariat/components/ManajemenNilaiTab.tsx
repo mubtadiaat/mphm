@@ -8,7 +8,7 @@ import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 import { useClasses } from "../queries/useClasses";
 import { useAssessmentMatrix, useSaveScoreMutation, StudentScore } from "../queries/useManajemenNilai";
 
-export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId, fixedClass }: { isReadOnly?: boolean; selectedYearId?: string; fixedClass?: string }) {
+export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId, fixedClass, fixedClassId }: { isReadOnly?: boolean; selectedYearId?: string; fixedClass?: string; fixedClassId?: string }) {
   const context = useAcademicYear();
   const isReadOnly = propsIsReadOnly !== undefined ? propsIsReadOnly : context.isReadOnly;
   const [activeCell, setActiveCell] = useState<{ studentId: string; subjectId: string } | null>(null);
@@ -18,20 +18,26 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
   const [selectedKwartal, setSelectedKwartal] = useState<number>(1);
   
   const { data: classes = [] } = useClasses(selectedYearId);
-  const [selectedClassId, setSelectedClassId] = useState<string>("");
+  const [selectedClassId, setSelectedClassId] = useState<string>(fixedClassId || "");
 
   useEffect(() => {
+    if (fixedClassId) {
+      setSelectedClassId(fixedClassId);
+      return;
+    }
     if (classes.length > 0) {
       if (fixedClass) {
-        const found = classes.find(c => c.name === fixedClass || c.id === fixedClass);
+        const found = classes.find(c => c.name === fixedClass || c.id === fixedClass || (c as any).fullName === fixedClass);
         if (found) {
           setSelectedClassId(found.id);
+        } else if (!selectedClassId) {
+          setSelectedClassId(classes[0].id);
         }
       } else if (!selectedClassId) {
         setSelectedClassId(classes[0].id);
       }
     }
-  }, [classes, selectedClassId, fixedClass]);
+  }, [classes, selectedClassId, fixedClass, fixedClassId]);
 
   const { data: matrixData, isLoading: isMatrixLoading } = useAssessmentMatrix(selectedClassId, selectedKwartal);
   const saveMutation = useSaveScoreMutation();
