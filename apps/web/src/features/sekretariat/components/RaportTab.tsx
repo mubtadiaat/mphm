@@ -23,7 +23,7 @@ interface StudentScore {
 
 export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
   const { data: user } = useAuth();
-  const isSekretariat = user?.role === "Sekretariat" || user?.role === "ADMIN" || user?.role === "DEVELOPER" || user?.role === "Pimpinan";
+  const isSekretariat = user?.role === "sek.pondok" || user?.role === "sek.madrasah" || user?.role === "Sekretariat" || user?.role === "ADMIN" || user?.role === "DEVELOPER" || user?.role === "Pimpinan";
 
   const [selectedSemester, setSelectedSemester] = useState<1 | 2>(1);
   

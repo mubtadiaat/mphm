@@ -218,7 +218,7 @@ export async function GET(req: NextRequest) {
           } else if (orgRole === "MUFATTISY" || orgRole === "Mufattisy") {
             suggestedRole = "Mufattisy";
           } else {
-            suggestedRole = "Sekretariat";
+            suggestedRole = "sek.pondok";
           }
         }
 

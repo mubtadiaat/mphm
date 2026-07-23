@@ -45,7 +45,8 @@ export function UsersManagementTab() {
     "Mufattisy",
     "Mundzir",
     "Keamanan",
-    "Sekretariat",
+    "sek.pondok",
+    "sek.madrasah",
     "Wali Santri",
   ];
 

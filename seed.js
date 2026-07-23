@@ -150,7 +150,7 @@ async function seed() {
   await sql`
     INSERT INTO user_accounts (id, person_id, username, email, password_hash, role, status)
     VALUES 
-      ('u-admin-01', ${adminP}, 'admin_mphm', 'admin@m.p3hm.my.id', 'admin123', 'Sekretariat', 'ACTIVE'),
+      ('u-admin-01', ${adminP}, 'admin_mphm', 'admin@m.p3hm.my.id', 'admin123', 'sek.pondok', 'ACTIVE'),
       ('u-sek-pondok-01', ${sekPondokP}, 'sek_pondok', 'pondok@m.p3hm.my.id', 'admin123', 'sek.pondok', 'ACTIVE'),
       ('u-sek-madrasah-01', ${sekMadrasahP}, 'sek_madrasah', 'madrasah@m.p3hm.my.id', 'admin123', 'sek.madrasah', 'ACTIVE'),
       ('u-mustahiq-01', ${mustahiq1P}, 'mustahiq01', 'mustahiq@mphm.or.id', 'mphm123', 'Mustahiq', 'ACTIVE'),
