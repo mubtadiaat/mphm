@@ -169,16 +169,20 @@ export function UniversalDataGrid<TData, TValue>({
           <thead className="bg-zinc-50 dark:bg-zinc-800/40 text-zinc-500 dark:text-zinc-400 font-semibold border-b border-zinc-200 dark:border-zinc-800">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="px-6 py-4 font-bold text-xs uppercase tracking-wider text-left text-zinc-500 dark:text-zinc-400">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const metaAlign = (header.column.columnDef.meta as { align?: string } | undefined)?.align;
+                  const alignClass = metaAlign === "center" ? "text-center" : metaAlign === "right" ? "text-right" : "text-left";
+                  return (
+                    <th key={header.id} className={`px-6 py-4 font-bold text-xs uppercase tracking-wider ${alignClass} text-zinc-500 dark:text-zinc-400`}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>
@@ -190,11 +194,15 @@ export function UniversalDataGrid<TData, TValue>({
                   onClick={() => onRowClick && onRowClick(row.original)}
                   className={`transition-colors duration-150 ${onRowClick ? "cursor-pointer hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40" : "hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30"}`}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 text-zinc-700 dark:text-zinc-300 whitespace-nowrap text-left align-middle">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const metaAlign = (cell.column.columnDef.meta as { align?: string } | undefined)?.align;
+                    const alignClass = metaAlign === "center" ? "text-center" : metaAlign === "right" ? "text-right" : "text-left";
+                    return (
+                      <td key={cell.id} className={`px-6 py-4 text-zinc-700 dark:text-zinc-300 whitespace-nowrap ${alignClass} align-middle`}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             ) : (

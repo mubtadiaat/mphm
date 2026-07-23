@@ -202,7 +202,7 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
         <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="bg-zinc-50 dark:bg-zinc-800/40 text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-800">
-              <th className="px-5 py-4 font-bold min-w-[220px] sticky left-0 bg-zinc-50 dark:bg-zinc-800/90 backdrop-blur-sm z-10 border-r border-zinc-200 dark:border-zinc-800">
+              <th className="px-5 py-4 text-left font-bold min-w-[220px] sticky left-0 bg-zinc-50 dark:bg-zinc-800/90 backdrop-blur-sm z-10 border-r border-zinc-200 dark:border-zinc-800">
                 Data Induk Siswa (Nama Lengkap)
               </th>
               {matrixData?.subjects?.map((sub, idx) => (

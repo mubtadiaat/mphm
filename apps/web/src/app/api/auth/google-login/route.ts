@@ -5,17 +5,17 @@ import { setSessionCookie } from "@/lib/jwt";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { uid, email, displayName, photoURL } = body;
+    const { uid, email } = body;
 
     if (!email) {
       return NextResponse.json(
-        { status: "Error", message: "Email dari Google Authentication tidak valid." },
+        { status: "Error", message: "Email dari Google Authentication tidak ditemukan." },
         { status: 400 }
       );
     }
 
-    // 1. Cari user_account berdasarkan firebase_uid atau email
-    let userAccount = await prisma.userAccount.findFirst({
+    // 1. Cari user_account yang sudah ditautkan berdasarkan firebaseUid atau email
+    const userAccount = await prisma.userAccount.findFirst({
       where: {
         OR: [{ firebaseUid: uid }, { email: email }],
         deletedAt: null,
@@ -23,39 +23,29 @@ export async function POST(req: NextRequest) {
       include: { person: true },
     });
 
-    // 2. Jika user belum ada, daftarkan akun baru (Single Source of Truth)
+    // 2. Jika akun belum ditautkan di pengaturan, jangan buat akun secara acak
     if (!userAccount) {
-      const personName = displayName || email.split("@")[0];
-      const person = await prisma.person.create({
-        data: {
-          fullName: personName,
-          gender: "L",
-          avatarUrl: photoURL || null,
+      return NextResponse.json(
+        {
+          status: "Error",
+          message: `Akun Google (${email}) belum ditautkan ke akun MPHM Anda. Silakan masuk dengan Username & Password terlebih dahulu, lalu tautkan akun Gmail Anda di menu Pengaturan Akun.`,
         },
-      });
+        { status: 404 }
+      );
+    }
 
-      const username = email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "") + "_" + Math.floor(Math.random() * 1000);
+    if (userAccount.status !== "ACTIVE") {
+      return NextResponse.json(
+        { status: "Error", message: "Akun Anda sedang dinonaktifkan." },
+        { status: 403 }
+      );
+    }
 
-      userAccount = await prisma.userAccount.create({
-        data: {
-          personId: person.id,
-          username: username,
-          email: email,
-          firebaseUid: uid,
-          role: "Wali Santri", // Default role untuk pendaftaran baru via Google
-          status: "ACTIVE",
-        },
-        include: { person: true },
-      });
-    } else if (!userAccount.firebaseUid || !userAccount.email) {
-      // Tautkan firebaseUid dan email jika belum ada
-      userAccount = await prisma.userAccount.update({
+    // Tautkan firebaseUid jika belum tersimpan
+    if (!userAccount.firebaseUid) {
+      await prisma.userAccount.update({
         where: { id: userAccount.id },
-        data: {
-          firebaseUid: uid,
-          email: email,
-        },
-        include: { person: true },
+        data: { firebaseUid: uid },
       });
     }
 
@@ -65,8 +55,10 @@ export async function POST(req: NextRequest) {
       personId: userAccount.personId,
       username: userAccount.username,
       role: userAccount.role,
-      fullName: userAccount.person.fullName,
-      avatarUrl: userAccount.person.avatarUrl,
+      fullName: userAccount.person?.fullName || userAccount.username,
+      avatarUrl: userAccount.person?.avatarUrl || null,
+      email: userAccount.email || email,
+      googleLinked: true,
       assignedClassId: null,
       familyCardNumber: null,
     };
@@ -80,9 +72,9 @@ export async function POST(req: NextRequest) {
     await setSessionCookie(response, sessionPayload);
     return response;
   } catch (err: any) {
-    console.error("GOOGLE_LOGIN_PRISMA_ERROR:", err.message);
+    console.error("GOOGLE_LOGIN_ERROR:", err.message);
     return NextResponse.json(
-      { status: "Error", message: err.message },
+      { status: "Error", message: err.message || "Terjadi kesalahan internal server." },
       { status: 500 }
     );
   }

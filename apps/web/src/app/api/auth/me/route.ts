@@ -34,6 +34,8 @@ export async function GET(req: NextRequest) {
       role: userAccount.role,
       fullName: userAccount.person?.fullName || userAccount.username,
       avatarUrl: userAccount.person?.avatarUrl || null,
+      email: userAccount.email || null,
+      googleLinked: Boolean(userAccount.firebaseUid || userAccount.email),
       assignedClassId: null,
       familyCardNumber: null,
     };

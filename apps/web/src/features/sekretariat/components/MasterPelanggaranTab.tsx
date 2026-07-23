@@ -243,9 +243,9 @@ export function MasterPelanggaranTab() {
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-zinc-500 uppercase bg-zinc-50 dark:bg-zinc-800/50">
               <tr>
-                <th className="px-4 py-3 rounded-l-lg">Pelanggaran</th>
-                <th className="px-4 py-3">Kategori</th>
-                <th className="px-4 py-3">Tingkat</th>
+                <th className="px-4 py-3 text-left rounded-l-lg">Pelanggaran</th>
+                <th className="px-4 py-3 text-left">Kategori</th>
+                <th className="px-4 py-3 text-left">Tingkat</th>
                 <th className="px-4 py-3 text-center">Poin</th>
                 <th className="px-4 py-3 text-right rounded-r-lg">Aksi</th>
               </tr>
@@ -253,9 +253,9 @@ export function MasterPelanggaranTab() {
             <tbody>
               {types.map((type) => (
                 <tr key={type.id} className="border-b border-zinc-100 dark:border-zinc-800/50 last:border-0">
-                  <td className="px-4 py-3 font-medium text-zinc-900 dark:text-white">{type.name}</td>
-                  <td className="px-4 py-3 text-zinc-500">{type.category}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-left font-medium text-zinc-900 dark:text-white">{type.name}</td>
+                  <td className="px-4 py-3 text-left text-zinc-500">{type.category}</td>
+                  <td className="px-4 py-3 text-left">
                     <span className="px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md text-xs font-medium">
                       {type.severity}
                     </span>

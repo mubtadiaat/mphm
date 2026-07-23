@@ -92,11 +92,11 @@ export function KelasTab({ isReadOnly = false, selectedYearId }: KelasTabProps) 
                       className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
                       onClick={() => setViewingDetail(student)}
                     >
-                      <td className="px-5 py-3.5 text-zinc-500 font-mono">{i + 1}</td>
-                      <td className="px-5 py-3.5 font-bold text-zinc-900 dark:text-white">{student.fullName}</td>
-                      <td className="px-5 py-3.5 font-mono text-xs">{student.nis || "-"}</td>
-                      <td className="px-5 py-3.5 font-mono text-xs">{student.nisn || "-"}</td>
-                      <td className="px-5 py-3.5">
+                      <td className="px-5 py-3.5 text-left text-zinc-500 font-mono">{i + 1}</td>
+                      <td className="px-5 py-3.5 text-left font-bold text-zinc-900 dark:text-white">{student.fullName}</td>
+                      <td className="px-5 py-3.5 text-left font-mono text-xs">{student.nis || "-"}</td>
+                      <td className="px-5 py-3.5 text-left font-mono text-xs">{student.nisn || "-"}</td>
+                      <td className="px-5 py-3.5 text-left">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${student.gender === "L" ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "bg-pink-50 text-pink-600 dark:bg-pink-900/20 dark:text-pink-400"}`}>
                           Perempuan
                         </span>

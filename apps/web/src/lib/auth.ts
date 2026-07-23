@@ -9,6 +9,8 @@ export interface UserSession {
   role: string;
   fullName: string;
   avatarUrl: string | null;
+  email?: string | null;
+  googleLinked?: boolean;
   assignedClassId: string | null;
   familyCardNumber: string | null;
   mustChangePassword?: boolean;

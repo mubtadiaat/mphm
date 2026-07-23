@@ -176,7 +176,7 @@ export default function RekapAbsensiPage() {
         <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="bg-zinc-50 dark:bg-zinc-800/40 text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-800">
-              <th className="px-6 py-4 font-semibold min-w-[200px]">Nama Santri</th>
+              <th className="px-6 py-4 font-semibold text-left min-w-[200px]">Nama Santri</th>
               <th className="px-6 py-4 font-semibold text-center">Sakit</th>
               <th className="px-6 py-4 font-semibold text-center">Izin</th>
               <th className="px-6 py-4 font-semibold text-center">Alfa</th>

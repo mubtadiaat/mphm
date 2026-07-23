@@ -258,7 +258,7 @@ export function KenaikanKelasTab({ isReadOnly = false, selectedYearId, fixedClas
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-150 dark:border-zinc-850 text-zinc-500 text-xs font-bold uppercase">
-                        <th className="px-4 py-3 text-center">Nama Santri</th>
+                        <th className="px-4 py-3 text-left">Nama Santri</th>
                         <th className="px-4 py-3 text-center">Nomor Stambuk</th>
                         <th className="px-4 py-3 text-center">Kehadiran</th>
                         <th className="px-4 py-3 text-center">Nilai Rerata</th>
@@ -268,14 +268,14 @@ export function KenaikanKelasTab({ isReadOnly = false, selectedYearId, fixedClas
                     </thead>
                     <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
                       {candidates.map((c) => (
-                        <tr key={c.studentId} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/10 text-center">
-                          <td className="px-4 py-3 font-bold text-zinc-800 dark:text-zinc-200">{c.name}</td>
-                          <td className="px-4 py-3 font-mono text-xs">{c.stambuk}</td>
-                          <td className="px-4 py-3 font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-450">
+                        <tr key={c.studentId} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/10">
+                          <td className="px-4 py-3 text-left font-bold text-zinc-800 dark:text-zinc-200">{c.name}</td>
+                          <td className="px-4 py-3 text-center font-mono text-xs">{c.stambuk}</td>
+                          <td className="px-4 py-3 text-center font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-450">
                             {(c.attendanceRate * 100).toFixed(1)}%
                           </td>
-                          <td className="px-4 py-3 font-bold">{c.averageScore}</td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-center font-bold">{c.averageScore}</td>
+                          <td className="px-4 py-3 text-center">
                             <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase ${
                               c.recommendedStatus === "PROMOTED" 
                                 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-450" 

@@ -100,10 +100,10 @@ export function MustahiqKelasDetail() {
                     className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer"
                     onClick={() => setViewingDetail(student)}
                   >
-                    <td className="px-4 py-3 text-zinc-500">{i + 1}</td>
-                    <td className="px-4 py-3 font-medium">{student.fullName}</td>
-                    <td className="px-4 py-3">{student.nis || '-'}</td>
-                    <td className="px-4 py-3">{student.nisn || '-'}</td>
+                    <td className="px-4 py-3 text-left text-zinc-500">{i + 1}</td>
+                    <td className="px-4 py-3 text-left font-medium">{student.fullName}</td>
+                    <td className="px-4 py-3 text-left">{student.nis || '-'}</td>
+                    <td className="px-4 py-3 text-left">{student.nisn || '-'}</td>
                   </tr>
                 ))
               )}
