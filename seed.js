@@ -15,21 +15,55 @@ if (!connectionString) {
 const sql = neon(connectionString);
 
 async function seed() {
-  console.log("🚀 Memulai proses seeding data komprehensif MPHM Enterprise 2026/2027...");
+  console.log("🚀 Memulai pembersihan total (TRUNCATE) dan pembenihan data komprehensif MPHM Enterprise 2026/2027...");
+
+  // 0. Clean All Tables (Reset Data Dummy Mengambang)
+  console.log("🧹 0/10 Wiping existing data (TRUNCATE CASCADE)...");
+  await sql`
+    TRUNCATE TABLE 
+      student_permits, 
+      student_violations, 
+      violation_types, 
+      student_attendances, 
+      student_scores, 
+      class_enrollments, 
+      academic_certificates, 
+      khidmah_assignments, 
+      custom_tables, 
+      rooms, 
+      academic_classes, 
+      curriculum_subjects,
+      curriculums, 
+      subjects, 
+      teacher_profiles, 
+      guardian_profiles, 
+      student_profiles, 
+      organization_memberships, 
+      user_accounts, 
+      people, 
+      academic_years,
+      audit_logs,
+      system_settings
+    CASCADE;
+  `;
 
   // 1. System Settings
-  console.log("📦 1/9 Creating System Settings...");
+  console.log("📦 1/10 Creating System Settings...");
   await sql`
     INSERT INTO system_settings (key, value, updated_at)
     VALUES 
       ('activeAcademicYear', '2026/2027', NOW()),
       ('systemName', 'MPHM Enterprise', NOW()),
-      ('systemMaintenance', 'false', NOW())
-    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
+      ('systemMaintenance', 'false', NOW()),
+      ('showMustahiqScores', 'true', NOW()),
+      ('showMustahiqAttendance', 'true', NOW()),
+      ('showGuardianScores', 'true', NOW()),
+      ('showGuardianDiscipline', 'true', NOW()),
+      ('showKeamananLookup', 'true', NOW());
   `;
 
-  // 2. Academic Years (Tahun Ajaran 2026/2027)
-  console.log("📅 2/9 Creating Academic Years...");
+  // 2. Academic Years (Tahun Ajaran 2026/2027 & 2025/2026)
+  console.log("📅 2/10 Creating Academic Years...");
   const ayId2026 = "ay-2026-2027-id";
   const ayId2025 = "ay-2025-2026-id";
 
@@ -37,17 +71,17 @@ async function seed() {
     INSERT INTO academic_years (id, name, is_active)
     VALUES 
       (${ayId2026}, '2026/2027', true),
-      (${ayId2025}, '2025/2026', false)
-    ON CONFLICT (id) DO NOTHING;
+      (${ayId2025}, '2025/2026', false);
   `;
 
-  // 3. Subjects
-  console.log("📚 3/9 Creating Subjects...");
+  // 3. Subjects (Mapel Diniyyah)
+  console.log("📚 3/10 Creating Subjects...");
   const subj1 = "subj-nahwu-01";
   const subj2 = "subj-shorof-01";
   const subj3 = "subj-fiqih-01";
   const subj4 = "subj-aqidah-01";
   const subj5 = "subj-hadits-01";
+  const subj6 = "subj-akhlaq-01";
 
   await sql`
     INSERT INTO subjects (id, code, name, subject_type)
@@ -56,21 +90,37 @@ async function seed() {
       (${subj2}, 'SRF-01', 'Kaelani & Nazham Maqsud (Shorof)', 'MAPEL'),
       (${subj3}, 'FQH-01', 'Fathul Qorib (Fiqih)', 'MAPEL'),
       (${subj4}, 'AQD-01', 'Aqidatul Awam (Aqidah)', 'MAPEL'),
-      (${subj5}, 'HDT-01', 'Arba''in Nawawiyyah (Hadits)', 'MAPEL')
-    ON CONFLICT (code) DO NOTHING;
+      (${subj5}, 'HDT-01', 'Arba''in Nawawiyyah (Hadits)', 'MAPEL'),
+      (${subj6}, 'AKH-01', 'Akhlaq Lil Banat (Akhlaq)', 'NON_MAPEL');
   `;
 
-  // 4. Curriculum
-  console.log("📜 4/9 Creating Curriculums...");
-  const currId = "curr-ibtida-2026";
+  // 4. Curriculum & Curriculum Subjects
+  console.log("📜 4/10 Creating Curriculums & Subjects Mapping...");
+  const currIdIbtida = "curr-ibtida-2026";
+  const currIdTsanawi = "curr-tsanawi-2026";
+
   await sql`
     INSERT INTO curriculums (id, name, institution_level)
-    VALUES (${currId}, 'Kurikulum Standar Ibtida''iyyah 2026', 'Ibtida''iyyah')
-    ON CONFLICT (id) DO NOTHING;
+    VALUES 
+      (${currIdIbtida}, 'Kurikulum Standar Ibtida''iyyah 2026', 'Ibtida''iyyah'),
+      (${currIdTsanawi}, 'Kurikulum Standar Tsanawiyyah 2026', 'Tsanawiyyah');
+  `;
+
+  await sql`
+    INSERT INTO curriculum_subjects (id, curriculum_id, subject_id, order_number)
+    VALUES 
+      ('cs-1', ${currIdIbtida}, ${subj1}, 1),
+      ('cs-2', ${currIdIbtida}, ${subj2}, 2),
+      ('cs-3', ${currIdIbtida}, ${subj3}, 3),
+      ('cs-4', ${currIdIbtida}, ${subj4}, 4),
+      ('cs-5', ${currIdIbtida}, ${subj6}, 5),
+      ('cs-6', ${currIdTsanawi}, ${subj1}, 1),
+      ('cs-7', ${currIdTsanawi}, ${subj3}, 2),
+      ('cs-8', ${currIdTsanawi}, ${subj5}, 3);
   `;
 
   // 5. Staff, Teacher, Mufattisy, Pimpinan, Keamanan & Accounts
-  console.log("👥 5/9 Creating Staff, Teacher & User Accounts...");
+  console.log("👥 5/10 Creating Staff, Teachers, Pengurus & User Accounts...");
   const adminP = "p-admin-01";
   const sekPondokP = "p-sek-pondok-01";
   const sekMadrasahP = "p-sek-madrasah-01";
@@ -83,15 +133,14 @@ async function seed() {
   await sql`
     INSERT INTO people (id, full_name, gender, phone_number, address)
     VALUES 
-      (${adminP}, 'Ustadz H. Ahmad Fauzi, S.Pd.I', 'L', '081234567890', 'Komplek Pesantren Blok A1'),
-      (${sekPondokP}, 'Sekretariat Pondok P3HM', 'P', '081234567891', 'Kantor Pengurus Pondok'),
-      (${sekMadrasahP}, 'Sekretariat Madrasah MPHM', 'P', '081234567892', 'Kantor Pengurus Madrasah'),
-      (${mustahiqP}, 'Ustadz Muhammad Ridwan, Lc', 'L', '081298765432', 'Komplek Pengajar Blok B2'),
-      (${mufattisyP}, 'Ustadz Dr. H. Zayd Syarif', 'L', '081311223344', 'Komplek Pengurus Pusat'),
-      (${pimpinanP}, 'KH. Abdullah Ma''sum', 'L', '081122334455', 'Kediaman Pengasuh'),
-      (${keamananP}, 'Ustadz Syamsuddin', 'L', '081566778899', 'Pos Keamanan Utama'),
-      (${waliP}, 'Bapak H. Mansur (Wali Santri)', 'L', '085677889900', 'Jl. Raya Kediri No. 45')
-    ON CONFLICT (id) DO NOTHING;
+      (${adminP}, 'Ustadz H. Ahmad Fauzi, S.Pd.I', 'L', '081234567890', 'Komplek Pesantren Blok A1, Kediri'),
+      (${sekPondokP}, 'Ustadzah Siti Aminah, S.Ag (Sek.Pondok)', 'P', '081234567891', 'Kantor Pengurus Pondok Putri, Kediri'),
+      (${sekMadrasahP}, 'Ustadzah Fatimah Azzahra, M.Pd (Sek.Madrasah)', 'P', '081234567892', 'Kantor Pengurus Madrasah Diniyyah, Kediri'),
+      (${mustahiqP}, 'Ustadz Muhammad Ridwan, Lc', 'L', '081298765432', 'Komplek Pengajar Blok B2, Kediri'),
+      (${mufattisyP}, 'Ustadz Dr. H. Zayd Syarif', 'L', '081311223344', 'Komplek Pengurus Pusat, Kediri'),
+      (${pimpinanP}, 'KH. Abdullah Ma''sum (Mundzir)', 'L', '081122334455', 'Kediaman Pengasuh Utama, Kediri'),
+      (${keamananP}, 'Ustadz Syamsuddin (Keamanan)', 'L', '081566778899', 'Pos Keamanan Gerbang Utama, Kediri'),
+      (${waliP}, 'Bapak H. Mansur (Wali Santri)', 'L', '085677889900', 'Jl. Raya Nganjuk No. 45, Nganjuk');
   `;
 
   await sql`
@@ -104,41 +153,45 @@ async function seed() {
       ('u-mufattisy-01', ${mufattisyP}, 'mufattisy01', 'mufattisy@mphm.or.id', 'mphm123', 'Mufattisy', 'ACTIVE'),
       ('u-pimpinan-01', ${pimpinanP}, 'pimpinan01', 'pimpinan@mphm.or.id', 'mphm123', 'Mundzir', 'ACTIVE'),
       ('u-keamanan-01', ${keamananP}, 'keamanan01', 'keamanan@mphm.or.id', 'mphm123', 'Keamanan', 'ACTIVE'),
-      ('u-wali-01', ${waliP}, 'wali01', 'wali01@gmail.com', 'mphm123', 'Wali Santri', 'ACTIVE')
-    ON CONFLICT (username) DO UPDATE SET email = EXCLUDED.email;
+      ('u-wali-01', ${waliP}, 'wali01', 'wali01@gmail.com', 'mphm123', 'Wali Santri', 'ACTIVE');
   `;
 
   await sql`
     INSERT INTO teacher_profiles (id, person_id, teacher_code, status)
-    VALUES ('t-mustahiq-01', ${mustahiqP}, 'GURU-2026-001', 'ACTIVE')
-    ON CONFLICT (person_id) DO NOTHING;
+    VALUES ('t-mustahiq-01', ${mustahiqP}, 'GURU-2026-001', 'ACTIVE');
   `;
 
   await sql`
     INSERT INTO guardian_profiles (id, person_id, family_card_number, relation)
-    VALUES ('g-wali-01', ${waliP}, '3506123456780001', 'AYAH')
-    ON CONFLICT (id) DO NOTHING;
+    VALUES ('g-wali-01', ${waliP}, '3506123456780001', 'AYAH');
   `;
 
-  // 6. Dormitory Rooms
-  console.log("🏠 6/9 Creating Dormitory Rooms...");
+  await sql`
+    INSERT INTO organization_memberships (id, person_id, role, service_year, status)
+    VALUES 
+      ('om-01', ${mufattisyP}, 'Mufattisy', '2026/2027', 'ACTIVE'),
+      ('om-02', ${pimpinanP}, 'Mundzir', '2026/2027', 'ACTIVE'),
+      ('om-03', ${keamananP}, 'Keamanan', '2026/2027', 'ACTIVE');
+  `;
+
+  // 6. Dormitory Rooms (Asrama Pondok)
+  console.log("🏠 6/10 Creating Dormitory Rooms...");
   const room1 = "room-aisyah-1";
   const room2 = "room-aisyah-2";
-  const room3 = "room-fatimah-1";
-  const room4 = "room-khadijah-1";
+  const room3 = "room-khadijah-1";
+  const room4 = "room-fatimah-1";
 
   await sql`
     INSERT INTO rooms (id, name, building_name, capacity, supervisor_id)
     VALUES 
       (${room1}, 'Asrama Aisyah 1', 'Gedung Aisyah', 20, ${mustahiqP}),
       (${room2}, 'Asrama Aisyah 2', 'Gedung Aisyah', 20, ${mustahiqP}),
-      (${room3}, 'Asrama Fatimah 1', 'Gedung Fatimah', 25, ${mufattisyP}),
-      (${room4}, 'Asrama Khadijah 1', 'Gedung Khadijah', 25, ${mufattisyP})
-    ON CONFLICT (id) DO NOTHING;
+      (${room3}, 'Asrama Khadijah 1', 'Gedung Khadijah', 25, ${mufattisyP}),
+      (${room4}, 'Asrama Fatimah 1', 'Gedung Fatimah', 25, ${mufattisyP});
   `;
 
   // 7. Academic Classes (Kelas Akademik 2026/2027)
-  console.log("🏫 7/9 Creating Academic Classes...");
+  console.log("🏫 7/10 Creating Academic Classes...");
   const class1A = "c-1-ibtida-a";
   const class2A = "c-2-ibtida-a";
   const class1Tsanawi = "c-1-tsanawi-a";
@@ -146,85 +199,98 @@ async function seed() {
   await sql`
     INSERT INTO academic_classes (id, academic_year_id, name, full_name, institution_level, level_number, mustahiq_id, curriculum_id)
     VALUES 
-      (${class1A}, ${ayId2026}, '1 Ibtida''iyyah A', 'Kelas 1 Ibtida''iyyah A (Putra)', 'Ibtida''iyyah', 1, ${mustahiqP}, ${currId}),
-      (${class2A}, ${ayId2026}, '2 Ibtida''iyyah A', 'Kelas 2 Ibtida''iyyah A (Putra)', 'Ibtida''iyyah', 2, ${mustahiqP}, ${currId}),
-      (${class1Tsanawi}, ${ayId2026}, '1 Tsanawiyyah A', 'Kelas 1 Tsanawiyyah A (Putra)', 'Tsanawiyyah', 1, ${mufattisyP}, NULL)
-    ON CONFLICT (id) DO NOTHING;
+      (${class1A}, ${ayId2026}, '1 Ibtida''iyyah A', 'Kelas 1 Ibtida''iyyah A (Putri)', 'Ibtida''iyyah', 1, ${mustahiqP}, ${currIdIbtida}),
+      (${class2A}, ${ayId2026}, '2 Ibtida''iyyah A', 'Kelas 2 Ibtida''iyyah A (Putri)', 'Ibtida''iyyah', 2, ${mustahiqP}, ${currIdIbtida}),
+      (${class1Tsanawi}, ${ayId2026}, '1 Tsanawiyyah A', 'Kelas 1 Tsanawiyyah A (Putri)', 'Tsanawiyyah', 1, ${mufattisyP}, ${currIdTsanawi});
   `;
 
-  // 8. Santri (Student Profiles) & Enrollments
-  console.log("👨‍🎓 8/9 Creating Santri, Enrollments & Scores...");
-  const santriData = [
-    { id: "s-01", personId: "p-s-01", name: "Muhammad Ahmad Zaki", stambuk: "2026001", nis: "NIS-2026-001", nisn: "0081234561", roomId: room1 },
-    { id: "s-02", personId: "p-s-02", name: "Ali Zainal Abidin", stambuk: "2026002", nis: "NIS-2026-002", nisn: "0081234562", roomId: room1 },
-    { id: "s-03", personId: "p-s-03", name: "Umar Al-Faruq", stambuk: "2026003", nis: "NIS-2026-003", nisn: "0081234563", roomId: room2 },
-    { id: "s-04", personId: "p-s-04", name: "Bilal Ramadhan", stambuk: "2026004", nis: "NIS-2026-004", nisn: "0081234564", roomId: room2 },
-    { id: "s-05", personId: "p-s-05", name: "Usman Nurul Huda", stambuk: "2026005", nis: "NIS-2026-005", nisn: "0081234565", roomId: room3 },
+  // 8. Santri (Student Profiles) & Enrollments & Scores
+  console.log("👨‍🎓 8/10 Creating Santri Profiles, Enrollments, Scores & Attendance...");
+  const santriList = [
+    { id: "s-01", personId: "p-s-01", name: "Aisyah Nabila", stambuk: "2026001", nis: "NIS-2026-001", nisn: "0081234561", roomId: room1, classId: class1A },
+    { id: "s-02", personId: "p-s-02", name: "Zahra Almira", stambuk: "2026002", nis: "NIS-2026-002", nisn: "0081234562", roomId: room1, classId: class1A },
+    { id: "s-03", personId: "p-s-03", name: "Khadijah Nurul Jannah", stambuk: "2026003", nis: "NIS-2026-003", nisn: "0081234563", roomId: room2, classId: class1A },
+    { id: "s-04", personId: "p-s-04", name: "Maryam Humaira", stambuk: "2026004", nis: "NIS-2026-004", nisn: "0081234564", roomId: room2, classId: class2A },
+    { id: "s-05", personId: "p-s-05", name: "Safiyyah Mawaddah", stambuk: "2026005", nis: "NIS-2026-005", nisn: "0081234565", roomId: room3, classId: class1Tsanawi },
   ];
 
-  for (const s of santriData) {
+  for (const s of santriList) {
     await sql`
-      INSERT INTO people (id, full_name, gender, birth_place, birth_date, address)
-      VALUES (${s.personId}, ${s.name}, 'L', 'Kediri', '2012-05-14', 'Jl. Santri Kediri')
-      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO people (id, full_name, gender, birth_place, birth_date, address, phone_number)
+      VALUES (${s.personId}, ${s.name}, 'P', 'Kediri', '2012-05-14', 'Jl. KH. Abdul Karim No. 12, Lirboyo, Kediri', '081234009988');
     `;
 
     await sql`
       INSERT INTO student_profiles (id, person_id, stambuk_number, nis, nisn, enrollment_year, status, room_id)
-      VALUES (${s.id}, ${s.personId}, ${s.stambuk}, ${s.nis}, ${s.nisn}, 2026, 'ACTIVE', ${s.roomId})
-      ON CONFLICT (nis) DO NOTHING;
+      VALUES (${s.id}, ${s.personId}, ${s.stambuk}, ${s.nis}, ${s.nisn}, 2026, 'ACTIVE', ${s.roomId});
     `;
 
     await sql`
       INSERT INTO class_enrollments (id, class_id, student_id, status)
-      VALUES (${"enr-" + s.id}, ${class1A}, ${s.id}, 'ACTIVE')
-      ON CONFLICT (class_id, student_id) DO NOTHING;
+      VALUES (${"enr-" + s.id}, ${s.classId}, ${s.id}, 'ACTIVE');
     `;
 
-    // Nilai Kwartal 1 & 2
+    // Nilai Kwartal 1, 2, 3
     await sql`
       INSERT INTO student_scores (id, class_id, student_id, subject_id, kwartal, score)
       VALUES 
-        (${"sc-1-" + s.id}, ${class1A}, ${s.id}, ${subj1}, 1, 85.0),
-        (${"sc-2-" + s.id}, ${class1A}, ${s.id}, ${subj2}, 1, 90.0),
-        (${"sc-3-" + s.id}, ${class1A}, ${s.id}, ${subj3}, 1, 88.0)
-      ON CONFLICT (class_id, student_id, subject_id, kwartal) DO NOTHING;
+        (${"sc-1-" + s.id}, ${s.classId}, ${s.id}, ${subj1}, 1, 8.5),
+        (${"sc-2-" + s.id}, ${s.classId}, ${s.id}, ${subj2}, 1, 8.0),
+        (${"sc-3-" + s.id}, ${s.classId}, ${s.id}, ${subj3}, 1, 9.0),
+        (${"sc-4-" + s.id}, ${s.classId}, ${s.id}, ${subj4}, 1, 8.5);
     `;
 
-    // Kehadiran Bulan Ini
+    // Kehadiran Presensi
     await sql`
       INSERT INTO student_attendances (id, student_id, month, year, sick, permitted, unexcused)
-      VALUES (${"att-" + s.id}, ${s.id}, 7, 2026, 0, 1, 0)
-      ON CONFLICT (id) DO NOTHING;
+      VALUES (${"att-" + s.id}, ${s.id}, 7, 2026, 0, 1, 0);
     `;
   }
 
   // 9. Violation Types & Sample Violations
-  console.log("⚠️ 9/9 Creating Violation Types & Initial Violations...");
+  console.log("⚠️ 9/10 Creating Violation Types & Initial Violations...");
+  const vType1 = "V-01";
+  const vType2 = "V-02";
+  const vType3 = "V-03";
+
   await sql`
     INSERT INTO violation_types (id, name, category, severity, points)
     VALUES 
-      ('V-01', 'Terlambat Berjamaah Subuh', 'Kedisiplinan', 'RINGAN', 5),
-      ('V-02', 'Tidak Membawa Al-Quran', 'Akademik', 'RINGAN', 5),
-      ('V-03', 'Keluar Komplek Tanpa Izin', 'Kedisiplinan', 'BERAT', 25)
-    ON CONFLICT (id) DO NOTHING;
+      (${vType1}, 'Terlambat Mengikuti Jamaah Subuh', 'Kedisiplinan', 'RINGAN', 5),
+      (${vType2}, 'Tidak Membawa Kitab Fathul Qorib', 'Akademik', 'RINGAN', 5),
+      (${vType3}, 'Keluar Komplek Tanpa Surat Izin Resmi', 'Kedisiplinan', 'BERAT', 25);
   `;
 
   await sql`
     INSERT INTO student_violations (id, student_id, violation_type_id, penalty, notes)
-    VALUES ('v-01', 's-02', 'V-01', 'Ta''zir Kebersihan Halaman', 'Terlambat mengikuti Jamaah Subuh')
-    ON CONFLICT (id) DO NOTHING;
+    VALUES 
+      ('v-01', 's-02', ${vType1}, 'Ta''zir Kebersihan Halaman Asrama', 'Terlambat 10 menit saat azan Subuh'),
+      ('v-02', 's-03', ${vType2}, 'Membaca Ulang Nazham Shorof', 'Lupa membawa kitab saat pengajian');
   `;
 
-  // Audit Log Initial Entry
+  // 10. Student Permits (Perizinan Pulang & Sambangan)
+  console.log("🎫 10/10 Creating Sample Student Permits...");
+  await sql`
+    INSERT INTO student_permits (id, student_id, permit_type, reason, start_date, end_date, status, approved_by_id, notes)
+    VALUES 
+      ('perm-01', 's-01', 'PULANG', 'Acara Pernikahan Kakak Kandung', '2026-07-25', '2026-07-28', 'APPROVED', ${pimpinanP}, 'Diizinkan pulang dengan pendampingan wali'),
+      ('perm-02', 's-04', 'SAMBANGAN', 'Kunjungan Orang Tua & Pengiriman Bekal', '2026-07-24', '2026-07-24', 'PENDING', NULL, 'Menunggu persetujuan Pengurus Pondok');
+  `;
+
+  // Khidmah Assignment Sample
+  await sql`
+    INSERT INTO khidmah_assignments (id, person_id, location, role_task, start_date, status)
+    VALUES ('khid-01', ${adminP}, 'Kantor Sekretariat Utama MPHM', 'Kepala Tata Usaha Akademik', '2025-06-01', 'ACTIVE');
+  `;
+
+  // Initial Audit Log Entry
   await sql`
     INSERT INTO audit_logs (id, action, entity, after_state)
-    VALUES ('log-init-01', 'INITIAL_SEED', 'SYSTEM', 'Initialized complete relational database seed for 2026/2027')
-    ON CONFLICT (id) DO NOTHING;
+    VALUES ('log-init-01', 'INITIAL_RELATIONAL_SEED', 'SYSTEM', 'Initialized complete interconnected database seed 2026/2027');
   `;
 
   console.log("======================================================");
-  console.log("🎉 DATABASE MPHM ENTERPRISE BERHASIL DISINKRONKAN DAN DIISI!");
+  console.log("🎉 DATABASE MPHM ENTERPRISE 100% BERHASIL DI-RESET DAN DIISI DENGAN DATA TERINTEGRASI!");
   console.log("======================================================");
 }
 
