@@ -43,7 +43,7 @@ export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
   {
     group: "Database Induk",
     items: [
-      { label: "Data Santriwati", href: "/sekretariat/santri", icon: Users },
+      { label: "Santriwati (Pondok P3HM)", href: "/sekretariat/santri", icon: Users },
       { label: "Data Wali Santri", href: "/sekretariat/wali-santri", icon: UserCircle },
       { label: "Data Kamar & Asrama", href: "/sekretariat/rooms", icon: Home },
       { label: "Data Mundzir", href: "/sekretariat/mundzir", icon: Users },
@@ -79,7 +79,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
   {
     group: "Manajemen Kelas",
     items: [
-      { label: "Siswi per Kelas", href: "/sekretariat/santri", icon: Users },
+      { label: "Siswi (Madrasah MPHM)", href: "/sekretariat/santri", icon: Users },
       { label: "Kelas & Rombel", href: "/sekretariat/kelas", icon: BookOpen },
     ]
   },

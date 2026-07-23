@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, X, MapPin, UploadCloud, Camera, User, Heart, Award, 
-  Calendar, Hash, Phone, FileText, Home, BookOpen, ExternalLink, ShieldCheck, Download
+  Calendar, Hash, Phone, FileText, Home, BookOpen, ExternalLink, ShieldCheck, Download, Layers
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
@@ -16,16 +16,26 @@ import { RegionSelector } from "@/components/shared/RegionSelector";
 import { TableActions } from "@/components/shared/TableActions";
 import { useSantri, Santri } from "../queries/useSantri";
 import { useToast } from "@/components/shared/ToastContext";
+import { useWorkspace, WorkspaceType } from "@/components/shared/WorkspaceContext";
 import { apiRequest } from "@/lib/api";
 
 interface SiswaTabProps {
   onViewDetail?: (data: Record<string, unknown>) => void;
   isReadOnly?: boolean;
   selectedYearId?: string;
-  workspace?: "pondok" | "madrasah";
+  workspace?: WorkspaceType;
 }
 
-export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, workspace = "madrasah" }: SiswaTabProps) {
+export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, workspace: propWorkspace }: SiswaTabProps) {
+  let contextWorkspace: WorkspaceType = "madrasah";
+  try {
+    const ws = useWorkspace();
+    contextWorkspace = ws.activeWorkspace;
+  } catch (_) {}
+
+  const activeWorkspace = propWorkspace || contextWorkspace;
+  const isPondok = activeWorkspace === "pondok";
+
   const [activeSubTab, setActiveSubTab] = useState<"aktif" | "alumni" | "mutasi">("aktif");
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -65,14 +75,14 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // Form States - II. Akademis
+  // Form States - II. Akademis / Keasramaan
   const [newStambuk, setNewStambuk] = useState("");
   const [newNis, setNewNis] = useState("");
   const [newNisn, setNewNisn] = useState("");
   const [newJenjang, setNewJenjang] = useState("Tsanawiyyah");
   const [newClass, setNewClass] = useState("Tsanawiyyah I-A");
+  const [newRoom, setNewRoom] = useState("Asrama Aisyah 1");
   const [newEnrollmentYear, setNewEnrollmentYear] = useState(2026);
-  const [newExitYear, setNewExitYear] = useState<number | undefined>(undefined);
   const [newGraduationYear, setNewGraduationYear] = useState<number | undefined>(undefined);
   const [newStatus, setNewStatus] = useState<string>("ACTIVE");
   const [newAddress, setNewAddress] = useState("");
@@ -85,15 +95,18 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const [newFamilyCardNumber, setNewFamilyCardNumber] = useState("");
 
   // Form States - V. Khidmah
-  const [newKhidmahLocation, setNewKhidmahLocation] = useState("Pondok Pesantren Putri Hidayatul Mubtadi'aat [P3HM] Lirboyo");
-  const [newKhidmahRole, setNewKhidmahRole] = useState("Pengabdi Asrama");
+  const [newKhidmahLocation, setNewKhidmahLocation] = useState(
+    isPondok 
+      ? "Pondok Pesantren Putri Hidayatul Mubtadi'aat [P3HM] Lirboyo" 
+      : "Madrasah Putri Hidayatul Mubtadi'aat [MPHM] Lirboyo"
+  );
+  const [newKhidmahRole, setNewKhidmahRole] = useState(isPondok ? "Musyrifah Asrama" : "Pengajar Diniyyah");
   const [newKhidmahRoom, setNewKhidmahRoom] = useState("Asrama Aisyah 1");
   const [newKhidmahStart, setNewKhidmahStart] = useState("2026");
   const [newKhidmahEnd, setNewKhidmahEnd] = useState("2027");
 
   // Media Upload States
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadFeedback, setUploadFeedback] = useState<string | null>(null);
 
   const handleOpenAdd = () => {
     setEditingSantri(null);
@@ -109,8 +122,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     setNewNisn("");
     setNewJenjang("Tsanawiyyah");
     setNewClass("Tsanawiyyah I-A");
+    setNewRoom("Asrama Aisyah 1");
     setNewEnrollmentYear(new Date().getFullYear());
-    setNewExitYear(undefined);
     setNewGraduationYear(undefined);
     setNewStatus("ACTIVE");
     setNewAddress("");
@@ -119,12 +132,6 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     setNewGuardianPhone("");
     setNewGuardianRelation("AYAH");
     setNewFamilyCardNumber("");
-    setNewKhidmahLocation("Pondok Pesantren Putri Hidayatul Mubtadi'aat [P3HM] Lirboyo");
-    setNewKhidmahRole("Pengabdi Asrama");
-    setNewKhidmahRoom("Asrama Aisyah 1");
-    setNewKhidmahStart("2026");
-    setNewKhidmahEnd("2027");
-    setUploadFeedback(null);
     setShowFormModal(true);
   };
 
@@ -150,17 +157,16 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     setNewGuardianPhone(student.guardianPhone);
     setNewGuardianRelation(student.guardianRelation);
     setNewFamilyCardNumber(student.familyCardNumber);
-    setUploadFeedback(null);
     setShowFormModal(true);
   };
 
   const handleDeleteSantri = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus data santri ini secara permanen dari sistem?")) {
+    if (confirm(`Apakah Anda yakin ingin menghapus data ${isPondok ? "santriwati" : "siswi"} ini secara permanen dari sistem?`)) {
       try {
         await deleteSantri(id);
-        toast("Data santri berhasil dihapus!", "success");
+        toast(`Data ${isPondok ? "santriwati" : "siswi"} berhasil dihapus!`, "success");
       } catch (_err) {
-        toast("Gagal menghapus data santri", "error");
+        toast(`Gagal menghapus data ${isPondok ? "santriwati" : "siswi"}.`, "error");
       }
     }
   };
@@ -170,8 +176,6 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     if (!file) return;
 
     setUploadingImage(true);
-    setUploadFeedback(null);
-
     try {
       const resSig = await apiRequest<{
         status: string;
@@ -204,12 +208,10 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       }
 
       setAvatarUrl(cloudinaryData.secure_url);
-      setUploadFeedback("Foto profil berhasil diunggah!");
-      toast("Pas foto santri berhasil diunggah ke Cloudinary!", "success");
+      toast("Pas foto berhasil diunggah ke Cloudinary!", "success");
     } catch (err: unknown) {
       console.error("UPLOAD_ERROR:", err);
       const errMsg = err instanceof Error ? err.message : "Gagal mengunggah foto.";
-      setUploadFeedback(`Error: ${errMsg}`);
       toast(errMsg, "error");
     } finally {
       setUploadingImage(false);
@@ -252,20 +254,25 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         await updateSantri({ id: editingSantri.id, data: payload });
         toast(`Data ${newName} berhasil diperbarui!`, "success");
       } else {
-        await createSantri(payload as Omit<Santri, "id">);
-        toast(`Santri baru ${newName} berhasil didaftarkan!`, "success");
+        await createSantri({
+          ...(payload as Omit<Santri, "id">),
+          mustahiq: isPondok ? "Ustadzah Musyrifah" : "Ustadz Mustahiq",
+          mufattisy: "Ustadz Mufattisy",
+        });
+        toast(`${isPondok ? "Santriwati" : "Siswi"} baru ${newName} berhasil didaftarkan!`, "success");
       }
 
       setShowFormModal(false);
     } catch (_err) {
-      toast("Gagal menyimpan data santri.", "error");
+      toast("Gagal menyimpan data.", "error");
     }
   };
 
-  const activeColumns: ColumnDef<Santri, unknown>[] = [
+  // Grid Columns for PONDOK (P3HM)
+  const pondokColumns: ColumnDef<Santri, unknown>[] = [
     {
       accessorKey: "name",
-      header: "Nama Santri & Stambuk",
+      header: "Nama Santriwati & Stambuk",
       cell: (info) => (
         <IdentityCell
           name={info.getValue() as string}
@@ -277,18 +284,28 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     },
     {
       accessorKey: "class",
-      header: workspace === "pondok" ? "Kamar Asrama" : "Kelas & Rombel",
+      header: "Kamar & Gedung Asrama",
       cell: (info) => (
-        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-          {workspace === "pondok" ? `Asrama Aisyah 1 (${info.getValue()})` : (info.getValue() as string)}
+        <div className="flex flex-col gap-0.5 text-left">
+          <span className="font-bold text-emerald-700 dark:text-emerald-400">Asrama Aisyah 1</span>
+          <span className="text-xs text-zinc-500 font-semibold">Gedung Aisyah (Lantai 2)</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "mustahiq",
+      header: "Musyrifah / Wali Kamar",
+      cell: (info) => (
+        <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-left">
+          Ustadzah Halimah
         </span>
       ),
     },
     {
       accessorKey: "familyCardNumber",
-      header: "Wali & No. KK (Smart KK)",
+      header: "Wali Santri & KK (Smart KK)",
       cell: (info) => (
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-0.5 text-left">
           <span className="font-bold text-zinc-900 dark:text-zinc-100">{info.row.original.guardianName}</span>
           <span className="text-[11px] font-mono text-zinc-500">KK: {info.getValue() as string}</span>
         </div>
@@ -296,7 +313,68 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     },
     {
       accessorKey: "status",
-      header: "Status Keaktifan",
+      header: "Status Keasramaan",
+      cell: (info) => <PillBadge label={info.getValue() as string === "ACTIVE" ? "AKTIF ASRAMA" : (info.getValue() as string)} variant={info.getValue() === "ACTIVE" ? "success" : "warning"} />,
+    },
+    {
+      id: "actions",
+      header: "Aksi Management",
+      cell: (info) => (
+        <TableActions
+          onEdit={() => handleOpenEdit(info.row.original)}
+          onDelete={() => handleDeleteSantri(info.row.original.id)}
+          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
+          isReadOnly={isReadOnly}
+        />
+      ),
+    },
+  ];
+
+  // Grid Columns for MADRASAH (MPHM)
+  const madrasahColumns: ColumnDef<Santri, unknown>[] = [
+    {
+      accessorKey: "name",
+      header: "Nama Siswi & Stambuk",
+      cell: (info) => (
+        <IdentityCell
+          name={info.getValue() as string}
+          subInfo={`Stambuk: ${info.row.original.stambuk} • Wali: ${info.row.original.guardianName}`}
+          stambuk={info.row.original.stambuk}
+          avatarUrl={info.row.original.avatarUrl}
+        />
+      ),
+    },
+    {
+      accessorKey: "class",
+      header: "Kelas & Rombel Diniyyah",
+      cell: (info) => (
+        <span className="font-bold text-blue-700 dark:text-blue-400 text-left">
+          {info.getValue() as string}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "mustahiq",
+      header: "Mustahiq (Wali Kelas)",
+      cell: (info) => (
+        <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-left">
+          {info.getValue() as string || "Ustadz Ahmad"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "familyCardNumber",
+      header: "Wali Siswi & KK (Smart KK)",
+      cell: (info) => (
+        <div className="flex flex-col gap-0.5 text-left">
+          <span className="font-bold text-zinc-900 dark:text-zinc-100">{info.row.original.guardianName}</span>
+          <span className="text-[11px] font-mono text-zinc-500">KK: {info.getValue() as string}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status Akademik",
       cell: (info) => <PillBadge label={info.getValue() as string} variant={info.getValue() === "ACTIVE" ? "success" : "warning"} />,
     },
     {
@@ -313,9 +391,12 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     },
   ];
 
-  const gridProps = { columns: activeColumns, data: santriData, tableName: "santri_aktif" };
+  const gridProps = {
+    columns: isPondok ? pondokColumns : madrasahColumns,
+    data: santriData,
+    tableName: isPondok ? "santriwati_pondok_p3hm" : "siswi_madrasah_mphm",
+  };
 
-  // Full Export/Import Headers (All 6 Form Sections)
   const excelHeaders = [
     "Nama Lengkap Santriwati",
     "NIK Santri (16 Digit)",
@@ -347,32 +428,74 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header Halaman */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-indigo-500/10 via-blue-500/5 to-transparent border border-indigo-500/20 dark:border-indigo-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Header Halaman Dinamis (PONDOK vs MADRASAH) */}
+      <div className={`relative overflow-hidden p-6 sm:p-8 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-md text-white ${
+        isPondok 
+          ? "bg-linear-to-r from-emerald-700 via-teal-700 to-emerald-900 border border-emerald-500/30" 
+          : "bg-linear-to-r from-indigo-700 via-blue-700 to-indigo-900 border border-indigo-500/30"
+      }`}>
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-indigo-650 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider">
-            <User className="w-4 h-4" />
-            <span>Manajemen Kesiswaan Enterprise ({workspace.toUpperCase()})</span>
+        <div className="flex flex-col gap-2 z-10">
+          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider px-3 py-1 bg-black/20 rounded-full border border-white/20 w-fit backdrop-blur-xs">
+            {isPondok ? <Home className="w-4 h-4 text-emerald-300" /> : <BookOpen className="w-4 h-4 text-blue-300" />}
+            <span>{isPondok ? "Workspace Pondok Pesantren Putri [P3HM Lirboyo]" : "Workspace Madrasah Diniyyah Putri [MPHM Lirboyo]"}</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Data Induk Santri
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            {isPondok ? "Data Induk Santriwati Asrama (P3HM)" : "Data Induk Siswi Diniyyah (MPHM)"}
           </h1>
-          <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Sistem data induk santriwati 6-Bagian terintegrasi dengan Nomor Stambuk, NIK, Wali (Smart KK), Khidmah, dan Berkas Digital.
+          <p className="text-white/80 text-sm max-w-2xl leading-relaxed">
+            {isPondok 
+              ? "Administrasi data santriwati pengasuhan asrama terintegrasi dengan Nomor Stambuk, Kamar Asrama, Musyrifah Wali Kamar, dan Smart KK Mapping."
+              : "Administrasi data siswi madrasah diniyyah terintegrasi dengan Nomor Stambuk, NIS/NISN, Kelas Rombel, Mustahiq, Raport Sakral Kwartal, dan Smart KK."
+            }
           </p>
         </div>
 
-        {!isReadOnly && (
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-5 py-3 bg-linear-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 border border-indigo-500/20"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tambah Santri Baru</span>
-          </button>
-        )}
+        <button
+          onClick={handleOpenAdd}
+          type="button"
+          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 border border-white/20 ${
+            isPondok ? "bg-emerald-500 hover:bg-emerald-400 text-zinc-950" : "bg-blue-500 hover:bg-blue-400 text-white"
+          }`}
+        >
+          <Plus className="w-4 h-4" />
+          <span>{isPondok ? "+ Registrasi Santriwati Baru" : "+ Registrasi Siswi Baru"}</span>
+        </button>
+      </div>
+
+      {/* Distinct Sub-tabs Menu */}
+      <div className="flex border-b border-zinc-200 dark:border-zinc-800 gap-1 overflow-x-auto pb-px">
+        <button
+          onClick={() => setActiveSubTab("aktif")}
+          className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${
+            activeSubTab === "aktif"
+              ? isPondok ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-extrabold" : "border-blue-600 text-blue-600 dark:text-blue-400 font-extrabold"
+              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+          }`}
+        >
+          {isPondok ? "Santriwati Asrama Aktif" : "Siswi Diniyyah Aktif"}
+        </button>
+        <button
+          onClick={() => setActiveSubTab("alumni")}
+          className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${
+            activeSubTab === "alumni"
+              ? isPondok ? "border-teal-600 text-teal-600 dark:text-teal-400 font-extrabold" : "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
+              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+          }`}
+        >
+          {isPondok ? "Santriwati Khidmah P3HM" : "Siswi Alumni / Lulus"}
+        </button>
+        <button
+          onClick={() => setActiveSubTab("mutasi")}
+          className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${
+            activeSubTab === "mutasi"
+              ? "border-rose-600 text-rose-600 dark:text-rose-400 font-extrabold"
+              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+          }`}
+        >
+          {isPondok ? "Santriwati Boyong" : "Mutasi & Keluar"}
+        </button>
       </div>
 
       <UniversalDataGrid
@@ -388,7 +511,9 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         onRowClick={(row) => setSelectedSantriForDetail(row as unknown as Santri)}
         tableName={gridProps.tableName}
         importExportProps={{
-          title: `Data Induk Santri (${workspace.toUpperCase()})`,
+          title: isPondok 
+            ? "Data Induk Santriwati Asrama (P3HM Lirboyo)" 
+            : "Data Induk Siswi Diniyyah (MPHM Lirboyo)",
           headers: excelHeaders,
           onImportSuccess: async (importedRows) => {
             let successCount = 0;
@@ -409,7 +534,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   graduationYear: r["Tahun Lulus"] ? Number(r["Tahun Lulus"]) : undefined,
                   status: r["Status Keaktifan"] || "ACTIVE",
                   address: r["Alamat Lengkap"] || "",
-                  mustahiq: "Ustadz Mustahiq",
+                  mustahiq: isPondok ? "Ustadzah Musyrifah" : "Ustadz Mustahiq",
                   mufattisy: "Ustadz Mufattisy",
                   guardianName: r["Nama Lengkap Wali"] || "Wali Import",
                   guardianRelation: (r["Hubungan Keluarga"] as any) || "AYAH",
@@ -427,26 +552,148 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         }}
       />
 
-      {/* Detail Modal Profil 6-Bagian */}
+      {/* Form Modal (Tambah / Edit) */}
       <AnimatePresence>
-        {selectedSantriForDetail && (
+        {showFormModal && (
           <div className="fixed inset-0 z-55 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelectedSantriForDetail(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowFormModal(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-xs"
             />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden relative z-10 max-h-[92vh] flex flex-col"
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden relative z-10 max-h-[92vh] flex flex-col"
             >
-              {/* Dynamic Header Profil Santri (Pondok vs Madrasah) */}
-              <div className="p-6 bg-linear-to-r from-indigo-600 via-indigo-700 to-blue-600 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
+              <div className={`p-5 border-b flex justify-between items-center ${
+                isPondok 
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50" 
+                  : "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900/50"
+              }`}>
+                <div>
+                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
+                    {editingSantri 
+                      ? `Edit Data: ${editingSantri.name}` 
+                      : (isPondok ? "Registrasi Santriwati Asrama Baru (P3HM)" : "Registrasi Siswi Diniyyah Baru (MPHM)")
+                    }
+                  </h3>
+                  <p className="text-xs text-zinc-500">Lengkapi data 6-bagian: identitas pribadi, akademis, alamat, wali (Smart KK), dan khidmah.</p>
+                </div>
+                <button onClick={() => setShowFormModal(false)} className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-xl transition-colors text-zinc-500 cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveForm} className="flex-1 overflow-y-auto p-6 space-y-8">
+                {/* 1. Pas Foto */}
+                <div className="bg-zinc-50 dark:bg-zinc-800/20 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-6">
+                  <div className="relative shrink-0 w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-850 flex items-center justify-center shadow-inner group">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center text-zinc-400">
+                        <Camera className="w-8 h-8" />
+                        <span className="text-[10px] mt-1 font-semibold">No Photo</span>
+                      </div>
+                    )}
+                    {uploadingImage && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-semibold">
+                        Mengunggah...
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-2 text-center sm:text-left">
+                    <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Pas Foto Resmi</h4>
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed">
+                      Format formal 3x4. Max file 2MB (JPG/PNG). Diunggah langsung ke Cloudinary Cloud Storage.
+                    </p>
+                    
+                    <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-xs cursor-pointer border border-blue-150 dark:border-blue-900/40 transition-colors">
+                      <UploadCloud className="w-4 h-4" />
+                      <span>Unggah Pas Foto</span>
+                      <input type="file" accept="image/*" onChange={handleImageFileChange} disabled={uploadingImage} className="hidden" />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Form Fields */}
+                <div className="space-y-4">
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">I. Informasi Pribadi</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">Nama Lengkap *</label>
+                      <input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">NIK (16 Digit) *</label>
+                      <input type="text" required maxLength={16} value={newNik} onChange={(e) => setNewNik(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">II. Informasi Akademik / Asrama</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">Nomor Stambuk *</label>
+                      <input type="text" required value={newStambuk} onChange={(e) => setNewStambuk(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">{isPondok ? "Kamar Asrama" : "Kelas Diniyyah"}</label>
+                      <input type="text" value={newClass} onChange={(e) => setNewClass(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">Nomor KK (Smart KK) *</label>
+                      <input type="text" required maxLength={16} value={newFamilyCardNumber} onChange={(e) => setNewFamilyCardNumber(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">III. Data Wali Santri</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">Nama Lengkap Wali *</label>
+                      <input type="text" required value={newGuardianName} onChange={(e) => setNewGuardianName(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-zinc-500">No. WhatsApp Wali *</label>
+                      <input type="text" required value={newGuardianPhone} onChange={(e) => setNewGuardianPhone(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border rounded-lg text-sm font-mono" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                  <button type="button" onClick={() => setShowFormModal(false)} className="px-4 py-2 text-sm font-bold bg-zinc-100 hover:bg-zinc-200 rounded-xl">Batal</button>
+                  <button type="submit" className={`px-6 py-2 text-sm font-bold text-white rounded-xl shadow-md ${isPondok ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"}`}>
+                    {editingSantri ? "Simpan Perubahan" : "Daftarkan"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Dynamic Modal Header profil Santri (Pondok vs Madrasah) */}
+      <AnimatePresence>
+        {selectedSantriForDetail && (
+          <div className="fixed inset-0 z-55 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedSantriForDetail(null)} className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden relative z-10 max-h-[92vh] flex flex-col">
+              
+              {/* HEADER PROFIL SANTRI RESMI: FOTO - STAMBUK - NAMA LENGKAP SANTRIWATI (NAMA WALI) - KAMAR/KELAS - STATUS */}
+              <div className={`p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md ${
+                isPondok 
+                  ? "bg-linear-to-r from-emerald-700 via-teal-700 to-emerald-900" 
+                  : "bg-linear-to-r from-indigo-700 via-blue-700 to-indigo-900"
+              }`}>
                 <div className="flex items-center gap-4 text-center sm:text-left">
                   <div className="relative shrink-0 w-20 h-20 rounded-full overflow-hidden border-2 border-white/30 shadow-lg bg-white/10 flex items-center justify-center">
                     {selectedSantriForDetail.avatarUrl ? (
@@ -457,23 +704,23 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   </div>
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                      <span className="text-xs font-mono font-bold bg-white/20 px-2.5 py-0.5 rounded-full text-indigo-100">
+                      <span className="text-xs font-mono font-bold bg-white/20 px-2.5 py-0.5 rounded-full text-white">
                         {selectedSantriForDetail.stambuk}
                       </span>
                       <PillBadge label={selectedSantriForDetail.status} variant={selectedSantriForDetail.status === "ACTIVE" ? "success" : "warning"} />
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black">
-                      {selectedSantriForDetail.name} <span className="text-sm font-normal text-indigo-200">({selectedSantriForDetail.guardianName})</span>
+                      {selectedSantriForDetail.name} <span className="text-sm font-normal text-white/80">({selectedSantriForDetail.guardianName})</span>
                     </h2>
-                    <p className="text-xs text-indigo-100 font-semibold flex items-center gap-2 justify-center sm:justify-start">
-                      {workspace === "pondok" ? (
+                    <p className="text-xs text-white/90 font-semibold flex items-center gap-2 justify-center sm:justify-start">
+                      {isPondok ? (
                         <>
-                          <Home className="w-3.5 h-3.5" />
-                          <span>Kamar: Asrama Aisyah 1</span>
+                          <Home className="w-3.5 h-3.5 text-emerald-300" />
+                          <span>Kamar: Asrama Aisyah 1 (Gedung Aisyah)</span>
                         </>
                       ) : (
                         <>
-                          <BookOpen className="w-3.5 h-3.5" />
+                          <BookOpen className="w-3.5 h-3.5 text-blue-300" />
                           <span>Kelas: {selectedSantriForDetail.class}</span>
                         </>
                       )}
@@ -485,12 +732,12 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                 </button>
               </div>
 
-              {/* Navigasi Tab 6-Bagian Detail */}
+              {/* Navigasi Tab 6-Bagian */}
               <div className="flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 overflow-x-auto px-4">
                 {[
                   { id: "pribadi", label: "I. Informasi Pribadi" },
-                  { id: "akademis", label: "II. Akademis" },
-                  { id: "alamat", label: "III. Alamat" },
+                  { id: "akademis", label: isPondok ? "II. Keasramaan" : "II. Akademis" },
+                  { id: "alamat", label: "III. Alamat Lengkap" },
                   { id: "wali", label: "IV. Wali (Smart KK)" },
                   { id: "khidmah", label: "V. Masa Khidmah" },
                   { id: "berkas", label: "VI. Berkas Penting" },
@@ -500,7 +747,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                     onClick={() => setDetailActiveSection(tab.id as any)}
                     className={`px-4 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
                       detailActiveSection === tab.id
-                        ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
+                        ? isPondok ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-extrabold" : "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
                         : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                     }`}
                   >
@@ -545,36 +792,12 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                       <p className="text-base font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-1">{selectedSantriForDetail.stambuk}</p>
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">NIS (Nomor Induk Santri)</span>
-                      <p className="text-base font-mono font-bold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.nis}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">NISN (Nasional)</span>
-                      <p className="text-base font-mono font-bold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.nisn || "-"}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Jenjang Aktif</span>
-                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">Tsanawiyyah</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Kelas Aktif</span>
-                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.class}</p>
+                      <span className="text-xs text-zinc-400 font-bold uppercase">{isPondok ? "Kamar Asrama" : "Kelas Diniyyah"}</span>
+                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{isPondok ? "Asrama Aisyah 1" : selectedSantriForDetail.class}</p>
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
                       <span className="text-xs text-zinc-400 font-bold uppercase">Status Keaktifan</span>
                       <p className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-1">{selectedSantriForDetail.status}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Tahun Masuk</span>
-                      <p className="text-base font-semibold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.enrollmentYear}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Tahun Keluar</span>
-                      <p className="text-base font-semibold text-zinc-900 dark:text-white mt-1">-</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Tahun Lulus</span>
-                      <p className="text-base font-semibold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.graduationYear || "-"}</p>
                     </div>
                   </div>
                 )}
@@ -598,16 +821,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                       <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.guardianName}</p>
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Hubungan Keluarga</span>
-                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.guardianRelation}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
                       <span className="text-xs text-zinc-400 font-bold uppercase">Nomor Kartu Keluarga (KK) *</span>
                       <p className="text-base font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-1">{selectedSantriForDetail.familyCardNumber}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">NIK Wali (16 Digit)</span>
-                      <p className="text-base font-mono font-bold text-zinc-900 dark:text-white mt-1">{selectedSantriForDetail.guardianNik || "-"}</p>
                     </div>
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800 sm:col-span-2">
                       <span className="text-xs text-zinc-400 font-bold uppercase">No. WhatsApp Wali</span>
@@ -625,14 +840,6 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
                       <span className="text-xs text-zinc-400 font-bold uppercase">Jabatan Khidmah</span>
                       <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{newKhidmahRole}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Kamar Saat Khidmah</span>
-                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{newKhidmahRoom}</p>
-                    </div>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <span className="text-xs text-zinc-400 font-bold uppercase">Masa Pengabdian</span>
-                      <p className="text-base font-bold text-zinc-900 dark:text-white mt-1">{newKhidmahStart} - {newKhidmahEnd}</p>
                     </div>
                   </div>
                 )}
@@ -656,17 +863,6 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
 
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-emerald-500" />
-                        <div>
-                          <p className="text-sm font-bold text-zinc-900 dark:text-white">Ijazah Kelulusan</p>
-                          <span className="text-xs text-zinc-400">Berkas Resmi Terverifikasi</span>
-                        </div>
-                      </div>
-                      <span className="text-xs text-zinc-400 font-semibold">Tersimpan di Arsip</span>
-                    </div>
-
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
                         <BookOpen className="w-5 h-5 text-blue-500" />
                         <div>
                           <p className="text-sm font-bold text-zinc-900 dark:text-white">Raport Per Kelas / Jenjang</p>
@@ -677,27 +873,12 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                         <ExternalLink className="w-3.5 h-3.5" /> View Raport
                       </button>
                     </div>
-
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Award className="w-5 h-5 text-amber-500" />
-                        <div>
-                          <p className="text-sm font-bold text-zinc-900 dark:text-white">Sertifikat Kelulusan & Prestasi</p>
-                          <span className="text-xs text-zinc-400">Dokumen Penghargaan</span>
-                        </div>
-                      </div>
-                      <span className="text-xs text-zinc-400 font-semibold">Tersimpan di Sertifikat</span>
-                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Modal Footer */}
               <div className="p-5 border-t border-zinc-150 dark:border-zinc-800 flex justify-end bg-zinc-50/50 dark:bg-zinc-900/50">
-                <button
-                  onClick={() => setSelectedSantriForDetail(null)}
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition-colors cursor-pointer"
-                >
+                <button onClick={() => setSelectedSantriForDetail(null)} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition-colors cursor-pointer">
                   Tutup Rincian
                 </button>
               </div>
