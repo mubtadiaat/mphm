@@ -212,35 +212,8 @@ export default function Page() {
             </p>
           </div>
 
-          {/* Highlight Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-md flex flex-col gap-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <GraduationCap className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-bold text-white">Akademik Sakral</span>
-              <span className="text-xs text-zinc-400">Matriks nilai 5 pelajaran sakral terpisah dari rangking.</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-md flex flex-col gap-2">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-bold text-white">Presensi Realtime</span>
-              <span className="text-xs text-zinc-400">Pencatatan sakit, izin, alpa terintegrasi otomatis.</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-md flex flex-col gap-2">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-                <Award className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-bold text-white">Keamanan & Audit</span>
-              <span className="text-xs text-zinc-400">Pencatatan pelanggaran, poin ta'zir & log audit sistem.</span>
-            </div>
-          </div>
-
           {/* Institutional Guarantee Footer */}
-          <div className="flex items-center gap-3 text-xs text-zinc-500 pt-2">
+          <div className="flex items-center gap-3 text-xs text-zinc-500 pt-4 border-t border-zinc-800/60">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Dilindungi enkripsi sesi berlapis & serverless database Neon cloud.</span>
           </div>
