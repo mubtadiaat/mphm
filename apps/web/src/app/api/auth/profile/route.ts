@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromCookies } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog } from "@/lib/auditLog";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -56,6 +57,14 @@ export async function PUT(req: NextRequest) {
         },
       });
     }
+
+    await createAuditLog({
+      userId: session.username,
+      action: newPassword ? "UPDATE_PASSWORD_PROFILE" : "UPDATE_PROFILE",
+      entity: "USER_SETTING",
+      entityId: userAccount.id,
+      afterState: { fullName, updatedAvatar: Boolean(avatarUrl) },
+    });
 
     return NextResponse.json({
       status: "Success",

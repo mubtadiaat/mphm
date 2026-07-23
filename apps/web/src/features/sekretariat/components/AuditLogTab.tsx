@@ -60,15 +60,15 @@ export function AuditLogTab({ onViewDetail }: AuditLogTabProps) {
         <div className="absolute top-0 right-0 w-32 h-32 bg-zinc-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-zinc-650 dark:text-zinc-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
             <Activity className="w-4 h-4" />
-            <span>Keamanan Sistem</span>
+            <span>Audit Log 24 Jam Realtime (Active & Rolling Purge)</span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Forensic Audit Log
+            Audit Log Aktivitas Sistem
           </h1>
           <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Jejak digital forensik transaksi data penting, perubahan nilai, dan mutasi santri seumur hidup.
+            Jejak digital forensik transaksi data, sesi login/logout, penautan akun, dan perubahan CRUD 24 jam terakhir. Log secara otomatis dibersihkan secara bergulir setelah 24 jam.
           </p>
         </div>
       </div>

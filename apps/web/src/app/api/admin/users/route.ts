@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSessionFromCookies } from "@/lib/jwt";
+import { createAuditLog } from "@/lib/auditLog";
 
 export async function GET(req: NextRequest) {
   try {
@@ -86,6 +88,15 @@ export async function POST(req: NextRequest) {
         status: "ACTIVE",
       },
       include: { person: true },
+    });
+
+    const session = await getSessionFromCookies();
+    await createAuditLog({
+      userId: session?.username || "ADMIN",
+      action: "CREATE_USER",
+      entity: "USER_ACCOUNT",
+      entityId: newUser.id,
+      afterState: { username: newUser.username, role: newUser.role },
     });
 
     return NextResponse.json({

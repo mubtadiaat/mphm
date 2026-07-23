@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/jwt";
+import { createAuditLog } from "@/lib/auditLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -70,6 +71,15 @@ export async function POST(req: NextRequest) {
     });
 
     await setSessionCookie(response, sessionPayload);
+
+    await createAuditLog({
+      userId: userAccount.username,
+      action: "LOGIN_GOOGLE",
+      entity: "AUTH",
+      entityId: userAccount.id,
+      afterState: { email, role: userAccount.role },
+    });
+
     return response;
   } catch (err: any) {
     console.error("GOOGLE_LOGIN_ERROR:", err.message);

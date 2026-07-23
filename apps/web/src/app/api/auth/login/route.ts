@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/jwt";
+import { createAuditLog } from "@/lib/auditLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -75,6 +76,16 @@ export async function POST(req: NextRequest) {
     });
 
     await setSessionCookie(response, sessionPayload);
+
+    // Audit Log 24-hour entry
+    await createAuditLog({
+      userId: userAccount.username,
+      action: "LOGIN",
+      entity: "AUTH",
+      entityId: userAccount.id,
+      afterState: { role: userAccount.role, fullName: sessionPayload.fullName },
+    });
+
     return response;
   } catch (err: any) {
     console.error("AUTH_LOGIN_ERROR_DETAILS:", err?.stack || err?.message || err);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromCookies } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog } from "@/lib/auditLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,6 +52,14 @@ export async function POST(req: NextRequest) {
       include: { person: true },
     });
 
+    await createAuditLog({
+      userId: session.username,
+      action: "LINK_GOOGLE",
+      entity: "USER_SETTING",
+      entityId: session.accountId,
+      afterState: { email, googleLinked: true },
+    });
+
     return NextResponse.json({
       status: "Success",
       message: `Akun Google (${email}) berhasil ditautkan!`,
@@ -83,6 +92,13 @@ export async function DELETE(req: NextRequest) {
       data: {
         firebaseUid: null,
       },
+    });
+
+    await createAuditLog({
+      userId: session.username,
+      action: "UNLINK_GOOGLE",
+      entity: "USER_SETTING",
+      entityId: session.accountId,
     });
 
     return NextResponse.json({
