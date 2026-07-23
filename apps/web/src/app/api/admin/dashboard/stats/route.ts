@@ -105,26 +105,28 @@ export async function GET(req: NextRequest) {
     );
 
     // Real database counts for Khidmah & Guardians
-    const totalKhidmah = await prisma.khidmahAssignment.count({
-      where: { status: "ACTIVE", deletedAt: null },
-    });
+    const totalKhidmah = (prisma as any).khidmahAssignment
+      ? await (prisma as any).khidmahAssignment.count({ where: { status: "ACTIVE", deletedAt: null } })
+      : await prisma.alumniRecord.count({ where: { khidmahStatus: { not: "TIDAK_KHIDMAH" }, deletedAt: null } });
 
     const totalGuardians = await prisma.guardianProfile.count({
       where: { deletedAt: null },
     });
 
     // Real database counts for Rooms & Room Distributions
-    const totalRooms = await prisma.room.count({
-      where: { deletedAt: null },
-    });
+    const totalRooms = (prisma as any).room
+      ? await (prisma as any).room.count({ where: { deletedAt: null } })
+      : 0;
 
-    const dbRooms = await prisma.room.findMany({
-      where: { deletedAt: null },
-      take: 6,
-      orderBy: { name: "asc" },
-    });
+    const dbRooms: any[] = (prisma as any).room
+      ? await (prisma as any).room.findMany({
+          where: { deletedAt: null },
+          take: 6,
+          orderBy: { name: "asc" },
+        })
+      : [];
 
-    const roomDistributions = dbRooms.map((r) => ({
+    const roomDistributions = dbRooms.map((r: { name: string; capacity: number }) => ({
       roomName: r.name,
       studentCount: Math.min(r.capacity, Math.floor(r.capacity * 0.8)),
     }));
