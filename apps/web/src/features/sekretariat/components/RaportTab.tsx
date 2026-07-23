@@ -206,7 +206,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
                 {/* Kertas A4 Simulation */}
                 <div className="bg-white text-black p-10 w-full max-w-[210mm] min-h-[297mm] shadow-md border border-zinc-300">
                   <div className="text-center border-b-2 border-black pb-4 mb-6">
-                    <h2 className="text-xl font-bold uppercase">Madrasah Pesantren Hidayatul Mubtadi&apos;in</h2>
+                    <h2 className="text-xl font-bold uppercase">Madrasah Putri Hidayatul Mubtadi&apos;aat [MPHM] Lirboyo</h2>
                     <p className="text-sm">Laporan Hasil Belajar Santri (Raport)</p>
                     <p className="text-sm font-semibold mt-1">Semester {selectedSemester}</p>
                   </div>

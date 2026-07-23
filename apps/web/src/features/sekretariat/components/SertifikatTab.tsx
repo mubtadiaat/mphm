@@ -116,7 +116,7 @@ export function SertifikatTab() {
                     
                     <p className="max-w-2xl mx-auto text-lg leading-relaxed text-gray-800 mb-16">
                       Telah menyelesaikan dan lulus seluruh program pendidikan tingkat I&apos;dadiyyah di 
-                      Madrasah Pesantren Hidayatul Mubtadi&apos;in dengan predikat <strong>Sangat Memuaskan</strong>.
+                      Madrasah Putri Hidayatul Mubtadi&apos;aat [MPHM] Lirboyo dengan predikat <strong>Sangat Memuaskan</strong>.
                     </p>
 
                     <div className="flex justify-between w-full px-20">

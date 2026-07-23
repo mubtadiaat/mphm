@@ -109,14 +109,13 @@ export function IjazahTab() {
                   
                   <div className="z-10 w-full">
                     <h1 className="text-5xl font-serif text-emerald-800 font-extrabold mb-2 uppercase tracking-wider">Ijazah Kelulusan</h1>
-                    <h2 className="text-2xl font-serif text-emerald-900 mb-10 font-semibold tracking-wide">Madrasah Aliyyah Pesantren Hidayatul Mubtadi&apos;in</h2>
+                    <h2 className="text-2xl font-serif text-emerald-900 mb-10 font-semibold tracking-wide">Madrasah Putri Hidayatul Mubtadi&apos;aat [MPHM] Lirboyo</h2>
+                    <p className="text-gray-700 italic mb-8">Dengan bertawakkal kepada Allah SWT, Menerangkan Bahwa:</p>
+                    <h3 className="text-3xl font-bold text-gray-900 mb-2 font-serif underline underline-offset-8">{previewStudent.name}</h3>
+                    <p className="text-sm font-mono text-gray-600 mb-8">Stambuk: {previewStudent.stambuk} | NIS: {(previewStudent as any).nis}</p>
                     
-                    <p className="text-lg mb-6">Dengan rahmat Allah SWT, menyatakan bahwa:</p>
-                    <h3 className="text-5xl font-bold text-black mb-4 font-serif underline decoration-emerald-800/30 underline-offset-8">{previewStudent.name}</h3>
-                    <p className="text-lg mb-8">Nomor Induk Stambuk: <span className="font-bold font-mono">{previewStudent.stambuk}</span></p>
-                    
-                    <p className="max-w-3xl mx-auto text-lg leading-relaxed text-gray-800 mb-16 text-justify">
-                      Telah menyelesaikan dan memenuhi segala persyaratan kelulusan serta ujian akhir pada tingkat Aliyyah dengan predikat <strong>Mumtaz (Sangat Memuaskan)</strong>. Kepadanya diberikan Ijazah Kelulusan sebagai tanda bukti sah tamat belajar dari Madrasah Pesantren Hidayatul Mubtadi&apos;in.
+                    <p className="text-gray-800 leading-relaxed text-justify max-w-xl mx-auto mb-16 font-serif">
+                      Telah menyelesaikan dan memenuhi segala persyaratan kelulusan serta ujian akhir pada tingkat Aliyyah dengan predikat <strong>Mumtaz (Sangat Memuaskan)</strong>. Kepadanya diberikan Ijazah Kelulusan sebagai tanda bukti sah tamat belajar dari Madrasah Putri Hidayatul Mubtadi&apos;aat [MPHM] Lirboyo.
                     </p>
 
                     <div className="flex justify-between w-full px-20">

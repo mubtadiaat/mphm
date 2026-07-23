@@ -85,7 +85,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const [newFamilyCardNumber, setNewFamilyCardNumber] = useState("");
 
   // Form States - V. Khidmah
-  const [newKhidmahLocation, setNewKhidmahLocation] = useState("Pondok Hidayatul Mubtadi'in");
+  const [newKhidmahLocation, setNewKhidmahLocation] = useState("Pondok Pesantren Putri Hidayatul Mubtadi'aat [P3HM] Lirboyo");
   const [newKhidmahRole, setNewKhidmahRole] = useState("Pengabdi Asrama");
   const [newKhidmahRoom, setNewKhidmahRoom] = useState("Asrama Aisyah 1");
   const [newKhidmahStart, setNewKhidmahStart] = useState("2026");
@@ -119,7 +119,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     setNewGuardianPhone("");
     setNewGuardianRelation("AYAH");
     setNewFamilyCardNumber("");
-    setNewKhidmahLocation("Pondok Hidayatul Mubtadi'in");
+    setNewKhidmahLocation("Pondok Pesantren Putri Hidayatul Mubtadi'aat [P3HM] Lirboyo");
     setNewKhidmahRole("Pengabdi Asrama");
     setNewKhidmahRoom("Asrama Aisyah 1");
     setNewKhidmahStart("2026");
