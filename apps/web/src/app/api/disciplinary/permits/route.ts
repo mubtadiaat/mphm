@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    const formatted = permits.map((p) => ({
+    const formatted = permits.map((p: any) => ({
       id: p.id,
       studentId: p.studentId,
       studentName: p.student.person.fullName,
