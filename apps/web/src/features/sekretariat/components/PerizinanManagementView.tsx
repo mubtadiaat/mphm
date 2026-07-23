@@ -166,12 +166,12 @@ export function PerizinanManagementView() {
 
   // Filtered List based on client search
   const filteredPermits = permits.filter((p) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      p.studentName.toLowerCase().includes(query) ||
-      p.stambuk.toLowerCase().includes(query) ||
-      p.reason.toLowerCase().includes(query)
-    );
+    const query = (searchQuery || "").toLowerCase();
+    if (!query) return true;
+    const nameStr = (p.studentName || "").toLowerCase();
+    const stambukStr = (p.stambuk || "").toLowerCase();
+    const reasonStr = (p.reason || "").toLowerCase();
+    return nameStr.includes(query) || stambukStr.includes(query) || reasonStr.includes(query);
   });
 
   // Stats calculation

@@ -12,11 +12,38 @@ export async function GET(req: NextRequest) {
         deletedAt: null,
         ...(studentId ? { studentId } : {}),
       },
+      include: {
+        student: {
+          include: {
+            person: true,
+            enrollments: {
+              where: { status: "ACTIVE", deletedAt: null },
+              include: { academicClass: true },
+            },
+          },
+        },
+        violationType: true,
+      },
       orderBy: { date: "desc" },
       take: limit,
     });
 
-    return NextResponse.json({ status: "Success", data: violations });
+    const formatted = violations.map((v) => ({
+      id: v.id,
+      name: v.student?.person?.fullName || "Santriwati",
+      stambuk: v.student?.stambukNumber || v.student?.nis || "-",
+      class: v.student?.enrollments?.[0]?.academicClass?.name || "Diniyyah",
+      desc: v.violationType?.name || v.penalty || v.notes || "Pelanggaran Harian",
+      category: v.violationType?.category || "Kedisiplinan",
+      severity: v.violationType?.severity || "RINGAN",
+      date: v.date ? new Date(v.date).toISOString().split("T")[0] : "-",
+      penalty: v.penalty || "-",
+      notes: v.notes || "-",
+      studentId: v.studentId,
+      violationTypeId: v.violationTypeId,
+    }));
+
+    return NextResponse.json({ status: "Success", data: formatted });
   } catch (err: any) {
     console.error("VIOLATIONS_GET_PRISMA_ERROR:", err.message);
     return NextResponse.json(

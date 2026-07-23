@@ -75,8 +75,11 @@ export default function KeamananJurnalPage() {
 
   // Filtering
   const filteredViolations = violations.filter(v => {
-    const matchesSearch = v.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          v.stambuk.includes(searchQuery);
+    const nameStr = (v.name || "").toLowerCase();
+    const stambukStr = (v.stambuk || "").toLowerCase();
+    const descStr = (v.desc || "").toLowerCase();
+    const q = (searchQuery || "").toLowerCase();
+    const matchesSearch = !q || nameStr.includes(q) || stambukStr.includes(q) || descStr.includes(q);
     const matchesCategory = selectedCategory === "all" || v.category === selectedCategory;
     const matchesSeverity = selectedSeverity === "all" || v.severity === selectedSeverity;
     return matchesSearch && matchesCategory && matchesSeverity;
