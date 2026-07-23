@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import { Users, AlertCircle, HeartPulse, BarChart3, TrendingUp, Heart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
-import { NAVIGATION_CONFIG } from "@/config/navigation.config";
-import Link from "next/link";
 
 interface GuardianStats {
   totalChildren: number;
@@ -42,7 +40,7 @@ export function GuardianDashboard() {
   const scoreTrend = data?.childQuarterlyScores || [];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 pb-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
@@ -147,39 +145,6 @@ export function GuardianDashboard() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* QUICK LINKS */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Menu Utama Wali Santri
-          </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Akses cepat ke seluruh laporan dan pencapaian anak.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {NAVIGATION_CONFIG["wali_santri"].map((item: any, itemIdx) => {
-            if (item.label.includes("Dashboard")) return null;
-            const ItemIcon = item.icon;
-            return (
-              <Link 
-                key={itemIdx} 
-                href={item.href}
-                className="flex items-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-blue-500 hover:shadow-md transition-all duration-200 group"
-              >
-                <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 transition-colors shrink-0">
-                  <ItemIcon className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500 transition-colors" />
-                </div>
-                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
       </div>
     </div>
   );

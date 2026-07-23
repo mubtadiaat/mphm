@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import { Users, AlertTriangle, Calendar, BarChart3, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
-import { NAVIGATION_CONFIG } from "@/config/navigation.config";
-import Link from "next/link";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -40,12 +38,11 @@ export function KeamananDashboard() {
     { label: "Penanganan Selesai", value: isLoading ? "..." : data?.resolvedViolations || 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
   ];
 
-  // Strictly use real API data, never hardcode mock fallback arrays
   const trendData = data?.monthlyTrend || [];
   const maxCount = trendData.length > 0 ? Math.max(...trendData.map((d) => d.count), 1) : 1;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-1">
@@ -149,39 +146,6 @@ export function KeamananDashboard() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* QUICK MENU UTAMA */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            Menu Utama Keamanan
-          </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Akses cepat ke seluruh fitur jurnal kedisiplinan dan pelacakan santri.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {NAVIGATION_CONFIG["keamanan"].map((item: any, itemIdx) => {
-            if (item.label.includes("Dashboard")) return null;
-            const ItemIcon = item.icon;
-            return (
-              <Link 
-                key={itemIdx} 
-                href={item.href}
-                className="flex items-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-rose-500 hover:shadow-md transition-all duration-200 group"
-              >
-                <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl group-hover:bg-rose-50 dark:group-hover:bg-rose-500/10 transition-colors shrink-0">
-                  <ItemIcon className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-rose-500 transition-colors" />
-                </div>
-                <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
