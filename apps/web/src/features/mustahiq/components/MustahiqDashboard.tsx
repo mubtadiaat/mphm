@@ -49,7 +49,7 @@ export function MustahiqDashboard() {
           <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
             <span>Mustahiq (Wali Kelas)</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
             Dashboard {data?.className || "Pengampuan Kelas"}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm">

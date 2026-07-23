@@ -154,7 +154,7 @@ export function Sidebar({ role }: { role: RoleTypes }) {
       <div className="h-20 flex items-center px-6 gap-3 border-b border-slate-900/80 bg-slate-950/50">
         <Image src="/logo.png" alt="MPHM Logo" width={36} height={36} unoptimized className="drop-shadow-md rounded-md" />
         <div className="flex flex-col">
-          <span className="font-extrabold text-lg tracking-tight text-white">MPHM 4.0</span>
+          <span className="font-extrabold text-base tracking-tight text-white">MPHM Lirboyo</span>
           <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{role.replace("_", " ")}</span>
         </div>
       </div>

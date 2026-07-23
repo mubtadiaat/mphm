@@ -50,7 +50,7 @@ export function PimpinanDashboard() {
             <Award className="w-4 h-4" />
             <span>Pimpinan / Mundzir Pondok Pesantren</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
             Dashboard Pengasuhan Pimpinan
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm">
