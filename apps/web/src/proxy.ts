@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyJWT } from "@/lib/jwt";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("mphm_session")?.value;
   const session = token ? verifyJWT(token) : null;
@@ -19,14 +19,12 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith(prefix)
   );
 
-  // If user is trying to access a dashboard route without valid session, redirect to login
   if (isDashboardRoute && !session) {
     const loginUrl = new URL("/", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // If user is logged in and trying to access the login page (/), redirect to their role home
   if (pathname === "/" && session) {
     const roleStr = String(session.role || "").trim().toLowerCase();
     let target = "/sekretariat";
