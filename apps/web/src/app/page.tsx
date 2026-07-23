@@ -82,7 +82,7 @@ export default function Page() {
         throw new Error(resData.message || "Login gagal. Silakan periksa kembali username dan password Anda.");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["auth_user"] });
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 
       let redirectUrl = "/sekretariat";
       const backendRole = String(resData.data?.role || "").trim().toLowerCase();
@@ -129,7 +129,7 @@ export default function Page() {
         throw new Error(resData.message || "Gagal menautkan akun Google.");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["auth_user"] });
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
 
       const roleStr = String(resData.data?.role || "").trim().toLowerCase();
       let redirectUrl = "/guardian";

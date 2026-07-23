@@ -43,6 +43,28 @@ function base64UrlDecode(str: string): string {
   return new TextDecoder().decode(bytes);
 }
 
+/**
+ * Simple HMAC-like signature using Web-safe operations.
+ * Uses a deterministic hash combining the input with the secret.
+ */
+function createSignature(input: string, secret: string): string {
+  // Use a stronger multi-pass hash to create signature
+  const combined = input + "|" + secret;
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+  for (let i = 0; i < combined.length; i++) {
+    const ch = combined.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const hash = (h2 >>> 0) * 4294967296 + (h1 >>> 0);
+  return hash.toString(36);
+}
+
 export function signJWT(payload: Omit<JWTPayload, "exp">, expiresInDays: number = 7): string {
   const header = { alg: "HS256", typ: "JWT" };
   const exp = Math.floor(Date.now() / 1000) + expiresInDays * 24 * 60 * 60;
@@ -51,15 +73,7 @@ export function signJWT(payload: Omit<JWTPayload, "exp">, expiresInDays: number 
   const encodedHeader = base64UrlEncode(JSON.stringify(header));
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
   const signatureInput = `${encodedHeader}.${encodedPayload}`;
-
-  let hash = 0;
-  const combined = signatureInput + JWT_SECRET;
-  for (let i = 0; i < combined.length; i++) {
-    const char = combined.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  const signature = Math.abs(hash).toString(36);
+  const signature = createSignature(signatureInput, JWT_SECRET);
 
   return `${signatureInput}.${signature}`;
 }
@@ -71,15 +85,7 @@ export function verifyJWT(token: string): JWTPayload | null {
 
     const [encodedHeader, encodedPayload, signature] = parts;
     const signatureInput = `${encodedHeader}.${encodedPayload}`;
-
-    let hash = 0;
-    const combined = signatureInput + JWT_SECRET;
-    for (let i = 0; i < combined.length; i++) {
-      const char = combined.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash |= 0;
-    }
-    const expectedSignature = Math.abs(hash).toString(36);
+    const expectedSignature = createSignature(signatureInput, JWT_SECRET);
 
     if (signature !== expectedSignature) {
       return null;
