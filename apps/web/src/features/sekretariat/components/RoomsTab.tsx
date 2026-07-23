@@ -107,9 +107,10 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
     {
       accessorKey: "name",
       header: "Nama Kamar",
+      meta: { align: "left" },
       cell: (info) => (
-        <div className="flex items-center gap-2 font-bold text-zinc-900 dark:text-white">
-          <Bed className="w-4 h-4 text-blue-500" />
+        <div className="flex items-center justify-start gap-2 font-bold text-zinc-900 dark:text-white">
+          <Bed className="w-4 h-4 text-blue-500 shrink-0" />
           <span>{info.getValue() as string}</span>
         </div>
       )
@@ -117,11 +118,13 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
     {
       accessorKey: "buildingName",
       header: "Gedung",
+      meta: { align: "left" },
       cell: (info) => <span className="font-medium text-zinc-700 dark:text-zinc-350">{info.getValue() as string}</span>
     },
     {
       accessorKey: "capacity",
       header: "Kapasitas",
+      meta: { align: "center" },
       cell: (info) => {
         const row = info.row.original;
         const filled = row.filledCapacity || 0;
@@ -145,9 +148,10 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
     {
       accessorKey: "supervisorName",
       header: "Wali Kamar / Ust.",
+      meta: { align: "left" },
       cell: (info) => (
-        <div className="flex items-center gap-1.5 text-sm text-zinc-700 dark:text-zinc-300">
-          <User className="w-3.5 h-3.5 text-zinc-400" />
+        <div className="flex items-center justify-start gap-1.5 text-sm text-zinc-700 dark:text-zinc-300">
+          <User className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
           <span>{info.getValue() as string || <span className="text-xs text-zinc-400 italic">Belum ditunjuk</span>}</span>
         </div>
       )
@@ -155,6 +159,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
     {
       id: "actions",
       header: "Aksi",
+      meta: { align: "center" },
       cell: (info) => {
         const row = info.row.original;
         if (isReadOnly) {

@@ -93,9 +93,10 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
     {
       accessorKey: "name",
       header: "Tahun Akademik",
+      meta: { align: "left" },
       cell: (info) => (
-        <div className="flex items-center justify-center gap-2">
-          <Calendar className="w-4 h-4 text-blue-500" />
+        <div className="flex items-center justify-start gap-2.5">
+          <Calendar className="w-4 h-4 text-blue-500 shrink-0" />
           <span className="font-bold text-zinc-900 dark:text-white">{info.getValue() as string}</span>
         </div>
       )
@@ -103,16 +104,19 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
     {
       accessorKey: "startDate",
       header: "Tanggal Mulai",
+      meta: { align: "center" },
       cell: (info) => <div className="text-center font-mono text-zinc-650 dark:text-zinc-400 font-semibold">{info.getValue() as string}</div>
     },
     {
       accessorKey: "endDate",
       header: "Tanggal Berakhir",
+      meta: { align: "center" },
       cell: (info) => <div className="text-center font-mono text-zinc-655 dark:text-zinc-400 font-semibold">{info.getValue() as string}</div>
     },
     {
       accessorKey: "isActive",
       header: "Status",
+      meta: { align: "center" },
       cell: (info) => (
         <div className="flex justify-center">
           <PillBadge
@@ -125,6 +129,7 @@ export function TahunAjaranTab({ onViewDetail, isReadOnly = false }: TahunAjaran
     {
       id: "actions",
       header: "Aksi",
+      meta: { align: "center" },
       cell: (info) => {
         const row = info.row.original;
         if (isReadOnly) {

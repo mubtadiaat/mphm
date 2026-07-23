@@ -38,15 +38,16 @@ export function RecycleBinTab() {
   };
 
   const columns: ColumnDef<DeletedItem, unknown>[] = [
-    { accessorKey: "type", header: "Tipe Data", cell: info => <span className="font-bold text-sm bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">{info.getValue() as string}</span> },
-    { accessorKey: "name", header: "Nama / Identitas", cell: info => <span className="font-medium">{info.getValue() as string}</span> },
-    { accessorKey: "deletedAt", header: "Waktu Dihapus", cell: info => <span className="text-sm text-zinc-500">{info.getValue() as string}</span> },
-    { accessorKey: "expiresAt", header: "Otomatis Terhapus Permanen", cell: info => <span className="text-sm font-medium text-rose-600 dark:text-rose-400">{info.getValue() as string}</span> },
+    { accessorKey: "type", header: "Tipe Data", meta: { align: "left" }, cell: info => <span className="font-bold text-sm bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">{info.getValue() as string}</span> },
+    { accessorKey: "name", header: "Nama / Identitas", meta: { align: "left" }, cell: info => <span className="font-medium">{info.getValue() as string}</span> },
+    { accessorKey: "deletedAt", header: "Waktu Dihapus", meta: { align: "center" }, cell: info => <div className="text-center text-sm text-zinc-500">{info.getValue() as string}</div> },
+    { accessorKey: "expiresAt", header: "Otomatis Terhapus Permanen", meta: { align: "center" }, cell: info => <div className="text-center text-sm font-medium text-rose-600 dark:text-rose-400">{info.getValue() as string}</div> },
     {
       id: "actions",
       header: "Aksi",
+      meta: { align: "center" },
       cell: (info) => (
-        <div className="flex gap-2">
+        <div className="flex justify-center gap-2">
           <button 
             onClick={() => handleRestore(info.row.original.id)}
             className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/50 dark:border-emerald-900/50 rounded-lg transition-colors"

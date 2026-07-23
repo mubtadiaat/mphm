@@ -20,29 +20,34 @@ export function AuditLogTab({ onViewDetail }: AuditLogTabProps) {
     {
       accessorKey: "timestamp",
       header: "Waktu Kejadian",
+      meta: { align: "left" },
       cell: (info) => <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{new Date(info.getValue() as string).toLocaleString("id-ID")}</span>
     },
     {
       accessorKey: "userId",
       header: "Pelaku Aksi",
+      meta: { align: "left" },
       cell: (info) => <span className="font-bold text-zinc-800 dark:text-zinc-200">{info.getValue() as string}</span>
     },
     {
       accessorKey: "role",
       header: "Role",
-      cell: (info) => <PillBadge label={info.getValue() as string} variant="info" />
+      meta: { align: "center" },
+      cell: (info) => <div className="flex justify-center"><PillBadge label={info.getValue() as string} variant="info" /></div>
     },
     {
       accessorKey: "module",
       header: "Modul Sistem",
+      meta: { align: "left" },
       cell: (info) => <span className="font-semibold text-zinc-700 dark:text-zinc-300">{info.getValue() as string}</span>
     },
     {
       accessorKey: "action",
       header: "HTTP Method",
+      meta: { align: "center" },
       cell: (info) => {
         const val = info.getValue() as string;
-        return <span className={`font-mono text-xs font-extrabold ${val === "DELETE" ? "text-rose-500" : val === "POST" ? "text-emerald-500" : "text-amber-500"}`}>{val}</span>;
+        return <div className="text-center"><span className={`font-mono text-xs font-extrabold ${val === "DELETE" ? "text-rose-500" : val === "POST" ? "text-emerald-500" : "text-amber-500"}`}>{val}</span></div>;
       }
     }
   ];

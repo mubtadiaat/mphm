@@ -89,6 +89,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
     {
       accessorKey: "code",
       header: "Kode Mapel",
+      meta: { align: "left" },
       cell: (info) => (
         <span className="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10 px-2 py-0.5 rounded border border-blue-100/50 dark:border-blue-800/30">
           {info.getValue() as string}
@@ -98,44 +99,54 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
     {
       accessorKey: "name",
       header: "Nama Pelajaran",
+      meta: { align: "left" },
       cell: (info) => <span className="font-bold text-zinc-900 dark:text-white">{info.getValue() as string}</span>
     },
     {
       accessorKey: "subjectType",
       header: "Tipe Pelajaran",
+      meta: { align: "center" },
       cell: (info) => {
         const val = info.getValue() as string;
         const isSacred = val === "NON_MAPEL";
         return (
-          <PillBadge
-            label={isSacred ? "NON_MAPEL" : "MAPEL"}
-            variant={isSacred ? "gold" : "info"}
-          />
+          <div className="flex justify-center">
+            <PillBadge
+              label={isSacred ? "NON_MAPEL" : "MAPEL"}
+              variant={isSacred ? "gold" : "info"}
+            />
+          </div>
         );
       }
     },
     {
       accessorKey: "isActive",
       header: "Status Kurikulum",
+      meta: { align: "center" },
       cell: (info) => (
-        <PillBadge
-          label={info.getValue() ? "AKTIF" : "NONAKTIF"}
-          variant={info.getValue() ? "success" : "danger"}
-        />
+        <div className="flex justify-center">
+          <PillBadge
+            label={info.getValue() ? "AKTIF" : "NONAKTIF"}
+            variant={info.getValue() ? "success" : "danger"}
+          />
+        </div>
       )
     },
     {
       id: "actions",
       header: "Aksi",
+      meta: { align: "center" },
       cell: (info) => {
         const row = info.row.original;
         return (
-          <TableActions
-            onEdit={() => handleOpenEdit(row)}
-            onDelete={() => handleDelete(row.id)}
-            onDetail={() => onViewDetail(row as unknown as Record<string, unknown>)}
-            isReadOnly={isReadOnly}
-          />
+          <div className="flex justify-center">
+            <TableActions
+              onEdit={() => handleOpenEdit(row)}
+              onDelete={() => handleDelete(row.id)}
+              onDetail={() => onViewDetail(row as unknown as Record<string, unknown>)}
+              isReadOnly={isReadOnly}
+            />
+          </div>
         );
       }
     }
