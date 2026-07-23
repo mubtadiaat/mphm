@@ -15,7 +15,11 @@ import {
   CheckSquare,
   Archive,
   Trash2,
-  Home
+  Home,
+  Ticket,
+  FileCode,
+  UserCheck,
+  FolderOpen
 } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { LucideProps } from "lucide-react";
@@ -38,81 +42,79 @@ export type NavMenu = NavItem | NavGroup;
 // 6 Peran Resmi Sistem (#08)
 export type RoleTypes = "sekretariat" | "mufattisy" | "mundzir" | "mustahiq" | "keamanan" | "wali_santri";
 
+// WORKSPACE PONDOK PESANTREN PUTRI [P3HM Lirboyo]
 export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
   { label: "Dashboard Pondok", href: "/sekretariat", icon: LayoutGrid },
   {
-    group: "Database Induk",
+    group: "A. DATABASE PONDOK",
     items: [
-      { label: "Santriwati (Pondok P3HM)", href: "/sekretariat/santri", icon: Users },
-      { label: "Data Wali Santri", href: "/sekretariat/wali-santri", icon: UserCircle },
-      { label: "Data Kamar & Asrama", href: "/sekretariat/rooms", icon: Home },
-      { label: "Data Mundzir", href: "/sekretariat/mundzir", icon: Users },
-      { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
+      { label: "Santriwati (P3HM)", href: "/sekretariat/santri", icon: Users },
+      { label: "Wali Santri (Smart KK)", href: "/sekretariat/wali-santri", icon: UserCircle },
+      { label: "Data Asrama (Blok & Kamar)", href: "/sekretariat/rooms", icon: Home },
+      { label: "Pengurus (Penasihat, Harian, Pleno)", href: "/sekretariat/pengurus", icon: Users },
+      { label: "Alumni Pondok", href: "/sekretariat/alumni", icon: Archive },
     ]
   },
   {
-    group: "Kedisiplinan",
+    group: "B. KEAMANAN & PENGASUHAN",
     items: [
+      { label: "Perizinan Santri", href: "/sekretariat/perizinan", icon: Ticket },
       { label: "Pelanggaran & Takzir", href: "/sekretariat/pelanggaran", icon: ShieldAlert },
     ]
   },
   {
-    group: "Al-Rabithoh & Alumni",
+    group: "SISTEM & UTILITAS",
     items: [
-      { label: "Masa Pengabdian", href: "/sekretariat/khidmah", icon: Heart },
-      { label: "Data Alumni", href: "/sekretariat/alumni", icon: Archive },
-    ]
-  },
-  {
-    group: "Sistem & Utilitas",
-    items: [
-      { label: "Manajemen Akun (Users)", href: "/sekretariat/users", icon: Users },
-      { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
+      { label: "Manajemen Akun (Users)", href: "/sekretariat/users", icon: UserCheck },
+      { label: "Audit Log 24 Jam", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
       { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
     ]
   }
 ];
 
+// WORKSPACE MADRASAH PUTRI [MPHM Lirboyo]
 export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
   { label: "Dashboard Madrasah", href: "/sekretariat", icon: LayoutGrid },
   {
-    group: "Manajemen Kelas",
+    group: "A. MANAJEMEN DATA",
     items: [
-      { label: "Siswi (Madrasah MPHM)", href: "/sekretariat/santri", icon: Users },
-      { label: "Kelas & Rombel", href: "/sekretariat/kelas", icon: BookOpen },
+      { label: "Data Siswi (MPHM)", href: "/sekretariat/santri", icon: Users },
+      { label: "Rombel / Kelas", href: "/sekretariat/kelas", icon: BookOpen },
     ]
   },
   {
-    group: "Tenaga Pendidik",
+    group: "B. TENAGA PENGAJAR & PENGURUS",
     items: [
-      { label: "Data Mufatish", href: "/sekretariat/mufattisy", icon: Users },
-      { label: "Data Mustahiq", href: "/sekretariat/mustahiq", icon: Users },
+      { label: "Dewan Harian", href: "/sekretariat/pengurus-madrasah", icon: Users },
+      { label: "Mundzir", href: "/sekretariat/mundzir", icon: Users },
+      { label: "Mufattisy", href: "/sekretariat/mufattisy", icon: Users },
+      { label: "Mustahiq", href: "/sekretariat/mustahiq", icon: Users },
+      { label: "Dewan Pleno", href: "/sekretariat/dewan-pleno", icon: Users },
     ]
   },
   {
-    group: "Akademik & Penilaian",
+    group: "C. AKADEMIK & PENILAIAN",
     items: [
-      { label: "Manajemen Nilai", href: "/sekretariat/penilaian", icon: ClipboardList },
-      { label: "Raport", href: "/sekretariat/raport", icon: FileText },
-      { label: "Kurikulum Builder", href: "/sekretariat/kurikulum", icon: ClipboardList },
+      { label: "Kurikulum & Mapel Sakral", href: "/sekretariat/kurikulum", icon: ClipboardList },
+      { label: "Manajemen Nilai", href: "/sekretariat/penilaian", icon: FileText },
       { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas", icon: Award },
     ]
   },
   {
-    group: "Dokumen & Sertifikasi",
+    group: "D. DOKUMEN SISWI",
     items: [
       { label: "Sertifikat", href: "/sekretariat/sertifikat", icon: Award },
-      { label: "Ijazah", href: "/sekretariat/ijazah", icon: Award },
-      { label: "Dokumen & Template", href: "/sekretariat/document-template", icon: FileText },
+      { label: "Raport Sakral Kwartal", href: "/sekretariat/raport", icon: FileText },
+      { label: "Ijazah Kelulusan", href: "/sekretariat/ijazah", icon: Award },
+      { label: "Template Dokumen", href: "/sekretariat/template-dokumen", icon: FileCode },
     ]
   },
   {
-    group: "Sistem & Utilitas",
+    group: "SISTEM & UTILITAS",
     items: [
-      { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran", icon: Calendar },
-      { label: "Arsip Akademik", href: "/sekretariat/arsip", icon: Archive },
-      { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
+      { label: "Manajemen Akun (Users)", href: "/sekretariat/users", icon: UserCheck },
+      { label: "Audit Log 24 Jam", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
       { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
     ]
@@ -120,40 +122,36 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
 ];
 
 export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
-  sekretariat: [], // Di-override oleh WorkspaceContext di Sidebar.tsx
+  sekretariat: SEKRETARIAT_MADRASAH_NAV,
   mufattisy: [
-    { label: "Dashboard", href: "/mufattisy", icon: LayoutGrid },
-    { label: "Data Santri", href: "/mufattisy/santri", icon: Users },
-    { label: "Akademik", href: "/mufattisy/akademik", icon: BookOpen },
-    { label: "Kedisiplinan", href: "/mufattisy/kedisiplinan", icon: ShieldAlert },
-    { label: "Kenaikan Kelas", href: "/mufattisy/kenaikan-kelas", icon: Award },
-    { label: "Perizinan", href: "/mufattisy/perizinan", icon: FileText },
+    { label: "Dashboard Mufattisy", href: "/mufattisy", icon: LayoutGrid },
+    { label: "Monitoring Kelas & Rombel", href: "/mufattisy/kelas", icon: BookOpen },
+    { label: "Pengawasan Nilai Sakral", href: "/mufattisy/penilaian", icon: ClipboardList },
+    { label: "Audit Log Aktivitas", href: "/mufattisy/audit-log", icon: History },
   ],
   mundzir: [
-    { label: "Dashboard", href: "/pimpinan", icon: LayoutGrid },
-    { label: "Santri & Kelas", href: "/pimpinan/santri", icon: Users },
-    { label: "Kehadiran", href: "/pimpinan/kehadiran", icon: Clock },
-    { label: "Kedisiplinan", href: "/pimpinan/kedisiplinan", icon: ShieldAlert },
-    { label: "Perizinan", href: "/pimpinan/perizinan", icon: FileText },
+    { label: "Dashboard Mundzir", href: "/mundzir", icon: LayoutGrid },
+    { label: "Bimbingan Asrama Santri", href: "/mundzir/asrama", icon: Home },
+    { label: "Pencatatan Kedisiplinan", href: "/mundzir/pelanggaran", icon: ShieldAlert },
+    { label: "Perizinan Pulang/Sambangan", href: "/mundzir/perizinan", icon: Ticket },
   ],
   mustahiq: [
-    { label: "Dashboard", href: "/mustahiq", icon: LayoutGrid },
-    { label: "Kelas & Santri", href: "/mustahiq/kelas", icon: BookOpen },
-    { label: "Penilaian Kwartal", href: "/mustahiq/penilaian", icon: ClipboardList },
-    { label: "Rekap Absensi", href: "/mustahiq/absensi", icon: Clock },
-    { label: "Catatan Akhlaq", href: "/mustahiq/akhlaq", icon: Heart },
-    { label: "Rekomendasi Kenaikan", href: "/mustahiq/kenaikan-kelas", icon: CheckSquare },
+    { label: "Dashboard Mustahiq", href: "/mustahiq", icon: LayoutGrid },
+    { label: "Input Nilai Raport Kwartal", href: "/mustahiq/penilaian", icon: ClipboardList },
+    { label: "Presensi Santri Realtime", href: "/mustahiq/absensi", icon: CheckSquare },
+    { label: "Detail Siswi Pengampuan", href: "/mustahiq/siswi", icon: Users },
   ],
   keamanan: [
-    { label: "Dashboard", href: "/keamanan", icon: LayoutGrid },
-    { label: "Jurnal Pelanggaran", href: "/keamanan/jurnal", icon: FileText },
-    { label: "Pencarian Santri", href: "/keamanan/santri", icon: Users },
+    { label: "Dashboard Keamanan", href: "/keamanan", icon: LayoutGrid },
+    { label: "Pencatatan Pelanggaran", href: "/keamanan/pelanggaran", icon: ShieldAlert },
+    { label: "Perizinan & Keluar Masuk", href: "/keamanan/perizinan", icon: Ticket },
+    { label: "Pos Keamanan Asrama", href: "/keamanan/pos", icon: Home },
   ],
   wali_santri: [
-    { label: "Dashboard", href: "/guardian", icon: LayoutGrid },
-    { label: "Anak Saya", href: "/guardian/children", icon: UserCircle },
-    { label: "Akademik", href: "/guardian/akademik", icon: BookOpen },
-    { label: "Kedisiplinan", href: "/guardian/kedisiplinan", icon: ShieldAlert },
-    { label: "Kehadiran", href: "/guardian/kehadiran", icon: Clock },
-  ],
+    { label: "Portal Utama Wali", href: "/wali-santri", icon: LayoutGrid },
+    { label: "Raport Sakral Anak", href: "/wali-santri/raport", icon: FileText },
+    { label: "Presensi Realtime Anak", href: "/wali-santri/absensi", icon: CheckSquare },
+    { label: "Catatan Kedisiplinan", href: "/wali-santri/pelanggaran", icon: ShieldAlert },
+    { label: "Pengajuan Perizinan", href: "/wali-santri/perizinan", icon: Ticket },
+  ]
 };
