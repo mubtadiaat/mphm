@@ -39,12 +39,7 @@ export function GuardianDashboard() {
     { label: "Catatan Pelanggaran", value: isLoading ? "..." : data?.totalViolations || 0, icon: AlertCircle, color: "text-rose-500 bg-rose-500/10" },
   ];
 
-  const scoreTrend = data?.childQuarterlyScores || [
-    { kwartal: "Kwartal 1", score: 8.5 },
-    { kwartal: "Kwartal 2", score: 8.6 },
-    { kwartal: "Kwartal 3", score: 8.3 },
-    { kwartal: "Kwartal 4", score: 8.8 },
-  ];
+  const scoreTrend = data?.childQuarterlyScores || [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -93,7 +88,7 @@ export function GuardianDashboard() {
         })}
       </motion.div>
 
-      {/* GRAFIK INDIKATOR WALI SANTRI: Grafik Nilai Raport Per Kwartal Anak */}
+      {/* GRAFIK INDIKATOR WALI SANTRI */}
       <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
         <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
           <div className="flex items-center gap-3">
@@ -117,31 +112,41 @@ export function GuardianDashboard() {
           </div>
         </div>
 
-        <div className="pt-4 pb-2">
-          <div className="h-48 flex items-end gap-4 sm:gap-8 px-4">
-            {scoreTrend.map((item, index) => {
-              const heightPercent = Math.max((item.score / 10) * 100, 10);
-              return (
-                <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                    {item.score}
-                  </span>
-                  <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${heightPercent}%` }}
-                      transition={{ duration: 0.8, delay: index * 0.15 }}
-                      className="w-full bg-linear-to-t from-blue-600 to-emerald-400 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    {item.kwartal}
-                  </span>
-                </div>
-              );
-            })}
+        {isLoading ? (
+          <div className="h-48 flex items-center justify-center text-xs text-zinc-400">
+            Memuat grafik...
           </div>
-        </div>
+        ) : scoreTrend.length === 0 ? (
+          <div className="h-48 flex items-center justify-center text-xs text-zinc-400">
+            Belum ada catatan nilai kwartal.
+          </div>
+        ) : (
+          <div className="pt-4 pb-2">
+            <div className="h-48 flex items-end gap-4 sm:gap-8 px-4">
+              {scoreTrend.map((item, index) => {
+                const heightPercent = Math.max((item.score / 10) * 100, 10);
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                      {item.score}
+                    </span>
+                    <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${heightPercent}%` }}
+                        transition={{ duration: 0.8, delay: index * 0.15 }}
+                        className="w-full bg-linear-to-t from-blue-600 to-emerald-400 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      {item.kwartal}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* QUICK LINKS */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, AlertTriangle, Calendar, ShieldAlert, TrendingUp, BarChart3 } from "lucide-react";
+import { Users, AlertTriangle, Calendar, BarChart3, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { NAVIGATION_CONFIG } from "@/config/navigation.config";
@@ -40,16 +40,9 @@ export function KeamananDashboard() {
     { label: "Penanganan Selesai", value: isLoading ? "..." : data?.resolvedViolations || 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
   ];
 
-  const trendData = data?.monthlyTrend || [
-    { month: "Feb", count: 2 },
-    { month: "Mar", count: 4 },
-    { month: "Apr", count: 1 },
-    { month: "Mei", count: 3 },
-    { month: "Jun", count: 5 },
-    { month: "Jul", count: data?.monthlyViolations || 2 },
-  ];
-
-  const maxCount = Math.max(...trendData.map((d) => d.count), 1);
+  // Strictly use real API data, never hardcode mock fallback arrays
+  const trendData = data?.monthlyTrend || [];
+  const maxCount = trendData.length > 0 ? Math.max(...trendData.map((d) => d.count), 1) : 1;
 
   return (
     <div className="flex flex-col gap-6">
@@ -60,7 +53,7 @@ export function KeamananDashboard() {
             Dashboard Keamanan
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400">
-            Pusat pemantauan tingkat kedisiplinan dan tren pencatatan pelanggaran santri.
+            Pusat pemantauan tingkat kedisiplinan dan pencatatan pelanggaran santri.
           </p>
         </div>
       </div>
@@ -96,7 +89,7 @@ export function KeamananDashboard() {
         })}
       </motion.div>
 
-      {/* GRAFIK INDIKATOR KEAMANAN: Grafik Pelanggaran Setiap Bulan */}
+      {/* GRAFIK INDIKATOR KEAMANAN */}
       <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
         <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
           <div className="flex items-center gap-3">
@@ -105,9 +98,9 @@ export function KeamananDashboard() {
             </div>
             <div>
               <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                Grafik Tren Pelanggaran Santri Per Bulan
+                Grafik Pelanggaran Santri Per Bulan
                 <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-semibold border border-rose-500/20">
-                  Realtime DB
+                  Sistem Terintegrasi
                 </span>
               </h2>
               <p className="text-xs text-zinc-500">
@@ -121,31 +114,41 @@ export function KeamananDashboard() {
         </div>
 
         {/* Visual Bar Chart */}
-        <div className="pt-4 pb-2">
-          <div className="h-48 flex items-end gap-3 sm:gap-6 px-2">
-            {trendData.map((item, index) => {
-              const heightPercent = Math.max((item.count / maxCount) * 100, 12);
-              return (
-                <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                  <span className="text-xs font-bold text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform">
-                    {item.count}
-                  </span>
-                  <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${heightPercent}%` }}
-                      transition={{ duration: 0.8, delay: index * 0.1 }}
-                      className="w-full bg-linear-to-t from-rose-600 to-amber-500 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    {item.month}
-                  </span>
-                </div>
-              );
-            })}
+        {isLoading ? (
+          <div className="h-48 flex items-center justify-center text-xs text-zinc-400">
+            Memuat grafik...
           </div>
-        </div>
+        ) : trendData.length === 0 ? (
+          <div className="h-48 flex items-center justify-center text-xs text-zinc-400">
+            Belum ada catatan grafik pelanggaran.
+          </div>
+        ) : (
+          <div className="pt-4 pb-2">
+            <div className="h-48 flex items-end gap-3 sm:gap-6 px-2">
+              {trendData.map((item, index) => {
+                const heightPercent = Math.max((item.count / maxCount) * 100, 12);
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                    <span className="text-xs font-bold text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform">
+                      {item.count}
+                    </span>
+                    <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${heightPercent}%` }}
+                        transition={{ duration: 0.8, delay: index * 0.1 }}
+                        className="w-full bg-linear-to-t from-rose-600 to-amber-500 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      {item.month}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* QUICK MENU UTAMA */}

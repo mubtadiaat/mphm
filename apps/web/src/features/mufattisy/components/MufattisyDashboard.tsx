@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, GraduationCap, AlertCircle, BarChart3, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Users, GraduationCap, BarChart3, ShieldCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { NAVIGATION_CONFIG } from "@/config/navigation.config";
@@ -40,12 +40,7 @@ export function MufattisyDashboard() {
     { label: "Kepatuhan Kurikulum", value: isLoading ? "..." : `${data?.curriculumCompliance || 85}%`, icon: ShieldCheck, color: "text-purple-500 bg-purple-500/10" },
   ];
 
-  const levelPerformances = data?.levelPerformances || [
-    { level: "Ibtida'iyyah", avgScore: 8.4, activeStudents: 120 },
-    { level: "Tsanawiyyah", avgScore: 8.1, activeStudents: 85 },
-    { level: "Aliyyah", avgScore: 8.6, activeStudents: 60 },
-  ];
-
+  const levelPerformances = data?.levelPerformances || [];
   const menus = NAVIGATION_CONFIG["mufattisy"];
 
   return (
@@ -95,7 +90,7 @@ export function MufattisyDashboard() {
         })}
       </motion.div>
 
-      {/* GRAFIK INDIKATOR MUFATTISY: Grafik Pengawasan Prestasi & Kepatuhan Per Jenjang */}
+      {/* GRAFIK INDIKATOR MUFATTISY */}
       <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
         <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
           <div className="flex items-center gap-3">
@@ -106,7 +101,7 @@ export function MufattisyDashboard() {
               <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 Grafik Inspeksi Akademik Per Jenjang Pendidikan
                 <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold border border-purple-500/20">
-                  Mufattisy Audit
+                  Pengawasan Terpadu
                 </span>
               </h2>
               <p className="text-xs text-zinc-500">
@@ -116,31 +111,41 @@ export function MufattisyDashboard() {
           </div>
         </div>
 
-        <div className="pt-4 pb-2">
-          <div className="h-48 flex items-end gap-6 sm:gap-12 px-6">
-            {levelPerformances.map((item, index) => {
-              const heightPercent = Math.max((item.avgScore / 10) * 100, 15);
-              return (
-                <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
-                    {item.avgScore}
-                  </span>
-                  <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${heightPercent}%` }}
-                      transition={{ duration: 0.8, delay: index * 0.15 }}
-                      className="w-full bg-linear-to-t from-purple-600 to-indigo-500 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    {item.level}
-                  </span>
-                </div>
-              );
-            })}
+        {isLoading ? (
+          <div className="h-48 flex items-center justify-center text-xs text-zinc-400">
+            Memuat grafik...
           </div>
-        </div>
+        ) : levelPerformances.length === 0 ? (
+          <div className="h-48 flex items-center justify-center text-xs text-zinc-400">
+            Belum ada data inspeksi jenjang pendidikan.
+          </div>
+        ) : (
+          <div className="pt-4 pb-2">
+            <div className="h-48 flex items-end gap-6 sm:gap-12 px-6">
+              {levelPerformances.map((item, index) => {
+                const heightPercent = Math.max((item.avgScore / 10) * 100, 15);
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                    <span className="text-xs font-bold text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                      {item.avgScore}
+                    </span>
+                    <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${heightPercent}%` }}
+                        transition={{ duration: 0.8, delay: index * 0.15 }}
+                        className="w-full bg-linear-to-t from-purple-600 to-indigo-500 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      {item.level}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* QUICK LINKS */}
