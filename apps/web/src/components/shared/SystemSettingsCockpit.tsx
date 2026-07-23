@@ -275,35 +275,90 @@ export function SystemSettingsCockpit() {
   const [newMundzirTitle, setNewMundzirTitle] = useState("");
   const [newPengurusTitle, setNewPengurusTitle] = useState("");
 
+  // Helper: parse boolean from DB
+  const parseBool = (v: unknown) => v === "true" || v === true;
+
   // Sync DB settings to local state on mount
   useEffect(() => {
     if (Object.keys(settings).length > 0) {
       queueMicrotask(() => {
-        if (settings.showMustahiqScores !== undefined) setShowMustahiqScores(settings.showMustahiqScores === "true" || settings.showMustahiqScores === true);
-        if (settings.showMustahiqAttendance !== undefined) setShowMustahiqAttendance(settings.showMustahiqAttendance === "true" || settings.showMustahiqAttendance === true);
-        if (settings.showGuardianScores !== undefined) setShowGuardianScores(settings.showGuardianScores === "true" || settings.showGuardianScores === true);
-        if (settings.showGuardianDiscipline !== undefined) setShowGuardianDiscipline(settings.showGuardianDiscipline === "true" || settings.showGuardianDiscipline === true);
-        if (settings.showKeamananLookup !== undefined) setShowKeamananLookup(settings.showKeamananLookup === "true" || settings.showKeamananLookup === true);
+        if (settings.showMustahiqScores !== undefined) setShowMustahiqScores(parseBool(settings.showMustahiqScores));
+        if (settings.showMustahiqAttendance !== undefined) setShowMustahiqAttendance(parseBool(settings.showMustahiqAttendance));
+        if (settings.showGuardianScores !== undefined) setShowGuardianScores(parseBool(settings.showGuardianScores));
+        if (settings.showGuardianDiscipline !== undefined) setShowGuardianDiscipline(parseBool(settings.showGuardianDiscipline));
+        if (settings.showKeamananLookup !== undefined) setShowKeamananLookup(parseBool(settings.showKeamananLookup));
         
-        if (settings.allowMustahiqAkhlaqOverride !== undefined) setAllowMustahiqAkhlaqOverride(settings.allowMustahiqAkhlaqOverride === "true" || settings.allowMustahiqAkhlaqOverride === true);
-        if (settings.allowGuardianPermits !== undefined) setAllowGuardianPermits(settings.allowGuardianPermits === "true" || settings.allowGuardianPermits === true);
-        if (settings.allowMufattisyApproval !== undefined) setAllowMufattisyApproval(settings.allowMufattisyApproval === "true" || settings.allowMufattisyApproval === true);
-        if (settings.allowKeamananEscalation !== undefined) setAllowKeamananEscalation(settings.allowKeamananEscalation === "true" || settings.allowKeamananEscalation === true);
+        if (settings.allowMustahiqAkhlaqOverride !== undefined) setAllowMustahiqAkhlaqOverride(parseBool(settings.allowMustahiqAkhlaqOverride));
+        if (settings.allowGuardianPermits !== undefined) setAllowGuardianPermits(parseBool(settings.allowGuardianPermits));
+        if (settings.allowMufattisyApproval !== undefined) setAllowMufattisyApproval(parseBool(settings.allowMufattisyApproval));
+        if (settings.allowKeamananEscalation !== undefined) setAllowKeamananEscalation(parseBool(settings.allowKeamananEscalation));
         
-        if (settings.systemMaintenance !== undefined) setSystemMaintenance(settings.systemMaintenance === "true" || settings.systemMaintenance === true);
-        if (settings.enforceHttps !== undefined) setEnforceHttps(settings.enforceHttps === "true" || settings.enforceHttps === true);
-        if (settings.ssoActive !== undefined) setSsoActive(settings.ssoActive === "true" || settings.ssoActive === true);
+        if (settings.systemMaintenance !== undefined) setSystemMaintenance(parseBool(settings.systemMaintenance));
+        if (settings.enforceHttps !== undefined) setEnforceHttps(parseBool(settings.enforceHttps));
+        if (settings.ssoActive !== undefined) setSsoActive(parseBool(settings.ssoActive));
         
         if (settings.cookieLifetime !== undefined) setCookieLifetime(Number(settings.cookieLifetime));
-        if (settings.whatsappContact !== undefined) setWhatsappContact(settings.whatsappContact);
-        if (settings.regionApiSource !== undefined) setRegionApiSource(settings.regionApiSource);
-        if (settings.binderbyteApiKey !== undefined) setBinderbyteApiKey(settings.binderbyteApiKey);
+        if (settings.whatsappContact !== undefined) setWhatsappContact(String(settings.whatsappContact));
+        if (settings.regionApiSource !== undefined) setRegionApiSource(String(settings.regionApiSource));
+        if (settings.binderbyteApiKey !== undefined) setBinderbyteApiKey(String(settings.binderbyteApiKey));
         
-        if (settings.system_role_ui_configs) setRoleConfigs(settings.system_role_ui_configs);
-        if (settings.job_titles_mundzir) setMundzirTitles(settings.job_titles_mundzir);
-        if (settings.job_titles_pengurus) setPengurusTitles(settings.job_titles_pengurus);
+        // Complex objects (already deserialized by API)
+        if (settings.system_role_ui_configs && typeof settings.system_role_ui_configs === "object") {
+          setRoleConfigs(settings.system_role_ui_configs);
+          localStorage.setItem("system_role_ui_configs", JSON.stringify(settings.system_role_ui_configs));
+        }
+        if (Array.isArray(settings.job_titles_mundzir)) {
+          setMundzirTitles(settings.job_titles_mundzir);
+          localStorage.setItem("job_titles_mundzir", JSON.stringify(settings.job_titles_mundzir));
+        }
+        if (Array.isArray(settings.job_titles_pengurus)) {
+          setPengurusTitles(settings.job_titles_pengurus);
+          localStorage.setItem("job_titles_pengurus", JSON.stringify(settings.job_titles_pengurus));
+        }
+
+        // Custom tables from DB → sync to localStorage
+        if (Array.isArray(settings.custom_tables_registry)) {
+          setCustomTablesList(settings.custom_tables_registry);
+          localStorage.setItem("custom_tables_registry", JSON.stringify(settings.custom_tables_registry));
+          window.dispatchEvent(new Event("custom_tables_changed"));
+        }
+
+        // Column visibility from DB → sync to localStorage
+        if (settings.col_vis_santri && typeof settings.col_vis_santri === "object") {
+          setSantriCols(settings.col_vis_santri);
+          localStorage.setItem("col_vis_santri", JSON.stringify(settings.col_vis_santri));
+        }
+        if (settings.col_vis_kelas && typeof settings.col_vis_kelas === "object") {
+          setKelasCols(settings.col_vis_kelas);
+          localStorage.setItem("col_vis_kelas", JSON.stringify(settings.col_vis_kelas));
+        }
+        if (settings.col_vis_kurikulum && typeof settings.col_vis_kurikulum === "object") {
+          setKurikulumCols(settings.col_vis_kurikulum);
+          localStorage.setItem("col_vis_kurikulum", JSON.stringify(settings.col_vis_kurikulum));
+        }
+        if (settings.col_vis_pelanggaran && typeof settings.col_vis_pelanggaran === "object") {
+          setPelanggaranCols(settings.col_vis_pelanggaran);
+          localStorage.setItem("col_vis_pelanggaran", JSON.stringify(settings.col_vis_pelanggaran));
+        }
+        if (settings.col_vis_tahun_ajaran && typeof settings.col_vis_tahun_ajaran === "object") {
+          setTahunAjaranCols(settings.col_vis_tahun_ajaran);
+          localStorage.setItem("col_vis_tahun_ajaran", JSON.stringify(settings.col_vis_tahun_ajaran));
+        }
+        if (settings.col_vis_audit_log && typeof settings.col_vis_audit_log === "object") {
+          setAuditLogCols(settings.col_vis_audit_log);
+          localStorage.setItem("col_vis_audit_log", JSON.stringify(settings.col_vis_audit_log));
+        }
+
+        // Sync localStorage for simple values
+        localStorage.setItem("showMustahiqScores", String(settings.showMustahiqScores ?? showMustahiqScores));
+        localStorage.setItem("showMustahiqAttendance", String(settings.showMustahiqAttendance ?? showMustahiqAttendance));
+        localStorage.setItem("showGuardianScores", String(settings.showGuardianScores ?? showGuardianScores));
+        localStorage.setItem("showGuardianDiscipline", String(settings.showGuardianDiscipline ?? showGuardianDiscipline));
+        localStorage.setItem("showKeamananLookup", String(settings.showKeamananLookup ?? showKeamananLookup));
+        localStorage.setItem("systemMaintenance", String(settings.systemMaintenance ?? systemMaintenance));
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
   const handleAddMundzirTitle = () => {
@@ -527,30 +582,47 @@ export function SystemSettingsCockpit() {
     }
   };
   const handleSaveSettings = () => {
-    const payload = {
+    // Build comprehensive payload — ALL settings go to DB
+    const payload: Record<string, unknown> = {
+      // Tampilan & Modul
       showMustahiqScores,
       showMustahiqAttendance,
       showGuardianScores,
       showGuardianDiscipline,
       showKeamananLookup,
+      // Hak Akses & Otorisasi
       allowMustahiqAkhlaqOverride,
       allowGuardianPermits,
       allowMufattisyApproval,
       allowKeamananEscalation,
+      // Parameter & Keamanan
       systemMaintenance,
       enforceHttps,
       ssoActive,
       cookieLifetime,
       whatsappContact,
+      // Manajemen Peran & UI (complex object)
       system_role_ui_configs: roleConfigs,
+      // Integrasi API Wilayah
       regionApiSource,
       binderbyteApiKey,
+      // Jabatan Struktural (arrays)
       job_titles_mundzir: mundzirTitles,
-      job_titles_pengurus: pengurusTitles
+      job_titles_pengurus: pengurusTitles,
+      // Tabel Kustom (array of objects)
+      custom_tables_registry: customTablesList,
+      // Konfigurasi Kolom Tabel (objects)
+      col_vis_santri: santriCols,
+      col_vis_kelas: kelasCols,
+      col_vis_kurikulum: kurikulumCols,
+      col_vis_pelanggaran: pelanggaranCols,
+      col_vis_tahun_ajaran: tahunAjaranCols,
+      col_vis_audit_log: auditLogCols,
     };
     
     updateSettingsMutation.mutate(payload);
 
+    // Mirror to localStorage for instant offline access
     if (typeof window !== "undefined") {
       localStorage.setItem("showMustahiqScores", String(showMustahiqScores));
       localStorage.setItem("showMustahiqAttendance", String(showMustahiqAttendance));
@@ -574,9 +646,18 @@ export function SystemSettingsCockpit() {
       localStorage.setItem("binderbyte_api_key", binderbyteApiKey);
       localStorage.setItem("job_titles_mundzir", JSON.stringify(mundzirTitles));
       localStorage.setItem("job_titles_pengurus", JSON.stringify(pengurusTitles));
+      localStorage.setItem("custom_tables_registry", JSON.stringify(customTablesList));
+      localStorage.setItem("col_vis_santri", JSON.stringify(santriCols));
+      localStorage.setItem("col_vis_kelas", JSON.stringify(kelasCols));
+      localStorage.setItem("col_vis_kurikulum", JSON.stringify(kurikulumCols));
+      localStorage.setItem("col_vis_pelanggaran", JSON.stringify(pelanggaranCols));
+      localStorage.setItem("col_vis_tahun_ajaran", JSON.stringify(tahunAjaranCols));
+      localStorage.setItem("col_vis_audit_log", JSON.stringify(auditLogCols));
+
       window.dispatchEvent(new Event("role_configs_changed"));
       window.dispatchEvent(new Event("region_settings_changed"));
       window.dispatchEvent(new Event("job_titles_changed"));
+      window.dispatchEvent(new Event("custom_tables_changed"));
     }
   };
 
