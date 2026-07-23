@@ -81,7 +81,7 @@ export function DocumentTemplateBuilder() {
       setIsUploading(true);
       // 1. Get Signature from Backend
       const sigRes = await fetch("/api/media/signature");
-      if (!sigRes.ok) throw new Error("Gagal mengambil token keamanan Cloudinary.");
+      if (!sigRes.ok) throw new Error("Gagal mengambil token keamanan Cloud Storage.");
       const sigData = await sigRes.json();
       
       if (sigData.status !== "Success") throw new Error(sigData.message || "Gagal mendapatkan token.");

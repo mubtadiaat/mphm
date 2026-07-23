@@ -213,11 +213,11 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
 
       const cloudinaryData = await cloudinaryRes.json();
       if (!cloudinaryRes.ok) {
-        throw new Error(cloudinaryData.error?.message || "Gagal mengunggah gambar ke Cloudinary.");
+        throw new Error(cloudinaryData.error?.message || "Gagal mengunggah gambar ke Cloud Storage.");
       }
 
       setAvatarUrl(cloudinaryData.secure_url);
-      toast("Pas foto berhasil diunggah ke Cloudinary!", "success");
+      toast("Pas foto berhasil diunggah!", "success");
     } catch (err: unknown) {
       console.error("UPLOAD_ERROR:", err);
       const errMsg = err instanceof Error ? err.message : "Gagal mengunggah foto.";
@@ -632,7 +632,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   <div className="flex-1 space-y-2 text-center sm:text-left">
                     <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Pas Foto Resmi</h4>
                     <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed">
-                      Format formal 3x4. Max file 2MB (JPG/PNG). Diunggah langsung ke Cloudinary Cloud Storage.
+                      Format formal 3x4. Max file 2MB (JPG/PNG). Diunggah langsung ke Cloud Storage.
                     </p>
                     
                     <label className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-xs cursor-pointer border border-blue-150 dark:border-blue-900/40 transition-colors">

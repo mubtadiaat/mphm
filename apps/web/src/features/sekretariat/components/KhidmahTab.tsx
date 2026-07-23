@@ -148,7 +148,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
 
         const uploadData = await uploadRes.json();
         setAvatarUrl(uploadData.secure_url);
-        setUploadFeedback("Foto berhasil diunggah ke Cloudinary!");
+        setUploadFeedback("Foto berhasil diunggah!");
       } else {
         throw new Error("Invalid signature response");
       }
@@ -393,7 +393,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
                   <div className="flex-1 space-y-2 text-center sm:text-left">
                     <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Pas Foto Santriwati</h4>
                     <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed">
-                      Ambil foto formal ukuran 3x4. Max file 2MB (format JPG/PNG). Pas foto diunggah langsung ke Cloudinary Cloud Storage.
+                      Ambil foto formal ukuran 3x4. Max file 2MB (format JPG/PNG). Pas foto diunggah langsung ke Cloud Storage.
                     </p>
                     
                     <div className="flex flex-wrap gap-2 justify-center sm:justify-start">

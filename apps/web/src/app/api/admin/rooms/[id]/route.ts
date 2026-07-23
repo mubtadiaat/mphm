@@ -33,7 +33,7 @@ export async function PUT(
 
     return NextResponse.json({
       status: "Success",
-      message: "Data kamar berhasil diperbarui di database PostgreSQL.",
+      message: "Data kamar berhasil diperbarui di database.",
       data: updated,
     });
   } catch (err: any) {

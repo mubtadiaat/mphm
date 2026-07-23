@@ -255,7 +255,7 @@ export default function Page() {
           {/* Institutional Guarantee Footer */}
           <div className="flex items-center gap-3 text-xs text-zinc-500 pt-4 border-t border-zinc-800/60">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Dilindungi enkripsi sesi berlapis & serverless database Neon cloud.</span>
+            <span>Dilindungi enkripsi sesi berlapis & database terenkripsi.</span>
           </div>
         </motion.div>
 
