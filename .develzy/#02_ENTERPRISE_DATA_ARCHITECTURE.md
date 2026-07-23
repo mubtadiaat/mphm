@@ -8,6 +8,11 @@ Transformasi MPHM dari sekadar "aplikasi web" menjadi "Pusat Data Abadi" bergant
 ## 1. FILOSOFI "SINGLE SOURCE OF TRUTH" (PERSON-CENTRIC CORE)
 Kelemahan aplikasi akademik tradisional adalah redundansi data. Di MPHM Enterprise v4.5, satu manusia di alam nyata hanya boleh memiliki satu baris data identitas (ID) seumur hidup pada tabel `people`.
 
+### Integrasi Alur Data Santriwati (Pondok ➔ Madrasah)
+- **Sumber Utama Master Data (Pondok)**: Pendaftaran identitas utama santriwati (Nama, NIK, TTL, Alamat, Wali) dilakukan di level **Pondok Pesantren (P3HM)**.
+- **Tarik Data & Penempatan Kelas (Madrasah)**: Aplikasi **Madrasah (MPHM)** memanggil/menarik data santriwati dari Pondok. Jika santriwati belum dipasangkan kelas madrasah saat registrasi awal di Pondok, Sekretariat MPHM menarik data santriwati dari daftar *Belum Ada Kelas* lalu mengalokasikannya ke kelas rujukan (Tsanawiyyah, Aliyyah, Ibtida'iyyah, I'dadiyyah).
+- **Proteksi Read-Only**: Data biologi & wali utama dikunci di tingkat Madrasah untuk mencegah duplikasi atau konflik master data.
+
 Sistem menggunakan konsep **Polymorphic Profiles (Matriks Profil)**:
 - **Entitas Inti (`people`)**: Data biologi & identitas utama (Nama, NIK, TTL, Jenis Kelamin, Alamat, Telepon).
 - **Entitas Profil (Role)**:

@@ -18,7 +18,14 @@ Arsitektur sistem mematuhi **Vercel Ecosystem** dan **Turborepo** (Monorepo) unt
 
 ## 2. DATA ARCHITECTURE & KEAMANAN SYSTEM (Modul #02, #08, #13)
 Sistem menggunakan hukum tata kelola data terpusat dan terenkripsi.
-- **Person-Centric (Single Source of Truth):** Data entitas manusia hanya satu (tabel `people`). Perannya bisa banyak (Santri, Pengajar, Wali, Pengurus).
+- **Person-Centric & Integrasi Data Santri (Single Source of Truth):**
+  - Data entitas manusia hanya satu (tabel `people`). Perannya bisa banyak (Santri, Pengajar, Wali, Pengurus).
+  - Pendaftaran identitas utama santriwati dilakukan dari **Pondok (P3HM)**.
+  - Aplikasi **Madrasah (MPHM)** memanggil/menarik data santriwati dari Pondok. Jika santriwati belum dipasangkan kelas madrasah saat registrasi di Pondok, Sekretariat MPHM menarik data santriwati tersebut dari daftar *Belum Ada Kelas* lalu mengalokasikannya ke kelas target.
+- **Pusat Pengelolaan Akun (Users) & Generator Kredensial:**
+  - Manajemen kredensial pengguna terpusat di `/sekretariat/users`.
+  - Generator kredensial akun instansi otomatis menarik personel Mustahiq, Mufattisy, dan Mundzir yang **belum memiliki akun** untuk menerbitkan username & password massal.
+  - Fitur Reset Password & isolasi Akun Dorman di Keranjang Sampah.
 - **Otorisasi Roles & Multi-Role Support:** Mendukung peran Sekretariat Utama, Sekretariat Pondok (`sek.pondok`), Sekretariat Madrasah (`sek.madrasah`), Mustahiq (Wali Kelas), Mufattisy, Mundzir (Pimpinan), Keamanan, dan Wali Santri.
 - **Workspace Auto-Sync:** `WorkspaceContext` secara otomatis mendeteksi role pengguna saat login:
   - Role `sek.pondok` ➔ Otomatis memuat Workspace **Pondok Pesantren** (Asrama, Kamar, Khidmah Alumni, Poin Takzir, Wali Santri).
@@ -30,6 +37,7 @@ Sistem menggunakan hukum tata kelola data terpusat dan terenkripsi.
 ## 3. AKADEMIK, ROMBEL & KURIKULUM (Modul #03, #10)
 Sistem menggunakan konsep "Academic Workspace" per Tahun Ajaran.
 - **Isolasi Tahun Ajaran:** Data transaksional (Rapor, Kelas, Absen) terikat pada ID Tahun Ajaran (`academic_years`).
+- **Sub-Tab "Belum Ada Kelas (Tarik Data Pondok)":** Memudahkan penempatan kelas bagi siswi baru yang didaftarkan di Pondok.
 - **Hierarki Lembaga:** Ibtida'iyyah, Tsanawiyyah, dan Aliyyah.
 - **Manajemen Asrama (Rooms):** Pengelolaan Kamar/Asrama Santriwati terpusat lengkap dengan Wali Kamar dan Kapasitas (tabel `rooms`).
 - **Syllabus Engine & Non-Mapel:**
@@ -57,9 +65,9 @@ Sistem menggunakan konsep "Academic Workspace" per Tahun Ajaran.
 ## 7. MANAJEMEN ASRAMA & SANTRI KHIDMAH (Modul #16)
 - Pengelolaan Kamar/Asrama (`rooms`), penugasan alumni khidmah (`khidmah_assignments`), dan pemetaan jabatan struktural pengurus pondok/madrasah.
 
-## 8. DOKUMEN (RAPORT, IJAZAH, SERTIFIKAT) & PENGATURAN (Modul #12, #14)
+## 8. DOKUMEN & SYSTEM CONFIGURATION (Modul #12, #14)
 - **Document Template Builder:** WYSIWYG Editor dengan *Merge Tags* (`{{nama_santri}}`, `{{stambuk}}`) untuk pencetakan Rapor dan Ijazah.
-- **System Settings Cockpit:** Dashboard kontrol parameter sistem terpusat (`SystemSettingsCockpit.tsx`) yang terhubung langsung ke API `/api/settings` dan database `system_settings`.
+- **System Settings Cockpit Persisten Database:** Dashboard kontrol parameter sistem terpusat (`SystemSettingsCockpit.tsx`) yang tersimpan persisten ke basis data terenkripsi via `PUT /api/settings` menggunakan JSON Serialization dan disinkronkan ke local storage.
 
 ## 9. STANDAR UI/UX & COMPONENT (Modul #01)
 - UI/UX Enterprise Premium berstandar *Glassmorphism*, *Responsive Grid*, *Role Quick Login Buttons*, *PillBadge*, dan *Spotlight Cards*.

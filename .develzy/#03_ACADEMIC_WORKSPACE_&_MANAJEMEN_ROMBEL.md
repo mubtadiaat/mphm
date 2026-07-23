@@ -38,17 +38,17 @@ Satu Mustahiq HANYA boleh memegang 1 kelas aktif per Tahun Ajaran (Kecuali dilak
 
 Soft Delete Policy: Penghapusan Kelas berstatus aktif menggunakan Soft Delete (mengubah deletedAt). Data Nilai, Absensi, dan Jadwal yang sudah melekat di kelas tersebut tetap aman dan tidak ikut terhapus.
 
-4. ENGINE PENEMPATAN SANTRI (BATCH ENROLLMENT)
+4. ENGINE PENEMPATAN SANTRI & SUB-TAB "BELUM ADA KELAS" (BATCH ENROLLMENT)
 Bagaimana santri masuk ke dalam kelas? Melalui tabel persimpangan class_enrollments.
 
-Batch Assignment UI: Antarmuka khusus berupa Dual-List Transfer (layaknya sistem enterprise). Sebelah kiri adalah daftar santri berstatus Active yang "Belum Memiliki Kelas di Tahun Ini". Sebelah kanan adalah "Keranjang Kelas Tujuan".
-
-Kapasitas Rombel Guard: Setiap kelas memiliki parameter capacity (misal maksimal 35). Sistem akan menolak drag-and-drop santri jika melebihi batas.
-
-Historical Append-Only: Jika santri pindah kelas di tengah tahun, status enrollment di kelas lama diubah menjadi MOVED/DROPPED, dan sistem membuat baris enrollment baru di kelas baru. Jejak perpindahannya terlihat permanen di database.
+- **Tarik Data Santriwati Pondok**: Data induk santriwati terdaftar melalui sistem Pondok (P3HM). Di workspace Madrasah (MPHM), terdapat sub-tab khusus **"Belum Ada Kelas (Tarik Data Pondok)"** yang mengkueri `StudentProfile` yang belum memiliki `ClassEnrollment` aktif di Tahun Ajaran berjalan.
+- **Batch & Quick Assignment**: Operator Madrasah cukup mengklik tombol **"Pasang Kelas Madrasah"** untuk memasangkan kelas target tanpa perlu mengisi ulang biodata pribadi dari nol.
+- **Batch Assignment UI**: Antarmuka khusus berupa Dual-List Transfer (layaknya sistem enterprise). Sebelah kiri adalah daftar santri berstatus Active yang "Belum Memiliki Kelas di Tahun Ini". Sebelah kanan adalah "Keranjang Kelas Tujuan".
+- **Kapasitas Rombel Guard**: Setiap kelas memiliki parameter capacity (misal maksimal 35). Sistem akan menolak penambahan santri jika melebihi batas.
+- **Historical Append-Only**: Jika santri pindah kelas di tengah tahun, status enrollment di kelas lama diubah menjadi MOVED/DROPPED, dan sistem membuat baris enrollment baru di kelas baru. Jejak perpindahannya terlihat permanen di database.
 
 5. MANAJEMEN JADWAL PESANTREN (HISSOH ULA & TSANI)
-Jadwal di MPHM tidak mengikuti format sekolah umum. Modul jadwal dirancang mengikuti jam Pesantren (Struktur_Jadwal_Pendidikan_MPHM.md).
+Jadwal di MPHM tidak mengikuti format sekolah umum. Modul jadwal dirancang mengikuti jam Pesantren.
 
 Slot Waktu Spesifik: Jadwal dipisahkan secara struktural menjadi dua sesi krusial:
 
@@ -59,7 +59,7 @@ Hissoh Tsani (Sesi 2): Setelah jeda kitab.
 Target Jadwal Fleksibel (Inheritance): Jadwal dapat diterapkan pada level "Tingkat" atau "Kelas". Jika Administrator menerapkan "Mata Pelajaran Fathul Mubin pada Hari Sabtu Hissoh Ula untuk Tingkat Tsanawiyyah I", maka otomatis Lokal A, B, C, D, dst di tingkat tersebut mewarisi jadwal yang sama, tanpa perlu diinput manual satu per satu.
 
 6. TRANSISI TAHUN AJARAN (CLONE WORKSPACE ALGORITHM)
-Setiap pergantian tahun (misal dari 2025/2026 ke 2026/2027), sistem menggunakan fitur "Clone Academic Year". Ini dijalankan melalui Background Job via Vercel.
+Setiap pergantian tahun (misal dari 2025/2026 ke 2026/2027), sistem menggunakan fitur "Clone Academic Year". Ini dijalankan melalui Background Job.
 
 Yang OTOMATIS DISALIN (Copied): Struktur Kelas (Jenjang, Tingkat, Bagian), Kurikulum Mata Pelajaran, Jadwal Mingguan, dan Penugasan Wali Kelas (bisa dicentang opsional).
 
