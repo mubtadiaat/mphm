@@ -18,8 +18,6 @@ async function main() {
       data: {
         name: "2026/2027",
         isActive: true,
-        startDate: "2026-07-01",
-        endDate: "2027-06-30",
       },
     });
   }
