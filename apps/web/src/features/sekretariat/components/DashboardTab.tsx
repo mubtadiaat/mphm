@@ -29,7 +29,7 @@ export function DashboardTab() {
 
   const madrasahStats = [
     { label: "Total Santri Aktif", value: statsData?.totalStudents ?? 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
-    { label: "Rata-Rata GPA Sakral", value: statsData?.averageGpa ?? 0, icon: GraduationCap, color: "text-amber-500 bg-amber-500/10" },
+    { label: "Rata-Rata GPA Diniyyah", value: statsData?.averageGpa ?? 0, icon: GraduationCap, color: "text-amber-500 bg-amber-500/10" },
     { label: "Tingkat Kehadiran", value: `${statsData?.attendanceRate ?? 100}%`, icon: Calendar, color: "text-emerald-500 bg-emerald-500/10" },
     { label: "Pelanggaran Akademik", value: statsData?.activeViolations ?? 0, icon: ShieldAlert, color: "text-rose-500 bg-rose-500/10" },
   ];
@@ -81,7 +81,7 @@ export function DashboardTab() {
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl">
             {isPondok 
               ? "Pusat pengelolaan kamar asrama santriwati, data pengurus mundzir, kedisiplinan takzir, pengabdian khidmah, dan wali santri."
-              : "Pusat pengelolaan rombel kelas, penilaian 5 pelajaran sakral, presensi, mufattisy, mustahiq, dan penceretakan raport."
+              : "Pusat pengelolaan rombel kelas, penilaian pelajaran diniyyah, presensi, mufattisy, mustahiq, dan pencetakan raport."
             }
           </p>
         </div>
@@ -179,7 +179,7 @@ export function DashboardTab() {
                 {isPondok ? "Poin Takzir Kedisiplinan" : "Input Nilai Kwartal III"}
               </span>
               <p className="text-zinc-500 dark:text-zinc-400">
-                {isPondok ? "Sistem merekapitulasi poin takzir santri aktif." : "Matriks nilai sakral terhubung ke database."}
+                {isPondok ? "Sistem merekapitulasi poin takzir santri aktif." : "Matriks nilai diniyyah terhubung ke database."}
               </p>
             </div>
           </div>

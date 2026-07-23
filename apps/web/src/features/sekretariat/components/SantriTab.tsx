@@ -468,7 +468,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
           <p className="text-white/80 text-sm max-w-2xl leading-relaxed">
             {isPondok 
               ? "Administrasi data santriwati pengasuhan asrama terintegrasi dengan Nomor Stambuk, Kamar Asrama, Musyrifah Wali Kamar, dan Smart KK Mapping."
-              : "Administrasi data siswi madrasah diniyyah terintegrasi dengan Nomor Stambuk, NIS/NISN, Kelas Rombel, Mustahiq, Raport Sakral Kwartal, dan Smart KK."
+              : "Administrasi data siswi madrasah diniyyah terintegrasi dengan Nomor Stambuk, NIS/NISN, Kelas Rombel, Mustahiq, Raport Kwartal, dan Smart KK."
             }
           </p>
         </div>
@@ -958,10 +958,10 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                         <BookOpen className="w-5 h-5 text-blue-500" />
                         <div>
                           <p className="text-sm font-bold text-zinc-900 dark:text-white">Raport Per Kelas / Jenjang</p>
-                          <span className="text-xs text-zinc-400">Akses Raport Sakral</span>
+                          <span className="text-xs text-zinc-400">Akses Raport Kwartal</span>
                         </div>
                       </div>
-                      <button onClick={() => toast("Membuka Raport Sakral...", "info")} className="px-3 py-1.5 bg-blue-50 text-blue-600 font-bold text-xs rounded-lg flex items-center gap-1">
+                      <button onClick={() => toast("Membuka Raport Kwartal...", "info")} className="px-3 py-1.5 bg-blue-50 text-blue-600 font-bold text-xs rounded-lg flex items-center gap-1">
                         <ExternalLink className="w-3.5 h-3.5" /> View Raport
                       </button>
                     </div>

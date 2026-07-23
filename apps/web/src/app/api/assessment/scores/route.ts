@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           status: "Validation Error",
-          message: `Nilai maksimal untuk pelajaran ${isAkhlaq ? "Akhlaq" : "umum/sakral"} adalah ${maxAllowed}.`,
+          message: `Nilai maksimal untuk pelajaran ${isAkhlaq ? "Akhlaq" : "diniyyah"} adalah ${maxAllowed}.`,
           field: "score",
         },
         { status: 400 }

@@ -248,7 +248,7 @@ export default function Page() {
               </span>
             </h1>
             <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-xl font-normal">
-              Portal terpadu pengurusan santri, manajemen raport kwartal sakral, presensi real-time, dan pengawasan pimpinan pesantren.
+              Portal terpadu pengurusan santri, manajemen raport kwartal, presensi real-time, dan pengawasan pimpinan pesantren.
             </p>
           </div>
 

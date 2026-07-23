@@ -96,7 +96,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
   {
     group: "C. AKADEMIK & PENILAIAN",
     items: [
-      { label: "Kurikulum & Mapel Sakral", href: "/sekretariat/kurikulum", icon: ClipboardList },
+      { label: "Kurikulum & Mapel Diniyyah", href: "/sekretariat/kurikulum", icon: ClipboardList },
       { label: "Manajemen Nilai", href: "/sekretariat/penilaian", icon: FileText },
       { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas", icon: Award },
     ]
@@ -105,7 +105,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
     group: "D. DOKUMEN SISWI",
     items: [
       { label: "Sertifikat", href: "/sekretariat/sertifikat", icon: Award },
-      { label: "Raport Sakral Kwartal", href: "/sekretariat/raport", icon: FileText },
+      { label: "Raport Kwartal Diniyyah", href: "/sekretariat/raport", icon: FileText },
       { label: "Ijazah Kelulusan", href: "/sekretariat/ijazah", icon: Award },
       { label: "Template Dokumen", href: "/sekretariat/template-dokumen", icon: FileCode },
     ]
