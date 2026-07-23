@@ -177,7 +177,60 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ status: "Success", data: formatted, total });
     }
 
+    // People who don't have a UserAccount yet (for Generate Akun tab)
+    if (role === "without_account") {
+      const people = await (prisma.person as any).findMany({
+        where: {
+          deletedAt: null,
+          userAccount: { is: null }, // No account yet
+        },
+        include: {
+          teacherProfile: true,
+          organizationMemberships: { take: 1 },
+          mustahiqClasses: { take: 1 },
+        },
+        take: limit,
+        skip: offset,
+      });
+
+      const total = await prisma.person.count({
+        where: {
+          deletedAt: null,
+          userAccount: { is: null },
+        },
+      });
+
+      const formatted = people.map((p: any) => {
+        // Determine suggested role based on profiles
+        let suggestedRole = "Mustahiq";
+        if (p.mustahiqClasses && p.mustahiqClasses.length > 0) {
+          suggestedRole = "Mustahiq";
+        } else if (p.teacherProfile) {
+          suggestedRole = "Mustahiq"; // teachers who teach are Mustahiq
+        } else if (p.organizationMemberships && p.organizationMemberships.length > 0) {
+          const orgRole = p.organizationMemberships[0].role;
+          if (orgRole === "MUNDZIR" || orgRole === "Mundzir") {
+            suggestedRole = "Mundzir";
+          } else if (orgRole === "MUFATTISY" || orgRole === "Mufattisy") {
+            suggestedRole = "Mufattisy";
+          } else {
+            suggestedRole = "Sekretariat";
+          }
+        }
+
+        return {
+          id: p.id,
+          fullName: p.fullName,
+          gender: p.gender || "P",
+          suggestedRole,
+        };
+      });
+
+      return NextResponse.json({ status: "Success", data: formatted, total });
+    }
+
     if (role === "guardian") {
+
       const whereCondition = {
         deletedAt: null,
         person: { deletedAt: null },
