@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     if (status) where.status = status;
     if (type) where.permitType = type;
 
-    const permits = await prisma.studentPermit.findMany({
+    const permits = await (prisma as any).studentPermit.findMany({
       where,
       include: {
         student: {
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const permit = await prisma.studentPermit.create({
+    const permit = await (prisma as any).studentPermit.create({
       data: {
         studentId,
         permitType,

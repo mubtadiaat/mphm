@@ -10,7 +10,7 @@ export async function PUT(
     const body = await request.json();
     const { status, approvedById, notes } = body;
 
-    const existing = await prisma.studentPermit.findUnique({
+    const existing = await (prisma as any).studentPermit.findUnique({
       where: { id },
     });
 
@@ -21,7 +21,7 @@ export async function PUT(
       );
     }
 
-    const updated = await prisma.studentPermit.update({
+    const updated = await (prisma as any).studentPermit.update({
       where: { id },
       data: {
         ...(status && { status }),
@@ -51,7 +51,7 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    await prisma.studentPermit.update({
+    await (prisma as any).studentPermit.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
