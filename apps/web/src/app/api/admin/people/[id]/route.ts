@@ -59,6 +59,8 @@ export async function PUT(
       guardianPhone,
       guardianRelation,
       familyCardNumber,
+      class: className,
+      classId,
     } = body;
 
     const updatedPersonName = name || fullName;
@@ -97,6 +99,38 @@ export async function PUT(
             ...(status !== undefined ? { status: status.toUpperCase() } : {}),
           },
         });
+
+        // 2b. Update or Create ClassEnrollment if class specified
+        let targetClass = null;
+        if (classId) {
+          targetClass = await tx.academicClass.findFirst({
+            where: { id: classId, deletedAt: null },
+          });
+        } else if (className && className !== "Belum Ditentukan") {
+          targetClass = await tx.academicClass.findFirst({
+            where: {
+              OR: [{ name: className }, { fullName: className }],
+              deletedAt: null,
+            },
+          });
+        }
+
+        if (targetClass) {
+          // Deactivate old enrollments
+          await tx.classEnrollment.updateMany({
+            where: { studentId: existingStudent.id, deletedAt: null },
+            data: { deletedAt: new Date() },
+          });
+
+          // Create new enrollment
+          await tx.classEnrollment.create({
+            data: {
+              classId: targetClass.id,
+              studentId: existingStudent.id,
+              status: "ACTIVE",
+            },
+          });
+        }
       }
 
       return person;

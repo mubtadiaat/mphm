@@ -37,7 +37,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const activeWorkspace = propWorkspace || contextWorkspace;
   const isPondok = activeWorkspace === "pondok";
 
-  const [activeSubTab, setActiveSubTab] = useState<"aktif" | "alumni" | "mutasi">("aktif");
+  const [activeSubTab, setActiveSubTab] = useState<"aktif" | "tanpa_kelas" | "alumni" | "mutasi">("aktif");
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -497,6 +497,18 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         >
           {isPondok ? "Santriwati Asrama Aktif" : "Siswi Diniyyah Aktif"}
         </button>
+        {!isPondok && (
+          <button
+            onClick={() => setActiveSubTab("tanpa_kelas")}
+            className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${
+              activeSubTab === "tanpa_kelas"
+                ? "border-amber-600 text-amber-600 dark:text-amber-400 font-extrabold"
+                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+            }`}
+          >
+            Belum Ada Kelas (Tarik Data Pondok)
+          </button>
+        )}
         <button
           onClick={() => setActiveSubTab("alumni")}
           className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${

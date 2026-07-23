@@ -11,10 +11,14 @@ export async function GET(req: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0");
 
     if (role === "student" || role === "santri") {
+      const isUnassignedTab = statusTab === "tanpa_kelas" || statusTab === "unassigned";
+      
       const whereCondition = {
         deletedAt: null,
         person: { deletedAt: null },
-        ...(statusTab && statusTab !== "all" && statusTab !== "aktif"
+        ...(isUnassignedTab
+          ? { enrollments: { none: { deletedAt: null } } }
+          : statusTab && statusTab !== "all" && statusTab !== "aktif"
           ? { status: statusTab.toUpperCase() }
           : statusTab === "aktif"
           ? { status: "ACTIVE" }
@@ -320,6 +324,8 @@ export async function POST(req: NextRequest) {
       guardianPhone,
       guardianRelation = "WALI",
       familyCardNumber,
+      class: className,
+      classId,
     } = body;
 
     const personFullName = name || fullName;
@@ -344,9 +350,9 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 2. Create StudentProfile if stambuk/nis specified
+      // 2. Create StudentProfile if stambuk/nis specified or role is student
       let studentProfile = null;
-      if (stambuk || nis) {
+      if (stambuk || nis || className || classId) {
         studentProfile = await tx.studentProfile.create({
           data: {
             personId: person.id,
@@ -357,6 +363,31 @@ export async function POST(req: NextRequest) {
             status: "ACTIVE",
           },
         });
+
+        // 2b. Assign to AcademicClass if specified
+        let targetClass = null;
+        if (classId) {
+          targetClass = await tx.academicClass.findFirst({
+            where: { id: classId, deletedAt: null },
+          });
+        } else if (className && className !== "Belum Ditentukan") {
+          targetClass = await tx.academicClass.findFirst({
+            where: {
+              OR: [{ name: className }, { fullName: className }],
+              deletedAt: null,
+            },
+          });
+        }
+
+        if (targetClass && studentProfile) {
+          await tx.classEnrollment.create({
+            data: {
+              classId: targetClass.id,
+              studentId: studentProfile.id,
+              status: "ACTIVE",
+            },
+          });
+        }
       }
 
       // 3. Create Guardian if guardian information provided
