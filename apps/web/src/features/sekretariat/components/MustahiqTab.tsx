@@ -9,6 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { useGuru, Guru } from "../queries/useGuru";
+import { addPosisiToJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -22,13 +23,6 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createGuru, updateGuru, deleteGuru } = useGuru(searchQuery, pageIndex, pageSize);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (remoteData) {
-      setTeachers(remoteData.data as Guru[]);
-      setTotalCount(remoteData.total);
-    }
-  }, [remoteData.data, remoteData.total]);
-  
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Guru | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Guru | null>(null);
@@ -36,6 +30,13 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
+  useEffect(() => {
+    if (remoteData) {
+      setTeachers(remoteData.data as Guru[]);
+      setTotalCount(remoteData.total);
+    }
+  }, [remoteData.data, remoteData.total]);
+  
   const resetForm = () => {
     setName(""); setPhone("");
   };
@@ -67,24 +68,24 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     
     try {
       if (editingData) {
-        if (!editingData.personId) {
-          throw new Error("ID orang tidak ditemukan pada data ini.");
-        }
+        if (!editingData.personId) throw new Error("ID person tidak ada");
         await updateGuru({ personId: editingData.personId, name, phone });
-        toast("Data Mustahiq berhasil diperbarui!", "success", "Sukses");
+        toast("Data Mustahiq diperbarui", "success", "Sukses");
       } else {
-        await createGuru({ name, phone });
-        toast("Mustahiq baru berhasil didaftarkan!", "success", "Sukses");
+        await createGuru({ name, phone, gender: "L" });
+        toast("Mustahiq berhasil ditambahkan", "success", "Sukses");
       }
       setShowModal(false);
-    } catch (err: any) {
-      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
+      resetForm();
+    } catch (_err) {
+      toast("Gagal menyimpan data", "error", "Gagal");
     }
   };
 
   const columns: ColumnDef<Guru, unknown>[] = [
-    { accessorKey: "name", header: "Nama Mustahiq", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
-    { accessorKey: "teacherCode", header: "Kode Guru", cell: info => <span className="text-sm font-medium text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded">{info.getValue() as string}</span> },
+    { accessorKey: "teacherCode", header: "Kode Guru/Mustahiq", cell: info => <span className="font-mono text-xs font-semibold">{info.getValue() as string || "-"}</span> },
+    { accessorKey: "name", header: "Nama Lengkap", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
+    { accessorKey: "phone", header: "No. HP / WA", cell: info => <span className="font-mono text-xs">{info.getValue() as string || "-"}</span> },
     { accessorKey: "status", header: "Status", cell: info => (
       <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
         {info.getValue() as string}
@@ -104,25 +105,25 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
             <Users className="w-4 h-4" />
-            <span>Manajemen SDM</span>
+            <span>Dewan Pengajar & Mustahiq Kelas</span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Data Mustahiq
+            Data Mustahiq (Wali Kelas)
           </h1>
           <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Kelola master data Mustahiq (Wali Kelas) dan status penugasan.
+            Kelola data pengajar dan Mustahiq penanggung jawab masing-masing kelas diniyyah.
           </p>
         </div>
         {!isReadOnly && (
-          <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95">
+          <button onClick={handleOpenAdd} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all z-10">
             <Plus className="w-4 h-4" /> Tambah Mustahiq
           </button>
         )}
       </div>
 
       <UniversalDataGrid
-        columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={teachers as unknown as Record<string, unknown>[]}
+        columns={columns}
+        data={teachers}
         pageCount={Math.ceil(totalCount / pageSize) || 1}
         pageIndex={pageIndex}
         pageSize={pageSize}
@@ -134,12 +135,13 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         tableName="mustahiq"
         importExportProps={{
           title: "Data Mustahiq dan Dewan Pengajar",
-          headers: ["Nama Lengkap Mustahiq", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          headers: ["Nama Lengkap Mustahiq", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
-              const nameVal = r["Nama Lengkap Mustahiq"] || r["nama"] || "";
+              const nameVal = r["Nama Lengkap Mustahiq"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
+              const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mustahiq";
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createGuru({
@@ -147,6 +149,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                   phone: phoneVal,
                   gender: "L",
                 });
+                await addPosisiToJabatan("Mustahiq", roleVal, "MADRASAH");
                 count++;
               } catch (err) {
                 console.error("Import row failed:", err);

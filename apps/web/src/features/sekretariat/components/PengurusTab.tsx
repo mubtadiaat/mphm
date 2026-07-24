@@ -9,7 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
-import { getStoredStructuralJabatan } from "@/config/jobPositions.config";
+import { getStoredStructuralJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -161,20 +161,22 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
         tableName="pengurus"
         importExportProps={{
           title: "Data Pengurus dan Struktur Organisasi",
-          headers: ["Nama Lengkap Pengurus", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          headers: ["Nama Lengkap Pengurus", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
-              const nameVal = r["Nama Lengkap Pengurus"] || r["nama"] || "";
+              const nameVal = r["Nama Lengkap Pengurus"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
+              const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Pengurus";
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createPengurus({
                   name: nameVal,
                   phone: phoneVal,
-                  roleName: "Pengurus Harian",
+                  roleName: roleVal,
                   gender: "L",
                 });
+                await addPosisiToJabatan("Pengurus Harian", roleVal, "PONDOK");
                 count++;
               } catch (err) {
                 console.error("Import row failed:", err);

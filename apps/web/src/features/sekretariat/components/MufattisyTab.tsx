@@ -10,6 +10,7 @@ import { useToast } from "@/components/shared/ToastContext";
 
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
+import { addPosisiToJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -73,20 +74,22 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
           throw new Error("ID orang tidak ditemukan pada data ini.");
         }
         await updatePengurus({ personId: editingData.personId, name, phone });
-        toast("Data Mufattisy berhasil diperbarui!", "success", "Sukses");
+        toast("Data Mufattisy diperbarui", "success", "Sukses");
       } else {
-        await createPengurus({ name, phone, roleName: "Mufattisy", supervisedLevel });
-        toast("Mufattisy baru berhasil didaftarkan!", "success", "Sukses");
+        await createPengurus({ name, phone, roleName: "Mufattisy", supervisedLevel, gender: "L" });
+        toast("Mufattisy berhasil ditambahkan", "success", "Sukses");
       }
       setShowModal(false);
-    } catch (err: any) {
-      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
+      resetForm();
+    } catch (_err) {
+      toast("Gagal menyimpan data", "error", "Gagal");
     }
   };
 
   const columns: ColumnDef<Pengurus, unknown>[] = [
     { accessorKey: "name", header: "Nama Mufattisy", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
-    { accessorKey: "role", header: "Peran", cell: info => <span className="text-sm font-medium text-zinc-600 truncate max-w-[200px] block">{info.getValue() as string}</span> },
+    { accessorKey: "supervisedLevel", header: "Jenjang Pengawasan", cell: info => <span className="text-xs font-semibold px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-md">{info.getValue() as string || "Tsanawiyyah"}</span> },
+    { accessorKey: "phone", header: "No. HP / WA", cell: info => <span className="font-mono text-xs">{info.getValue() as string || "-"}</span> },
     { accessorKey: "status", header: "Status", cell: info => (
       <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
         {info.getValue() as string}
@@ -106,17 +109,17 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="w-4 h-4" />
-            <span>Manajemen SDM</span>
+            <span>Dewan Inspektorat & Pengawas (Mufattisy)</span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
             Data Mufattisy
           </h1>
           <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Kelola master data Mufattisy (Pengawas) dan ruang lingkup pengawasan.
+            Kelola master data Mufattisy pengawas santri dan keikutsertaan madrasah.
           </p>
         </div>
         {!isReadOnly && (
-          <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95">
+          <button onClick={handleOpenAdd} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all z-10">
             <Plus className="w-4 h-4" /> Tambah Mufattisy
           </button>
         )}
@@ -136,20 +139,22 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
         tableName="mufattisy"
         importExportProps={{
           title: "Data Mufattisy dan Dewan Pengawas",
-          headers: ["Nama Lengkap Mufattisy", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          headers: ["Nama Lengkap Mufattisy", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
-              const nameVal = r["Nama Lengkap Mufattisy"] || r["nama"] || "";
+              const nameVal = r["Nama Lengkap Mufattisy"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
+              const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mufattisy";
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createPengurus({
                   name: nameVal,
                   phone: phoneVal,
-                  roleName: "Mufattisy",
+                  roleName: roleVal,
                   gender: "L",
                 });
+                await addPosisiToJabatan("Mufattisy", roleVal, "MADRASAH");
                 count++;
               } catch (err) {
                 console.error("Import row failed:", err);

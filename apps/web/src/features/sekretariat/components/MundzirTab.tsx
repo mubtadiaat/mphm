@@ -9,7 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
-import { getPositionsForJabatan } from "@/config/jobPositions.config";
+import { getPositionsForJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
 
 interface MundzirTabProps {
   onViewDetail: (data: Record<string, unknown>) => void;
@@ -27,11 +27,11 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
 
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mundzir", pageIndex, pageSize);
   const { toast } = useToast();
-  
+
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Pengurus | null>(null);
-  
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("");
@@ -87,7 +87,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
-    
+
     try {
       if (editingData) {
         if (!editingData.personId) {
@@ -109,11 +109,13 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
     { accessorKey: "name", header: "Nama Mundzir", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
     { accessorKey: "role", header: "Jabatan Eksekutif", cell: info => <span className="text-sm font-medium">{info.getValue() as string}</span> },
     { accessorKey: "phone", header: "No. Telepon", cell: info => <span className="font-mono text-xs">{info.getValue() as string}</span> },
-    { accessorKey: "status", header: "Status", cell: info => (
-      <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-        {info.getValue() as string}
-      </span>
-    )},
+    {
+      accessorKey: "status", header: "Status", cell: info => (
+        <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          {info.getValue() as string}
+        </span>
+      )
+    },
     {
       id: "actions", header: "Aksi",
       cell: info => <TableActions onEdit={() => handleOpenEdit(info.row.original)} onDelete={() => handleDelete(info.row.original.id)} onDetail={() => onViewDetail(info.row.original as unknown as Record<string, unknown>)} isReadOnly={isReadOnly} />
@@ -124,7 +126,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
     <div className="flex flex-col gap-6 mt-4">
       <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 dark:border-blue-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
             <Users className="w-4 h-4" />
@@ -134,7 +136,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
             Data Mundzir
           </h1>
           <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Kelola master data Mundzir dan Mundziroh (Pimpinan Asrama).
+            Kelola master data Mundzir.
           </p>
         </div>
         {!isReadOnly && (
@@ -158,20 +160,22 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
         tableName="mundzir"
         importExportProps={{
           title: "Data Mundzir dan Pimpinan Pesantren",
-          headers: ["Nama Lengkap Mundzir", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          headers: ["Nama Lengkap Mundzir", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
-              const nameVal = r["Nama Lengkap Mundzir"] || r["nama"] || "";
+              const nameVal = r["Nama Lengkap Mundzir"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
+              const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mundzir";
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createPengurus({
                   name: nameVal,
                   phone: phoneVal,
-                  roleName: "Mundzir Asrama",
+                  roleName: roleVal,
                   gender: "L",
                 });
+                await addPosisiToJabatan("Mundzir", roleVal, "MADRASAH");
                 count++;
               } catch (err) {
                 console.error("Import row failed:", err);
@@ -191,7 +195,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden">
               <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between">
                 <h3 className="font-bold">{editingData ? "Edit Data Mundzir" : "Tambah Mundzir Baru"}</h3>
-                <button onClick={() => setShowModal(false)} className="text-zinc-500 hover:bg-zinc-100 p-1 rounded-md"><X className="w-5 h-5"/></button>
+                <button onClick={() => setShowModal(false)} className="text-zinc-500 hover:bg-zinc-100 p-1 rounded-md"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleSave} className="p-4 space-y-4">
                 <div className="space-y-1">
@@ -212,7 +216,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
                       ))}
                     </select>
                   ) : (
-                    <input required value={role} onChange={e => setRole(e.target.value)} placeholder="Contoh: AM, Mundzir Asrama..." className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
+                    <input required value={role} onChange={e => setRole(e.target.value)} placeholder="Contoh: AM, Satu, Dua..." className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                   )}
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
@@ -236,7 +240,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
                   <Users className="w-5 h-5 text-blue-500" />
                   Detail Rinci Mundzir
                 </h3>
-                <button onClick={() => setViewingDetail(null)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5"/></button>
+                <button onClick={() => setViewingDetail(null)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5" /></button>
               </div>
               <div className="p-6 overflow-y-auto space-y-4 text-sm font-medium">
                 <table className="w-full border-collapse">
@@ -247,7 +251,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Jabatan / Peran</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-semibold">{viewingDetail.role || "Mundzir Asrama"}</td>
+                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-semibold">{viewingDetail.role || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">No. HP / WhatsApp</td>
