@@ -326,6 +326,7 @@ export async function POST(req: NextRequest) {
       familyCardNumber,
       class: className,
       classId,
+      role,
     } = body;
 
     const personFullName = name || fullName;
@@ -350,16 +351,17 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 2. Create StudentProfile if stambuk/nis specified or role is student
+      // 2. Create StudentProfile if role is student/santri OR stambuk/nis/class/etc is specified
       let studentProfile = null;
-      if (stambuk || nis || className || classId) {
+      const isStudentRole = role === "student" || role === "santri" || !role;
+      if (isStudentRole || stambuk || nis || className || classId) {
         studentProfile = await tx.studentProfile.create({
           data: {
             personId: person.id,
-            stambukNumber: stambuk || `STB-${Date.now()}`,
-            nis: nis || `NIS-${Date.now()}`,
+            stambukNumber: stambuk || `STB-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            nis: nis || `NIS-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
             nisn: nisn || null,
-            enrollmentYear: Number(enrollmentYear),
+            enrollmentYear: Number(enrollmentYear) || new Date().getFullYear(),
             status: "ACTIVE",
           },
         });

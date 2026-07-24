@@ -383,10 +383,22 @@ export function ImportExportToolbar({
         const obj: Record<string, string> = {};
         let hasValue = false;
         headers.forEach((h, idx) => {
-          const cellValue = row.getCell(idx + 1).value;
-          const val = cellValue !== undefined && cellValue !== null ? String(cellValue) : "";
-          obj[h] = val;
-          if (val.trim() !== "") hasValue = true;
+          const cell = row.getCell(idx + 1);
+          let val = "";
+          if (cell && cell.value !== undefined && cell.value !== null) {
+            if (typeof cell.value === "object") {
+              val = (cell.value as any).result !== undefined 
+                ? String((cell.value as any).result) 
+                : (cell.value as any).text !== undefined 
+                ? String((cell.value as any).text) 
+                : cell.text || "";
+            } else {
+              val = String(cell.value);
+            }
+          }
+          val = val.trim();
+          obj[h.trim()] = val;
+          if (val !== "") hasValue = true;
         });
         if (hasValue) {
           formattedData.push(obj);
