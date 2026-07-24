@@ -28,7 +28,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
   );
 
   const { data: guruData = { data: [], total: 0 } } = useGuru(undefined, 0, 100);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
@@ -63,9 +63,15 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus kamar ini? Santri yang menghuni kamar ini akan dide-asosiasikan.")) {
-      return;
-    }
+    const isConfirmed = await confirm({
+      title: "Hapus Kamar Asrama?",
+      message: "Apakah Anda yakin ingin menghapus kamar ini? Santri yang menghuni kamar ini akan dide-asosiasikan.",
+      confirmText: "Ya, Hapus Kamar",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (!isConfirmed) return;
 
     try {
       await deleteRoom(id);

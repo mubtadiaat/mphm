@@ -21,7 +21,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [totalCount, setTotalCount] = useState(0);
 
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createGuru, updateGuru, deleteGuru } = useGuru(searchQuery, pageIndex, pageSize);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Guru | null>(null);
@@ -52,12 +52,20 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Yakin hapus data Mustahiq ini?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Data Mustahiq?",
+      message: "Apakah Anda yakin ingin menghapus data Mustahiq ini?",
+      confirmText: "Ya, Hapus Data",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deleteGuru(id);
-        toast("Data dihapus", "success", "Sukses");
+        toast("Data Mustahiq berhasil dihapus", "success", "Sukses");
       } catch (_err) {
-        toast("Gagal menghapus data", "error", "Gagal");
+        toast("Gagal menghapus data Mustahiq", "error", "Gagal");
       }
     }
   };

@@ -12,11 +12,19 @@ import { useRecycleBin, DeletedItem } from "../queries/useRecycleBin";
 export function RecycleBinTab() {
   const { data: remoteData = [], isLoading, restoreItem, forceDeleteItem } = useRecycleBin();
   const data = remoteData;
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   const [detailData, setDetailData] = useState<Record<string, any> | null>(null);
 
   const handleRestore = async (id: string) => {
-    if (confirm("Kembalikan data ini ke sistem aktif?")) {
+    const isConfirmed = await confirm({
+      title: "Pulihkan Data?",
+      message: "Apakah Anda yakin ingin mengembalikan data ini ke sistem aktif?",
+      confirmText: "Ya, Pulihkan Data",
+      cancelText: "Batal",
+      type: "info",
+    });
+
+    if (isConfirmed) {
       try {
         await restoreItem(id);
         toast("Data berhasil dikembalikan", "success", "Sukses");
@@ -27,7 +35,15 @@ export function RecycleBinTab() {
   };
 
   const handlePermanentDelete = async (id: string) => {
-    if (confirm("Hapus permanen data ini SEKARANG? Tindakan ini tidak dapat dibatalkan!")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Permanen Data?",
+      message: "Hapus permanen data ini SEKARANG? Tindakan ini tidak dapat dibatalkan!",
+      confirmText: "Ya, Hapus Permanen",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await forceDeleteItem(id);
         toast("Data dihapus permanen", "success", "Terhapus");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Trash2, ShieldAlert, Tag, LayoutList, Loader2 } from "lucide-react";
 import { useViolationMaster } from "../queries/useViolationMaster";
+import { useToast } from "@/components/shared/ToastContext";
 
 export function MasterPelanggaranTab() {
   const {
@@ -67,9 +68,20 @@ export function MasterPelanggaranTab() {
     setNewTypePoints("");
   };
 
+  const { toast, confirm } = useToast();
+
   const handleDeleteType = async (id: string) => {
-    if (confirm("Yakin ingin menonaktifkan pelanggaran ini?")) {
+    const isConfirmed = await confirm({
+      title: "Nonaktifkan Jenis Pelanggaran?",
+      message: "Apakah Anda yakin ingin menonaktifkan jenis pelanggaran ini?",
+      confirmText: "Ya, Nonaktifkan",
+      cancelText: "Batal",
+      type: "warning",
+    });
+
+    if (isConfirmed) {
       await deleteViolation(id);
+      toast("Pelanggaran berhasil dinonaktifkan", "success");
     }
   };
 

@@ -9,7 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
-import { getStoredStructuralJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
+import { getStoredStructuralJabatan, addPosisiToJabatan, getPositionsForJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -26,7 +26,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const [totalCount, setTotalCount] = useState(0);
 
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
@@ -37,9 +37,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const [role, setRole] = useState("");
 
   const [pengurusTitles, setPengurusTitles] = useState<string[]>(() => {
-    const all = getStoredStructuralJabatan();
-    const positions = all.flatMap(j => j.posisiList);
-    return Array.from(new Set(positions));
+    return getPositionsForJabatan("Pengurus Harian", "PONDOK");
   });
 
   useEffect(() => {
@@ -51,9 +49,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
 
   useEffect(() => {
     const handleJobTitlesChanged = () => {
-      const all = getStoredStructuralJabatan();
-      const positions = all.flatMap(j => j.posisiList);
-      setPengurusTitles(Array.from(new Set(positions)));
+      setPengurusTitles(getPositionsForJabatan("Pengurus Harian", "PONDOK"));
     };
     window.addEventListener("structural_job_positions_changed", handleJobTitlesChanged);
     window.addEventListener("job_titles_changed", handleJobTitlesChanged);
@@ -78,12 +74,20 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Yakin hapus data Pengurus ini?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Data Pengurus?",
+      message: "Apakah Anda yakin ingin menghapus data Pengurus ini?",
+      confirmText: "Ya, Hapus Data",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deletePengurus(id);
-        toast("Data dihapus", "success", "Sukses");
+        toast("Data Pengurus berhasil dihapus", "success", "Sukses");
       } catch (_err) {
-        toast("Gagal menghapus data", "error", "Gagal");
+        toast("Gagal menghapus data Pengurus", "error", "Gagal");
       }
     }
   };

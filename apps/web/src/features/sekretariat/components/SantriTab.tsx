@@ -57,7 +57,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
 
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -170,12 +170,21 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   };
 
   const handleDeleteSantri = async (id: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus data ${isPondok ? "santriwati" : "siswi"} ini secara permanen dari sistem?`)) {
+    const label = isPondok ? "santriwati" : "siswi";
+    const isConfirmed = await confirm({
+      title: `Hapus Data ${label.toUpperCase()}?`,
+      message: `Apakah Anda yakin ingin menghapus data ${label} ini secara permanen dari sistem?`,
+      confirmText: "Ya, Hapus Data",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deleteSantri(id);
-        toast(`Data ${isPondok ? "santriwati" : "siswi"} berhasil dihapus!`, "success");
+        toast(`Data ${label} berhasil dihapus!`, "success");
       } catch (_err) {
-        toast(`Gagal menghapus data ${isPondok ? "santriwati" : "siswi"}.`, "error");
+        toast(`Gagal menghapus data ${label}.`, "error");
       }
     }
   };

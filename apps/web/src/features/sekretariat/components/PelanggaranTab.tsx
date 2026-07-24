@@ -19,7 +19,7 @@ interface PelanggaranTabProps {
 export function PelanggaranTab({ onViewDetail, isReadOnly = false }: PelanggaranTabProps) {
   const { types, isLoadingTypes, categories, severities, createViolation, deleteViolation } = useViolationMaster();
   const [violationsData, setViolationsData] = useState<ViolationType[]>([]);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   // Sync with TanStack Query data
   useEffect(() => {
@@ -30,35 +30,31 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
     }
   }, [types]);
 
-  // Modal States
+  // Modal & Form States
   const [showModal, setShowModal] = useState(false);
-  const [editingViolation, setEditingViolation] = useState<ViolationType | null>(null);
+  const [editingItem, setEditingItem] = useState<ViolationType | null>(null);
   const [viewingDetail, setViewingDetail] = useState<ViolationType | null>(null);
-
-  // Form States
   const [name, setName] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [severityId, setSeverityId] = useState("");
-  const [points, setPoints] = useState(5);
+  const [points, setPoints] = useState<number>(5);
 
   const resetForm = () => {
     setName("");
-    setCategoryId(categories?.[0]?.id || "");
-    setSeverityId(severities?.[0]?.id || "");
+    setCategoryId("");
+    setSeverityId("");
     setPoints(5);
   };
 
   const handleOpenAdd = () => {
-    setEditingViolation(null);
+    setEditingItem(null);
     resetForm();
     setShowModal(true);
   };
 
   const handleOpenEdit = (vio: ViolationType) => {
-    setEditingViolation(vio);
+    setEditingItem(vio);
     setName(vio.name);
-    // Note: Edit requires category/severity IDs but we only have string names in the list.
-    // For full CRUD, we'd fetch the exact item or match by name.
     const matchedCat = categories.find(c => c.name === vio.category);
     const matchedSev = severities.find(s => s.name === vio.severity);
     setCategoryId(matchedCat?.id || "");
@@ -68,7 +64,15 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus jenis pelanggaran master ini?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Jenis Pelanggaran?",
+      message: "Apakah Anda yakin ingin menghapus jenis pelanggaran master ini?",
+      confirmText: "Ya, Hapus Master",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deleteViolation(id);
         toast("Master pelanggaran berhasil dihapus!", "success", "Data Dihapus");
@@ -245,10 +249,10 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false }: Pelanggaran
               <div className="p-5 border-b border-zinc-150 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50 shrink-0">
                 <div>
                   <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
-                    {editingViolation ? "Edit Jenis Pelanggaran" : "Tambah Pelanggaran Baru"}
+                    {editingItem ? "Edit Jenis Pelanggaran" : "Tambah Pelanggaran Baru"}
                   </h3>
                   <p className="text-xs text-zinc-500">
-                    {editingViolation ? "Ubah deskripsi aturan atau bobot poin takzir." : "Daftarkan pasal pelanggaran baru."}
+                    {editingItem ? "Ubah deskripsi aturan atau bobot poin takzir." : "Daftarkan pasal pelanggaran baru."}
                   </p>
                 </div>
                 <button

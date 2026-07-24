@@ -5,6 +5,7 @@ import { Trash2, BookOpen, Layers, Plus, X, Save } from "lucide-react";
 import { useClasses } from "@/features/sekretariat/queries/useClasses";
 import { useGuru } from "@/features/sekretariat/queries/useGuru";
 import { usePengurus } from "@/features/sekretariat/queries/usePengurus";
+import { useToast } from "@/components/shared/ToastContext";
 
 const CLASS_LEVELS_MAP: Record<string, string[]> = {
   "I'dadiyyah": ["I", "II", "III"],
@@ -15,6 +16,7 @@ const CLASS_LEVELS_MAP: Record<string, string[]> = {
 };
 
 export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false }: { onViewDetail?: (data: Record<string, unknown>) => void, selectedYearId?: string, isReadOnly?: boolean }) {
+  const { toast, confirm } = useToast();
   const { data: remoteData, isLoading, createClass, isCreating, deleteClass } = useClasses(selectedYearId);
   
   const { data: mustahiqListRemote = { data: [], total: 0 } } = useGuru("", 0, 100);
@@ -205,9 +207,16 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                   </div>
                   {!isReadOnly && (
                     <button 
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
-                        if (confirm(`Apakah Anda yakin ingin menghapus kelas ${cls.name}?`)) {
+                        const isConfirmed = await confirm({
+                          title: "Hapus Kelas Diniyyah?",
+                          message: `Apakah Anda yakin ingin menghapus kelas ${cls.name}?`,
+                          confirmText: "Ya, Hapus Kelas",
+                          cancelText: "Batal",
+                          type: "danger",
+                        });
+                        if (isConfirmed) {
                           deleteClass(cls.id);
                         }
                       }}

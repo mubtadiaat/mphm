@@ -27,7 +27,7 @@ export interface StudentPermitData {
 
 export function PerizinanManagementView() {
   const { data: user } = useAuth();
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   const queryClient = useQueryClient();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -410,8 +410,15 @@ export function PerizinanManagementView() {
 
                         <button
                           title="Hapus Record"
-                          onClick={() => {
-                            if (confirm("Apakah Anda yakin ingin menghapus data perizinan ini?")) {
+                          onClick={async () => {
+                            const isConfirmed = await confirm({
+                              title: "Hapus Data Perizinan?",
+                              message: "Apakah Anda yakin ingin menghapus data perizinan ini?",
+                              confirmText: "Ya, Hapus Record",
+                              cancelText: "Batal",
+                              type: "danger",
+                            });
+                            if (isConfirmed) {
                               deletePermitMutation.mutate(item.id);
                             }
                           }}

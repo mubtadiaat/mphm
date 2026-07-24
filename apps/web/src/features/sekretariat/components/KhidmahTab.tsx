@@ -28,7 +28,7 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
   const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "khidmah");
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   // Filter khusus untuk Khidmah (now handled by server)
   const filteredData = santriData;
 
@@ -95,7 +95,15 @@ export function KhidmahTab({ onViewDetail, isReadOnly = false, selectedYearId }:
 
   // Delete Action
   const handleDeleteSantri = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus data santri ini secara permanen dari sistem?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Data Khidmah?",
+      message: "Apakah Anda yakin ingin menghapus data santri khidmah ini secara permanen dari sistem?",
+      confirmText: "Ya, Hapus Data",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deleteSantri(id);
         toast("Data santri berhasil dihapus!", "success");

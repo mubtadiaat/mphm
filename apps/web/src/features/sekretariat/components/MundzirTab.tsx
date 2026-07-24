@@ -26,7 +26,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   const [totalCount, setTotalCount] = useState(0);
 
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mundzir", pageIndex, pageSize);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
@@ -74,12 +74,20 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Yakin hapus data Mundzir ini?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Data Mundzir?",
+      message: "Apakah Anda yakin ingin menghapus data Mundzir ini?",
+      confirmText: "Ya, Hapus Data",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deletePengurus(id);
-        toast("Data dihapus", "success", "Sukses");
+        toast("Data Mundzir berhasil dihapus", "success", "Sukses");
       } catch (_err) {
-        toast("Gagal menghapus data", "error", "Gagal");
+        toast("Gagal menghapus data Mundzir", "error", "Gagal");
       }
     }
   };

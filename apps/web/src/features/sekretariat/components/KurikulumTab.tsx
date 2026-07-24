@@ -18,7 +18,7 @@ interface KurikulumTabProps {
 
 export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabProps) {
   const { data: remoteData = [], isLoading, createSubject, updateSubject, deleteSubject } = useSubjects();
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   // Modal States
   const [showModal, setShowModal] = useState(false);
@@ -54,7 +54,15 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus mata pelajaran ini dari kurikulum?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Mata Pelajaran?",
+      message: "Apakah Anda yakin ingin menghapus mata pelajaran ini dari kurikulum?",
+      confirmText: "Ya, Hapus Mapel",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deleteSubject(id);
         toast("Mata pelajaran berhasil dihapus!", "success", "Data Dihapus");

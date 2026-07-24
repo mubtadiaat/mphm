@@ -22,7 +22,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   const [totalCount, setTotalCount] = useState(0);
 
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
   
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
@@ -54,12 +54,20 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Yakin hapus data Mufattisy ini?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Data Mufattisy?",
+      message: "Apakah Anda yakin ingin menghapus data Mufattisy ini?",
+      confirmText: "Ya, Hapus Data",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deletePengurus(id);
-        toast("Data dihapus", "success", "Sukses");
+        toast("Data Mufattisy berhasil dihapus", "success", "Sukses");
       } catch (_err) {
-        toast("Gagal menghapus data", "error", "Gagal");
+        toast("Gagal menghapus data Mufattisy", "error", "Gagal");
       }
     }
   };

@@ -28,7 +28,7 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
   const { data: remoteData, isLoading, createSantri, updateSantri, deleteSantri } = useSantri(selectedYearId, pageIndex, pageSize, searchQuery, "alumni");
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const { toast } = useToast();
+  const { toast, confirm } = useToast();
 
   // Sync with TanStack Query data
   useEffect(() => {
@@ -105,7 +105,15 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
 
   // Delete Action
   const handleDeleteSantri = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus data santri ini secara permanen dari sistem?")) {
+    const isConfirmed = await confirm({
+      title: "Hapus Data Alumni?",
+      message: "Apakah Anda yakin ingin menghapus data santri ini secara permanen dari sistem?",
+      confirmText: "Ya, Hapus Data",
+      cancelText: "Batal",
+      type: "danger",
+    });
+
+    if (isConfirmed) {
       try {
         await deleteSantri(id);
         toast("Data santri berhasil dihapus!", "success");
