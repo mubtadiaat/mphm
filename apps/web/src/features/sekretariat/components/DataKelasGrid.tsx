@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2, BookOpen, Layers, Plus, X, Save } from "lucide-react";
 import { useClasses } from "@/features/sekretariat/queries/useClasses";
 import { useGuru } from "@/features/sekretariat/queries/useGuru";
@@ -42,6 +42,53 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
     if (jenjang === "Semua") return true;
     return cls.name.toLowerCase().includes(jenjang.toLowerCase());
   });
+
+  const targetPattern = `${newJenjang} ${newTingkat} ${newRuang}`.trim().toLowerCase();
+
+  const sortedMustahiqList = [...mustahiqList].sort((a, b) => {
+    const aRole = (a.role || "").toLowerCase();
+    const bRole = (b.role || "").toLowerCase();
+    const aMatch = aRole.includes(targetPattern) || (aRole.includes(newJenjang.toLowerCase()) && aRole.includes(newRuang.toLowerCase()));
+    const bMatch = bRole.includes(targetPattern) || (bRole.includes(newJenjang.toLowerCase()) && bRole.includes(newRuang.toLowerCase()));
+    if (aMatch && !bMatch) return -1;
+    if (!aMatch && bMatch) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  const jenjangTarget = newJenjang.toLowerCase();
+  const sortedMufattisyList = [...mufattisyList].sort((a, b) => {
+    const aLevel = (a.supervisedLevel || a.role || "").toLowerCase();
+    const bLevel = (b.supervisedLevel || b.role || "").toLowerCase();
+    const aMatch = aLevel.includes(jenjangTarget);
+    const bMatch = bLevel.includes(jenjangTarget);
+    if (aMatch && !bMatch) return -1;
+    if (!aMatch && bMatch) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  useEffect(() => {
+    if (mustahiqList.length > 0) {
+      const match = sortedMustahiqList.find(g => {
+        const r = (g.role || "").toLowerCase();
+        return r.includes(targetPattern) || (r.includes(newJenjang.toLowerCase()) && r.includes(newRuang.toLowerCase()));
+      });
+      if (match) {
+        setNewMustahiq(match.id);
+      }
+    }
+  }, [newJenjang, newTingkat, newRuang, mustahiqList.length]);
+
+  useEffect(() => {
+    if (mufattisyList.length > 0) {
+      const match = sortedMufattisyList.find(m => {
+        const lvl = (m.supervisedLevel || m.role || "").toLowerCase();
+        return lvl.includes(jenjangTarget);
+      });
+      if (match) {
+        setNewMufattisy(match.name);
+      }
+    }
+  }, [newJenjang, mufattisyList.length]);
 
   return (
     <div className="flex flex-col gap-6 mt-4">
@@ -123,9 +170,22 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                 className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none"
               >
                 <option value="">Pilih Mustahiq...</option>
-                {mustahiqList.map((guru) => (
-                  <option key={guru.id} value={guru.id}>{guru.name}</option>
-                ))}
+                {sortedMustahiqList.map((guru) => {
+                  const r = (guru.role || "").toLowerCase();
+                  const isExact = r.includes(targetPattern);
+                  const isPartial = r.includes(newJenjang.toLowerCase()) && r.includes(newRuang.toLowerCase());
+                  const star = isExact ? "⭐ " : isPartial ? "✨ " : "";
+                  const matchBadge = isExact
+                    ? ` [Sesuai ${newJenjang} ${newTingkat} ${newRuang}]`
+                    : isPartial
+                    ? ` [Sesuai ${newJenjang} ${newRuang}]`
+                    : "";
+                  return (
+                    <option key={guru.id} value={guru.id}>
+                      {star}{guru.name} — ({guru.role || "Mustahiq"}){matchBadge}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
@@ -136,9 +196,17 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                 className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none"
               >
                 <option value="">Pilih Mufattisy...</option>
-                {mufattisyList.map((muf) => (
-                  <option key={muf.id} value={muf.name}>{muf.name}</option>
-                ))}
+                {sortedMufattisyList.map((muf) => {
+                  const lvl = (muf.supervisedLevel || muf.role || "").toLowerCase();
+                  const isMatch = lvl.includes(jenjangTarget);
+                  const displayRole = muf.role || "Mufattisy";
+                  const displayLevel = muf.supervisedLevel ? ` | Jenjang: ${muf.supervisedLevel}` : "";
+                  return (
+                    <option key={muf.id} value={muf.name}>
+                      {isMatch ? `⭐ ${muf.name} — (${displayRole}${displayLevel}) [Pengawas ${newJenjang}]` : `${muf.name} — (${displayRole}${displayLevel})`}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
