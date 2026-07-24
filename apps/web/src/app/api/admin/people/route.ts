@@ -100,30 +100,43 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === "pengurus") {
-      let roleSearchConditions: any[] = query ? [{ role: { contains: query, mode: "insensitive" as const } }] : [];
-      if (query) {
-        const qLower = query.toLowerCase();
-        if (qLower.includes("mufat") || qLower.includes("mufattisy") || qLower.includes("mufatish")) {
-          roleSearchConditions.push(
-            { role: { contains: "mufat", mode: "insensitive" as const } },
-            { role: { contains: "mufattisy", mode: "insensitive" as const } },
-            { role: { contains: "mufatish", mode: "insensitive" as const } }
-          );
-        }
-      }
+      const qLower = (query || "").trim().toLowerCase();
+      const isMufattisyQuery = qLower.includes("mufat") || qLower.includes("mufattisy") || qLower.includes("mufatish");
+      const isMundzirQuery = qLower.includes("mundzir");
 
-      const whereCondition = {
+      let whereCondition: any = {
         deletedAt: null,
         person: { deletedAt: null },
-        ...(query
-          ? {
-              OR: [
-                { person: { fullName: { contains: query, mode: "insensitive" as const } } },
-                ...roleSearchConditions,
-              ],
-            }
-          : {}),
       };
+
+      if (isMundzirQuery) {
+        whereCondition.role = { contains: "Mundzir", mode: "insensitive" };
+      } else if (isMufattisyQuery) {
+        whereCondition.OR = [
+          { role: { contains: "mufat", mode: "insensitive" } },
+          { role: { contains: "mufattisy", mode: "insensitive" } },
+          { role: { contains: "mufatish", mode: "insensitive" } },
+        ];
+      } else {
+        // Dewan Harian / Dewan Pleno / General Pengurus:
+        // EXCLUDE Mundzir, Mufattisy, and Mustahiq!
+        whereCondition.AND = [
+          { role: { not: { contains: "Mundzir", mode: "insensitive" } } },
+          { role: { not: { contains: "Mufattisy", mode: "insensitive" } } },
+          { role: { not: { contains: "Mufatish", mode: "insensitive" } } },
+          { role: { not: { contains: "Mufatisy", mode: "insensitive" } } },
+          { role: { not: { contains: "Mustahiq", mode: "insensitive" } } },
+        ];
+
+        if (query) {
+          whereCondition.AND.push({
+            OR: [
+              { person: { fullName: { contains: query, mode: "insensitive" } } },
+              { role: { contains: query, mode: "insensitive" } },
+            ],
+          });
+        }
+      }
 
       const [total, list] = await Promise.all([
         prisma.organizationMembership.count({ where: whereCondition }),
