@@ -143,16 +143,24 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
           headers: ["Nama Lengkap Mufattisy", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: async (rows) => {
             let count = 0;
+            const formatFullRole = (pos: string, defaultJabatan: string) => {
+              if (!pos || !pos.trim()) return defaultJabatan;
+              let p = pos.trim().replace(/mufatish/gi, "Mufattisy").replace(/mufatisy/gi, "Mufattisy");
+              if (p.toLowerCase().includes(defaultJabatan.toLowerCase())) return p;
+              return `${defaultJabatan} ${p}`;
+            };
+
             for (const r of rows) {
               const nameVal = r["Nama Lengkap Mufattisy"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
               const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mufattisy";
+              const fullRole = formatFullRole(roleVal, "Mufattisy");
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createPengurus({
                   name: nameVal,
                   phone: phoneVal,
-                  roleName: roleVal,
+                  roleName: fullRole,
                   gender: "L",
                 });
                 await addPosisiToJabatan("Mufattisy", roleVal, "MADRASAH");

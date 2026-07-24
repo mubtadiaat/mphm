@@ -100,6 +100,18 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === "pengurus") {
+      let roleSearchConditions: any[] = query ? [{ role: { contains: query, mode: "insensitive" as const } }] : [];
+      if (query) {
+        const qLower = query.toLowerCase();
+        if (qLower.includes("mufat") || qLower.includes("mufattisy") || qLower.includes("mufatish")) {
+          roleSearchConditions.push(
+            { role: { contains: "mufat", mode: "insensitive" as const } },
+            { role: { contains: "mufattisy", mode: "insensitive" as const } },
+            { role: { contains: "mufatish", mode: "insensitive" as const } }
+          );
+        }
+      }
+
       const whereCondition = {
         deletedAt: null,
         person: { deletedAt: null },
@@ -107,7 +119,7 @@ export async function GET(req: NextRequest) {
           ? {
               OR: [
                 { person: { fullName: { contains: query, mode: "insensitive" as const } } },
-                { role: { contains: query, mode: "insensitive" as const } },
+                ...roleSearchConditions,
               ],
             }
           : {}),
