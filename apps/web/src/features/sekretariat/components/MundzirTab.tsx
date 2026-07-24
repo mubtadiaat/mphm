@@ -84,19 +84,29 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
     }
   };
 
+  const formatFullRole = (pos: string, defaultJabatan: string) => {
+    if (!pos || !pos.trim()) return defaultJabatan;
+    const p = pos.trim();
+    if (p.toLowerCase().includes(defaultJabatan.toLowerCase())) return p;
+    return `${defaultJabatan} ${p}`;
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
+
+    const fullRole = formatFullRole(role, "Mundzir");
 
     try {
       if (editingData) {
         if (!editingData.personId) {
           throw new Error("ID orang tidak ditemukan pada data ini.");
         }
-        await updatePengurus({ personId: editingData.personId, name, phone });
+        await updatePengurus({ personId: editingData.personId, name, phone, roleName: fullRole });
         toast("Data Mundzir berhasil diperbarui!", "success", "Sukses");
       } else {
-        await createPengurus({ name, phone, roleName: role });
+        await createPengurus({ name, phone, roleName: fullRole });
+        await addPosisiToJabatan("Mundzir", role, "MADRASAH");
         toast("Mundzir baru berhasil didaftarkan!", "success", "Sukses");
       }
       setShowModal(false);
@@ -107,7 +117,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
 
   const columns: ColumnDef<Pengurus, unknown>[] = [
     { accessorKey: "name", header: "Nama Mundzir", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
-    { accessorKey: "role", header: "Jabatan Eksekutif", cell: info => <span className="text-sm font-medium">{info.getValue() as string}</span> },
+    { accessorKey: "role", header: "Jabatan Eksekutif", cell: info => <span className="text-sm font-medium font-bold text-blue-600 dark:text-blue-400">{info.getValue() as string}</span> },
     { accessorKey: "phone", header: "No. Telepon", cell: info => <span className="font-mono text-xs">{info.getValue() as string}</span> },
     {
       accessorKey: "status", header: "Status", cell: info => (
@@ -140,7 +150,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
           </p>
         </div>
         {!isReadOnly && (
-          <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95">
+          <button onClick={handleOpenAdd} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all z-10">
             <Plus className="w-4 h-4" /> Tambah Mundzir
           </button>
         )}
@@ -167,12 +177,13 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
               const nameVal = r["Nama Lengkap Mundzir"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
               const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mundzir";
+              const fullRole = formatFullRole(roleVal, "Mundzir");
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createPengurus({
                   name: nameVal,
                   phone: phoneVal,
-                  roleName: roleVal,
+                  roleName: fullRole,
                   gender: "L",
                 });
                 await addPosisiToJabatan("Mundzir", roleVal, "MADRASAH");

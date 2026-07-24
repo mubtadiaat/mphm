@@ -88,20 +88,30 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
     }
   };
 
+  const formatFullRole = (pos: string, defaultJabatan: string) => {
+    if (!pos || !pos.trim()) return defaultJabatan;
+    const p = pos.trim();
+    if (p.toLowerCase().includes("pengurus") || p.toLowerCase().includes("harian") || p.toLowerCase().includes("pleno") || p.toLowerCase().includes("penasihat")) return p;
+    return `${defaultJabatan} ${p}`;
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return toast("Nama Lengkap wajib diisi", "warning", "Peringatan");
     if (!phone.trim()) return toast("Nomor WhatsApp Aktif wajib diisi untuk penerbitan & pengiriman akun", "warning", "Peringatan");
-    
+
+    const fullRole = formatFullRole(role, "Pengurus");
+
     try {
       if (editingData) {
         if (!editingData.personId) {
           throw new Error("ID orang tidak ditemukan pada data ini.");
         }
-        await updatePengurus({ personId: editingData.personId, name, phone });
+        await updatePengurus({ personId: editingData.personId, name, phone, roleName: fullRole });
         toast("Data Pengurus berhasil diperbarui!", "success", "Sukses");
       } else {
-        await createPengurus({ name, phone, roleName: role });
+        await createPengurus({ name, phone, roleName: fullRole });
+        await addPosisiToJabatan("Pengurus Harian", role, "PONDOK");
         toast("Pengurus baru berhasil didaftarkan!", "success", "Sukses");
       }
       setShowModal(false);

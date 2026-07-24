@@ -88,6 +88,15 @@ export async function PUT(
         },
       });
 
+      // 1b. Update OrganizationMembership if roleName/role provided
+      const targetRoleName = body.roleName || body.role;
+      if (targetRoleName) {
+        await tx.organizationMembership.updateMany({
+          where: { personId: targetPersonId, deletedAt: null },
+          data: { role: targetRoleName },
+        });
+      }
+
       // 2. Update StudentProfile if exists
       if (existingStudent) {
         await tx.studentProfile.update({
