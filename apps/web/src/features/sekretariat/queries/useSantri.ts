@@ -68,7 +68,7 @@ export function useSantri(
     mutationFn: async (newSantri: Omit<Santri, "id">) => {
       const res = await apiRequest<{ data: Santri }>("/api/admin/people", {
         method: "POST",
-        body: JSON.stringify(newSantri),
+        body: JSON.stringify({ ...newSantri, role: "student" }),
       });
       return res.data;
     },

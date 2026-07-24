@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Download, Upload, FileSpreadsheet, FileText, ChevronDown, Check, AlertCircle } from "lucide-react";
+import { Download, Upload, FileSpreadsheet, FileText, ChevronDown, Check, AlertCircle, Loader2 } from "lucide-react";
 
 
 function resolveValue(item: any, h: string): string {
@@ -93,7 +93,7 @@ function resolveValue(item: any, h: string): string {
 interface ImportExportToolbarProps {
   headers: string[]; // e.g. ["Nama Lengkap", "NIK", "Nomor Stambuk", "Kelas", "Alamat"]
   data: Record<string, string | number | boolean | null | undefined>[]; // current data to export
-  onImportSuccess?: (importedData: Record<string, string>[]) => void;
+  onImportSuccess?: (importedData: Record<string, string>[]) => void | Promise<void>;
   title?: string;
   disableImport?: boolean;
   disableExport?: boolean;
@@ -111,6 +111,8 @@ export function ImportExportToolbar({
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 1. Download Template Excel (Header locked, comments added)
@@ -405,14 +407,32 @@ export function ImportExportToolbar({
         }
       });
 
-      if (onImportSuccess) {
-        onImportSuccess(formattedData);
+      if (formattedData.length === 0) {
+        setImportError("File Excel tidak memiliki data. Pastikan Anda mengisi data di bawah baris header.");
+        return;
       }
-      setImportSuccess(true);
-      setTimeout(() => setImportSuccess(false), 3000);
+
+      if (onImportSuccess) {
+        setIsImporting(true);
+        setImportProgress(`Mengimpor ${formattedData.length} baris data...`);
+        try {
+          await onImportSuccess(formattedData);
+          setImportSuccess(true);
+          setImportProgress("");
+          setTimeout(() => setImportSuccess(false), 5000);
+        } catch (callbackErr: any) {
+          console.error("Import callback error:", callbackErr);
+          setImportError(`Gagal menyimpan data ke server: ${callbackErr?.message || "Unknown error"}`);
+        } finally {
+          setIsImporting(false);
+        }
+      } else {
+        setImportSuccess(true);
+        setTimeout(() => setImportSuccess(false), 3000);
+      }
     } catch (err) {
       console.error("Excel import failed:", err);
-      setImportError("Gagal membaca file Excel. Pastikan format valid.");
+      setImportError("Gagal membaca file Excel. Pastikan format file .xlsx valid dan sesuai template.");
     }
 
     setShowImportDropdown(false);
@@ -493,11 +513,16 @@ export function ImportExportToolbar({
           <div className="relative">
             <button
               onClick={() => { setShowImportDropdown(!showImportDropdown); setShowExportDropdown(false); }}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-300 rounded-xl text-sm font-semibold transition-all duration-200 shadow-xs"
+              disabled={isImporting}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-300 rounded-xl text-sm font-semibold transition-all duration-200 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Upload className="w-4 h-4 text-blue-500" />
-              <span>Import</span>
-              <ChevronDown className="w-3.5 h-3.5" />
+              {isImporting ? (
+                <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4 text-blue-500" />
+              )}
+              <span>{isImporting ? "Mengimpor..." : "Import"}</span>
+              {!isImporting && <ChevronDown className="w-3.5 h-3.5" />}
             </button>
 
             {showImportDropdown && (
@@ -561,7 +586,13 @@ export function ImportExportToolbar({
         )}
       </div>
 
-      {/* Success/Error messages */}
+      {/* Loading/Progress indicator */}
+      {isImporting && importProgress && (
+        <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium bg-blue-50 dark:bg-blue-950/20 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-900/30">
+          <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" />
+          <span>{importProgress}</span>
+        </div>
+      )}
       {importError && (
         <div className="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 mt-1 font-medium bg-rose-50 dark:bg-rose-950/20 px-3 py-1.5 rounded-lg border border-rose-100 dark:border-rose-900/30">
           <AlertCircle className="w-3.5 h-3.5 shrink-0" />

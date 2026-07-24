@@ -33,6 +33,7 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
           fullName: data.name,
           phoneNumber: data.phone || null,
           gender: data.gender || "L",
+          role: "teacher",
         }),
       });
       const personId = personRes.data?.person?.id || (personRes.data as any)?.id;

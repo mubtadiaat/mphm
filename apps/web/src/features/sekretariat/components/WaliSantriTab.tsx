@@ -125,8 +125,7 @@ export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
               const kkVal = r["Nomor Kartu Keluarga (KK)"] || r["familyCardNumber"] || "";
               const nikVal = r["NIK Wali (16 Digit)"] || r["nik"] || "";
               try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                await fetch(`${apiUrl}/api/admin/people`, {
+                const res = await fetch("/api/admin/people", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -134,11 +133,16 @@ export function WaliSantriTab({ onViewDetail }: SiswaTabProps) {
                     nik: nikVal || null,
                     phoneNumber: phoneVal || null,
                     gender: "L",
+                    role: "guardian",
                     guardianName: nameVal,
                     guardianPhone: phoneVal,
-                    familyCardNumber: kkVal || `KK-${Date.now()}`,
+                    familyCardNumber: kkVal || null,
                   }),
                 });
+                if (!res.ok) {
+                  const errData = await res.json().catch(() => ({}));
+                  throw new Error(errData.message || `HTTP ${res.status}`);
+                }
                 count++;
               } catch (err) {
                 console.error("Import row failed:", err);

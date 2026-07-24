@@ -351,10 +351,11 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 2. Create StudentProfile if role is student/santri OR stambuk/nis/class/etc is specified
+      // 2. Create StudentProfile if role is explicitly student/santri OR stambuk/nis/class is specified
       let studentProfile = null;
-      const isStudentRole = role === "student" || role === "santri" || !role;
-      if (isStudentRole || stambuk || nis || className || classId) {
+      const isStudentRole = role === "student" || role === "santri";
+      const hasStudentData = !!(stambuk || nis || className || classId);
+      if (isStudentRole || hasStudentData) {
         studentProfile = await tx.studentProfile.create({
           data: {
             personId: person.id,
