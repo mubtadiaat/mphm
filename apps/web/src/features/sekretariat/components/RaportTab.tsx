@@ -26,7 +26,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
   const isSekretariat = user?.role === "sek.pondok" || user?.role === "sek.madrasah" || user?.role === "ADMIN" || user?.role === "DEVELOPER" || user?.role === "Pimpinan";
 
   const [selectedSemester, setSelectedSemester] = useState<1 | 2>(1);
-  
+
   const { data: classes = [] } = useClasses(selectedYearId);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
 
@@ -43,7 +43,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
 
   const displayedStudents = useMemo(() => {
     if (!matrixKwartal?.students) return [];
-    
+
     return matrixKwartal.students.map(studentKwartal => {
       const studentUjian = matrixUjian?.students?.find(s => s.id === studentKwartal.id);
       return {
@@ -62,16 +62,16 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
   }, [matrixKwartal]);
 
   const [showPreview, setShowPreview] = useState(false);
-  const [previewStudent, setPreviewStudent] = useState<StudentScore | null>(null); 
+  const [previewStudent, setPreviewStudent] = useState<StudentScore | null>(null);
 
-  const [raportFormula, setRaportFormula] = useState<{type: string; value: string}[] | null>(null);
+  const [raportFormula, setRaportFormula] = useState<{ type: string; value: string }[] | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("raport_formula");
       if (saved) {
         setTimeout(() => {
-          setRaportFormula(JSON.parse(saved) as {type: string; value: string}[]);
+          setRaportFormula(JSON.parse(saved) as { type: string; value: string }[]);
         }, 0);
       }
     }
@@ -86,7 +86,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
     if (!raportFormula || raportFormula.length === 0) {
       return ((kwartal + ujian) / 2).toFixed(2);
     }
-    
+
     try {
       const formulaStr = raportFormula.map(chip => {
         if (chip.type === "variable") {
@@ -97,7 +97,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
         }
         return chip.value;
       }).join(" ");
-      
+
       const result = new Function(`return ${formulaStr}`)();
       return Number(result).toFixed(2);
     } catch (e) {
@@ -107,13 +107,13 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
   };
 
   const columns: ColumnDef<StudentScore, unknown>[] = [
-    { 
-      accessorKey: "name", 
-      header: "Nama Santri", 
+    {
+      accessorKey: "name",
+      header: "Nama Santri",
       cell: info => (
-        <IdentityCell 
-          name={info.getValue() as string} 
-          subInfo={`Stambuk: ${info.row.original.stambuk}`} 
+        <IdentityCell
+          name={info.getValue() as string}
+          subInfo={`Stambuk: ${info.row.original.stambuk}`}
           stambuk={info.row.original?.stambuk}
           avatarUrl={info.row.original?.avatarUrl}
         />
@@ -121,16 +121,15 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
     },
     { accessorKey: "class", header: "Kelas", cell: info => <span className="font-semibold">{info.getValue() as string}</span> },
     {
-      id: "actions", 
+      id: "actions",
       header: isSekretariat ? "Cetak Dokumen" : "Pratinjau Dokumen",
       cell: info => (
-        <button 
+        <button
           onClick={(e) => { e.stopPropagation(); handleCetak(info.row.original); }}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
-            isSekretariat 
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${isSekretariat
               ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
               : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-300"
-          }`}
+            }`}
         >
           {isSekretariat ? <Printer className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           <span>{isSekretariat ? "Cetak Raport" : "Lihat Raport"}</span>
@@ -193,15 +192,15 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowPreview(false)} />
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="w-full max-w-3xl bg-zinc-50 dark:bg-zinc-900 rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden max-h-[90vh]">
-              
+
               <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-zinc-950">
                 <div className="flex items-center gap-3">
                   <Printer className="w-5 h-5 text-indigo-600" />
                   <h3 className="font-bold text-lg">{isSekretariat ? "Print Preview Raport" : "Pratinjau Raport Santri"}</h3>
                 </div>
-                <button onClick={() => setShowPreview(false)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-xl"><X className="w-5 h-5"/></button>
+                <button onClick={() => setShowPreview(false)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1.5 rounded-xl"><X className="w-5 h-5" /></button>
               </div>
-              
+
               <div className="flex-1 overflow-y-auto p-8 flex justify-center bg-zinc-200/50 dark:bg-zinc-950/50">
                 {/* Kertas A4 Simulation */}
                 <div className="bg-white text-black p-10 w-full max-w-[210mm] min-h-[297mm] shadow-md border border-zinc-300">
@@ -210,7 +209,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
                     <p className="text-sm">Laporan Hasil Belajar Santri (Raport)</p>
                     <p className="text-sm font-semibold mt-1">Semester {selectedSemester}</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 text-sm mb-8 font-semibold">
                     <div>
                       <p>Nama: {previewStudent.name}</p>
@@ -255,7 +254,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
                       <p className="font-bold underline">_________________</p>
                     </div>
                     <div>
-                      <p>Mundzir ,</p>
+                      <p>Mundzir Madrasah,</p>
                       <br /><br /><br />
                       <p className="font-bold underline">_________________</p>
                     </div>
