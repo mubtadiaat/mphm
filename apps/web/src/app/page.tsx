@@ -388,7 +388,9 @@ export default function Page() {
                       </svg>
                     )}
                     <span>Masuk dengan Gmail</span>
-                           {/* Pilihan Portal Login Spesiﬁk */}
+                  </button>
+
+                  {/* Pilihan Portal Login Spesifik */}
                   <div className="pt-4 space-y-2 border-t border-zinc-800/80">
                     <span className="block text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider text-center">
                       Pilih Portal Spesifik Aplikasi
@@ -497,9 +499,8 @@ export default function Page() {
                           👨‍👩‍👧 Wali Santri
                         </button>
                       </div>
-                  )}
                     </div>
-                  </div>
+                  )}
 
                   {/* WhatsApp Bantuan Login */}
                   <div className="pt-4 border-t border-zinc-800/80 text-center">
