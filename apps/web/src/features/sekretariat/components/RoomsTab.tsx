@@ -249,7 +249,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
             for (const r of rows) {
               const nameVal = r["Nama Kamar Asrama"] || r["name"] || "";
               if (!nameVal.trim()) continue;
-              const buildingVal = r["Nama Gedung Blok"] || r["buildingName"] || "Gedung Utama";
+              const buildingVal = r["Nama Gedung Blok"] || r["buildingName"] || "";
               const capacityVal = parseInt(r["Kapasitas Kamar"] || r["capacity"] || "20") || 20;
               try {
                 await createRoom({
