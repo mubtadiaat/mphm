@@ -64,7 +64,9 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
   const handleOpenEdit = (item: Guru) => {
     setEditingData(item);
-    setName(item.name); setPhone(item.phone || "");
+    setName(item.name);
+    setPhone(item.phone || "");
+    setRole(item.role || "");
     setShowModal(true);
   };
 
@@ -87,29 +89,49 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     }
   };
 
+  const formatFullRole = (pos: string, defaultJabatan: string) => {
+    if (!pos || !pos.trim()) return defaultJabatan;
+    let p = pos.trim();
+    if (p.toLowerCase().includes(defaultJabatan.toLowerCase())) return p;
+    return `${defaultJabatan} ${p}`;
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
-    
+    if (!name.trim()) return toast("Lengkapi nama", "warning", "Peringatan");
+    const fullRole = formatFullRole(role, "Mustahiq");
+
     try {
       if (editingData) {
-        if (!editingData.personId) throw new Error("ID person tidak ada");
-        await updateGuru({ personId: editingData.personId, name, phone });
-        toast("Data Mustahiq diperbarui", "success", "Sukses");
+        if (!editingData.personId) throw new Error("ID person tidak ditemukan pada data ini.");
+        await updateGuru({
+          personId: editingData.personId,
+          name,
+          phone,
+          roleName: fullRole,
+        });
+        toast("Data Mustahiq berhasil diperbarui!", "success", "Sukses");
       } else {
-        await createGuru({ name, phone, gender: "L" });
-        toast("Mustahiq berhasil ditambahkan", "success", "Sukses");
+        await createGuru({
+          name,
+          phone,
+          roleName: fullRole,
+          gender: "L",
+        });
+        await addPosisiToJabatan("Mustahiq", role || "Mustahiq", "MADRASAH");
+        toast("Mustahiq baru berhasil didaftarkan!", "success", "Sukses");
       }
       setShowModal(false);
       resetForm();
-    } catch (_err) {
-      toast("Gagal menyimpan data", "error", "Gagal");
+    } catch (err: any) {
+      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
     }
   };
 
   const columns: ColumnDef<Guru, unknown>[] = [
+    { accessorKey: "name", header: "Nama Lengkap Mustahiq", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
+    { accessorKey: "role", header: "Jabatan / Posisi", cell: info => <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{(info.getValue() as string) || "Mustahiq"}</span> },
     { accessorKey: "teacherCode", header: "Kode Guru/Mustahiq", cell: info => <span className="font-mono text-xs font-semibold">{info.getValue() as string || "-"}</span> },
-    { accessorKey: "name", header: "Nama Lengkap", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
     { accessorKey: "phone", header: "No. HP / WA", cell: info => <span className="font-mono text-xs">{info.getValue() as string || "-"}</span> },
     { accessorKey: "status", header: "Status", cell: info => (
       <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -126,7 +148,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     <div className="flex flex-col gap-6 mt-4">
       <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 dark:border-blue-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
             <Users className="w-4 h-4" />
@@ -167,11 +189,13 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
               const nameVal = r["Nama Lengkap Mustahiq"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
               const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mustahiq";
+              const fullRole = formatFullRole(roleVal, "Mustahiq");
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createGuru({
                   name: nameVal,
                   phone: phoneVal,
+                  roleName: fullRole,
                   gender: "L",
                 });
                 await addPosisiToJabatan("Mustahiq", roleVal, "MADRASAH");
@@ -243,6 +267,10 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama</td>
                       <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.name || "-"}</td>
+                    </tr>
+                    <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
+                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Jabatan / Posisi</td>
+                      <td className="py-2.5 text-blue-600 dark:text-blue-400 text-left font-bold">{viewingDetail.role || "Mustahiq"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Kode Guru</td>

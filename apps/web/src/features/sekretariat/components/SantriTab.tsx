@@ -139,7 +139,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     setNewGuardianName("");
     setNewGuardianNik("");
     setNewGuardianPhone("");
-    setNewGuardianRelation("");
+    setNewGuardianRelation("AYAH");
     setNewFamilyCardNumber("");
     setShowFormModal(true);
   };
@@ -460,8 +460,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     <div className="flex flex-col gap-6">
       {/* Header Halaman Dinamis (PONDOK vs MADRASAH) */}
       <div className={`relative overflow-hidden p-6 sm:p-8 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-md text-white ${isPondok
-          ? "bg-linear-to-r from-emerald-700 via-teal-700 to-emerald-900 border border-emerald-500/30"
-          : "bg-linear-to-r from-indigo-700 via-blue-700 to-indigo-900 border border-indigo-500/30"
+        ? "bg-linear-to-r from-emerald-700 via-teal-700 to-emerald-900 border border-emerald-500/30"
+        : "bg-linear-to-r from-indigo-700 via-blue-700 to-indigo-900 border border-indigo-500/30"
         }`}>
         <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -497,8 +497,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         <button
           onClick={() => setActiveSubTab("aktif")}
           className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "aktif"
-              ? isPondok ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-extrabold" : "border-blue-600 text-blue-600 dark:text-blue-400 font-extrabold"
-              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+            ? isPondok ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-extrabold" : "border-blue-600 text-blue-600 dark:text-blue-400 font-extrabold"
+            : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
           {isPondok ? "Santriwati Asrama Aktif" : "Siswi Diniyyah Aktif"}
@@ -507,8 +507,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
           <button
             onClick={() => setActiveSubTab("tanpa_kelas")}
             className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "tanpa_kelas"
-                ? "border-amber-600 text-amber-600 dark:text-amber-400 font-extrabold"
-                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              ? "border-amber-600 text-amber-600 dark:text-amber-400 font-extrabold"
+              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               }`}
           >
             Belum Ada Kelas (Tarik Data Pondok)
@@ -517,8 +517,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         <button
           onClick={() => setActiveSubTab("alumni")}
           className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "alumni"
-              ? isPondok ? "border-teal-600 text-teal-600 dark:text-teal-400 font-extrabold" : "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
-              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+            ? isPondok ? "border-teal-600 text-teal-600 dark:text-teal-400 font-extrabold" : "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
+            : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
           {isPondok ? "Santriwati Khidmah P3HM" : "Siswi Alumni / Lulus"}
@@ -526,8 +526,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         <button
           onClick={() => setActiveSubTab("mutasi")}
           className={`px-4 py-3 text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "mutasi"
-              ? "border-rose-600 text-rose-600 dark:text-rose-400 font-extrabold"
-              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+            ? "border-rose-600 text-rose-600 dark:text-rose-400 font-extrabold"
+            : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
           {isPondok ? "Santriwati Boyong" : "Mutasi & Keluar"}
@@ -611,8 +611,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden relative z-10 max-h-[92vh] flex flex-col"
             >
               <div className={`p-5 border-b flex justify-between items-center ${isPondok
-                  ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50"
-                  : "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900/50"
+                ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/50"
+                : "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900/50"
                 }`}>
                 <div>
                   <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
@@ -790,8 +790,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
 
               {/* HEADER PROFIL SANTRI RESMI */}
               <div className={`p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md ${isPondok
-                  ? "bg-linear-to-r from-emerald-700 via-teal-700 to-emerald-900"
-                  : "bg-linear-to-r from-indigo-700 via-blue-700 to-indigo-900"
+                ? "bg-linear-to-r from-emerald-700 via-teal-700 to-emerald-900"
+                : "bg-linear-to-r from-indigo-700 via-blue-700 to-indigo-900"
                 }`}>
                 <div className="flex items-center gap-4 text-center sm:text-left">
                   <div className="relative shrink-0 w-20 h-20 rounded-full overflow-hidden border-2 border-white/30 shadow-lg bg-white/10 flex items-center justify-center">
@@ -849,8 +849,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                     key={tab.id}
                     onClick={() => setDetailActiveSection(tab.id as any)}
                     className={`px-4 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${detailActiveSection === tab.id
-                        ? isPondok ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-extrabold" : "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
-                        : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                      ? isPondok ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-extrabold" : "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
+                      : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                       }`}
                   >
                     {tab.label}

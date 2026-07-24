@@ -44,12 +44,22 @@ export async function POST(
       });
     }
 
-    // Handle "teacher" role → Create TeacherProfile (no UserAccount needed)
+    // Handle "teacher" role → Create TeacherProfile + OrganizationMembership (no UserAccount needed)
     if (role === "teacher") {
       const profile = await prisma.teacherProfile.create({
         data: {
           personId,
           teacherCode: teacherCode || `UST-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          status: "ACTIVE",
+        },
+      });
+
+      // Also create OrganizationMembership for role title
+      await prisma.organizationMembership.create({
+        data: {
+          personId,
+          role: roleName || "Mustahiq",
+          serviceYear: new Date().getFullYear().toString(),
           status: "ACTIVE",
         },
       });

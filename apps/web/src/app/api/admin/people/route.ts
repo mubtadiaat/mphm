@@ -173,7 +173,14 @@ export async function GET(req: NextRequest) {
           take: limit,
           skip: offset,
           include: {
-            person: true,
+            person: {
+              include: {
+                organizationMemberships: {
+                  where: { deletedAt: null },
+                  take: 1,
+                },
+              },
+            },
           },
         }),
       ]);
@@ -183,6 +190,7 @@ export async function GET(req: NextRequest) {
         personId: tp.personId,
         name: tp.person.fullName,
         teacherCode: tp.teacherCode,
+        role: tp.person.organizationMemberships?.[0]?.role || "Mustahiq",
         nik: tp.person.nik,
         phone: tp.person.phoneNumber,
         status: tp.status,

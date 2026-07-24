@@ -6,6 +6,7 @@ export interface Guru {
   personId?: string;
   name: string;
   teacherCode: string;
+  role?: string;
   phone: string;
   status: "ACTIVE" | "INACTIVE";
   gender: string;
@@ -26,7 +27,7 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { name: string; phone?: string; gender?: "L" | "P" }) => {
+    mutationFn: async (data: { name: string; phone?: string; roleName?: string; gender?: "L" | "P" }) => {
       const personRes = await apiRequest<{ data: { person: { id: string }; id?: string } }>("/api/admin/people", {
         method: "POST",
         body: JSON.stringify({
@@ -34,6 +35,7 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
           phoneNumber: data.phone || null,
           gender: data.gender || "L",
           role: "teacher",
+          roleName: data.roleName || "Mustahiq",
         }),
       });
       const personId = personRes.data?.person?.id || (personRes.data as any)?.id;
@@ -46,6 +48,7 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
         body: JSON.stringify({
           role: "teacher",
           teacherCode,
+          roleName: data.roleName || "Mustahiq",
         }),
       });
       return personRes.data;
@@ -56,12 +59,13 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { personId: string; name: string; phone?: string }) => {
+    mutationFn: async (data: { personId: string; name: string; phone?: string; roleName?: string }) => {
       return await apiRequest(`/api/admin/people/${data.personId}`, {
         method: "PUT",
         body: JSON.stringify({
           fullName: data.name,
           phoneNumber: data.phone || null,
+          ...(data.roleName ? { roleName: data.roleName } : {}),
         }),
       });
     },
