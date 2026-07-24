@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Trash2, KeyRound, Search, ChevronLeft, ChevronRight, CheckCircle2, RefreshCw, Phone, MessageSquare, AlertCircle } from "lucide-react";
+import { Users, Trash2, KeyRound, Search, ChevronLeft, ChevronRight, CheckCircle2, RefreshCw, Phone, MessageSquare, AlertCircle, Edit2, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useUsers, UserAccount } from "../queries/useUsers";
 import { useToast } from "@/components/shared/ToastContext";
 
@@ -51,7 +52,7 @@ export function UsersManagementTab() {
   ];
 
   // Users from API
-  const { data: users = [], isLoading, createUser, isCreating, deleteUser, isDeleting, resetPassword, isResetting } = useUsers(searchQuery || undefined);
+  const { data: users = [], isLoading, createUser, isCreating, updateUser, isUpdating, deleteUser, isDeleting, resetPassword, isResetting } = useUsers(searchQuery || undefined);
 
   // People without accounts (for Generate tab)
   const [peopleWithoutAccounts, setPeopleWithoutAccounts] = useState<PersonWithoutAccount[]>([]);
@@ -62,9 +63,47 @@ export function UsersManagementTab() {
 
   const { toast, confirm } = useToast();
 
+  // Edit user state
+  const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
+  const [editUsername, setEditUsername] = useState("");
+  const [editFullName, setEditFullName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editRole, setEditRole] = useState("");
+  const [editStatus, setEditStatus] = useState("ACTIVE");
+
+  const handleOpenEditUser = (u: UserAccount) => {
+    setEditingUser(u);
+    setEditUsername(u.username || "");
+    setEditFullName(u.personName || u.fullName || u.username || "");
+    setEditPhone(u.personPhone || "");
+    setEditRole(u.role || "Mustahiq");
+    setEditStatus(u.status || (u.isActive ? "ACTIVE" : "INACTIVE"));
+  };
+
   // Reset password modal
   const [resetModal, setResetModal] = useState<{ userId: string; username: string; personPhone?: string } | null>(null);
   const [newPassword, setNewPassword] = useState("");
+
+  const handleSaveEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    try {
+      await updateUser({
+        id: editingUser.id,
+        data: {
+          username: editUsername,
+          fullName: editFullName,
+          phone: editPhone,
+          role: editRole,
+          status: editStatus,
+        },
+      });
+      toast(`Akun ${editUsername} berhasil diperbarui!`, "success", "Berhasil");
+      setEditingUser(null);
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : "Gagal memperbarui data akun.", "error", "Gagal");
+    }
+  };
 
   // Fetch people without accounts when Generate tab is opened
   useEffect(() => {
@@ -359,6 +398,15 @@ export function UsersManagementTab() {
                               <MessageSquare className="w-4 h-4" />
                             </button>
 
+                            {/* Tombol Edit Akun */}
+                            <button
+                              onClick={() => handleOpenEditUser(user)}
+                              className="p-1.5 text-zinc-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition-colors cursor-pointer"
+                              title="Edit Data Akun"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+
                             {/* Tombol Reset Password */}
                             <button
                               onClick={() => setResetModal({ userId: user.id, username: user.username, personPhone: user.personPhone })}
@@ -590,6 +638,110 @@ export function UsersManagementTab() {
           </div>
         )}
       </div>
+
+      {/* Edit User Modal */}
+      <AnimatePresence>
+        {editingUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-950/80 backdrop-blur-md" onClick={() => setEditingUser(null)} />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl z-10 overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                    <Edit2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-base text-zinc-900 dark:text-white">Edit Data Akun Pengguna</h3>
+                    <p className="text-xs text-zinc-500 font-medium">Ubah kredensial & rincian profil person</p>
+                  </div>
+                </div>
+                <button onClick={() => setEditingUser(null)} className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-xl transition-colors cursor-pointer"><X className="w-5 h-5"/></button>
+              </div>
+
+              <form onSubmit={handleSaveEditUser} className="p-6 space-y-4 text-sm font-medium">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Username *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                    placeholder="Contoh: sek_madrasah"
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 dark:text-zinc-100 font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Person Penanggung Jawab *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editFullName}
+                    onChange={(e) => setEditFullName(e.target.value)}
+                    placeholder="Nama lengkap person..."
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 dark:text-zinc-100 font-semibold"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nomor WhatsApp</label>
+                    <input
+                      type="text"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                      placeholder="081234567890"
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 dark:text-zinc-100 font-semibold font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Role Akses</label>
+                    <select
+                      value={editRole}
+                      onChange={(e) => setEditRole(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 dark:text-zinc-100 font-bold"
+                    >
+                      {AVAILABLE_ROLES.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Status Keaktifan Akun</label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 dark:text-zinc-100 font-bold"
+                  >
+                    <option value="ACTIVE">AKTIF (Normal Access)</option>
+                    <option value="INACTIVE">NON-AKTIF / DORMAN (Blokir Login)</option>
+                  </select>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                  <button
+                    type="button"
+                    onClick={() => setEditingUser(null)}
+                    className="px-5 py-2.5 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUpdating}
+                    className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-amber-600/30 transition-all cursor-pointer"
+                  >
+                    {isUpdating ? "Simpan Perubahan..." : "Simpan Perubahan Akun"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Reset Password Modal */}
       {resetModal && (

@@ -27,7 +27,7 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
 
   const createMutation = useMutation({
     mutationFn: async (data: { name: string; phone?: string; gender?: "L" | "P" }) => {
-      const personRes = await apiRequest<{ data: { id: string } }>("/api/admin/people", {
+      const personRes = await apiRequest<{ data: { person: { id: string }; id?: string } }>("/api/admin/people", {
         method: "POST",
         body: JSON.stringify({
           fullName: data.name,
@@ -35,7 +35,10 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
           gender: data.gender || "L",
         }),
       });
-      const personId = personRes.data.id;
+      const personId = personRes.data?.person?.id || (personRes.data as any)?.id;
+      if (!personId) {
+        throw new Error("Gagal mengambil ID person yang baru dibuat.");
+      }
       const teacherCode = `UST-${Math.floor(100 + Math.random() * 900)}`;
       await apiRequest(`/api/admin/people/${personId}/assign-role`, {
         method: "POST",

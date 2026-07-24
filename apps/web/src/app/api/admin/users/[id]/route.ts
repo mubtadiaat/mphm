@@ -8,7 +8,24 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { username, email, role, status } = body;
+    const { username, email, role, status, fullName, phone, password } = body;
+
+    // Check if username is changing and unique
+    if (username) {
+      const existing = await prisma.userAccount.findFirst({
+        where: {
+          username,
+          id: { not: id },
+          deletedAt: null,
+        },
+      });
+      if (existing) {
+        return NextResponse.json(
+          { status: "Error", message: "Username sudah digunakan oleh akun lain." },
+          { status: 400 }
+        );
+      }
+    }
 
     const updated = await prisma.userAccount.update({
       where: { id },
@@ -17,6 +34,13 @@ export async function PUT(
         ...(email !== undefined ? { email } : {}),
         ...(role ? { role } : {}),
         ...(status ? { status } : {}),
+        ...(password ? { passwordHash: password } : {}),
+        person: {
+          update: {
+            ...(fullName ? { fullName } : {}),
+            ...(phone !== undefined ? { phoneNumber: phone } : {}),
+          },
+        },
       },
       include: { person: true },
     });
