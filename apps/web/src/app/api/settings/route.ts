@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSessionFromCookies } from "@/lib/jwt";
+import { createAuditLog } from "@/lib/auditLog";
 
 /**
  * Serializes a value for DB storage.
@@ -87,6 +89,14 @@ export async function POST(req: NextRequest) {
     }
     await upsertSettings(body);
 
+    const session = await getSessionFromCookies();
+    await createAuditLog({
+      userId: session?.username || "sek_madrasah",
+      action: "UPDATE",
+      entity: "SYSTEM_SETTINGS",
+      afterState: body,
+    });
+
     return NextResponse.json({
       status: "Success",
       message: "Pengaturan sistem berhasil disimpan.",
@@ -110,6 +120,14 @@ export async function PUT(req: NextRequest) {
       );
     }
     await upsertSettings(body);
+
+    const session = await getSessionFromCookies();
+    await createAuditLog({
+      userId: session?.username || "sek_madrasah",
+      action: "UPDATE",
+      entity: "SYSTEM_SETTINGS",
+      afterState: body,
+    });
 
     return NextResponse.json({
       status: "Success",

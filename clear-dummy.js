@@ -44,14 +44,14 @@ async function cleanData() {
   // 2. Remove dummy user accounts except core sekretariat & admin
   await sql`
     DELETE FROM user_accounts 
-    WHERE username NOT IN ('sek_pondok', 'sek_madrasah', 'admin_mphm');
+    WHERE username NOT IN ('mphm2026', 'p3hm20026', 'sek_pondok', 'sek_madrasah', 'admin_mphm');
   `;
 
   // 3. Remove non-admin people
   await sql`
     DELETE FROM people 
     WHERE id NOT IN (
-      SELECT person_id FROM user_accounts WHERE username IN ('sek_pondok', 'sek_madrasah', 'admin_mphm')
+      SELECT person_id FROM user_accounts WHERE username IN ('mphm2026', 'p3hm20026', 'sek_pondok', 'sek_madrasah', 'admin_mphm')
     );
   `;
 
