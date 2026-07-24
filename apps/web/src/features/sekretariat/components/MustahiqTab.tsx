@@ -9,7 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { useGuru, Guru } from "../queries/useGuru";
-import { addPosisiToJabatan } from "@/config/jobPositions.config";
+import { addPosisiToJabatan, getPositionsForJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -29,6 +29,11 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("");
+
+  const [mustahiqTitles, setMustahiqTitles] = useState<string[]>(() => {
+    return getPositionsForJabatan("Mustahiq", "MADRASAH");
+  });
 
   useEffect(() => {
     if (remoteData) {
@@ -36,9 +41,21 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
       setTotalCount(remoteData.total);
     }
   }, [remoteData.data, remoteData.total]);
-  
+
+  useEffect(() => {
+    const handleJobTitlesChanged = () => {
+      setMustahiqTitles(getPositionsForJabatan("Mustahiq", "MADRASAH"));
+    };
+    window.addEventListener("structural_job_positions_changed", handleJobTitlesChanged);
+    window.addEventListener("job_titles_changed", handleJobTitlesChanged);
+    return () => {
+      window.removeEventListener("structural_job_positions_changed", handleJobTitlesChanged);
+      window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
+    };
+  }, []);
+
   const resetForm = () => {
-    setName(""); setPhone("");
+    setName(""); setPhone(""); setRole("");
   };
 
   const handleOpenAdd = () => {
@@ -181,12 +198,21 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
               </div>
               <form onSubmit={handleSave} className="p-4 space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Nama Mustahiq</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Mustahiq</label>
                   <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">No. HP / WhatsApp</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WhatsApp</label>
                   <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Jabatan / Posisi</label>
+                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                    <option value="">Pilih Posisi Mustahiq</option>
+                    {mustahiqTitles.map((t, idx) => (
+                      <option key={idx} value={t}>{t}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold">Batal</button>

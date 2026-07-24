@@ -60,13 +60,14 @@ export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { personId: string; name: string; phone?: string; roleName?: string }) => {
+    mutationFn: async (data: { personId: string; name: string; phone?: string; roleName?: string; supervisedLevel?: string | null }) => {
       return await apiRequest(`/api/admin/people/${data.personId}`, {
         method: "PUT",
         body: JSON.stringify({
           fullName: data.name,
           phoneNumber: data.phone || null,
           ...(data.roleName ? { roleName: data.roleName } : {}),
+          ...(data.supervisedLevel !== undefined ? { supervisedLevel: data.supervisedLevel } : {}),
         }),
       });
     },

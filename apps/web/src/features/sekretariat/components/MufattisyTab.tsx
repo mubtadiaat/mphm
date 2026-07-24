@@ -8,9 +8,8 @@ import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
-
 import { usePengurus, Pengurus } from "../queries/usePengurus";
-import { addPosisiToJabatan } from "@/config/jobPositions.config";
+import { addPosisiToJabatan, getPositionsForJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -23,14 +22,19 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
 
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery || "Mufattisy", pageIndex, pageSize);
   const { toast, confirm } = useToast();
-  
+
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Pengurus | null>(null);
-  
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [supervisedLevel, setSupervisedLevel] = useState("Tsanawiyyah");
+  const [role, setRole] = useState("");
+  const [supervisedLevel, setSupervisedLevel] = useState("");
+
+  const [mufattisyTitles, setMufattisyTitles] = useState<string[]>(() => {
+    return getPositionsForJabatan("Mufattisy", "MADRASAH");
+  });
 
   useEffect(() => {
     if (remoteData) {
@@ -39,8 +43,20 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
     }
   }, [remoteData.data, remoteData.total]);
 
+  useEffect(() => {
+    const handleJobTitlesChanged = () => {
+      setMufattisyTitles(getPositionsForJabatan("Mufattisy", "MADRASAH"));
+    };
+    window.addEventListener("structural_job_positions_changed", handleJobTitlesChanged);
+    window.addEventListener("job_titles_changed", handleJobTitlesChanged);
+    return () => {
+      window.removeEventListener("structural_job_positions_changed", handleJobTitlesChanged);
+      window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
+    };
+  }, []);
+
   const resetForm = () => {
-    setName(""); setPhone(""); setSupervisedLevel("Tsanawiyyah");
+    setName(""); setPhone(""); setRole(""); setSupervisedLevel("");
   };
 
   const handleOpenAdd = () => {
@@ -49,7 +65,10 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
 
   const handleOpenEdit = (item: Pengurus) => {
     setEditingData(item);
-    setName(item.name); setPhone(item.phone || ""); setSupervisedLevel(item.supervisedLevel || "Tsanawiyyah");
+    setName(item.name);
+    setPhone(item.phone || "");
+    setRole(item.role || "");
+    setSupervisedLevel(item.supervisedLevel || "");
     setShowModal(true);
   };
 
@@ -72,25 +91,46 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
     }
   };
 
+  const formatFullRole = (pos: string, defaultJabatan: string) => {
+    if (!pos || !pos.trim()) return defaultJabatan;
+    let p = pos.trim().replace(/mufatish/gi, "Mufattisy").replace(/mufatisy/gi, "Mufattisy");
+    if (p.toLowerCase().includes(defaultJabatan.toLowerCase())) return p;
+    return `${defaultJabatan} ${p}`;
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast("Lengkapi nama", "warning", "Peringatan");
-    
+    if (!name.trim()) return toast("Lengkapi nama", "warning", "Peringatan");
+    const fullRole = formatFullRole(role, "Mufattisy");
+
     try {
       if (editingData) {
         if (!editingData.personId) {
           throw new Error("ID orang tidak ditemukan pada data ini.");
         }
-        await updatePengurus({ personId: editingData.personId, name, phone });
-        toast("Data Mufattisy diperbarui", "success", "Sukses");
+        await updatePengurus({
+          personId: editingData.personId,
+          name,
+          phone,
+          roleName: fullRole,
+          supervisedLevel,
+        });
+        toast("Data Mufattisy berhasil diperbarui!", "success", "Sukses");
       } else {
-        await createPengurus({ name, phone, roleName: "Mufattisy", supervisedLevel, gender: "L" });
-        toast("Mufattisy berhasil ditambahkan", "success", "Sukses");
+        await createPengurus({
+          name,
+          phone,
+          roleName: fullRole,
+          supervisedLevel,
+          gender: "L",
+        });
+        await addPosisiToJabatan("Mufattisy", role || "Mufattisy", "MADRASAH");
+        toast("Mufattisy baru berhasil didaftarkan!", "success", "Sukses");
       }
       setShowModal(false);
       resetForm();
-    } catch (_err) {
-      toast("Gagal menyimpan data", "error", "Gagal");
+    } catch (err: any) {
+      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
     }
   };
 
@@ -114,7 +154,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
     <div className="flex flex-col gap-6 mt-4">
       <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 dark:border-blue-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="w-4 h-4" />
@@ -148,20 +188,14 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
         tableName="mufattisy"
         importExportProps={{
           title: "Data Mufattisy dan Dewan Pengawas",
-          headers: ["Nama Lengkap Mufattisy", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          headers: ["Nama Lengkap Mufattisy", "Jabatan / Posisi", "Jenjang Pengawasan", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: async (rows) => {
             let count = 0;
-            const formatFullRole = (pos: string, defaultJabatan: string) => {
-              if (!pos || !pos.trim()) return defaultJabatan;
-              let p = pos.trim().replace(/mufatish/gi, "Mufattisy").replace(/mufatisy/gi, "Mufattisy");
-              if (p.toLowerCase().includes(defaultJabatan.toLowerCase())) return p;
-              return `${defaultJabatan} ${p}`;
-            };
-
             for (const r of rows) {
               const nameVal = r["Nama Lengkap Mufattisy"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
               const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mufattisy";
+              const supervisedVal = r["Jenjang Pengawasan"] || r["Jenjang"] || r["supervisedLevel"] || "";
               const fullRole = formatFullRole(roleVal, "Mufattisy");
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
@@ -169,6 +203,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
                   name: nameVal,
                   phone: phoneVal,
                   roleName: fullRole,
+                  supervisedLevel: supervisedVal,
                   gender: "L",
                 });
                 await addPosisiToJabatan("Mufattisy", roleVal, "MADRASAH");
@@ -195,24 +230,35 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
               </div>
               <form onSubmit={handleSave} className="p-4 space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Nama Lengkap</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap</label>
                   <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
+
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">No. HP / WhatsApp</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WhatsApp</label>
                   <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
-                {!editingData && (
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold">Jenjang Pengawasan</label>
-                    <select value={supervisedLevel} onChange={e => setSupervisedLevel(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
-                      <option value="I'dadiyyah">I&apos;dadiyyah</option>
-                      <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
-                      <option value="Tsanawiyyah">Tsanawiyyah</option>
-                      <option value="Aliyyah">Aliyyah</option>
-                    </select>
-                  </div>
-                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Jabatan / Posisi</label>
+                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                    <option value="">Pilih Posisi Mufattisy</option>
+                    {mufattisyTitles.map((t, idx) => (
+                      <option key={idx} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Jenjang Pengawasan</label>
+                  <select value={supervisedLevel} onChange={e => setSupervisedLevel(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                    <option value="I'dadiyyah">I&apos;dadiyyah</option>
+                    <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
+                    <option value="Tsanawiyyah">Tsanawiyyah</option>
+                    <option value="Aliyyah">Aliyyah</option>
+                  </select>
+                </div>
+
                 <div className="flex justify-end gap-2 pt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold">Batal</button>
                   <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Simpan</button>

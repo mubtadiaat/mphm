@@ -88,12 +88,16 @@ export async function PUT(
         },
       });
 
-      // 1b. Update OrganizationMembership if roleName/role provided
+      // 1b. Update OrganizationMembership if roleName/role or supervisedLevel provided
       const targetRoleName = body.roleName || body.role;
-      if (targetRoleName) {
+      const targetSupervisedLevel = body.supervisedLevel;
+      if (targetRoleName || targetSupervisedLevel !== undefined) {
         await tx.organizationMembership.updateMany({
           where: { personId: targetPersonId, deletedAt: null },
-          data: { role: targetRoleName },
+          data: {
+            ...(targetRoleName ? { role: targetRoleName } : {}),
+            ...(targetSupervisedLevel !== undefined ? { supervisedLevel: targetSupervisedLevel } : {}),
+          },
         });
       }
 
