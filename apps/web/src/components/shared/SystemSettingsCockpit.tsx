@@ -491,17 +491,21 @@ export function SystemSettingsCockpit() {
     key: K,
     value: RoleUIConfig[K]
   ) => {
-    setRoleConfigs((prev) => ({
-      ...prev,
-      [role]: {
-        ...prev[role],
-        [key]: value
-      }
-    }));
+    setRoleConfigs((prev) => {
+      const baseRoleConfig = prev[role] || DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
+      return {
+        ...prev,
+        [role]: {
+          ...baseRoleConfig,
+          [key]: value
+        }
+      };
+    });
   };
 
   const handleToggleMenuVisibility = (role: RoleTypes, menuHref: string) => {
-    const currentEnabled = roleConfigs[role].enabledMenus;
+    const roleConfig = roleConfigs[role] || DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
+    const currentEnabled = roleConfig.enabledMenus || [];
     let nextEnabled = [];
     if (currentEnabled.includes(menuHref)) {
       nextEnabled = currentEnabled.filter((m) => m !== menuHref);
@@ -517,21 +521,23 @@ export function SystemSettingsCockpit() {
     action: keyof MenuCapabilities,
     value: boolean
   ) => {
-    const currentCaps = roleConfigs[role].capabilities[menuHref] || { ...DEFAULT_CAPABILITIES };
-    const nextCaps = {
+    const roleConfig = roleConfigs[role] || DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
+    const currentCaps = roleConfig.capabilities?.[menuHref] || { ...DEFAULT_CAPABILITIES };
+    const updatedCap = {
       ...currentCaps,
       [action]: value
     };
 
     setRoleConfigs((prev) => {
+      const baseRoleConfig = prev[role] || DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
       const updatedCaps = {
-        ...prev[role].capabilities,
-        [menuHref]: nextCaps
+        ...(baseRoleConfig.capabilities || {}),
+        [menuHref]: updatedCap
       };
       return {
         ...prev,
         [role]: {
-          ...prev[role],
+          ...baseRoleConfig,
           capabilities: updatedCaps
         }
       };
@@ -1444,195 +1450,202 @@ export function SystemSettingsCockpit() {
               </div>
             </div>
           )}
-          {settingsTab === "roles" && (
-            <div className="space-y-6">
-              {/* Role selector tabs */}
-              <div className="flex flex-wrap gap-2 p-1.5 bg-zinc-100 dark:bg-zinc-800/60 rounded-2xl border border-zinc-200 dark:border-zinc-850">
-                {(["sek.pondok", "sek.madrasah", "mustahiq", "keamanan", "wali_santri", "mufattisy", "mundzir"] as const).map((r) => {
-                  const isActive = selectedConfigRole === r;
-                  let label: string = r;
-                  if (r === "sek.pondok") label = "Sekretariat Pondok";
-                  else if (r === "sek.madrasah") label = "Sekretariat Madrasah";
-                  else if (r === "mustahiq") label = "Mustahiq";
-                  else if (r === "keamanan") label = "Keamanan";
-                  else if (r === "wali_santri") label = "Wali Santri";
-                  else if (r === "mufattisy") label = "Mufattisy";
-                  else if (r === "mundzir") label = "Pimpinan/Mundzir";
+          {settingsTab === "roles" && (() => {
+            const currentRoleConfig = roleConfigs[selectedConfigRole] || DEFAULT_ROLE_CONFIGS[selectedConfigRole] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
+            const enabledMenus = currentRoleConfig.enabledMenus || [];
+            const capabilities = currentRoleConfig.capabilities || {};
+            const welcomeBannerText = currentRoleConfig.welcomeBanner || DEFAULT_ROLE_CONFIGS[selectedConfigRole]?.welcomeBanner || "";
 
-                  return (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setSelectedConfigRole(r)}
-                      className={`px-4 py-2 text-xs font-bold rounded-xl transition-all duration-150 cursor-pointer ${
-                        isActive
-                          ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80"
-                          : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
+            return (
+              <div className="space-y-6">
+                {/* Role selector tabs */}
+                <div className="flex flex-wrap gap-2 p-1.5 bg-zinc-100 dark:bg-zinc-800/60 rounded-2xl border border-zinc-200 dark:border-zinc-850">
+                  {(["sek.pondok", "sek.madrasah", "mustahiq", "keamanan", "wali_santri", "mufattisy", "mundzir"] as const).map((r) => {
+                    const isActive = selectedConfigRole === r;
+                    let label: string = r;
+                    if (r === "sek.pondok") label = "Sekretariat Pondok";
+                    else if (r === "sek.madrasah") label = "Sekretariat Madrasah";
+                    else if (r === "mustahiq") label = "Mustahiq";
+                    else if (r === "keamanan") label = "Keamanan";
+                    else if (r === "wali_santri") label = "Wali Santri";
+                    else if (r === "mufattisy") label = "Mufattisy";
+                    else if (r === "mundzir") label = "Pimpinan/Mundzir";
 
-              {/* Configurations Form for the selected role */}
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
-                <div>
-                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
-                    Konfigurasi Peran: <span className="capitalize text-blue-600 dark:text-blue-400">{selectedConfigRole.replace("_", " ")}</span>
-                  </h3>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
-                    Sesuaikan tata letak, warna aksen UI, banner dasbor, dan matriks hak akses tindakan menu secara dinamis.
-                  </p>
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setSelectedConfigRole(r)}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all duration-150 cursor-pointer ${
+                          isActive
+                            ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs border border-zinc-200 dark:border-zinc-700/80"
+                            : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Left Column: Layout & Theme */}
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Welcome Banner Text</label>
-                      <input
-                        type="text"
-                        value={roleConfigs[selectedConfigRole].welcomeBanner}
-                        onChange={(e) => handleUpdateRoleConfig(selectedConfigRole, "welcomeBanner", e.target.value)}
-                        placeholder="Masukkan pesan selamat datang..."
-                        className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200 w-full"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Gaya Navigasi</label>
-                        <select
-                          value={roleConfigs[selectedConfigRole].navigationStyle}
-                          onChange={(e) => handleUpdateRoleConfig(selectedConfigRole, "navigationStyle", e.target.value as "sidebar" | "bottom_nav")}
-                          className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200"
-                        >
-                          <option value="sidebar">Sidebar Utama</option>
-                          <option value="bottom_nav">Bottom Navigasi</option>
-                        </select>
-                      </div>
-
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Grid Dasbor</label>
-                        <select
-                          value={roleConfigs[selectedConfigRole].gridLayout}
-                          onChange={(e) => handleUpdateRoleConfig(selectedConfigRole, "gridLayout", e.target.value as "1-1" | "2-2" | "3-3")}
-                          className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200"
-                        >
-                          <option value="1-1">1 Baris (1-1)</option>
-                          <option value="2-2">2 Kolom (2-2)</option>
-                          <option value="3-3">3 Kolom (3-3)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Accent Color Picker */}
-                    <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Tema Warna Aksen</label>
-                      <div className="flex gap-3 items-center">
-                        {(["blue", "emerald", "rose", "violet", "orange"] as const).map((color) => {
-                          const isSelected = roleConfigs[selectedConfigRole].accentColor === color;
-                          const colorBgs = {
-                            blue: "bg-blue-500",
-                            emerald: "bg-emerald-500",
-                            rose: "bg-rose-500",
-                            violet: "bg-violet-500",
-                            orange: "bg-orange-500"
-                          };
-                          return (
-                            <button
-                              key={color}
-                              type="button"
-                              onClick={() => handleUpdateRoleConfig(selectedConfigRole, "accentColor", color)}
-                              className={`w-7 h-7 rounded-full ${colorBgs[color]} relative transition-all cursor-pointer hover:scale-110 ${
-                                isSelected ? "ring-2 ring-offset-2 ring-zinc-400 dark:ring-offset-zinc-950 scale-105 shadow-sm" : ""
-                              }`}
-                              title={color}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
+                {/* Configurations Form for the selected role */}
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
+                  <div>
+                    <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
+                      Konfigurasi Peran: <span className="capitalize text-blue-600 dark:text-blue-400">{selectedConfigRole.replace("_", " ")}</span>
+                    </h3>
+                    <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
+                      Sesuaikan tata letak, warna aksen UI, banner dasbor, dan matriks hak akses tindakan menu secara dinamis.
+                    </p>
                   </div>
 
-                  {/* Right Column: Menu Visibility Checklist */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Visibilitas Menu Utama</label>
-                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl max-h-[220px] overflow-y-auto space-y-2">
-                      {getRoleMenus(selectedConfigRole).map((menu) => {
-                        const isVisible = roleConfigs[selectedConfigRole].enabledMenus.includes(menu.href);
-                        return (
-                          <label key={menu.href} className="flex items-center gap-3 text-sm text-zinc-700 dark:text-zinc-300 font-semibold cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={isVisible}
-                              onChange={() => handleToggleMenuVisibility(selectedConfigRole, menu.href)}
-                              className="w-4 h-4 text-blue-600 border-zinc-300 rounded focus:ring-blue-500 cursor-pointer"
-                            />
-                            <span>{menu.label}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column: Layout & Theme */}
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Welcome Banner Text</label>
+                        <input
+                          type="text"
+                          value={welcomeBannerText}
+                          onChange={(e) => handleUpdateRoleConfig(selectedConfigRole, "welcomeBanner", e.target.value)}
+                          placeholder="Masukkan pesan selamat datang..."
+                          className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200 w-full"
+                        />
+                      </div>
 
-                {/* Bottom Section: Menu Permissions Grid */}
-                <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Matriks Hak Akses & Tindakan</h4>
-                  <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
-                          <th className="p-3">Nama Menu</th>
-                          <th className="p-3 text-center">Bisa Lihat</th>
-                          <th className="p-3 text-center">Bisa Input/Tambah</th>
-                          <th className="p-3 text-center">Bisa Ubah/Edit</th>
-                          <th className="p-3 text-center">Bisa Hapus</th>
-                          <th className="p-3 text-center">Bisa Ekspor</th>
-                          <th className="p-3 text-center">Bisa Impor</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Gaya Navigasi</label>
+                          <select
+                            value={currentRoleConfig.navigationStyle || "sidebar"}
+                            onChange={(e) => handleUpdateRoleConfig(selectedConfigRole, "navigationStyle", e.target.value as "sidebar" | "bottom_nav")}
+                            className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200"
+                          >
+                            <option value="sidebar">Sidebar Utama</option>
+                            <option value="bottom_nav">Bottom Navigasi</option>
+                          </select>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Grid Dasbor</label>
+                          <select
+                            value={currentRoleConfig.gridLayout || "2-2"}
+                            onChange={(e) => handleUpdateRoleConfig(selectedConfigRole, "gridLayout", e.target.value as "1-1" | "2-2" | "3-3")}
+                            className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200"
+                          >
+                            <option value="1-1">1 Baris (1-1)</option>
+                            <option value="2-2">2 Kolom (2-2)</option>
+                            <option value="3-3">3 Kolom (3-3)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Accent Color Picker */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Tema Warna Aksen</label>
+                        <div className="flex gap-3 items-center">
+                          {(["blue", "emerald", "rose", "violet", "orange"] as const).map((color) => {
+                            const isSelected = (currentRoleConfig.accentColor || "blue") === color;
+                            const colorBgs = {
+                              blue: "bg-blue-500",
+                              emerald: "bg-emerald-500",
+                              rose: "bg-rose-500",
+                              violet: "bg-violet-500",
+                              orange: "bg-orange-500"
+                            };
+                            return (
+                              <button
+                                key={color}
+                                type="button"
+                                onClick={() => handleUpdateRoleConfig(selectedConfigRole, "accentColor", color)}
+                                className={`w-7 h-7 rounded-full ${colorBgs[color]} relative transition-all cursor-pointer hover:scale-110 ${
+                                  isSelected ? "ring-2 ring-offset-2 ring-zinc-400 dark:ring-offset-zinc-950 scale-105 shadow-sm" : ""
+                                }`}
+                                title={color}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Menu Visibility Checklist */}
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Visibilitas Menu Utama</label>
+                      <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-2xl max-h-[220px] overflow-y-auto space-y-2">
                         {getRoleMenus(selectedConfigRole).map((menu) => {
-                          const menuCaps = roleConfigs[selectedConfigRole].capabilities[menu.href] || { ...DEFAULT_CAPABILITIES };
-                          const isMenuVisible = roleConfigs[selectedConfigRole].enabledMenus.includes(menu.href);
-
+                          const isVisible = enabledMenus.includes(menu.href);
                           return (
-                            <tr 
-                              key={menu.href} 
-                              className={`hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20 ${!isMenuVisible ? "opacity-40" : ""}`}
-                            >
-                              <td className="p-3 font-semibold text-zinc-700 dark:text-zinc-300">
-                                {menu.label}
-                                <span className="block text-[10px] text-zinc-400 font-mono mt-0.5">{menu.href}</span>
-                              </td>
-                              {(["view", "input", "edit", "delete", "export", "import"] as const).map((action) => {
-                                const isChecked = !!menuCaps[action];
-                                return (
-                                  <td key={action} className="p-3 text-center">
-                                    <input
-                                      type="checkbox"
-                                      disabled={!isMenuVisible}
-                                      checked={isChecked}
-                                      onChange={(e) => handleUpdateMenuCapability(selectedConfigRole, menu.href, action, e.target.checked)}
-                                      className="w-4 h-4 text-blue-600 border-zinc-300 rounded focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed"
-                                    />
-                                  </td>
-                                );
-                              })}
-                            </tr>
+                            <label key={menu.href} className="flex items-center gap-3 text-sm text-zinc-700 dark:text-zinc-300 font-semibold cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isVisible}
+                                onChange={() => handleToggleMenuVisibility(selectedConfigRole, menu.href)}
+                                className="w-4 h-4 text-blue-600 border-zinc-300 rounded focus:ring-blue-500 cursor-pointer"
+                              />
+                              <span>{menu.label}</span>
+                            </label>
                           );
                         })}
-                      </tbody>
-                    </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Section: Menu Permissions Grid */}
+                  <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Matriks Hak Akses & Tindakan</h4>
+                    <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+                            <th className="p-3">Nama Menu</th>
+                            <th className="p-3 text-center">Bisa Lihat</th>
+                            <th className="p-3 text-center">Bisa Input/Tambah</th>
+                            <th className="p-3 text-center">Bisa Ubah/Edit</th>
+                            <th className="p-3 text-center">Bisa Hapus</th>
+                            <th className="p-3 text-center">Bisa Ekspor</th>
+                            <th className="p-3 text-center">Bisa Impor</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                          {getRoleMenus(selectedConfigRole).map((menu) => {
+                            const menuCaps = capabilities[menu.href] || { ...DEFAULT_CAPABILITIES };
+                            const isMenuVisible = enabledMenus.includes(menu.href);
+
+                            return (
+                              <tr 
+                                key={menu.href} 
+                                className={`hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20 ${!isMenuVisible ? "opacity-40" : ""}`}
+                              >
+                                <td className="p-3 font-semibold text-zinc-700 dark:text-zinc-300">
+                                  {menu.label}
+                                  <span className="block text-[10px] text-zinc-400 font-mono mt-0.5">{menu.href}</span>
+                                </td>
+                                {(["view", "input", "edit", "delete", "export", "import"] as const).map((action) => {
+                                  const isChecked = !!menuCaps[action];
+                                  return (
+                                    <td key={action} className="p-3 text-center">
+                                      <input
+                                        type="checkbox"
+                                        disabled={!isMenuVisible}
+                                        checked={isChecked}
+                                        onChange={(e) => handleUpdateMenuCapability(selectedConfigRole, menu.href, action, e.target.checked)}
+                                        className="w-4 h-4 text-blue-600 border-zinc-300 rounded focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed"
+                                      />
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
           {settingsTab === "job_titles" && (
             <div className="space-y-6">
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
