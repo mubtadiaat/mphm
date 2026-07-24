@@ -497,8 +497,7 @@ export default function Page() {
                           👨‍👩‍👧 Wali Santri
                         </button>
                       </div>
-                    </div>
-                  )}on>
+                  )}
                     </div>
                   </div>
 
