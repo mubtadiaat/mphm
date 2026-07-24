@@ -34,7 +34,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("Mundzir Asrama");
+  const [role, setRole] = useState("");
 
   const [mundzirTitles, setMundzirTitles] = useState<string[]>(() => {
     return getPositionsForJabatan("Mundzir", "MADRASAH");
@@ -60,7 +60,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   }, []);
 
   const resetForm = () => {
-    setName(""); setPhone(""); setRole("Mundzir Asrama");
+    setName(""); setPhone(""); setRole("");
   };
 
   const handleOpenAdd = () => {

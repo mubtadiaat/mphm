@@ -34,7 +34,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("Staf Keamanan");
+  const [role, setRole] = useState("");
 
   const [pengurusTitles, setPengurusTitles] = useState<string[]>(() => {
     const all = getStoredStructuralJabatan();
@@ -64,7 +64,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   }, []);
 
   const resetForm = () => {
-    setName(""); setPhone(""); setRole("Dewan Harian Pondok");
+    setName(""); setPhone(""); setRole("");
   };
 
   const handleOpenAdd = () => {
