@@ -206,22 +206,27 @@ export const DEFAULT_CAPABILITIES: MenuCapabilities = {
 };
 
 export function useRoleUIConfig(role: RoleTypes) {
-  const [config, setConfig] = useState<RoleUIConfig>(DEFAULT_ROLE_CONFIGS[role]);
+  const defaultConfig = DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
+  const [config, setConfig] = useState<RoleUIConfig>(defaultConfig);
 
   useEffect(() => {
     const loadConfig = () => {
+      const fallback = DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
       if (typeof window !== "undefined") {
         const saved = localStorage.getItem("system_role_ui_configs");
         if (saved) {
           try {
             const allConfigs: Record<RoleTypes, RoleUIConfig> = JSON.parse(saved);
-            if (allConfigs[role]) {
-              // Merge capabilities with default keys to avoid undefined structure
-              const roleConfig = allConfigs[role];
-              const capabilities = { ...roleConfig.capabilities };
-              
+            const roleConfig = allConfigs?.[role];
+            if (roleConfig) {
+              const capabilities = { ...(roleConfig.capabilities || {}) };
               setConfig({
+                ...fallback,
                 ...roleConfig,
+                welcomeBanner: roleConfig.welcomeBanner || fallback.welcomeBanner || "",
+                navigationStyle: roleConfig.navigationStyle || fallback.navigationStyle || "sidebar",
+                accentColor: roleConfig.accentColor || fallback.accentColor || "blue",
+                enabledMenus: roleConfig.enabledMenus || fallback.enabledMenus || [],
                 capabilities
               });
               return;
@@ -230,8 +235,7 @@ export function useRoleUIConfig(role: RoleTypes) {
             console.error("Failed to parse role configs registry", e);
           }
         }
-        // Fallback to default config
-        setConfig(DEFAULT_ROLE_CONFIGS[role]);
+        setConfig(fallback);
       }
     };
 
@@ -256,13 +260,15 @@ export function useRoleUIConfig(role: RoleTypes) {
     const normalizedPath = menuHref.replace(/\/$/, "");
 
     // Check menu level permissions
-    const caps = config.capabilities[normalizedPath] || DEFAULT_CAPABILITIES;
-    return !!caps[action];
+    const activeCaps = config?.capabilities?.[normalizedPath] || DEFAULT_CAPABILITIES;
+    return !!activeCaps[action];
   };
 
+  const safeConfig = config || DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
+
   return {
-    config,
-    accentColorClasses: ACCENT_COLOR_MAP[config.accentColor] || ACCENT_COLOR_MAP.blue,
+    config: safeConfig,
+    accentColorClasses: ACCENT_COLOR_MAP[safeConfig.accentColor] || ACCENT_COLOR_MAP.blue,
     canDoAction
   };
 }

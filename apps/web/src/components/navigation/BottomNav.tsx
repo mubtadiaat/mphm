@@ -62,7 +62,12 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
     if (isSekretariatRole) {
       fetchStatus();
     }
-  }, [isSekretariatRole]);
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("onboarding_status_changed", fetchStatus);
+      return () => window.removeEventListener("onboarding_status_changed", fetchStatus);
+    }
+  }, [isSekretariatRole, pathname]);
 
   const isMenuLocked = (href: string): boolean => {
     if (!isSekretariatRole) return false;

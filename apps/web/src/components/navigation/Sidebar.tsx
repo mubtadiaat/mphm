@@ -63,7 +63,12 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     if (isSekretariatRole) {
       fetchStatus();
     }
-  }, [isSekretariatRole]);
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("onboarding_status_changed", fetchStatus);
+      return () => window.removeEventListener("onboarding_status_changed", fetchStatus);
+    }
+  }, [isSekretariatRole, pathname]);
 
   useEffect(() => {
     const loadCustomTables = () => {

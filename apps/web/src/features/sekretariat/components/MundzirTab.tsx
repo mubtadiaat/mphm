@@ -9,6 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
+import { getPositionsForJabatan } from "@/config/jobPositions.config";
 
 interface MundzirTabProps {
   onViewDetail: (data: Record<string, unknown>) => void;
@@ -36,15 +37,7 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   const [role, setRole] = useState("Mundzir Asrama");
 
   const [mundzirTitles, setMundzirTitles] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("job_titles_mundzir");
-      return saved ? JSON.parse(saved) : [
-        "Mundzir Utama", "Mundzir Asrama Putra", "Mundziroh Asrama Putri", "Mundzir Asrama (Umum)"
-      ];
-    }
-    return [
-      "Mundzir Utama", "Mundzir Asrama Putra", "Mundziroh Asrama Putri", "Mundzir Asrama (Umum)"
-    ];
+    return getPositionsForJabatan("Mundzir", "MADRASAH");
   });
 
   useEffect(() => {
@@ -56,13 +49,14 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
 
   useEffect(() => {
     const handleJobTitlesChanged = () => {
-      const updated = localStorage.getItem("job_titles_mundzir");
-      if (updated) {
-        setMundzirTitles(JSON.parse(updated));
-      }
+      setMundzirTitles(getPositionsForJabatan("Mundzir", "MADRASAH"));
     };
+    window.addEventListener("structural_job_positions_changed", handleJobTitlesChanged);
     window.addEventListener("job_titles_changed", handleJobTitlesChanged);
-    return () => window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
+    return () => {
+      window.removeEventListener("structural_job_positions_changed", handleJobTitlesChanged);
+      window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
+    };
   }, []);
 
   const resetForm = () => {
@@ -209,13 +203,17 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
                   <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Jabatan</label>
-                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
-                    <option value="" disabled>Pilih Jabatan</option>
-                    {mundzirTitles.map((title) => (
-                      <option key={title} value={title}>{title}</option>
-                    ))}
-                  </select>
+                  <label className="text-xs font-bold">Jabatan / Posisi</label>
+                  {mundzirTitles.length > 0 ? (
+                    <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                      <option value="" disabled>Pilih Posisi Mundzir</option>
+                      {mundzirTitles.map((title) => (
+                        <option key={title} value={title}>{title}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input required value={role} onChange={e => setRole(e.target.value)} placeholder="Contoh: AM, Mundzir Asrama..." className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
+                  )}
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold">Batal</button>

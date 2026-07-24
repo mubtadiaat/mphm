@@ -53,6 +53,9 @@ export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-pengurus"] });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("onboarding_status_changed"));
+      }
     },
   });
 
@@ -68,6 +71,9 @@ export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-pengurus"] });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("onboarding_status_changed"));
+      }
     },
   });
 
@@ -80,6 +86,9 @@ export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-pengurus"] });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("onboarding_status_changed"));
+      }
     },
   });
 

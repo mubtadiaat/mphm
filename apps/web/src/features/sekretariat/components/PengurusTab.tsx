@@ -9,6 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
+import { getStoredStructuralJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -36,31 +37,9 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const [role, setRole] = useState("Staf Keamanan");
 
   const [pengurusTitles, setPengurusTitles] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("job_titles_pengurus");
-      return saved ? JSON.parse(saved) : [
-        "Penasihat Pondok",
-        "Penasihat Madrasah",
-        "Dewan Harian Pondok",
-        "Dewan Harian Madrasah",
-        "Dewan Pleno Pondok",
-        "Dewan Pleno Madrasah",
-        "Kepala Keamanan",
-        "Staf Keamanan",
-        "Staf IT & Sistem"
-      ];
-    }
-    return [
-      "Penasihat Pondok",
-      "Penasihat Madrasah",
-      "Dewan Harian Pondok",
-      "Dewan Harian Madrasah",
-      "Dewan Pleno Pondok",
-      "Dewan Pleno Madrasah",
-      "Kepala Keamanan",
-      "Staf Keamanan",
-      "Staf IT & Sistem"
-    ];
+    const all = getStoredStructuralJabatan();
+    const positions = all.flatMap(j => j.posisiList);
+    return Array.from(new Set(positions));
   });
 
   useEffect(() => {
@@ -72,13 +51,16 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
 
   useEffect(() => {
     const handleJobTitlesChanged = () => {
-      const updated = localStorage.getItem("job_titles_pengurus");
-      if (updated) {
-        setPengurusTitles(JSON.parse(updated));
-      }
+      const all = getStoredStructuralJabatan();
+      const positions = all.flatMap(j => j.posisiList);
+      setPengurusTitles(Array.from(new Set(positions)));
     };
+    window.addEventListener("structural_job_positions_changed", handleJobTitlesChanged);
     window.addEventListener("job_titles_changed", handleJobTitlesChanged);
-    return () => window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
+    return () => {
+      window.removeEventListener("structural_job_positions_changed", handleJobTitlesChanged);
+      window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
+    };
   }, []);
 
   const resetForm = () => {
@@ -224,13 +206,17 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
                   <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Divisi / Jabatan</label>
-                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
-                    <option value="" disabled>Pilih Divisi / Jabatan</option>
-                    {pengurusTitles.map((title) => (
-                      <option key={title} value={title}>{title}</option>
-                    ))}
-                  </select>
+                  <label className="text-xs font-bold">Jabatan / Posisi</label>
+                  {pengurusTitles.length > 0 ? (
+                    <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                      <option value="" disabled>Pilih Posisi Pengurus</option>
+                      {pengurusTitles.map((title) => (
+                        <option key={title} value={title}>{title}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input required value={role} onChange={e => setRole(e.target.value)} placeholder="Contoh: Ketua Harian, Sekretaris..." className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
+                  )}
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold">Batal</button>

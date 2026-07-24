@@ -16,6 +16,7 @@ import {
   MenuCapabilities
 } from "@/lib/useRoleUIConfig";
 import { MathFormulaBuilder } from "./MathFormulaBuilder";
+import { StructuralJabatan, DEFAULT_STRUCTURAL_JABATAN } from "@/config/jobPositions.config";
 
 
 const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: string }>> = {
@@ -229,36 +230,93 @@ export function SystemSettingsCockpit() {
 
   const [selectedConfigRole, setSelectedConfigRole] = useState<RoleTypes>("mustahiq");
   const [roleConfigs, setRoleConfigs] = useState<Record<RoleTypes, RoleUIConfig>>(() => {
+    const base = JSON.parse(JSON.stringify(DEFAULT_ROLE_CONFIGS)) as Record<RoleTypes, RoleUIConfig>;
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("system_role_ui_configs");
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          (Object.keys(base) as RoleTypes[]).forEach((r) => {
+            if (parsed[r]) {
+              base[r] = {
+                ...base[r],
+                ...parsed[r],
+                welcomeBanner: parsed[r].welcomeBanner || base[r].welcomeBanner || "",
+                navigationStyle: parsed[r].navigationStyle || base[r].navigationStyle || "sidebar",
+                capabilities: { ...(base[r].capabilities || {}), ...(parsed[r].capabilities || {}) }
+              };
+            }
+          });
         } catch (e) {
           console.error("Failed to load saved role configs, resetting to default", e);
         }
       }
     }
-    return JSON.parse(JSON.stringify(DEFAULT_ROLE_CONFIGS));
+    return base;
   });
 
-  // Job Titles State
-  const [mundzirTitles, setMundzirTitles] = useState<string[]>(() => {
+  // Structural Job Titles & Positions State (Pondok vs Madrasah)
+  const [selectedInstitution, setSelectedInstitution] = useState<"MADRASAH" | "PONDOK">("MADRASAH");
+  const [structuralJabatanList, setStructuralJabatanList] = useState<StructuralJabatan[]>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("job_titles_mundzir");
-      return saved ? JSON.parse(saved) : [];
+      const saved = localStorage.getItem("structural_job_positions");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to load structural_job_positions", e);
+        }
+      }
     }
-    return [];
+    return DEFAULT_STRUCTURAL_JABATAN;
   });
-  const [pengurusTitles, setPengurusTitles] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("job_titles_pengurus");
-      return saved ? JSON.parse(saved) : [];
-    }
-    return [];
-  });
-  const [newMundzirTitle, setNewMundzirTitle] = useState("");
-  const [newPengurusTitle, setNewPengurusTitle] = useState("");
+  const [newJabatanName, setNewJabatanName] = useState("");
+  const [newPosisiInputs, setNewPosisiInputs] = useState<Record<string, string>>({});
+
+  const handleAddJabatan = () => {
+    if (!newJabatanName.trim()) return;
+    const nameClean = newJabatanName.trim();
+    const newId = `${selectedInstitution.toLowerCase()}-${Date.now()}`;
+    const newItem: StructuralJabatan = {
+      id: newId,
+      institution: selectedInstitution,
+      jabatan: nameClean,
+      posisiList: [],
+    };
+    const nextList = [...structuralJabatanList, newItem];
+    setStructuralJabatanList(nextList);
+    setNewJabatanName("");
+  };
+
+  const handleRemoveJabatan = (id: string) => {
+    setStructuralJabatanList((prev) => prev.filter((j) => j.id !== id));
+  };
+
+  const handleAddPosisi = (jabatanId: string) => {
+    const val = (newPosisiInputs[jabatanId] || "").trim();
+    if (!val) return;
+    setStructuralJabatanList((prev) =>
+      prev.map((j) => {
+        if (j.id === jabatanId) {
+          if (j.posisiList.includes(val)) return j;
+          return { ...j, posisiList: [...j.posisiList, val] };
+        }
+        return j;
+      })
+    );
+    setNewPosisiInputs((prev) => ({ ...prev, [jabatanId]: "" }));
+  };
+
+  const handleRemovePosisi = (jabatanId: string, posisiName: string) => {
+    setStructuralJabatanList((prev) =>
+      prev.map((j) => {
+        if (j.id === jabatanId) {
+          return { ...j, posisiList: j.posisiList.filter((p) => p !== posisiName) };
+        }
+        return j;
+      })
+    );
+  };
 
   // Helper: parse boolean from DB
   const parseBool = (v: unknown) => v === "true" || v === true;
@@ -292,13 +350,10 @@ export function SystemSettingsCockpit() {
           setRoleConfigs(settings.system_role_ui_configs);
           localStorage.setItem("system_role_ui_configs", JSON.stringify(settings.system_role_ui_configs));
         }
-        if (Array.isArray(settings.job_titles_mundzir)) {
-          setMundzirTitles(settings.job_titles_mundzir);
-          localStorage.setItem("job_titles_mundzir", JSON.stringify(settings.job_titles_mundzir));
-        }
-        if (Array.isArray(settings.job_titles_pengurus)) {
-          setPengurusTitles(settings.job_titles_pengurus);
-          localStorage.setItem("job_titles_pengurus", JSON.stringify(settings.job_titles_pengurus));
+        if (Array.isArray(settings.structural_job_positions)) {
+          setStructuralJabatanList(settings.structural_job_positions);
+          localStorage.setItem("structural_job_positions", JSON.stringify(settings.structural_job_positions));
+          window.dispatchEvent(new Event("structural_job_positions_changed"));
         }
 
         // Custom tables from DB → sync to localStorage
@@ -346,25 +401,7 @@ export function SystemSettingsCockpit() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
-  const handleAddMundzirTitle = () => {
-    if (newMundzirTitle.trim() && !mundzirTitles.includes(newMundzirTitle.trim())) {
-      setMundzirTitles([...mundzirTitles, newMundzirTitle.trim()]);
-      setNewMundzirTitle("");
-    }
-  };
-  const handleRemoveMundzirTitle = (title: string) => {
-    setMundzirTitles(mundzirTitles.filter(t => t !== title));
-  };
 
-  const handleAddPengurusTitle = () => {
-    if (newPengurusTitle.trim() && !pengurusTitles.includes(newPengurusTitle.trim())) {
-      setPengurusTitles([...pengurusTitles, newPengurusTitle.trim()]);
-      setNewPengurusTitle("");
-    }
-  };
-  const handleRemovePengurusTitle = (title: string) => {
-    setPengurusTitles(pengurusTitles.filter(t => t !== title));
-  };
 
 
   // Local storage column visibility states
@@ -591,9 +628,8 @@ export function SystemSettingsCockpit() {
       // Integrasi API Wilayah
       regionApiSource,
       binderbyteApiKey,
-      // Jabatan Struktural (arrays)
-      job_titles_mundzir: mundzirTitles,
-      job_titles_pengurus: pengurusTitles,
+      // Jabatan Struktural (Hirarki Posisi)
+      structural_job_positions: structuralJabatanList,
       // Tabel Kustom (array of objects)
       custom_tables_registry: customTablesList,
       // Konfigurasi Kolom Tabel (objects)
@@ -628,11 +664,21 @@ export function SystemSettingsCockpit() {
 
       localStorage.setItem("system_role_ui_configs", JSON.stringify(roleConfigs));
       localStorage.setItem("region_api_source", regionApiSource);
-      localStorage.setItem("binderbyte_api_key", binderbyteApiKey);
-      localStorage.setItem("job_titles_mundzir", JSON.stringify(mundzirTitles));
-      localStorage.setItem("job_titles_pengurus", JSON.stringify(pengurusTitles));
+      localStorage.setItem("binderbyteApiKey", binderbyteApiKey);
+      localStorage.setItem("structural_job_positions", JSON.stringify(structuralJabatanList));
       localStorage.setItem("custom_tables_registry", JSON.stringify(customTablesList));
       localStorage.setItem("col_vis_santri", JSON.stringify(santriCols));
+      localStorage.setItem("col_vis_kelas", JSON.stringify(kelasCols));
+      localStorage.setItem("col_vis_kurikulum", JSON.stringify(kurikulumCols));
+      localStorage.setItem("col_vis_pelanggaran", JSON.stringify(pelanggaranCols));
+      localStorage.setItem("col_vis_tahun_ajaran", JSON.stringify(tahunAjaranCols));
+      localStorage.setItem("col_vis_audit_log", JSON.stringify(auditLogCols));
+
+      window.dispatchEvent(new Event("role_configs_changed"));
+      window.dispatchEvent(new Event("region_settings_changed"));
+      window.dispatchEvent(new Event("structural_job_positions_changed"));
+      window.dispatchEvent(new Event("job_titles_changed"));
+      window.dispatchEvent(new Event("custom_tables_changed"));
       localStorage.setItem("col_vis_kelas", JSON.stringify(kelasCols));
       localStorage.setItem("col_vis_kurikulum", JSON.stringify(kurikulumCols));
       localStorage.setItem("col_vis_pelanggaran", JSON.stringify(pelanggaranCols));
@@ -1590,81 +1636,140 @@ export function SystemSettingsCockpit() {
           {settingsTab === "job_titles" && (
             <div className="space-y-6">
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
-                <div>
-                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Manajemen Jabatan Pengurus</h3>
-                  <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
-                    Kelola daftar jabatan yang akan muncul pada menu dropdown saat menambah atau mengubah data pengurus dan pimpinan.
-                  </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+                  <div>
+                    <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Manajemen Jabatan & Posisi Pengurus</h3>
+                    <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
+                      Kelola struktur Jabatan dan Posisi secara terpisah untuk Madrasah (MPHM) dan Pondok (P3HM).
+                    </p>
+                  </div>
+
+                  {/* Filter Institusi */}
+                  <div className="flex items-center gap-1.5 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedInstitution("MADRASAH")}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        selectedInstitution === "MADRASAH"
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                      }`}
+                    >
+                      Madrasah (MPHM)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedInstitution("PONDOK")}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        selectedInstitution === "PONDOK"
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                      }`}
+                    >
+                      Pondok (P3HM)
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Jabatan Pimpinan/Mundzir */}
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Jabatan Pimpinan (Mundzir)</h4>
-                    <div className="flex gap-2">
-                      <input 
-                        type="text"
-                        value={newMundzirTitle}
-                        onChange={(e) => setNewMundzirTitle(e.target.value)}
-                        placeholder="Contoh: Mundzir Utama"
-                        className="flex-1 px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddMundzirTitle()}
-                      />
-                      <button 
-                        onClick={handleAddMundzirTitle}
-                        disabled={!newMundzirTitle.trim()}
-                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <ul className="space-y-2 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2 bg-zinc-50 dark:bg-zinc-900/50 max-h-60 overflow-y-auto">
-                      {mundzirTitles.length === 0 ? (
-                        <li className="text-center text-xs text-zinc-500 py-4">Belum ada jabatan pimpinan</li>
-                      ) : mundzirTitles.map(title => (
-                        <li key={title} className="flex items-center justify-between px-3 py-2 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-700/50 shadow-xs">
-                          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{title}</span>
-                          <button onClick={() => handleRemoveMundzirTitle(title)} className="text-zinc-400 hover:text-rose-500 transition-colors">
-                            <X className="w-4 h-4" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                {/* Form Tambah Jabatan Baru */}
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 rounded-xl space-y-2">
+                  <label className="text-xs font-bold text-zinc-600 dark:text-zinc-300 uppercase tracking-wider block">
+                    Tambah Jabatan Baru ({selectedInstitution === "MADRASAH" ? "Madrasah" : "Pondok"})
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newJabatanName}
+                      onChange={(e) => setNewJabatanName(e.target.value)}
+                      placeholder="Contoh: Dewan Harian, Mundzir, Mufattisy, Mustahiq, Penasihat..."
+                      className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-hidden dark:text-white"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddJabatan())}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddJabatan}
+                      disabled={!newJabatanName.trim()}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Tambah Jabatan
+                    </button>
                   </div>
+                </div>
 
-                  {/* Jabatan Divisi/Staf */}
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Jabatan Divisi / Staf Pengurus</h4>
-                    <div className="flex gap-2">
-                      <input 
-                        type="text"
-                        value={newPengurusTitle}
-                        onChange={(e) => setNewPengurusTitle(e.target.value)}
-                        placeholder="Contoh: Kepala Keamanan"
-                        className="flex-1 px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddPengurusTitle()}
-                      />
-                      <button 
-                        onClick={handleAddPengurusTitle}
-                        disabled={!newPengurusTitle.trim()}
-                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+                {/* Grid Kartu Jabatan & Posisi */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {structuralJabatanList.filter(j => j.institution === selectedInstitution).length === 0 ? (
+                    <div className="col-span-2 p-8 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-400 text-xs font-medium">
+                      Belum ada Jabatan untuk {selectedInstitution === "MADRASAH" ? "Madrasah (MPHM)" : "Pondok (P3HM)"}. Silakan buat Jabatan baru di atas.
                     </div>
-                    <ul className="space-y-2 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2 bg-zinc-50 dark:bg-zinc-900/50 max-h-60 overflow-y-auto">
-                      {pengurusTitles.length === 0 ? (
-                        <li className="text-center text-xs text-zinc-500 py-4">Belum ada jabatan divisi</li>
-                      ) : pengurusTitles.map(title => (
-                        <li key={title} className="flex items-center justify-between px-3 py-2 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-700/50 shadow-xs">
-                          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{title}</span>
-                          <button onClick={() => handleRemovePengurusTitle(title)} className="text-zinc-400 hover:text-rose-500 transition-colors">
-                            <X className="w-4 h-4" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  ) : (
+                    structuralJabatanList
+                      .filter(j => j.institution === selectedInstitution)
+                      .map((j) => (
+                        <div key={j.id} className="p-4 bg-white dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/80 rounded-2xl shadow-xs space-y-3 flex flex-col justify-between">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-700">
+                              <span className="font-extrabold text-sm text-zinc-900 dark:text-white flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${selectedInstitution === "MADRASAH" ? "bg-blue-500" : "bg-emerald-500"}`} />
+                                {j.jabatan}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveJabatan(j.id)}
+                                className="text-zinc-400 hover:text-rose-500 transition-colors p-1 rounded-lg hover:bg-rose-500/10 cursor-pointer"
+                                title="Hapus Jabatan Ini"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* Form Tambah Posisi */}
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={newPosisiInputs[j.id] || ""}
+                                onChange={(e) => setNewPosisiInputs(prev => ({ ...prev, [j.id]: e.target.value }))}
+                                placeholder="Tambah posisi..."
+                                className="flex-1 px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs focus:outline-hidden dark:text-white"
+                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddPosisi(j.id))}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleAddPosisi(j.id)}
+                                className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                              >
+                                <Plus className="w-3 h-3" />
+                                Posisi
+                              </button>
+                            </div>
+
+                            {/* List Badge Posisi */}
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {j.posisiList.length === 0 ? (
+                                <span className="text-[11px] text-zinc-400 italic">Belum ada posisi diisi.</span>
+                              ) : (
+                                j.posisiList.map((pos) => (
+                                  <span
+                                    key={pos}
+                                    className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-700/60 border border-zinc-200 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 text-xs font-semibold rounded-lg flex items-center gap-1.5"
+                                  >
+                                    {pos}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemovePosisi(j.id, pos)}
+                                      className="text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </span>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                  )}
                 </div>
               </div>
             </div>
