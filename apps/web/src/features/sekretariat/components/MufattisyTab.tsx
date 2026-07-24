@@ -137,7 +137,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
   const columns: ColumnDef<Pengurus, unknown>[] = [
     { accessorKey: "name", header: "Nama Mufattisy", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
     { accessorKey: "role", header: "Jabatan Eksekutif", cell: info => <span className="text-sm font-medium font-bold text-blue-600 dark:text-blue-400">{info.getValue() as string}</span> },
-    { accessorKey: "supervisedLevel", header: "Jenjang Pengawasan", cell: info => <span className="text-xs font-semibold px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-md">{info.getValue() as string || "Tsanawiyyah"}</span> },
+    { accessorKey: "supervisedLevel", header: "Jenjang Pengawasan", cell: info => <span className="text-xs font-semibold px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-md">{(info.getValue() as string) || "-"}</span> },
     { accessorKey: "phone", header: "No. HP / WA", cell: info => <span className="font-mono text-xs">{info.getValue() as string || "-"}</span> },
     { accessorKey: "status", header: "Status", cell: info => (
       <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -252,6 +252,7 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Jenjang Pengawasan</label>
                   <select value={supervisedLevel} onChange={e => setSupervisedLevel(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                    <option value="">Pilih Jenjang Pengawasan</option>
                     <option value="I'dadiyyah">I&apos;dadiyyah</option>
                     <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
                     <option value="Tsanawiyyah">Tsanawiyyah</option>
