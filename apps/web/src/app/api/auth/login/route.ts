@@ -67,6 +67,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const roleLower = String(userAccount.role || "").trim().toLowerCase();
+
+    // Strict Portal Role Validation
+    if (body.portal === "sekretariat") {
+      const allowedSek = ["sek.pondok", "sek.madrasah", "admin", "superadmin", "sekretariat"];
+      if (!allowedSek.includes(roleLower)) {
+        return NextResponse.json(
+          { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Sekretariat Windows." },
+          { status: 403 }
+        );
+      }
+    } else if (body.portal === "staff") {
+      const allowedStaff = ["mustahiq", "mufattisy", "mundzir", "pimpinan", "keamanan", "petugas keamanan"];
+      if (!allowedStaff.includes(roleLower)) {
+        return NextResponse.json(
+          { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Staf Lapangan." },
+          { status: 403 }
+        );
+      }
+    } else if (body.portal === "guardian") {
+      const allowedGuardian = ["wali.santri", "wali_santri", "wali santri", "guardian"];
+      if (!allowedGuardian.includes(roleLower)) {
+        return NextResponse.json(
+          { status: "Error", message: "Akun Anda bukan merupakan akun Wali Santri." },
+          { status: 403 }
+        );
+      }
+    }
+
     const sessionPayload = {
       userId: userAccount.id,
       accountId: userAccount.id,
