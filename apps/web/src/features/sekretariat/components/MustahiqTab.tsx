@@ -9,7 +9,7 @@ import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { useGuru, Guru } from "../queries/useGuru";
-import { addPosisiToJabatan, getPositionsForJabatan } from "@/config/jobPositions.config";
+import { addPosisiToJabatan } from "@/config/jobPositions.config";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -26,14 +26,12 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState<Guru | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Guru | null>(null);
-  
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("");
-
-  const [mustahiqTitles, setMustahiqTitles] = useState<string[]>(() => {
-    return getPositionsForJabatan("Mustahiq", "MADRASAH");
-  });
+  const [jenjang, setJenjang] = useState("Ibtida'iyyah");
+  const [tingkat, setTingkat] = useState("I");
+  const [lokal, setLokal] = useState("A");
 
   useEffect(() => {
     if (remoteData) {
@@ -42,20 +40,8 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     }
   }, [remoteData.data, remoteData.total]);
 
-  useEffect(() => {
-    const handleJobTitlesChanged = () => {
-      setMustahiqTitles(getPositionsForJabatan("Mustahiq", "MADRASAH"));
-    };
-    window.addEventListener("structural_job_positions_changed", handleJobTitlesChanged);
-    window.addEventListener("job_titles_changed", handleJobTitlesChanged);
-    return () => {
-      window.removeEventListener("structural_job_positions_changed", handleJobTitlesChanged);
-      window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
-    };
-  }, []);
-
   const resetForm = () => {
-    setName(""); setPhone(""); setRole("");
+    setName(""); setPhone(""); setJenjang("Ibtida'iyyah"); setTingkat("I"); setLokal("A");
   };
 
   const handleOpenAdd = () => {
@@ -66,7 +52,9 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     setEditingData(item);
     setName(item.name);
     setPhone(item.phone || "");
-    setRole(item.role || "");
+    setJenjang(item.jenjang && item.jenjang !== "-" ? item.jenjang : "Ibtida'iyyah");
+    setTingkat(item.tingkat && item.tingkat !== "-" ? item.tingkat : "I");
+    setLokal(item.lokal && item.lokal !== "-" ? item.lokal : "A");
     setShowModal(true);
   };
 
@@ -89,17 +77,10 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     }
   };
 
-  const formatFullRole = (pos: string, defaultJabatan: string) => {
-    if (!pos || !pos.trim()) return defaultJabatan;
-    let p = pos.trim();
-    if (p.toLowerCase().includes(defaultJabatan.toLowerCase())) return p;
-    return `${defaultJabatan} ${p}`;
-  };
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return toast("Lengkapi nama", "warning", "Peringatan");
-    const fullRole = formatFullRole(role, "Mustahiq");
+    if (!name.trim()) return toast("Lengkapi nama Mustahiq", "warning", "Peringatan");
+    const fullRole = `Mustahiq ${jenjang} ${tingkat} ${lokal}`.trim();
 
     try {
       if (editingData) {
@@ -118,7 +99,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
           roleName: fullRole,
           gender: "L",
         });
-        await addPosisiToJabatan("Mustahiq", role || "Mustahiq", "MADRASAH");
+        await addPosisiToJabatan("Mustahiq", `${jenjang} ${tingkat} ${lokal}`, "MADRASAH");
         toast("Mustahiq baru berhasil didaftarkan!", "success", "Sukses");
       }
       setShowModal(false);
@@ -130,8 +111,8 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
   const columns: ColumnDef<Guru, unknown>[] = [
     { accessorKey: "name", header: "Nama Lengkap Mustahiq", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
-    { accessorKey: "role", header: "Jabatan / Posisi", cell: info => <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{(info.getValue() as string) || "Mustahiq"}</span> },
-    { accessorKey: "teacherCode", header: "Kode Guru/Mustahiq", cell: info => <span className="font-mono text-xs font-semibold">{info.getValue() as string || "-"}</span> },
+    { accessorKey: "jenjang", header: "Jenjang", cell: info => <span className="text-xs font-semibold px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-md">{(info.getValue() as string) || "-"}</span> },
+    { accessorKey: "tingkatLokal", header: "Tingkat | Lokal", cell: info => <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{(info.getValue() as string) || "-"}</span> },
     { accessorKey: "phone", header: "No. HP / WA", cell: info => <span className="font-mono text-xs">{info.getValue() as string || "-"}</span> },
     { accessorKey: "status", header: "Status", cell: info => (
       <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -182,14 +163,25 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         tableName="mustahiq"
         importExportProps={{
           title: "Data Mustahiq dan Dewan Pengajar",
-          headers: ["Nama Lengkap Mustahiq", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          headers: ["Nama Lengkap Mustahiq", "Jenjang", "Tingkat", "Ruang / Lokal", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
               const nameVal = r["Nama Lengkap Mustahiq"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
-              const roleVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"] || "Mustahiq";
-              const fullRole = formatFullRole(roleVal, "Mustahiq");
+
+              const jenjangVal = r["Jenjang"] || r["jenjang"] || "";
+              const tingkatVal = r["Tingkat"] || r["tingkat"] || "";
+              const lokalVal = r["Ruang / Lokal"] || r["Lokal"] || r["lokal"] || r["ruang"] || "";
+
+              let fullRole = "";
+              const posVal = r["Jabatan / Posisi"] || r["Jabatan"] || r["Posisi"] || r["roleName"] || r["role"];
+              if (posVal && String(posVal).trim()) {
+                fullRole = String(posVal).trim().startsWith("Mustahiq") ? String(posVal).trim() : `Mustahiq ${String(posVal).trim()}`;
+              } else {
+                fullRole = `Mustahiq ${jenjangVal} ${tingkatVal} ${lokalVal}`.trim();
+              }
+
               const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
               try {
                 await createGuru({
@@ -198,7 +190,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                   roleName: fullRole,
                   gender: "L",
                 });
-                await addPosisiToJabatan("Mustahiq", roleVal, "MADRASAH");
+                await addPosisiToJabatan("Mustahiq", `${jenjangVal} ${tingkatVal} ${lokalVal}`.trim() || "Mustahiq", "MADRASAH");
                 count++;
               } catch (err) {
                 console.error("Import row failed:", err);
@@ -222,22 +214,44 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
               </div>
               <form onSubmit={handleSave} className="p-4 space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Mustahiq</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Mustahiq</label>
                   <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
+
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WhatsApp</label>
                   <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Jabatan / Posisi</label>
-                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
-                    <option value="">Pilih Posisi Mustahiq</option>
-                    {mustahiqTitles.map((t, idx) => (
-                      <option key={idx} value={t}>{t}</option>
-                    ))}
-                  </select>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Jenjang</label>
+                    <select value={jenjang} onChange={e => setJenjang(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                      <option value="I'dadiyyah">I&apos;dadiyyah</option>
+                      <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
+                      <option value="Tsanawiyyah">Tsanawiyyah</option>
+                      <option value="Aliyyah">Aliyyah</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Tingkat</label>
+                    <select value={tingkat} onChange={e => setTingkat(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
+                      <option value="I">Tingkat I</option>
+                      <option value="II">Tingkat II</option>
+                      <option value="III">Tingkat III</option>
+                      <option value="IV">Tingkat IV</option>
+                      <option value="V">Tingkat V</option>
+                      <option value="VI">Tingkat VI</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Ruang / Lokal</label>
+                    <input value={lokal} onChange={e => setLokal(e.target.value.toUpperCase())} placeholder="A, B, C" className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden uppercase dark:bg-zinc-800 dark:border-zinc-700" />
+                  </div>
                 </div>
+
                 <div className="flex justify-end gap-2 pt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold">Batal</button>
                   <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Simpan</button>
@@ -265,16 +279,16 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                 <table className="w-full border-collapse">
                   <tbody>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama</td>
+                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama Mustahiq</td>
                       <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.name || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Jabatan / Posisi</td>
-                      <td className="py-2.5 text-blue-600 dark:text-blue-400 text-left font-bold">{viewingDetail.role || "Mustahiq"}</td>
+                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Jenjang</td>
+                      <td className="py-2.5 text-purple-700 dark:text-purple-300 text-left font-bold">{viewingDetail.jenjang || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Kode Guru</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-mono">{viewingDetail.teacherCode || "-"}</td>
+                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Tingkat & Lokal</td>
+                      <td className="py-2.5 text-blue-600 dark:text-blue-400 text-left font-bold">{viewingDetail.tingkatLokal || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
                       <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">No. HP / WhatsApp</td>

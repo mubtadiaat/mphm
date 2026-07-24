@@ -185,18 +185,54 @@ export async function GET(req: NextRequest) {
         }),
       ]);
 
-      const formatted = list.map((tp: any) => ({
-        id: tp.id,
-        personId: tp.personId,
-        name: tp.person.fullName,
-        teacherCode: tp.teacherCode,
-        role: tp.person.organizationMemberships?.[0]?.role || "Mustahiq",
-        nik: tp.person.nik,
-        phone: tp.person.phoneNumber,
-        status: tp.status,
-        gender: tp.person.gender,
-        avatarUrl: tp.person.avatarUrl,
-      }));
+      const formatted = list.map((tp: any) => {
+        const rawRole = tp.person.organizationMemberships?.[0]?.role || "Mustahiq";
+        let str = rawRole.replace(/^Mustahiq\s*/i, "").trim();
+        
+        let jenjang = tp.person.organizationMemberships?.[0]?.supervisedLevel || "-";
+        if (/i['`’]?dadiyyah/i.test(str)) jenjang = "I'dadiyyah";
+        else if (/ibtida['`’]?iyyah/i.test(str)) jenjang = "Ibtida'iyyah";
+        else if (/tsanawiyyah/i.test(str)) jenjang = "Tsanawiyyah";
+        else if (/aliyyah/i.test(str)) jenjang = "Aliyyah";
+        else if (/robithoh/i.test(str)) jenjang = "Al-Robithoh";
+        
+        let tingkat = "-";
+        const tingkatMatch = str.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
+        if (tingkatMatch) {
+          tingkat = tingkatMatch[1].toUpperCase();
+        }
+
+        let lokal = "-";
+        const parts = str.split(/\s+/);
+        const lastPart = parts[parts.length - 1];
+        if (/^[A-Z]$/i.test(lastPart)) {
+          lokal = lastPart.toUpperCase();
+        } else {
+          const lokalMatch = str.match(/\b([A-Z])\b/);
+          if (lokalMatch) lokal = lokalMatch[1];
+        }
+
+        const tingkatLokal = (tingkat !== "-" || lokal !== "-")
+          ? `Tingkat ${tingkat} | Lokal ${lokal}`
+          : "-";
+
+        return {
+          id: tp.id,
+          personId: tp.personId,
+          name: tp.person.fullName,
+          teacherCode: tp.teacherCode,
+          role: rawRole,
+          jenjang,
+          tingkat,
+          lokal,
+          tingkatLokal,
+          nik: tp.person.nik,
+          phone: tp.person.phoneNumber,
+          status: tp.status,
+          gender: tp.person.gender,
+          avatarUrl: tp.person.avatarUrl,
+        };
+      });
 
       return NextResponse.json({ status: "Success", data: formatted, total });
     }

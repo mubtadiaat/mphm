@@ -7,6 +7,10 @@ export interface Guru {
   name: string;
   teacherCode: string;
   role?: string;
+  jenjang?: string;
+  tingkat?: string;
+  lokal?: string;
+  tingkatLokal?: string;
   phone: string;
   status: "ACTIVE" | "INACTIVE";
   gender: string;
