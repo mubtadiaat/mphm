@@ -56,22 +56,35 @@ export async function GET(req: NextRequest) {
 }
 
 async function upsertSettings(body: Record<string, unknown>) {
+  if (!body || typeof body !== "object") return;
   const entries = Object.entries(body);
+  if (entries.length === 0) return;
 
-  await prisma.$transaction(
-    entries.map(([key, value]) =>
-      prisma.systemSetting.upsert({
-        where: { key },
-        update: { value: serializeValue(value), updatedAt: new Date() },
-        create: { key, value: serializeValue(value) },
-      })
-    )
+  await Promise.all(
+    entries.map(async ([key, value]) => {
+      if (!key) return;
+      try {
+        await prisma.systemSetting.upsert({
+          where: { key },
+          update: { value: serializeValue(value), updatedAt: new Date() },
+          create: { key, value: serializeValue(value) },
+        });
+      } catch (err: any) {
+        console.error(`SETTINGS_UPSERT_KEY_ERROR (${key}):`, err?.message || err);
+      }
+    })
   );
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { status: "Error", message: "Payload tidak valid." },
+        { status: 400 }
+      );
+    }
     await upsertSettings(body);
 
     return NextResponse.json({
@@ -79,9 +92,9 @@ export async function POST(req: NextRequest) {
       message: "Pengaturan sistem berhasil disimpan.",
     });
   } catch (err: any) {
-    console.error("POST_SETTINGS_ERROR:", err.message);
+    console.error("POST_SETTINGS_ERROR:", err?.message || err);
     return NextResponse.json(
-      { status: "Error", message: err.message },
+      { status: "Error", message: err?.message || "Internal server error" },
       { status: 500 }
     );
   }
@@ -89,7 +102,13 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { status: "Error", message: "Payload tidak valid." },
+        { status: 400 }
+      );
+    }
     await upsertSettings(body);
 
     return NextResponse.json({
@@ -97,10 +116,11 @@ export async function PUT(req: NextRequest) {
       message: "Pengaturan sistem berhasil diperbarui.",
     });
   } catch (err: any) {
-    console.error("PUT_SETTINGS_ERROR:", err.message);
+    console.error("PUT_SETTINGS_ERROR:", err?.message || err);
     return NextResponse.json(
-      { status: "Error", message: err.message },
+      { status: "Error", message: err?.message || "Internal server error" },
       { status: 500 }
     );
   }
 }
+
