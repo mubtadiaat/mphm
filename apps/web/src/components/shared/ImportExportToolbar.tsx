@@ -182,6 +182,8 @@ export function ImportExportToolbar({
         commentText = "Nama kamar / asrama tempat tinggal santriwati (Contoh: Asrama Aisyah 1).";
       } else if (lowerH.includes("alamat")) {
         commentText = "Alamat domisili lengkap mencakup Jalan, RT/RW, Desa/Kelurahan, Kecamatan, dan Kabupaten.";
+      } else if (lowerH.includes("jabatan") || lowerH.includes("posisi") || lowerH.includes("peran")) {
+        commentText = "Nama Jabatan / Posisi Eksekutif (Contoh: Mundzir Asrama, AM, Sekretaris, Ketua Harian). Jika belum terdaftar di sistem, akan otomatis ditambahkan.";
       } else if (lowerH.includes("hubungan")) {
         commentText = "Hubungan dengan santriwati (Contoh: AYAH, IBU, WALI, KAKAK).";
       } else if (lowerH.includes("kategori")) {
@@ -234,6 +236,7 @@ export function ImportExportToolbar({
       else if (lowerH.includes("kelas") || lowerH.includes("rombel")) placeholderRowData[h] = "1 Ibtida'iyyah A";
       else if (lowerH.includes("jenjang")) placeholderRowData[h] = "Ibtida'iyyah";
       else if (lowerH.includes("asrama") || lowerH.includes("kamar")) placeholderRowData[h] = "Asrama Aisyah 1";
+      else if (lowerH.includes("jabatan") || lowerH.includes("posisi") || lowerH.includes("peran")) placeholderRowData[h] = "Mundzir Asrama";
       else if (lowerH.includes("alamat")) placeholderRowData[h] = "Jl. KH. Abdul Karim No. 12, Lirboyo, Kediri";
       else if (lowerH.includes("hubungan")) placeholderRowData[h] = "AYAH";
       else if (lowerH.includes("kategori")) placeholderRowData[h] = "Kedisiplinan";
@@ -365,27 +368,23 @@ export function ImportExportToolbar({
         return;
       }
       
-      const fileHeaders: string[] = [];
+      const colMap = new Map<string, number>();
       const headerRow = ws.getRow(1);
       headerRow.eachCell((cell, colNumber) => {
-        fileHeaders[colNumber - 1] = String(cell.value || "").trim();
+        const headerText = String(cell.value || "").trim().toLowerCase();
+        if (headerText) {
+          colMap.set(headerText, colNumber);
+        }
       });
-
-      // Validate headers match
-      const headersMatch = headers.every((h, idx) => fileHeaders[idx]?.toLowerCase() === h.trim().toLowerCase());
-      
-      if (!headersMatch) {
-        setImportError(`Header kolom tidak sesuai template. Harus: ${headers.join(", ")}`);
-        return;
-      }
 
       const formattedData: Record<string, string>[] = [];
       ws.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return; // skip header
         const obj: Record<string, string> = {};
         let hasValue = false;
-        headers.forEach((h, idx) => {
-          const cell = row.getCell(idx + 1);
+
+        colMap.forEach((colNum, headerKey) => {
+          const cell = row.getCell(colNum);
           let val = "";
           if (cell && cell.value !== undefined && cell.value !== null) {
             if (typeof cell.value === "object") {
@@ -399,9 +398,25 @@ export function ImportExportToolbar({
             }
           }
           val = val.trim();
-          obj[h.trim()] = val;
           if (val !== "") hasValue = true;
+
+          const matchedHeader = headers.find(h => h.trim().toLowerCase() === headerKey) || headerKey;
+          obj[matchedHeader] = val;
         });
+
+        headers.forEach((h, idx) => {
+          const key = h.trim();
+          if (obj[key] === undefined) {
+            const fallbackCell = row.getCell(idx + 1);
+            let val = "";
+            if (fallbackCell && fallbackCell.value !== undefined && fallbackCell.value !== null) {
+              val = String(typeof fallbackCell.value === "object" ? (fallbackCell.value as any).text || "" : fallbackCell.value).trim();
+            }
+            obj[key] = val;
+            if (val !== "") hasValue = true;
+          }
+        });
+
         if (hasValue) {
           formattedData.push(obj);
         }
