@@ -557,6 +557,13 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               const nameVal = r["Nama Lengkap Santriwati"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
               try {
+                const rawJenjang = r["Jenjang Aktif"] || r["Jenjang"] || "";
+                const rawKelas = r["Kelas Aktif"] || r["Kelas"] || "";
+                let fullClassName = rawKelas.trim();
+                if (rawJenjang.trim() && rawKelas.trim() && !rawKelas.toLowerCase().includes(rawJenjang.toLowerCase())) {
+                  fullClassName = `${rawJenjang.trim()} ${rawKelas.trim()}`;
+                }
+
                 await createSantri({
                   name: nameVal,
                   nik: r["NIK Santri (16 Digit)"] || r["NIK Santri"] || r["NIK"] || r["nik"] || "",
@@ -567,7 +574,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   stambuk: r["Nomor Stambuk"] || r["stambuk"] || "",
                   nis: r["NIS"] || r["Nomor Stambuk"] || r["stambuk"] || "",
                   nisn: r["NISN"] || "",
-                  class: r["Kelas Aktif"] || r["Kelas"] || "Belum Ditentukan",
+                  class: fullClassName || "Belum Ditentukan",
                   enrollmentYear: Number(r["Tahun Masuk"]) || new Date().getFullYear(),
                   graduationYear: r["Tahun Lulus"] ? Number(r["Tahun Lulus"]) : undefined,
                   status: r["Status Keaktifan"] || "ACTIVE",

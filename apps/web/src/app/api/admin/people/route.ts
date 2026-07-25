@@ -459,12 +459,62 @@ export async function POST(req: NextRequest) {
             where: { id: classId, deletedAt: null },
           });
         } else if (className && className !== "Belum Ditentukan") {
+          const normName = className.trim();
+          const withDash = normName.replace(/\s+([A-Z0-9]+)$/i, "-$1");
+          const withoutDash = normName.replace(/-([A-Z0-9]+)$/i, " $1");
+
           targetClass = await tx.academicClass.findFirst({
             where: {
-              OR: [{ name: className }, { fullName: className }],
+              OR: [
+                { name: { equals: normName, mode: "insensitive" } },
+                { name: { equals: withDash, mode: "insensitive" } },
+                { name: { equals: withoutDash, mode: "insensitive" } },
+                { fullName: { contains: normName, mode: "insensitive" } },
+                { fullName: { contains: withDash, mode: "insensitive" } },
+              ],
               deletedAt: null,
             },
           });
+
+          // Auto-create class if not found yet
+          if (!targetClass) {
+            let jenjang = "Ibtida'iyyah";
+            if (/i['`’]?dadiyyah/i.test(normName)) jenjang = "I'dadiyyah";
+            else if (/ibtida['`’]?iyyah/i.test(normName)) jenjang = "Ibtida'iyyah";
+            else if (/tsanawiyyah/i.test(normName)) jenjang = "Tsanawiyyah";
+            else if (/aliyyah/i.test(normName)) jenjang = "Aliyyah";
+
+            const cleanStr = normName
+              .replace(/i['`’]?dadiyyah/i, "")
+              .replace(/ibtida['`’]?iyyah/i, "")
+              .replace(/tsanawiyyah/i, "")
+              .replace(/aliyyah/i, "")
+              .trim();
+
+            let tingkat = "I";
+            const tingkatMatch = cleanStr.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
+            if (tingkatMatch) tingkat = tingkatMatch[1].toUpperCase();
+
+            let lokal = "A";
+            const parts = cleanStr.split(/[\s-]+/);
+            const lastPart = parts[parts.length - 1];
+            if (/^[A-Z]$/i.test(lastPart)) lokal = lastPart.toUpperCase();
+
+            const activeYear = await tx.academicYear.findFirst({ where: { isActive: true, deletedAt: null } });
+            const targetYearId = activeYear?.id || (await tx.academicYear.findFirst({ where: { deletedAt: null } }))?.id;
+
+            if (targetYearId) {
+              targetClass = await tx.academicClass.create({
+                data: {
+                  academicYearId: targetYearId,
+                  name: `${jenjang} ${tingkat}-${lokal}`,
+                  fullName: `Kelas ${jenjang} ${tingkat}-${lokal}`,
+                  institutionLevel: jenjang,
+                  levelNumber: ({ I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6 } as any)[tingkat] || 1,
+                },
+              });
+            }
+          }
         }
 
         if (targetClass && studentProfile) {
