@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, BookOpen, Layers, Plus, X, Save } from "lucide-react";
+import { Trash2, Edit3, BookOpen, Layers, Plus, X, Save } from "lucide-react";
 import { useClasses } from "@/features/sekretariat/queries/useClasses";
 import { useGuru } from "@/features/sekretariat/queries/useGuru";
 import { usePengurus } from "@/features/sekretariat/queries/usePengurus";
@@ -17,7 +17,7 @@ const CLASS_LEVELS_MAP: Record<string, string[]> = {
 
 export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false }: { onViewDetail?: (data: Record<string, unknown>) => void, selectedYearId?: string, isReadOnly?: boolean }) {
   const { toast, confirm } = useToast();
-  const { data: remoteData, isLoading, createClass, isCreating, deleteClass } = useClasses(selectedYearId);
+  const { data: remoteData, isLoading, createClass, isCreating, updateClass, isUpdating, deleteClass } = useClasses(selectedYearId);
   
   const { data: mustahiqListRemote = { data: [], total: 0 } } = useGuru("", 0, 100);
   const mustahiqList = mustahiqListRemote.data;
@@ -33,6 +33,10 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
   const [newMustahiq, setNewMustahiq] = useState("");
   const [newMufattisy, setNewMufattisy] = useState("");
   const [newCapacity, setNewCapacity] = useState(40);
+
+  const [editingClass, setEditingClass] = useState<any | null>(null);
+  const [editMustahiqId, setEditMustahiqId] = useState("");
+  const [editCapacity, setEditCapacity] = useState(40);
 
   const classesData = remoteData || [];
 
@@ -274,25 +278,39 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                     </span>
                   </div>
                   {!isReadOnly && (
-                    <button 
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const isConfirmed = await confirm({
-                          title: "Hapus Kelas Diniyyah?",
-                          message: `Apakah Anda yakin ingin menghapus kelas ${cls.name}?`,
-                          confirmText: "Ya, Hapus Kelas",
-                          cancelText: "Batal",
-                          type: "danger",
-                        });
-                        if (isConfirmed) {
-                          deleteClass(cls.id);
-                        }
-                      }}
-                      className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md text-zinc-400 hover:text-rose-600 transition-colors cursor-pointer"
-                      title="Hapus Kelas"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingClass(cls);
+                          setEditMustahiqId(cls.mustahiqId || "");
+                          setEditCapacity(cls.capacity || 40);
+                        }}
+                        className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-md text-zinc-400 hover:text-blue-600 transition-colors cursor-pointer"
+                        title="Edit Kelas"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const isConfirmed = await confirm({
+                            title: "Hapus Kelas Diniyyah?",
+                            message: `Apakah Anda yakin ingin menghapus kelas ${cls.name}?`,
+                            confirmText: "Ya, Hapus Kelas",
+                            cancelText: "Batal",
+                            type: "danger",
+                          });
+                          if (isConfirmed) {
+                            deleteClass(cls.id);
+                          }
+                        }}
+                        className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md text-zinc-400 hover:text-rose-600 transition-colors cursor-pointer"
+                        title="Hapus Kelas"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="p-5 flex-1 flex flex-col gap-3">
@@ -314,6 +332,74 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {/* Modal Edit Kelas */}
+      {editingClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+            <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/30">
+              <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-blue-500" />
+                Edit Data Kelas ({editingClass.name})
+              </h3>
+              <button onClick={() => setEditingClass(null)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5"/></button>
+            </div>
+            <div className="p-5 space-y-4 text-sm font-medium">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Wali Kelas (Mustahiq)</label>
+                <select 
+                  value={editMustahiqId} 
+                  onChange={(e) => setEditMustahiqId(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700 font-bold"
+                >
+                  <option value="">Pilih Wali Kelas (Mustahiq)</option>
+                  {mustahiqList.map((m) => (
+                    <option key={m.id} value={m.personId || m.id}>
+                      {m.name} — ({m.role || "Mustahiq"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Kapasitas Maksimal (Siswa)</label>
+                <input 
+                  type="number"
+                  value={editCapacity} 
+                  onChange={(e) => setEditCapacity(Number(e.target.value))} 
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700 font-mono" 
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <button type="button" onClick={() => setEditingClass(null)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700">
+                  Batal
+                </button>
+                <button 
+                  disabled={isUpdating}
+                  onClick={async () => {
+                    try {
+                      await updateClass({
+                        id: editingClass.id,
+                        mustahiqId: editMustahiqId,
+                        capacity: editCapacity
+                      });
+                      toast("Data Kelas berhasil diperbarui!", "success", "Sukses");
+                      setEditingClass(null);
+                    } catch (err: any) {
+                      toast(err.message || "Gagal memperbarui kelas", "error", "Gagal");
+                    }
+                  }} 
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  {isUpdating ? "Menyimpan..." : "Simpan Perubahan"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

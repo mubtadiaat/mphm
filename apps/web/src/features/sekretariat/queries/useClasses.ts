@@ -43,6 +43,19 @@ export function useClasses(academicYearId?: string) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (data: { id: string; name?: string; mustahiqId?: string; capacity?: number }) => {
+      const res = await apiRequest<{ data: AcademicClass }>(`/api/admin/classes/${data.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-classes"] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await apiRequest<{ status: string }>(`/api/admin/classes/${id}`, {
@@ -58,8 +71,10 @@ export function useClasses(academicYearId?: string) {
   return {
     ...query,
     createClass: createMutation.mutateAsync,
-    isCreating: createMutation.isPending,
+    updateClass: updateMutation.mutateAsync,
     deleteClass: deleteMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
   };
 }

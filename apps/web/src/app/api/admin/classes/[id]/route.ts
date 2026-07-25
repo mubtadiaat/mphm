@@ -26,6 +26,24 @@ export async function GET(
       );
     }
 
+    const mufattisyList = await prisma.organizationMembership.findMany({
+      where: {
+        role: { contains: "Mufattisy", mode: "insensitive" },
+        deletedAt: null,
+      },
+      include: { person: true },
+    });
+
+    const getMufattisyName = (levelStr: string) => {
+      const target = (levelStr || "").toLowerCase();
+      const match = mufattisyList.find(m => {
+        const sup = (m.supervisedLevel || "").toLowerCase();
+        const r = (m.role || "").toLowerCase();
+        return sup.includes(target) || r.includes(target);
+      });
+      return match?.person.fullName || "-";
+    };
+
     const formattedClass = {
       id: academicClass.id,
       name: academicClass.name,
@@ -33,7 +51,7 @@ export async function GET(
       institutionLevel: academicClass.institutionLevel,
       levelNumber: academicClass.levelNumber,
       mustahiq: academicClass.mustahiq?.fullName || "-",
-      mufattisy: "-",
+      mufattisy: getMufattisyName(academicClass.institutionLevel || academicClass.name),
       mustahiqId: academicClass.mustahiqId,
       curriculumId: academicClass.curriculumId,
       curriculumName: academicClass.curriculum?.name || "-",

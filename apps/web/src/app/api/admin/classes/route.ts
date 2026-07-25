@@ -18,6 +18,24 @@ export async function GET(req: NextRequest) {
       await autoEnsureClassesFromMustahiqs(targetYearId);
     }
 
+    const mufattisyList = await prisma.organizationMembership.findMany({
+      where: {
+        role: { contains: "Mufattisy", mode: "insensitive" },
+        deletedAt: null,
+      },
+      include: { person: true },
+    });
+
+    const getMufattisyName = (levelStr: string) => {
+      const target = (levelStr || "").toLowerCase();
+      const match = mufattisyList.find(m => {
+        const sup = (m.supervisedLevel || "").toLowerCase();
+        const r = (m.role || "").toLowerCase();
+        return sup.includes(target) || r.includes(target);
+      });
+      return match?.person.fullName || "-";
+    };
+
     const classes = await (prisma.academicClass as any).findMany({
       where: {
         ...(targetYearId ? { academicYearId: targetYearId } : {}),
@@ -40,7 +58,7 @@ export async function GET(req: NextRequest) {
       institutionLevel: c.institutionLevel,
       levelNumber: c.levelNumber,
       mustahiq: c.mustahiq?.fullName || "-",
-      mufattisy: "-",
+      mufattisy: getMufattisyName(c.institutionLevel || c.name),
       capacity: 40,
       mustahiqId: c.mustahiqId,
       academicYearId: c.academicYearId,
