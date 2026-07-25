@@ -14,6 +14,10 @@ export async function GET(req: NextRequest) {
       targetYearId = activeYear?.id || null;
     }
 
+    if (targetYearId) {
+      await autoEnsureClassesFromMustahiqs(targetYearId);
+    }
+
     const classes = await (prisma.academicClass as any).findMany({
       where: {
         ...(targetYearId ? { academicYearId: targetYearId } : {}),
@@ -84,5 +88,73 @@ export async function POST(req: NextRequest) {
       { status: "Error", message: err.message },
       { status: 500 }
     );
+  }
+}
+
+async function autoEnsureClassesFromMustahiqs(targetYearId: string) {
+  try {
+    const mustahiqs = await prisma.organizationMembership.findMany({
+      where: {
+        role: { contains: "Mustahiq", mode: "insensitive" },
+        deletedAt: null,
+      },
+      include: { person: true },
+    });
+
+    for (const m of mustahiqs) {
+      let str = m.role.replace(/^Mustahiq\s*/i, "").trim();
+      if (!str || str === "Mustahiq") continue;
+
+      let jenjang = "Ibtida'iyyah";
+      if (/i['`’]?dadiyyah/i.test(str)) jenjang = "I'dadiyyah";
+      else if (/ibtida['`’]?iyyah/i.test(str)) jenjang = "Ibtida'iyyah";
+      else if (/tsanawiyyah/i.test(str)) jenjang = "Tsanawiyyah";
+      else if (/aliyyah/i.test(str)) jenjang = "Aliyyah";
+
+      let tingkat = "I";
+      const tingkatMatch = str.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
+      if (tingkatMatch) tingkat = tingkatMatch[1].toUpperCase();
+
+      let lokal = "A";
+      const parts = str.split(/\s+/);
+      const lastPart = parts[parts.length - 1];
+      if (/^[A-Z]$/i.test(lastPart)) {
+        lokal = lastPart.toUpperCase();
+      }
+
+      const className = `${jenjang} ${tingkat}-${lokal}`;
+      const fullClassName = `Kelas ${jenjang} ${tingkat}-${lokal}`;
+
+      const map: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6 };
+      const levelNum = map[tingkat] || 1;
+
+      const existingClass = await prisma.academicClass.findFirst({
+        where: {
+          academicYearId: targetYearId,
+          OR: [{ name: className }, { name: className.replace("-", " ") }],
+          deletedAt: null,
+        },
+      });
+
+      if (!existingClass) {
+        await prisma.academicClass.create({
+          data: {
+            academicYearId: targetYearId,
+            name: className,
+            fullName: fullClassName,
+            institutionLevel: jenjang,
+            levelNumber: levelNum,
+            mustahiqId: m.personId,
+          },
+        });
+      } else if (!existingClass.mustahiqId) {
+        await prisma.academicClass.update({
+          where: { id: existingClass.id },
+          data: { mustahiqId: m.personId },
+        });
+      }
+    }
+  } catch (err) {
+    console.error("autoEnsureClassesFromMustahiqs error:", err);
   }
 }
