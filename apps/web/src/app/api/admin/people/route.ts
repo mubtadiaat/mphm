@@ -200,28 +200,36 @@ export async function GET(req: NextRequest) {
 
       const formatted = list.map((tp: any) => {
         const rawRole = tp.person.organizationMemberships?.[0]?.role || "Mustahiq";
-        let str = rawRole.replace(/^Mustahiq\s*/i, "").trim();
-        
+
         let jenjang = tp.person.organizationMemberships?.[0]?.supervisedLevel || "-";
-        if (/i['`’]?dadiyyah/i.test(str)) jenjang = "I'dadiyyah";
-        else if (/ibtida['`’]?iyyah/i.test(str)) jenjang = "Ibtida'iyyah";
-        else if (/tsanawiyyah/i.test(str)) jenjang = "Tsanawiyyah";
-        else if (/aliyyah/i.test(str)) jenjang = "Aliyyah";
-        else if (/robithoh/i.test(str)) jenjang = "Al-Robithoh";
-        
+        if (/i['`’]?dadiyyah/i.test(rawRole)) jenjang = "I'dadiyyah";
+        else if (/ibtida['`’]?iyyah/i.test(rawRole)) jenjang = "Ibtida'iyyah";
+        else if (/tsanawiyyah/i.test(rawRole)) jenjang = "Tsanawiyyah";
+        else if (/aliyyah/i.test(rawRole)) jenjang = "Aliyyah";
+        else if (/robithoh/i.test(rawRole)) jenjang = "Al-Robithoh";
+
+        const cleanStr = rawRole
+          .replace(/^Mustahiq\s*/i, "")
+          .replace(/i['`’]?dadiyyah/i, "")
+          .replace(/ibtida['`’]?iyyah/i, "")
+          .replace(/tsanawiyyah/i, "")
+          .replace(/aliyyah/i, "")
+          .replace(/robithoh/i, "")
+          .trim();
+
         let tingkat = "-";
-        const tingkatMatch = str.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
+        const tingkatMatch = cleanStr.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
         if (tingkatMatch) {
           tingkat = tingkatMatch[1].toUpperCase();
         }
 
         let lokal = "-";
-        const parts = str.split(/\s+/);
+        const parts = cleanStr.split(/\s+/);
         const lastPart = parts[parts.length - 1];
         if (/^[A-Z]$/i.test(lastPart)) {
           lokal = lastPart.toUpperCase();
         } else {
-          const lokalMatch = str.match(/\b([A-Z])\b/);
+          const lokalMatch = cleanStr.match(/\b([A-Z])\b/);
           if (lokalMatch) lokal = lokalMatch[1];
         }
 

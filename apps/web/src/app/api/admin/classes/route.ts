@@ -120,21 +120,29 @@ async function autoEnsureClassesFromMustahiqs(targetYearId: string) {
     });
 
     for (const m of mustahiqs) {
-      let str = m.role.replace(/^Mustahiq\s*/i, "").trim();
-      if (!str || str === "Mustahiq") continue;
+      const rawRole = m.role || "Mustahiq";
+      if (!rawRole || rawRole.trim() === "Mustahiq") continue;
 
       let jenjang = "Ibtida'iyyah";
-      if (/i['`’]?dadiyyah/i.test(str)) jenjang = "I'dadiyyah";
-      else if (/ibtida['`’]?iyyah/i.test(str)) jenjang = "Ibtida'iyyah";
-      else if (/tsanawiyyah/i.test(str)) jenjang = "Tsanawiyyah";
-      else if (/aliyyah/i.test(str)) jenjang = "Aliyyah";
+      if (/i['`’]?dadiyyah/i.test(rawRole)) jenjang = "I'dadiyyah";
+      else if (/ibtida['`’]?iyyah/i.test(rawRole)) jenjang = "Ibtida'iyyah";
+      else if (/tsanawiyyah/i.test(rawRole)) jenjang = "Tsanawiyyah";
+      else if (/aliyyah/i.test(rawRole)) jenjang = "Aliyyah";
+
+      const cleanStr = rawRole
+        .replace(/^Mustahiq\s*/i, "")
+        .replace(/i['`’]?dadiyyah/i, "")
+        .replace(/ibtida['`’]?iyyah/i, "")
+        .replace(/tsanawiyyah/i, "")
+        .replace(/aliyyah/i, "")
+        .trim();
 
       let tingkat = "I";
-      const tingkatMatch = str.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
+      const tingkatMatch = cleanStr.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
       if (tingkatMatch) tingkat = tingkatMatch[1].toUpperCase();
 
       let lokal = "A";
-      const parts = str.split(/\s+/);
+      const parts = cleanStr.split(/\s+/);
       const lastPart = parts[parts.length - 1];
       if (/^[A-Z]$/i.test(lastPart)) {
         lokal = lastPart.toUpperCase();
