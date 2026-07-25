@@ -11,6 +11,7 @@ import { useToast } from "@/components/shared/ToastContext";
 import { useGuru, Guru } from "../queries/useGuru";
 import { addPosisiToJabatan } from "@/config/jobPositions.config";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { apiRequest } from "@/lib/api";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -170,6 +171,12 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         importExportProps={{
           title: "Data Mustahiq dan Dewan Pengajar",
           headers: ["Nama Lengkap Mustahiq", "Jenjang", "Tingkat", "Ruang / Lokal", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          onExportFetchAll: async () => {
+            let url = `/api/admin/people?role=teacher&limit=10000&offset=0`;
+            if (searchQuery) url += `&q=${encodeURIComponent(searchQuery)}`;
+            const res = await apiRequest<{ data: Guru[] }>(url);
+            return res?.data || [];
+          },
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {

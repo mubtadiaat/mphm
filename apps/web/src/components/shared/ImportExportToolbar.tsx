@@ -94,6 +94,7 @@ interface ImportExportToolbarProps {
   headers: string[]; // e.g. ["Nama Lengkap", "NIK", "Nomor Stambuk", "Kelas", "Alamat"]
   data: Record<string, string | number | boolean | null | undefined>[]; // current data to export
   onImportSuccess?: (importedData: Record<string, string>[]) => void | Promise<void>;
+  onExportFetchAll?: () => Promise<any[]>;
   title?: string;
   disableImport?: boolean;
   disableExport?: boolean;
@@ -103,6 +104,7 @@ export function ImportExportToolbar({
   headers, 
   data, 
   onImportSuccess, 
+  onExportFetchAll,
   title = "Data Ekspor",
   disableImport = false,
   disableExport = false
@@ -454,8 +456,23 @@ export function ImportExportToolbar({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const getExportRowsData = async () => {
+    if (onExportFetchAll) {
+      try {
+        const fetched = await onExportFetchAll();
+        if (Array.isArray(fetched) && fetched.length > 0) {
+          return fetched;
+        }
+      } catch (err) {
+        console.error("Failed to fetch all rows for export:", err);
+      }
+    }
+    return data;
+  };
+
   // 3. Export data to Excel
   const handleExportExcel = async () => {
+    const targetData = await getExportRowsData();
     const ExcelJSMod = await import("exceljs");
     const ExcelJS = ExcelJSMod.default || ExcelJSMod;
     const fileSaver = await import("file-saver");
@@ -467,7 +484,7 @@ export function ImportExportToolbar({
     sheet.getRow(1).font = { bold: true };
     sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
 
-    data.forEach(item => {
+    targetData.forEach(item => {
       const rowData: Record<string, string> = {};
       headers.forEach(h => {
         rowData[h] = resolveValue(item, h);
@@ -482,6 +499,7 @@ export function ImportExportToolbar({
 
   // 4. Export data to PDF
   const handleExportPDF = async () => {
+    const targetData = await getExportRowsData();
     const jsPDFMod = await import("jspdf");
     const jsPDF = jsPDFMod.jsPDF || jsPDFMod.default || jsPDFMod;
     const autoTableMod = await import("jspdf-autotable");
@@ -491,7 +509,7 @@ export function ImportExportToolbar({
     doc.text(title, 14, 15);
     
     // Map data values to arrays
-    const exportRows = data.map(item => {
+    const exportRows = targetData.map(item => {
       return headers.map(h => {
         return resolveValue(item, h);
       });

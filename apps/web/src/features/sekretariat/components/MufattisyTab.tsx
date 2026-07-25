@@ -11,6 +11,7 @@ import { useToast } from "@/components/shared/ToastContext";
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 import { addPosisiToJabatan, getPositionsForJabatan } from "@/config/jobPositions.config";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { apiRequest } from "@/lib/api";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -195,6 +196,12 @@ export function MufattisyTab({ onViewDetail, isReadOnly = false }: { onViewDetai
         importExportProps={{
           title: "Data Mufattisy dan Dewan Pengawas",
           headers: ["Nama Lengkap Mufattisy", "Jabatan / Posisi", "Jenjang Pengawasan", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          onExportFetchAll: async () => {
+            let url = `/api/admin/people?role=mufattisy&limit=10000&offset=0`;
+            if (searchQuery) url += `&q=${encodeURIComponent(searchQuery)}`;
+            const res = await apiRequest<{ data: Pengurus[] }>(url);
+            return res?.data || [];
+          },
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {

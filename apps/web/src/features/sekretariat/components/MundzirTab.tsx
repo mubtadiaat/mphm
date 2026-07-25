@@ -11,6 +11,7 @@ import { useToast } from "@/components/shared/ToastContext";
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 import { getPositionsForJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { apiRequest } from "@/lib/api";
 
 interface MundzirTabProps {
   onViewDetail: (data: Record<string, unknown>) => void;
@@ -185,6 +186,12 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
         importExportProps={{
           title: "Data Mundzir dan Pimpinan Pesantren",
           headers: ["Nama Lengkap Mundzir", "Jabatan / Posisi", "NIK (16 Digit)", "No. HP / WhatsApp", "Alamat Lengkap"],
+          onExportFetchAll: async () => {
+            let url = `/api/admin/people?role=mundzir&limit=10000&offset=0`;
+            if (searchQuery) url += `&q=${encodeURIComponent(searchQuery)}`;
+            const res = await apiRequest<{ data: Pengurus[] }>(url);
+            return res?.data || [];
+          },
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {

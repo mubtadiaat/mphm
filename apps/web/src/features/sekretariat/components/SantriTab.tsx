@@ -551,6 +551,13 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
             ? "Data Induk Santriwati Asrama (P3HM Lirboyo)"
             : "Data Induk Siswi Diniyyah (MPHM Lirboyo)",
           headers: excelHeaders,
+          onExportFetchAll: async () => {
+            const statusParam = activeSubTab === "tanpa_kelas" ? "without_class" : activeSubTab;
+            let url = `/api/admin/people?role=student&limit=10000&offset=0&status=${statusParam}`;
+            if (searchQuery) url += `&q=${encodeURIComponent(searchQuery)}`;
+            const res = await apiRequest<{ data: Santri[] }>(url);
+            return res?.data || [];
+          },
           onImportSuccess: async (importedRows) => {
             let successCount = 0;
             for (const r of importedRows) {

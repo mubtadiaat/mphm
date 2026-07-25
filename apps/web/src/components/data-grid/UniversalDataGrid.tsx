@@ -28,6 +28,7 @@ interface UniversalDataGridProps<TData, TValue> {
     disableImport?: boolean;
     disableExport?: boolean;
     onImportSuccess?: (importedRows: Record<string, string>[]) => void;
+    onExportFetchAll?: () => Promise<any[]>;
   };
 }
 
@@ -154,6 +155,7 @@ export function UniversalDataGrid<TData, TValue>({
             disableImport={importExportProps.disableImport}
             disableExport={importExportProps.disableExport}
             onImportSuccess={importExportProps.onImportSuccess}
+            onExportFetchAll={importExportProps.onExportFetchAll}
           />
         )}
       </div>
