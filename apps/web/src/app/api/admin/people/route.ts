@@ -274,27 +274,34 @@ export async function GET(req: NextRequest) {
       });
 
       const formatted = people.map((p: any) => {
-        // Determine suggested role based on profiles
         let suggestedRole = "Mustahiq";
-        if (p.mustahiqClasses && p.mustahiqClasses.length > 0) {
-          suggestedRole = "Mustahiq";
-        } else if (p.teacherProfile) {
-          suggestedRole = "Mustahiq"; // teachers who teach are Mustahiq
-        } else if (p.organizationMemberships && p.organizationMemberships.length > 0) {
-          const orgRole = p.organizationMemberships[0].role;
-          if (orgRole === "MUNDZIR" || orgRole === "Mundzir") {
+        let jabatan = "-";
+
+        if (p.organizationMemberships && p.organizationMemberships.length > 0) {
+          const orgRole = p.organizationMemberships[0].role || "";
+          jabatan = orgRole;
+          const orgLower = orgRole.toLowerCase();
+
+          if (orgLower.includes("mundzir")) {
             suggestedRole = "Mundzir";
-          } else if (orgRole === "MUFATTISY" || orgRole === "Mufattisy") {
+          } else if (orgLower.includes("mufat")) {
             suggestedRole = "Mufattisy";
+          } else if (orgLower.includes("mustahiq")) {
+            suggestedRole = "Mustahiq";
           } else {
-            suggestedRole = "sek.pondok";
+            suggestedRole = "Pengurus Harian";
           }
+        } else if (p.teacherProfile) {
+          suggestedRole = "Mustahiq";
+          jabatan = "Mustahiq / Pengajar";
         }
 
         return {
           id: p.id,
           fullName: p.fullName,
-          gender: p.gender || "P",
+          gender: p.gender || "L",
+          phoneNumber: p.phoneNumber || "-",
+          jabatan,
           suggestedRole,
         };
       });

@@ -12,6 +12,7 @@ interface PersonWithoutAccount {
   gender: string;
   suggestedRole: string;
   phoneNumber?: string;
+  jabatan?: string;
 }
 
 export function UsersManagementTab() {
@@ -545,7 +546,7 @@ export function UsersManagementTab() {
             {/* People without accounts list */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+                <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase tracking-wider">
                   <tr>
                     <th className="px-4 py-3 text-left">
                       <input
@@ -555,53 +556,66 @@ export function UsersManagementTab() {
                         className="w-4 h-4 rounded border-zinc-300 cursor-pointer"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left">Nama Lengkap Person</th>
-                    <th className="px-4 py-3 text-left">Gender</th>
-                    <th className="px-4 py-3 text-left">Pilih Role Akun</th>
+                    <th className="px-4 py-3 text-left">Nama Lengkap</th>
+                    <th className="px-4 py-3 text-left">Jabatan (Jabatan/Jenjang/Tingkat)</th>
+                    <th className="px-4 py-3 text-left">Pilih Role Akun (Otomatis)</th>
+                    <th className="px-4 py-3 text-left">No. WhatsApp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                   {loadingPeople ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-8 text-zinc-500">Memuat data personel...</td>
+                      <td colSpan={5} className="text-center py-8 text-zinc-500">Memuat data personel...</td>
                     </tr>
                   ) : peopleWithoutAccounts.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-8 text-zinc-500">
+                      <td colSpan={5} className="text-center py-8 text-zinc-500">
                         Semua pengurus & pengajar sudah memiliki akun. Tidak ada yang perlu di-generate.
                       </td>
                     </tr>
                   ) : (
-                    peopleWithoutAccounts.map((person) => (
-                      <tr key={person.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-                        <td className="px-4 py-3">
-                          <input
-                            type="checkbox"
-                            checked={selectedPeople.includes(person.id)}
-                            onChange={() => handleToggleSelect(person.id)}
-                            className="w-4 h-4 rounded border-zinc-300 cursor-pointer"
-                          />
-                        </td>
-                        <td className="px-4 py-3 font-medium text-zinc-900 dark:text-white">
-                          {person.fullName}
-                          {person.phoneNumber && (
-                            <span className="block text-xs font-mono text-zinc-400">WA: {person.phoneNumber}</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-zinc-500">{person.gender === "L" ? "Laki-laki" : "Perempuan"}</td>
-                        <td className="px-4 py-3">
-                          <select
-                            value={customRoles[person.id] || person.suggestedRole || "Mustahiq"}
-                            onChange={(e) => handleRoleChange(person.id, e.target.value)}
-                            className="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 focus:outline-none"
-                          >
-                            {AVAILABLE_ROLES.map((r) => (
-                              <option key={r} value={r}>{r}</option>
-                            ))}
-                          </select>
-                        </td>
-                      </tr>
-                    ))
+                    peopleWithoutAccounts.map((person) => {
+                      const autoRole = customRoles[person.id] || person.suggestedRole || "Mustahiq";
+                      return (
+                        <tr key={person.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                          <td className="px-4 py-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedPeople.includes(person.id)}
+                              onChange={() => handleToggleSelect(person.id)}
+                              className="w-4 h-4 rounded border-zinc-300 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-4 py-3 font-bold text-zinc-900 dark:text-white">
+                            {person.fullName}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-xs font-semibold px-2.5 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-md inline-block">
+                              {person.jabatan && person.jabatan !== "-" ? person.jabatan : "Pengurus / Pengajar"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <select
+                              value={autoRole}
+                              onChange={(e) => handleRoleChange(person.id, e.target.value)}
+                              className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-lg text-xs font-bold text-blue-700 dark:text-blue-300 focus:outline-none"
+                            >
+                              {AVAILABLE_ROLES.map((r) => {
+                                const isAuto = r === person.suggestedRole;
+                                return (
+                                  <option key={r} value={r}>
+                                    {isAuto ? `⭐ ${r} (Otomatis)` : r}
+                                  </option>
+                                );
+                              })}
+                            </select>
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                            {person.phoneNumber && person.phoneNumber !== "-" ? person.phoneNumber : "-"}
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
