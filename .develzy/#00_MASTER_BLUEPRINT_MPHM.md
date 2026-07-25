@@ -1,5 +1,4 @@
-🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
-
+🌟 MASTER BLUEPRINT MPHM v4.5 (ULTIMATE EDITION)
 **"Sistem Informasi Akademik & Pusat Data Abadi Enterprise"**
 
 ## #00: VISI STRATEGIS, ARSITEKTUR STACK & DEPLOYMENT
@@ -7,143 +6,44 @@
 Sistem Informasi Akademik MPHM dibangun sebagai platform **Enterprise Internal SaaS**. Arsitektur wajib dipisah sepenuhnya (*Strictly Decoupled*) untuk menjamin performa maksimal, keamanan militer, dan keandalan jangka panjang di jaringan Vercel.
 
 **1. Tech Stack Mutlak (The New Stack):**
-
-* **Frontend Layer (PWA & Visual Presentation):** Next.js 15+ (App Router), React 19, TypeScript, Progressive Web App (PWA). Di-deploy ke ekosistem **Vercel**.
+* **Frontend Layer (PWA & Visual Presentation):** Next.js 16+ (App Router dengan Turbopack), React 19, TypeScript, Progressive Web App (PWA). Di-deploy ke ekosistem **Vercel**.
 * **Backend API Gateway (Business Logic):** **Next.js Native Route Handlers** (`apps/web/src/app/api/.../route.ts`). (Murni JSON REST API).
-* **Pusat Data (Database & ORM):** **Neon Postgres** (Serverless PostgreSQL) dikelola dengan **Prisma ORM 7** (`@prisma/adapter-neon`, `prisma/schema.prisma`).
-* **Autentikasi:** **Firebase Authentication** (Google Login & Email/Password) diikat ke `firebase_uid` pada tabel `user_accounts` & `people`.
-* **Media & Asset Storage:** **Cloudinary**. Seluruh foto profil, aset 3D, dokumen bukti, wajib diunggah langsung ke Cloudinary (Direct Signed Upload).
+* **Pusat Data (Database & ORM):** Basis Data Relasional Terenkripsi dikelola dengan **Prisma ORM 7** (`@prisma/client`, `prisma/schema.prisma`).
+* **Autentikasi:** Native Auth Sesi JWT & Google OAuth yang dipetakan langsung ke entitas pengguna di database (`user_accounts`).
+* **Media & Asset Storage:** **Cloud Storage**. Seluruh foto profil & aset media diunggah via Direct Signed Upload.
 
 **2. Aturan Deployment & Domain Produksi:**
-
 * **Domain Utama:** Seluruh sistem beroperasi HANYA di `https://m.p3hm.my.id`.
 * **API Base URL:** `https://m.p3hm.my.id/api/*` (API Edge/Serverless Endpoint via Next.js Route Handlers).
-* Tidak ada referensi ke domain `*.vercel.app` pada konfigurasi produksi.
 
 ---
 
-## #01: UI/UX, 3D, & MODERN ANIMATION STANDARD
+## #01: UI/UX & MODERN ANIMATION STANDARD
+Seluruh antarmuka WAJIB **100% Responsive (Mobile-First, Tablet, Desktop)** dan mengusung filosofi *Ultra-Modern Enterprise Professional SaaS*.
 
-Seluruh antarmuka WAJIB **100% Responsive (Mobile-First, Tablet, Desktop)** dan mengusung filosofi *Ultra-Modern Enterprise Professional SaaS* (sekelas UI premium di Uiverse/Vercel/Linear).
-
-**1. Desain Visual & Komponen:**
-
-* Menggunakan **Tailwind CSS v4**, **shadcn/ui**, **Magic UI** (Bento Grid, Animated List), dan **Aceternity UI** (Spotlight Cards, Glowing Effects).
-* Karakteristik visual: *Glassmorphism* halus, *soft shadow*, *thin border*, *hover elevation*, dan tipografi bersih.
-* **Universal Data Grid:** Tabel wajib memiliki *Realtime Search* (tanpa tombol cari), *Column Manager*, *Server-Side Pagination*, dan format sel identitas (Avatar bulat + Nama Tebal + Sub-info).
-
-**2. Animasi & Rendering 3D:**
-
-* **Micro-interactions:** Menggunakan **Framer Motion** untuk transisi perpindahan halaman, *drawer collapse*, *subtle glow* pada form, dan *loading skeleton*.
-* **3D Elements:** Menggunakan **React Three Fiber / Three.js** untuk elemen interaktif di Dashboard (misal: Logo MPHM 3D, Kartu Statistik Mengambang yang bereaksi terhadap kursor/sentuhan). Animasi 3D harus ringan dan tidak mengorbankan performa.
-
-**3. Dual-Workspace Architecture (Pemilahan Dashboard):**
-* Untuk mengurangi kerumitan antarmuka bagi role admin/Sekretariat, sistem dibagi menjadi dua fokus layar (Workspace Switcher):
-  * **Hub Pondok:** Fokus pada kepengasuhan, asrama, kamar, dan kedisiplinan santriwati.
-  * **Hub Madrasah:** Fokus pada kegiatan sekolah, akademik, rapor, kelas, dan kurikulum siswi.
+- **Policy #UI-08 (Tanpa Hardcoded Fallback String):** Cell renderer dilarang keras menampilkan string fallback buatan (`|| "Tsanawiyyah"`, `|| "Belum Ditentukan"`). Semua tampilan berasal dari database atau `-`.
+- **Universal Data Grid:** Realtime Search (Debounced 300ms), Server-Side Pagination, Column Manager, Identity Cell Pattern (Avatar + Nama Tebal + Sub-teks).
+- **Dual-Workspace Architecture:** Hub PondokPesantren & Hub Madrasah Diniyyah.
 
 ---
 
-## #02: PIPELINE MEDIA CLOUDINARY (STRICTLY DECOUPLED)
-
-Untuk memastikan Vercel Serverless Functions tidak dibebani file berat, sistem media menggunakan **Direct Signed Upload**.
-
-1. **Request Signature:** Frontend meminta token otorisasi ke Backend (Hono).
-2. **Direct Upload:** Frontend mengunggah file (Foto/Bukti) **langsung** ke server Cloudinary.
-3. **Save URL:** Cloudinary membalas dengan URL gambar, lalu Frontend mengirim URL tersebut ke Backend untuk disimpan di database Neon Postgres.
+## #02: PIPELINE MEDIA CLOUD STORAGE
+Frontend meminta token otorisasi ke Backend, mengunggah file langsung ke Cloud Storage, lalu menyimpan URL gambar di database.
 
 ---
 
 ## #03: ENTERPRISE DATA ARCHITECTURE (PERSON-CENTRIC)
-
-Database menganut prinsip **Single Source of Truth**. Tidak boleh ada duplikasi data manusia seumur hidup.
-
-**1. Tabel Inti (`people`):**
-Menyimpan identitas dasar (ID, NIK, Nama, TTL, Alamat, Nomor WA, URL Avatar Cloudinary). Wajib dikunci dengan indeks non-unik pada nama dan indeks unik pada NIK.
-
-**2. Matriks Profil Polimorfik (Smart Data):**
-Entitas `people` dapat memiliki banyak profil seiring waktu. Penghapusan `people` ditolak mutlak (`ON DELETE RESTRICT`) jika profil masih ada.
-
-* `student_profiles`: Santri (Terkait NIS, NISN).
-* `teacher_profiles`: Pengajar / Mustahiq (Terkait Kode Pengajar).
-* `guardian_profiles`: Wali Santri (Diikat dengan Nomor KK, 1 KK bisa melihat banyak santri).
-* `organization_memberships`: Pengurus / Mufattisy / Mundzir.
-* `alumni_records`: Alumni (Otomatis dibuat saat lulus).
-
-**3. Global Command Palette (CTRL+K):**
-Pencarian instan lintas peran (Mencari "Fatimah" akan memunculkan apakah dia Santri, Alumni, atau Pengajar).
+Database menganut prinsip **Single Source of Truth** (`people`). Entitas `people` mengenakan profil polimorfik (`student_profiles`, `teacher_profiles`, `guardian_profiles`, `organization_memberships`, `alumni_records`).
 
 ---
 
 ## #04: ACADEMIC WORKSPACE & MANAJEMEN ROMBEL
-
-Seluruh data operasional diisolasi di dalam **Tahun Ajaran Aktif**.
-
-**1. Hierarki Mutlak:**
-`Tahun Ajaran -> Semester -> Jenjang -> Tingkat -> Kelas/Bagian -> Jadwal & Nilai`
-
-**2. Master Jenjang & Tingkat (Permanen & Hardcoded di Logic):**
-
-* **I'dadiyyah:** Tingkat I - III (Hanya pembagian kelompok, masa 1 tahun, **tanpa kenaikan kelas**).
-* **Ibtida'iyyah:** Tingkat I - VI (Masa 6 tahun).
-* **Tsanawiyyah:** Tingkat I - III (Masa 3 tahun).
-* **Aliyyah:** Tingkat I - III (Masa 3 tahun).
-* **Al-Robithoh:** Khidmah/Mengabdi pasca Aliyyah (Masa 1 tahun).
-
-**3. Aturan Rombel & Mustahiq:**
-Satu kelas hanya dipegang oleh 1 Mustahiq (Wali Kelas) per Tahun Ajaran. Kelas yang sudah berjalan tidak boleh dihapus permanen (Gunakan *Soft Delete*).
+- **Data Model Mustahiq:** Kolom `Nama Lengkap Mustahiq`, `Jenjang` (Badge Ungu), `Tingkat | Lokal` (Blue Bold), `No. HP / WA`, `Status`, `Aksi`. `Kode Guru/Mustahiq` dihapus.
+- **Auto-Generate Classes:** Backend secara otomatis membuat `AcademicClass` di database dari posisi Mustahiq yang diimpor/didaftarkan.
+- **Mufattisy Auto-Match:** Pemetaan otomatis pengawas kelas berbasis `supervisedLevel`.
+- **Card Edit Action:** Tombol edit `Edit3` & modal edit kelas pada kartu rombel.
 
 ---
 
 ## #05: ENGINE PENILAIAN & PROMOTION (KENAIKAN KELAS)
-
-Ini adalah jantung logika komputasi akademik MPHM.
-
-**1. Sistem Penilaian (Kwartal 1 - 4):**
-
-* Mustahiq menginput nilai asli (mendukung pecahan, misal: `6.5` atau `7.5`).
-* **Jenis Pelajaran (MAPEL vs NON-MAPEL):** Pelajaran diklasifikasikan secara dinamis di Dashboard Admin.
-* **Nilai Maksimal:** Untuk MAPEL batasnya adalah 10 (atau 100), sedangkan untuk NON-MAPEL batas mutlaknya adalah 8 (atau 80). (API wajib menolak input di atas ambang batas masing-masing).
-* Pelajaran berjenis NON-MAPEL **TIDAK DIHITUNG** (dieliminasi) dari total agregat nilai untuk penentuan Ranking kelas.
-
-
-
-**2. Promotion Engine (Kenaikan Kelas Akhir Tahun):**
-
-* Mesin yang mengeksekusi rekomendasi akhir secara massal: `PROMOTED` (Naik), `RETAINED` (Tinggal), `GRADUATED` (Lulus), atau `KHIDMAH` (Al-Robithoh).
-* Membaca histori Kwartal 1-4, persentase kehadiran, dan tingkat pelanggaran.
-* I'dadiyyah dikecualikan dari algoritma naik/tinggal tingkat.
-
----
-
-## #06: JADWAL PENDIDIKAN & MANAJEMEN KEDISIPLINAN
-
-**1. Struktur Jadwal (Hissoh):**
-
-* Jadwal terikat pada `Tahun Ajaran -> Kelas`.
-* Dibagi menjadi sesi khusus Pesantren: *Hissoh Ula* (Sesi 1) dan *Hissoh Tsani* (Sesi 2).
-
-**2. Kedisiplinan & Worst-Case Tier Shifting:**
-
-* Master Pelanggaran bersifat dinamis (dikelola Admin Sekretariat) berisi: Kategori, Tingkat Keparahan (Ringan/Sedang/Berat/Sangat Berat), dan Poin.
-* **Algoritma Shifting Akhlaq:** Absensi fisik (kehadiran) dan pelanggaran fatal akan langsung memengaruhi/menjatuhkan predikat kualitatif Akhlaq (misal dari *Jayyid Awwal* jatuh ke *Maqbul*) secara otomatis pada Rapor.
-
----
-
-## #09: KEAMANAN MILITER (RBAC, OTORISASI & GLOBAL AUDIT)
-
-Seluruh eksekusi logika dikunci di tingkat Middleware Hono.
-
-1. **RBAC (Role-Based Access Control):** Super Admin, Sekretariat, Operator, Mustahiq, Mufattisy, Pimpinan, Wali Santri. Setiap *role* HANYA BISA melihat data sesuai lingkup kerjanya (*Data Scope Authorization*).
-2. **Otentikasi:** Wajib menggunakan `HttpOnly Secure Cookie`.
-3. **Realtime Audit Log:** Seluruh aktivitas POST/PUT/DELETE memicu *Middleware* untuk mencatat secara otomatis (Siapa, Kapan, Aksi, *Before/After*).
-4. **TanStack Query + Optimistic Update:** Frontend wajib menggunakan TanStack Query v5 dengan tata kelola *Cache* yang rapi. Antarmuka harus terasa realtime tanpa *reload*.
-5. **NO DUMMY LOGIC:** Dilarang keras membuat logika hardcode palsu (*mock* yang tidak bisa diganti). Backend API harus siap memvalidasi dengan *Zod Interceptors*. Seluruh penanganan *Error* membalas dengan format JSON yang konsisten.
-
----
-
-### 🚀 STATUS: READY FOR DEVELOPMENT
-
-Blueprint ini adalah spesifikasi teknis tingkat *Enterprise SaaS*. Anda dapat langsung memerintahkan agen AI/Developer Anda dengan *prompt* berikut untuk memulai:
-
-> *"Berdasarkan Master Blueprint MPHM v4.0, set up Vercel untuk Next.js 15 (Frontend) dengan Tailwind v4 dan shadcn, serta API Hono.js di apps/web/src/server dengan Neon Postgres Database. Buat skema Drizzle untuk tabel `people` dan `student_profiles` di packages/db/src/schema."*
+Algoritma 4 Kwartal, Eliminasi Nilai Non-Mapel dari Ranking, serta State Machine Kenaikan Kelas (Draft -> Review -> Final).

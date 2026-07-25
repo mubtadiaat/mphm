@@ -1,52 +1,56 @@
-🌟 MASTER BLUEPRINT MPHM v4.0 (ULTIMATE EDITION)
+🌟 MASTER BLUEPRINT MPHM v4.5 (ULTIMATE EDITION)
 #08: OTORISASI HAK AKSES (RBAC), KEAMANAN, & GLOBAL REALTIME AUDIT TRAIL
-Keamanan, otorisasi, dan forensik data pada ekosistem MPHM v4.0 diimplementasikan secara terpusat di tingkat lapisan Backend API Gateway. Kebijakan ini memastikan bahwa seluruh operasi baca dan tulis (read/write) divalidasi sebelum mengeksekusi perintah ke basis data terenkripsi.
 
-1. MANAJEMEN SESI & 6 PERAN RESMI (RBAC SYSTEM)
-Sistem autentikasi MPHM tidak menggunakan token JWT di sisi client storage demi menghindari kerentanan Cross-Site Scripting (XSS). Sistem menggunakan Session Authentication berbasis HttpOnly Cookie.
+Keamanan, otorisasi, dan forensik data pada ekosistem MPHM v4.5 diimplementasikan secara terpusat di tingkat lapisan Backend API Gateway. Kebijakan ini memastikan bahwa seluruh operasi baca dan tulis (read/write) divalidasi sebelum mengeksekusi perintah ke basis data terenkripsi.
 
-Spesifikasi Keamanan Cookie (Strict Flag):
+---
+
+## 1. MANAJEMEN SESI & PERAN RESMI (RBAC SYSTEM)
+Sistem menggunakan Session Authentication berbasis HttpOnly Cookie & JWT Token Sesi.
+
+**Spesifikasi Keamanan Cookie (Strict Flag):**
 - **HttpOnly: true** (Mencegah skrip frontend membaca token sesi).
 - **Secure: true** (Wajib dilewatkan hanya melalui jaringan HTTPS murni pada domain `https://m.p3hm.my.id`).
 - **SameSite: Strict** (Mencegah serangan Cross-Site Request Forgery / CSRF).
-- **Session Rotation**: Token sesi otomatis diperbarui (rotate) setiap kali pengguna melakukan tindakan krusial.
-
-6 Peran Resmi Sistem:
-1. **Sekretariat**: Pengelolaan administratif terpusat, kontrol data induk, kurikulum, serta manajemen akun global.
-2. **Mustahiq (Wali Kelas)**: Hak input nilai kuartal atau ujian semester, mengelola kehadiran berbasis hissoh, serta memberikan catatan kualitatif akhlaq.
-3. **Mufattisy (Pimpinan Tingkatan)**: Peninjauan (review) pengisian nilai kelas, kedisiplinan tingkat, serta memberikan persetujuan pada kandidat kenaikan kelas.
-4. **Pimpinan / Mundzir**: Akses pemantauan eksekutif (monitoring dashboard) lintas jenjang.
-5. **Petugas Keamanan**: Pencatatan insiden pelanggaran santri secara langsung ke dalam jurnal kedisiplinan.
-6. **Wali Santri**: Akses masuk Read-Only khusus untuk memantau perkembangan anak asuh.
 
 ---
 
-2. PUSAT PENGELOLAAN AKUN (USERS) & MODUL GENERATOR KREDENSIAL
-Modul `/sekretariat/users` menyediakan kontrol otorisasi akun pengguna secara massal:
-- **Monitoring Akun Aktif**: Menampilkan daftar username, nama lengkap person, role, status aktif/non-aktif, serta pagination dynamic baris (5, 10, 20, 50 baris).
-- **Generator Kredensial Instansi Massal**: Menarik data personel (`people`) yang terdaftar sebagai Mustahiq, Mufattisy, atau Mundzir tetapi **belum memilik akun** (`userAccount: { is: null }`). Operator dapat melakukan *multi-select* dan secara otomatis menerbitkan username & password login acak yang siap didistribusikan.
-- **Fitur Reset Password**: Menyediakan dialog khusus untuk mereset password akun pengguna secara langsung oleh Sekretariat.
-- **Keranjang Sampah Dorman**: Mengisolasi akun yang dorman (> 1 tahun tidak aktif) untuk dikaji ulang oleh Administrator.
+## 2. STRICT SDM MENU ISOLATION (ISOLASI MENU EKSEKUTIF & DEWAN)
+Untuk menjaga kerapian administratif dan integritas peran, API Server (`/api/admin/people?role=pengurus`) secara mutlak memisahkan data personel:
+- **Dewan Harian & Dewan Pleno:** Menggunakan filter eksplisit server-side:
+  - `EXCLUDE: Mundzir`
+  - `EXCLUDE: Mufattisy / Mufatish`
+  - `EXCLUDE: Mustahiq / Wali Kelas`
+- **Menu Terisolasi 100%:**
+  - `/sekretariat/mundzir`: Khusus menampilkan Dewan Harian Mundzir.
+  - `/sekretariat/mufattisy`: Khusus menampilkan Inspektorat Mufattisy.
+  - `/sekretariat/mustahiq`: Khusus menampilkan Dewan Pengajar Mustahiq.
+  - `/sekretariat/pengurus-madrasah` & `/sekretariat/dewan-pleno`: Khusus untuk Pengurus Eksekutif (Ketua, Sekretaris, Bendahara, IT, Keamanan, dst.).
 
 ---
 
-3. DATA SCOPE AUTHORIZATION INTERCEPTOR
+## 3. PUSAT PENGELOLAAN AKUN (USERS) & 4 SUB-MENU RESMI
+Modul `/sekretariat/users` menyediakan 4 Sub-Menu Utama:
+
+1. **Daftar Akun (Monitoring):** Monitoring seluruh akun pengguna terdaftar beserta status keaktifan & status online.
+2. **Generate Akun Instansi:** Generator kredensial massal dengan **Deteksi Role Otomatis (`⭐ Otomatis`)**.
+   - Sistem membaca `OrganizationMembership` & `TeacherProfile` untuk menentukan role secara presisi (Mustahiq, Mufattisy, Mundzir, atau Pengurus Harian).
+   - Lay-out Tabel: `Nama Lengkap | Jabatan (Jabatan/Jenjang/Tingkat) | Pilih Role Akun (Otomatis) | No. WhatsApp`.
+3. **Keranjang Sampah Dorman (>6 Bulan):** Isolasi otomatis bagi akun tidak login >6 bulan.
+4. **Wali Santri (Yang Sudah Mendaftar):** Sub-menu khusus monitoring & pengelolaan akun Wali Santri / Orang Tua murid terdaftar.
+
+---
+
+## 4. DATA SCOPE AUTHORIZATION INTERCEPTOR
 Sistem menerapkan Data Scope Authorization secara absolut:
-- **Mustahiq Scope Lock**: Mustahiq secara otomatis terikat pada satu class_id aktif. Endpoint `/api/scores` atau `/api/attendance` menyaring data kelas miliknya secara otomatis.
-- **Wali Santri Scope Lock**: Akun Wali Santri dikunci murni berbasis parameter `family_card_number` (Nomor KK).
+- **Mustahiq Scope Lock:** Mustahiq secara otomatis terikat pada kelas miliknya per Tahun Ajaran.
+- **Wali Santri Scope Lock:** Akun Wali Santri dikunci murni berbasis parameter NIK / Nomor KK (`family_card_number`).
 
 ---
 
-4. AUTOMATED FORENSICS AUDIT LOG ENGINE (BEFORE/AFTER PATTERN)
-Setiap operasi manipulasi data yang bersifat merubah isi basis data (POST, PUT, DELETE) dicegat secara otomatis oleh Audit Log Engine:
-- **userId & userRole** (Identitas eksekutor tindakan).
-- **module** (Nama fitur yang diakses, contoh: ASSESSMENT_ENGINE, CLASS_MANAGEMENT, USER_ACCOUNTS).
-- **action** (Jenis manipulasi: INSERT, UPDATE, DELETE).
+## 5. AUTOMATED FORENSICS AUDIT LOG ENGINE (BEFORE/AFTER PATTERN)
+Setiap operasi manipulasi data (POST, PUT, DELETE) dicegat secara otomatis oleh Audit Log Engine:
+- **userId & userRole** (Identitas eksekutor).
+- **module** (Nama fitur).
+- **action** (INSERT, UPDATE, DELETE).
 - **beforeData & afterData** (Kondisi JSON data sebelum dan sesudah mutasi).
-
----
-
-5. UNIVERSAL API & CRUD STANDARD
-- **Standar Response JSON**: `{ success: boolean, message: string, data/errors: object }`.
-- **Universal Import & Export**: Mendukung format Excel, CSV, dan PDF.
-- **Universal Bulk & Soft Delete**: Aksi massal menggunakan Soft Delete (`deletedAt`) dan dilindungi oleh Database Transaction.

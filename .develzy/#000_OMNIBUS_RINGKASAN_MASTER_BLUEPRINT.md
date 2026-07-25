@@ -15,6 +15,9 @@ Arsitektur sistem mematuhi **Vercel Ecosystem** dan **Turborepo** (Monorepo) unt
 - **Pipeline Media:** Cloud Storage. Tidak ada file gambar lokal statis, Frontend menggunakan *Signed Upload Token* ke Cloud Storage.
 - **Domain Produksi Tunggal:** Seluruh sistem diakses melalui `https://m.p3hm.my.id`. API diakses via `/api/*`.
 - **Standar Bahasa UI:** Bersih dari nama vendor internal (seperti Neon/Postgres/Cloudinary di teks user-facing), diganti dengan istilah umum profesional ("database terenkripsi", "Cloud Storage").
+- **Hukum Tanpa Hardcoded Fallback String:** Seluruh cell renderer tabel dilarang keras menggunakan string fallback palsu (seperti `|| "Tsanawiyyah"`, `|| "Belum Ditentukan"`). Semua tampilan WAJIB murni dari baris database PostgreSQL atau fallback ke tanda dash (`"-"`).
+
+---
 
 ## 2. DATA ARCHITECTURE & KEAMANAN SYSTEM (Modul #02, #08, #13)
 Sistem menggunakan hukum tata kelola data terpusat dan terenkripsi.
@@ -22,28 +25,37 @@ Sistem menggunakan hukum tata kelola data terpusat dan terenkripsi.
   - Data entitas manusia hanya satu (tabel `people`). Perannya bisa banyak (Santri, Pengajar, Wali, Pengurus).
   - Pendaftaran identitas utama santriwati dilakukan dari **Pondok (P3HM)**.
   - Aplikasi **Madrasah (MPHM)** memanggil/menarik data santriwati dari Pondok. Jika santriwati belum dipasangkan kelas madrasah saat registrasi di Pondok, Sekretariat MPHM menarik data santriwati tersebut dari daftar *Belum Ada Kelas* lalu mengalokasikannya ke kelas target.
-- **Pusat Pengelolaan Akun (Users) & Generator Kredensial:**
-  - Manajemen kredensial pengguna terpusat di `/sekretariat/users`.
-  - Generator kredensial akun instansi otomatis menarik personel Mustahiq, Mufattisy, dan Mundzir yang **belum memiliki akun** untuk menerbitkan username & password massal.
-  - Fitur Reset Password & isolasi Akun Dorman di Keranjang Sampah.
+- **Pusat Pengelolaan Akun (Users) & 4 Sub-Menu Utama:**
+  - Terpusat pada menu `/sekretariat/users` dengan 4 Sub-Menu Resmi:
+    1. **Daftar Akun (Monitoring):** Pemantauan seluruh akun terdaftar beserta status keaktifan & online.
+    2. **Generate Akun Instansi:** Generator massal kredensial akun instansi dengan **Deteksi Role Otomatis (`⭐ Otomatis`)** berdasarkan jabatan/profil. Tabel standar: `Nama Lengkap | Jabatan (Jabatan/Jenjang/Tingkat) | Pilih Role Akun (Otomatis) | No. WhatsApp`.
+    3. **Keranjang Sampah Dorman (>6 Bulan):** Isolasi otomatis bagi akun tidak aktif >6 bulan.
+    4. **Wali Santri (Yang Sudah Mendaftar):** Modul khusus pemantauan & manajemen akun Wali Santri terdaftar.
 - **Otorisasi Roles & Multi-Role Support:** Mendukung peran Sekretariat Utama, Sekretariat Pondok (`sek.pondok`), Sekretariat Madrasah (`sek.madrasah`), Mustahiq (Wali Kelas), Mufattisy, Mundzir (Pimpinan), Keamanan, dan Wali Santri.
+- **Strict SDM Menu Isolation:** API Server (`/api/admin/people?role=pengurus`) secara ketat mengeksklusi Mundzir, Mufattisy, dan Mustahiq agar tabel Dewan Harian & Dewan Pleno 100% bersih dan berdiri sendiri-sendiri tanpa ada pencampuran data.
 - **Workspace Auto-Sync:** `WorkspaceContext` secara otomatis mendeteksi role pengguna saat login:
   - Role `sek.pondok` ➔ Otomatis memuat Workspace **Pondok Pesantren** (Asrama, Kamar, Khidmah Alumni, Poin Takzir, Wali Santri).
   - Role `sek.madrasah` ➔ Otomatis memuat Workspace **Madrasah Diniyyah** (Kurikulum, GPA Diniyyah, Presensi Realtime, Rombel).
 - **Automated Audit Log:** Route Handler Next.js mencatat setiap mutasi data (POST, PUT, DELETE) dengan skema *Before/After Data* pada tabel `audit_logs`.
 - **Soft Delete Mutlak:** Seluruh relasi database menggunakan `onDelete: "restrict"` atau `deletedAt`. Dilarang ada penghapusan baris jika masih memiliki riwayat akademik/pelanggaran.
-- **Wipe Out & Relational Seeding:** Skrip `seed.js` mengeksekusi `TRUNCATE TABLE ... CASCADE` untuk pembersihan total data dummy mengambang dan menanamkan data terintegrasi 100%.
+
+---
 
 ## 3. AKADEMIK, ROMBEL & KURIKULUM (Modul #03, #10)
 Sistem menggunakan konsep "Academic Workspace" per Tahun Ajaran.
 - **Isolasi Tahun Ajaran:** Data transaksional (Rapor, Kelas, Absen) terikat pada ID Tahun Ajaran (`academic_years`).
+- **Data Model Mustahiq (Tanpa Kode Guru):** Tabel Mustahiq (`/sekretariat/mustahiq`) menyajikan kolom `Nama Lengkap Mustahiq`, **`Jenjang`** *(Badge Ungu)*, **`Tingkat | Lokal`** *(Teks Biru Cetak Tebal)*, `No. HP / WA`, `Status`, `Aksi`. `Kode Guru/Mustahiq` dihapus sepenuhnya demi kejelasan structural position.
+- **Auto-Generate Academic Classes:** Backend (`GET /api/admin/classes`) secara otomatis memeriksa dan membuat entitas kelas (`AcademicClass`) di database untuk setiap Mustahiq yang diimpor/didaftarkan dengan posisi kelas (misal `I'dadiyyah I A`), sekaligus memasangkan Mustahiq sebagai Wali Kelas resmi.
+- **Pemuatan Otomatis Mufattisy (Pengawas):** Mufattisy secara otomatis dipetakan ke kartu kelas berdasarkan kesesuaian `Jenjang Pengawasan` (misal *Nur Hidayat* untuk *I'dadiyyah*).
+- **Modal & Aksi Edit Kelas:** Kartu kelas pada Grid Data Kelas (`/sekretariat/kelas`) dilengkapi tombol **Edit** (`Edit3`) dan modal interaktif untuk mengubah Wali Kelas Mustahiq dan Kapasitas Rombel.
 - **Sub-Tab "Belum Ada Kelas (Tarik Data Pondok)":** Memudahkan penempatan kelas bagi siswi baru yang didaftarkan di Pondok.
 - **Hierarki Lembaga:** Ibtida'iyyah, Tsanawiyyah, dan Aliyyah.
 - **Manajemen Asrama (Rooms):** Pengelolaan Kamar/Asrama Santriwati terpusat lengkap dengan Wali Kamar dan Kapasitas (tabel `rooms`).
 - **Syllabus Engine & Non-Mapel:**
   - Mapel Diniyyah menggunakan judul kitab berbahasa Arab (seperti فتح القريب, الكيلاني, الآجرومية).
-  - Kelompok Non-Mapel (Al-Qur'an, Khoth, Qiro'ah, Muhafadhoh, Akhlaq) dapat dipisahkan dari kalkulasi Ranking.
-- **Jadwal & Hissoh:** Jadwal fleksibel diturunkan ke kelas yang terbagi dalam dua hissoh (Ula & Tsani).
+  - Kelompok Non-Mapel (Al-Qur'an, Khoth, Qiro'ah, Muhafadhoh, Akhlaq) dipisahkan dari kalkulasi Ranking.
+
+---
 
 ## 4. ENGINE PENILAIAN & KENAIKAN KELAS (Modul #04, #05)
 - **Algoritma 4 Kwartal:** Tamrin Sem I, Ujian Sem I, Tamrin Sem II, Ujian Sem II.
@@ -51,23 +63,32 @@ Sistem menggunakan konsep "Academic Workspace" per Tahun Ajaran.
 - **Ranking Elimination Engine:** Fitur isolasi nilai Non-Mapel dari perhitungan ranking kelas.
 - **Promotion Engine:** State Machine Kenaikan Kelas (Draft -> Review -> Final) dengan status Promoted, Retained, Graduated, Khidmah.
 
+---
+
 ## 5. KEDISIPLINAN, ABSENSI, & PERIZINAN (Modul #06, #15)
 - **Kehadiran (Rekap Hijriyyah):** Absensi direkap per bulan pada tabel `student_attendances`.
 - **Master Pelanggaran & Poin:** Jenis pelanggaran dikelola dari dashboard via tabel `violation_types` dan `student_violations`.
 - **Sistem Perizinan & Sambangan (StudentPermit):** 
   - Model `StudentPermit` (`student_permits`) mengelola izin PULANG, SAMBANGAN, dan KELUAR.
   - Alur persetujuan (*approval flow*) dari Pimpinan/Sekretariat dengan audit status PENDING, APPROVED, REJECTED, COMPLETED.
-  - RESTful API CRUD di `/api/disciplinary/permits` dan `/api/disciplinary/permits/[id]`.
+
+---
 
 ## 6. PORTAL WALI SANTRI & EKOSISTEM KK MAPPING (Modul #07)
-- Wali Santri dapat memantau perkembangan akademik, presensi, kedisiplinan, dan perizinan anak kandung secara realtime berdasarkan ikatan Nomor KK / NIK pada `guardian_profiles`.
+- Wali Santri dapat memantau perkembangan akademik, presensi, kedisiplinan, dan perizinan anak kandung secara realtime berdasarkan ikatan Nomor KK / NIK pada `guardian_profiles` dan akun di sub-menu *Wali Santri (Yang Sudah Mendaftar)*.
+
+---
 
 ## 7. MANAJEMEN ASRAMA & SANTRI KHIDMAH (Modul #16)
 - Pengelolaan Kamar/Asrama (`rooms`), penugasan alumni khidmah (`khidmah_assignments`), dan pemetaan jabatan struktural pengurus pondok/madrasah.
 
+---
+
 ## 8. DOKUMEN & SYSTEM CONFIGURATION (Modul #12, #14)
 - **Document Template Builder:** WYSIWYG Editor dengan *Merge Tags* (`{{nama_santri}}`, `{{stambuk}}`) untuk pencetakan Rapor dan Ijazah.
-- **System Settings Cockpit Persisten Database:** Dashboard kontrol parameter sistem terpusat (`SystemSettingsCockpit.tsx`) yang tersimpan persisten ke basis data terenkripsi via `PUT /api/settings` menggunakan JSON Serialization dan disinkronkan ke local storage.
+- **System Settings Cockpit Persisten Database:** Dashboard kontrol parameter sistem terpusat (`SystemSettingsCockpit.tsx`) yang tersimpan persisten ke basis data terenkripsi via `PUT /api/settings`.
+
+---
 
 ## 9. STANDAR UI/UX & COMPONENT (Modul #01)
 - UI/UX Enterprise Premium berstandar *Glassmorphism*, *Responsive Grid*, *Role Quick Login Buttons*, *PillBadge*, dan *Spotlight Cards*.
