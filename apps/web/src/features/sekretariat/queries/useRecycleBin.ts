@@ -3,6 +3,7 @@ import { apiRequest } from "../../../lib/api";
 
 export interface DeletedItem {
   id: string;
+  entityType?: string;
   type: string;
   name: string;
   deletedAt: string;
@@ -29,6 +30,9 @@ export function useRecycleBin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-recycle-bin"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-santri"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-guru"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-pengurus"] });
     },
   });
 
@@ -44,11 +48,42 @@ export function useRecycleBin() {
     },
   });
 
+  const emptyTrashMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest<{ status: string; message: string }>("/api/admin/recycle-bin", {
+        method: "DELETE",
+      });
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-recycle-bin"] });
+    },
+  });
+
+  const restoreAllMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest<{ status: string; message: string }>("/api/admin/recycle-bin", {
+        method: "POST",
+      });
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-recycle-bin"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-santri"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-guru"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-pengurus"] });
+    },
+  });
+
   return {
     ...query,
     restoreItem: restoreMutation.mutateAsync,
     isRestoring: restoreMutation.isPending,
     forceDeleteItem: forceDeleteMutation.mutateAsync,
     isForceDeleting: forceDeleteMutation.isPending,
+    emptyTrash: emptyTrashMutation.mutateAsync,
+    isEmptyingTrash: emptyTrashMutation.isPending,
+    restoreAllTrash: restoreAllMutation.mutateAsync,
+    isRestoringAll: restoreAllMutation.isPending,
   };
 }
