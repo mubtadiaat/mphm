@@ -5,8 +5,9 @@ import { useSystemSettings } from "@/components/providers/SystemSettingsProvider
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/components/shared/ToastContext";
 import { motion } from "framer-motion";
-import { Users, Lock, Settings, CheckCircle2, Database, Sliders, MapPin, Calculator, Briefcase, Plus, X, AlertCircle } from "lucide-react";
+import { Users, Lock, Settings, CheckCircle2, Database, Sliders, MapPin, Calculator, Briefcase, Plus, X, AlertCircle, Trash2, Loader2 } from "lucide-react";
 import { PillBadge } from "@/components/shared/PillBadge";
+import { apiRequest } from "@/lib/api";
 import { MasterPelanggaranTab } from "@/features/sekretariat/components/MasterPelanggaranTab";
 import { 
   DEFAULT_ROLE_CONFIGS, 
@@ -832,6 +833,17 @@ export function SystemSettingsCockpit() {
           >
             <Calculator className="w-4 h-4 text-emerald-500" />
             <span>Parameter Matematis</span>
+          </button>
+          <button
+            onClick={() => setSettingsTab("purge_data")}
+            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all duration-200 ${
+              settingsTab === "purge_data"
+                ? "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 shadow-xs border border-rose-200 dark:border-rose-900"
+                : "text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/30 border border-transparent"
+            }`}
+          >
+            <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+            <span>Hapus All Data</span>
           </button>
         </div>
 
@@ -1792,6 +1804,10 @@ export function SystemSettingsCockpit() {
             <MasterPelanggaranTab />
           )}
 
+          {settingsTab === "purge_data" && (
+            <PurgeAllDataTab />
+          )}
+
 
 
           {/* Save Button */}
@@ -1806,6 +1822,236 @@ export function SystemSettingsCockpit() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PurgeAllDataTab() {
+  const { toast } = useToast();
+  const [selectedCategory, setSelectedCategory] = useState("student");
+  const [confirmationInput, setConfirmationInput] = useState("");
+  const [isPurging, setIsPurging] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const CATEGORY_MAP: Record<string, { label: string; desc: string; icon: string }> = {
+    student: {
+      label: "SANTRIWATI / SISWI",
+      desc: "Menghapus seluruh data Induk Santriwati Asrama P3HM dan Siswi Diniyyah MPHM beserta profilnya.",
+      icon: "👩‍🎓",
+    },
+    mustahiq: {
+      label: "MUSTAHIQ (DEWAN PENGAJAR)",
+      desc: "Menghapus seluruh data Ustadz Mustahiq dan Dewan Pengajar Diniyyah.",
+      icon: "📚",
+    },
+    mufattisy: {
+      label: "MUFATISH (DEWAN PENGAWAS)",
+      desc: "Menghapus seluruh data Ustadz Mufattisy dan Dewan Pengawas Kedisiplinan.",
+      icon: "🔍",
+    },
+    mundzir: {
+      label: "MUNDZIR (PIMPINAN PESANTREN)",
+      desc: "Menghapus seluruh data Mundzir dan Pimpinan Pesantren/Madrasah.",
+      icon: "🏛️",
+    },
+    pengurus: {
+      label: "PENGURUS STRUKTURAL",
+      desc: "Menghapus seluruh data Pengurus Organisasi Pondok & Madrasah.",
+      icon: "👔",
+    },
+    dewan_harian: {
+      label: "DEWAN HARIAN",
+      desc: "Menghapus seluruh data Pengurus Eksekutif Dewan Harian (Ketua, Sekretaris, Bendahara, dll).",
+      icon: "⚡",
+    },
+    dewan_pleno: {
+      label: "DEWAN PLENO",
+      desc: "Menghapus seluruh data Pengurus Anggota Dewan Pleno Organisasi.",
+      icon: "📊",
+    },
+  };
+
+  const handleExecutePurge = async () => {
+    if (confirmationInput !== "HAPUS SEMUA DATA") {
+      toast("Teks konfirmasi harus diisi persis 'HAPUS SEMUA DATA'", "error", "Gagal");
+      return;
+    }
+
+    setIsPurging(true);
+    try {
+      const res = await apiRequest<{ status: string; message: string; deletedCount: number }>("/api/admin/purge", {
+        method: "POST",
+        body: JSON.stringify({
+          category: selectedCategory,
+          confirmationText: confirmationInput,
+        }),
+      });
+
+      toast(res.message || "Data berhasil dibersihkan dari sistem.", "success", "Berhasil Purge");
+      setConfirmationInput("");
+      setShowConfirmModal(false);
+      window.dispatchEvent(new Event("role_configs_changed"));
+    } catch (err: any) {
+      console.error("Purge error:", err);
+      toast(err?.message || "Gagal menghapus data dari sistem.", "error", "Gagal");
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
+  const currentCatInfo = CATEGORY_MAP[selectedCategory] || CATEGORY_MAP.student;
+
+  return (
+    <div className="space-y-6">
+      {/* Danger Banner */}
+      <div className="p-6 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-rose-100 dark:bg-rose-900/50 rounded-2xl text-rose-600 dark:text-rose-400 shrink-0">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-600 text-white">
+                Zona Bahaya (Danger Zone)
+              </span>
+            </div>
+            <h2 className="text-xl font-black text-rose-900 dark:text-rose-200 tracking-tight">
+              Hapus All Data (Batch Selective Purge)
+            </h2>
+            <p className="text-xs text-rose-700 dark:text-rose-300 max-w-2xl leading-relaxed">
+              Fitur ini memungkinkan administrator untuk menghapus seluruh data secara massal dan selektif berdasarkan kategori dropdown di bawah ini. Pastikan Anda telah melakukan backup data sebelum mengeksekusi pembersihan.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Purge Configuration Card */}
+      <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm space-y-6">
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">
+            1. Pilih Kategori Data yang Ingin Dihapus Seluruhnya *
+          </label>
+          <div className="relative">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-300 dark:border-zinc-700 rounded-xl text-base font-extrabold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all cursor-pointer"
+            >
+              <option value="student">SANTRIWATI / SISWI</option>
+              <option value="mustahiq">MUSTAHIQ (DEWAN PENGAJAR)</option>
+              <option value="mufattisy">MUFATISH (DEWAN PENGAWAS)</option>
+              <option value="mundzir">MUNDZIR (PIMPINAN PESANTREN)</option>
+              <option value="pengurus">PENGURUS STRUKTURAL</option>
+              <option value="dewan_harian">DEWAN HARIAN</option>
+              <option value="dewan_pleno">DEWAN PLENO</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Dynamic Category Preview */}
+        <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl flex items-center gap-4">
+          <span className="text-3xl">{currentCatInfo.icon}</span>
+          <div>
+            <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">
+              Target Pembersihan: <span className="text-rose-600 dark:text-rose-400">{currentCatInfo.label}</span>
+            </h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {currentCatInfo.desc}
+            </p>
+          </div>
+        </div>
+
+        {/* Double Safety Input Confirmation */}
+        <div className="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+          <label className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 block">
+            2. Ketik Teks Konfirmasi Keamanan *
+          </label>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Ketik kata <span className="font-mono font-black text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-900">HAPUS SEMUA DATA</span> pada kotak di bawah ini untuk membuka kunci tombol eksekusi:
+          </p>
+          <input
+            type="text"
+            value={confirmationInput}
+            onChange={(e) => setConfirmationInput(e.target.value)}
+            placeholder="Ketik 'HAPUS SEMUA DATA' di sini..."
+            className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border border-rose-300 dark:border-rose-800 rounded-xl text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/40 transition-all placeholder:text-zinc-400 placeholder:font-normal"
+          />
+        </div>
+
+        {/* Execution Button */}
+        <div className="pt-2 flex justify-end">
+          <button
+            type="button"
+            disabled={confirmationInput !== "HAPUS SEMUA DATA" || isPurging}
+            onClick={() => setShowConfirmModal(true)}
+            className={`px-6 py-3.5 rounded-xl font-black text-sm tracking-wide transition-all duration-200 flex items-center gap-2.5 shadow-md ${
+              confirmationInput === "HAPUS SEMUA DATA" && !isPurging
+                ? "bg-rose-600 hover:bg-rose-700 text-white cursor-pointer hover:shadow-rose-600/25 active:scale-98"
+                : "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed border border-zinc-300 dark:border-zinc-700"
+            }`}
+          >
+            <Trash2 className="w-5 h-5" />
+            <span>HAPUS SELURUH DATA {currentCatInfo.label}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white dark:bg-zinc-900 border border-rose-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5"
+          >
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+              <div className="p-3 bg-rose-100 dark:bg-rose-950/60 rounded-xl">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">
+                  Konfirmasi Akhir Pembersihan Massal
+                </h3>
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-bold">
+                  Tindakan Tidak Dapat Dibatalkan!
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+              Apakah Anda benar-benar yakin ingin menghapus <strong>SELURUH DATA {currentCatInfo.label}</strong> dari database sistem?
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold rounded-xl text-sm hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isPurging}
+                onClick={handleExecutePurge}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl text-sm shadow-md transition-all cursor-pointer flex items-center gap-2"
+              >
+                {isPurging ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Memproses...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Ya, Hapus Sekarang</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
