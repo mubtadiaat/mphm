@@ -65,18 +65,45 @@ export async function PUT(
 
     const updatedPersonName = name || fullName;
 
-    // Check if id matches personId or studentProfile id
+    // Dynamic targetPersonId resolution across all polymorphic profiles
+    let targetPersonId: string | null = null;
+
+    const existingPerson = await prisma.person.findFirst({ where: { id, deletedAt: null } });
+    if (existingPerson) targetPersonId = existingPerson.id;
+
+    if (!targetPersonId) {
+      const teacher = await prisma.teacherProfile.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (teacher) targetPersonId = teacher.personId;
+    }
+
+    if (!targetPersonId) {
+      const membership = await prisma.organizationMembership.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (membership) targetPersonId = membership.personId;
+    }
+
+    if (!targetPersonId) {
+      const student = await prisma.studentProfile.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (student) targetPersonId = student.personId;
+    }
+
+    if (!targetPersonId) {
+      const userAccount = await prisma.userAccount.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (userAccount) targetPersonId = userAccount.personId;
+    }
+
+    if (!targetPersonId) {
+      targetPersonId = id;
+    }
+
     const existingStudent = await prisma.studentProfile.findFirst({
-      where: { OR: [{ id }, { personId: id }] },
+      where: { personId: targetPersonId },
       include: { person: true },
     });
-
-    const targetPersonId = existingStudent ? existingStudent.personId : id;
 
     const result = await prisma.$transaction(async (tx) => {
       // 1. Update Person
       const person = await tx.person.update({
-        where: { id: targetPersonId },
+        where: { id: targetPersonId! },
         data: {
           ...(updatedPersonName ? { fullName: updatedPersonName } : {}),
           ...(nik !== undefined ? { nik } : {}),
@@ -93,7 +120,7 @@ export async function PUT(
       const targetSupervisedLevel = body.supervisedLevel;
       if (targetRoleName || targetSupervisedLevel !== undefined) {
         await tx.organizationMembership.updateMany({
-          where: { personId: targetPersonId, deletedAt: null },
+          where: { personId: targetPersonId!, deletedAt: null },
           data: {
             ...(targetRoleName ? { role: targetRoleName } : {}),
             ...(targetSupervisedLevel !== undefined ? { supervisedLevel: targetSupervisedLevel } : {}),
@@ -170,30 +197,76 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const existingStudent = await prisma.studentProfile.findFirst({
-      where: { OR: [{ id }, { personId: id }] },
-    });
+    // Dynamic targetPersonId resolution across all polymorphic profiles
+    let targetPersonId: string | null = null;
 
-    const targetPersonId = existingStudent ? existingStudent.personId : id;
+    const existingPerson = await prisma.person.findFirst({ where: { id } });
+    if (existingPerson) targetPersonId = existingPerson.id;
+
+    if (!targetPersonId) {
+      const teacher = await prisma.teacherProfile.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (teacher) targetPersonId = teacher.personId;
+    }
+
+    if (!targetPersonId) {
+      const membership = await prisma.organizationMembership.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (membership) targetPersonId = membership.personId;
+    }
+
+    if (!targetPersonId) {
+      const student = await prisma.studentProfile.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (student) targetPersonId = student.personId;
+    }
+
+    if (!targetPersonId) {
+      const userAccount = await prisma.userAccount.findFirst({ where: { OR: [{ id }, { personId: id }] } });
+      if (userAccount) targetPersonId = userAccount.personId;
+    }
+
+    if (!targetPersonId) {
+      return NextResponse.json(
+        { status: "Error", message: "Data person tidak ditemukan." },
+        { status: 404 }
+      );
+    }
+
     const now = new Date();
 
     await prisma.$transaction(async (tx) => {
+      // 1. Soft delete Person
       await tx.person.update({
-        where: { id: targetPersonId },
+        where: { id: targetPersonId! },
         data: { deletedAt: now },
       });
 
-      if (existingStudent) {
-        await tx.studentProfile.update({
-          where: { id: existingStudent.id },
-          data: { deletedAt: now },
-        });
-      }
+      // 2. Soft delete StudentProfile if exists
+      await tx.studentProfile.updateMany({
+        where: { personId: targetPersonId!, deletedAt: null },
+        data: { deletedAt: now },
+      });
+
+      // 3. Soft delete TeacherProfile if exists
+      await tx.teacherProfile.updateMany({
+        where: { personId: targetPersonId!, deletedAt: null },
+        data: { deletedAt: now },
+      });
+
+      // 4. Soft delete OrganizationMembership if exists
+      await tx.organizationMembership.updateMany({
+        where: { personId: targetPersonId!, deletedAt: null },
+        data: { deletedAt: now },
+      });
+
+      // 5. Soft delete UserAccount if exists
+      await tx.userAccount.updateMany({
+        where: { personId: targetPersonId!, deletedAt: null },
+        data: { status: "INACTIVE", deletedAt: now },
+      });
     });
 
     return NextResponse.json({
       status: "Success",
-      message: "Data berhasil dihapus.",
+      message: "Data person dan seluruh profil terkait berhasil dihapus.",
     });
   } catch (err: any) {
     console.error("PEOPLE_ID_DELETE_ERROR:", err.message);
