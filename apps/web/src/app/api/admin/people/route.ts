@@ -301,6 +301,7 @@ export async function GET(req: NextRequest) {
           fullName: p.fullName,
           gender: p.gender || "L",
           phoneNumber: p.phoneNumber || "-",
+          avatarUrl: p.avatarUrl || null,
           jabatan,
           suggestedRole,
         };

@@ -10,6 +10,7 @@ import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 import { getStoredStructuralJabatan, addPosisiToJabatan, getPositionsForJabatan } from "@/config/jobPositions.config";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -125,7 +126,12 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   };
 
   const columns: ColumnDef<Pengurus, unknown>[] = [
-    { accessorKey: "name", header: "Nama Lengkap", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
+    { accessorKey: "name", header: "Nama Lengkap", cell: info => (
+      <div className="flex items-center gap-3">
+        <UserAvatar name={info.getValue() as string} avatarUrl={info.row.original.avatarUrl} size="md" />
+        <span className="font-bold">{info.getValue() as string}</span>
+      </div>
+    ) },
     { accessorKey: "role", header: "Jabatan & Divisi", cell: info => <span className="text-sm font-medium">{info.getValue() as string}</span> },
     { accessorKey: "phone", header: "No. Telepon", cell: info => <span className="font-mono text-xs">{info.getValue() as string}</span> },
     { accessorKey: "status", header: "Status", cell: info => (

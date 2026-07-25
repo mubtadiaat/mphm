@@ -5,6 +5,7 @@ import { Users, Trash2, KeyRound, Search, ChevronLeft, ChevronRight, CheckCircle
 import { motion, AnimatePresence } from "framer-motion";
 import { useUsers, UserAccount } from "../queries/useUsers";
 import { useToast } from "@/components/shared/ToastContext";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 interface PersonWithoutAccount {
   id: string;
@@ -13,6 +14,7 @@ interface PersonWithoutAccount {
   suggestedRole: string;
   phoneNumber?: string;
   jabatan?: string;
+  avatarUrl?: string | null;
 }
 
 export function UsersManagementTab() {
@@ -364,14 +366,19 @@ export function UsersManagementTab() {
                           {user?.username}
                         </td>
                         <td className="px-4 py-3 text-left">
-                          <div className="font-medium text-zinc-900 dark:text-white">
-                            {user?.personName || user?.fullName || user?.username || "-"}
-                          </div>
-                          {user?.personPhone && (
-                            <div className="text-xs text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
-                              <Phone className="w-3 h-3" /> {user.personPhone}
+                          <div className="flex items-center gap-3">
+                            <UserAvatar name={user?.personName || user?.fullName || user?.username} avatarUrl={user?.avatarUrl} size="md" />
+                            <div>
+                              <div className="font-bold text-zinc-900 dark:text-white">
+                                {user?.personName || user?.fullName || user?.username || "-"}
+                              </div>
+                              {user?.personPhone && (
+                                <div className="text-xs text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1">
+                                  <Phone className="w-3 h-3" /> {user.personPhone}
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-left">
                           <span className="px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-lg text-xs font-semibold">
@@ -596,8 +603,11 @@ export function UsersManagementTab() {
                               className="w-4 h-4 rounded border-zinc-300 cursor-pointer"
                             />
                           </td>
-                          <td className="px-4 py-3 font-bold text-zinc-900 dark:text-white">
-                            {person.fullName}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <UserAvatar name={person.fullName} avatarUrl={person.avatarUrl} size="md" />
+                              <span className="font-bold text-zinc-900 dark:text-white">{person.fullName}</span>
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-xs font-semibold px-2.5 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-md inline-block">
@@ -704,8 +714,11 @@ export function UsersManagementTab() {
                       .map((user, idx) => (
                         <tr key={user.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                           <td className="px-4 py-3 font-mono text-xs text-zinc-400">{idx + 1}</td>
-                          <td className="px-4 py-3 font-bold text-zinc-900 dark:text-white">
-                            {user.personName || user.fullName || user.username}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <UserAvatar name={user.personName || user.fullName || user.username} avatarUrl={user.avatarUrl} size="md" />
+                              <span className="font-bold text-zinc-900 dark:text-white">{user.personName || user.fullName || user.username}</span>
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 rounded-md inline-block">

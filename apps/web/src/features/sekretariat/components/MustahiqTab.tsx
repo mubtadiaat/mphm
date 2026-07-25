@@ -10,6 +10,7 @@ import { useToast } from "@/components/shared/ToastContext";
 
 import { useGuru, Guru } from "../queries/useGuru";
 import { addPosisiToJabatan } from "@/config/jobPositions.config";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -110,7 +111,12 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   };
 
   const columns: ColumnDef<Guru, unknown>[] = [
-    { accessorKey: "name", header: "Nama Lengkap Mustahiq", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
+    { accessorKey: "name", header: "Nama Lengkap Mustahiq", cell: info => (
+      <div className="flex items-center gap-3">
+        <UserAvatar name={info.getValue() as string} avatarUrl={info.row.original.avatarUrl} size="md" />
+        <span className="font-bold">{info.getValue() as string}</span>
+      </div>
+    ) },
     { accessorKey: "jenjang", header: "Jenjang", cell: info => <span className="text-xs font-semibold px-2 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-md">{(info.getValue() as string) || "-"}</span> },
     { accessorKey: "tingkatLokal", header: "Tingkat | Lokal", cell: info => <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{(info.getValue() as string) || "-"}</span> },
     { accessorKey: "phone", header: "No. HP / WA", cell: info => <span className="font-mono text-xs">{info.getValue() as string || "-"}</span> },

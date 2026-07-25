@@ -10,6 +10,7 @@ import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
 import { getPositionsForJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 interface MundzirTabProps {
   onViewDetail: (data: Record<string, unknown>) => void;
@@ -124,7 +125,12 @@ export function MundzirTab({ onViewDetail, isReadOnly = false }: MundzirTabProps
   };
 
   const columns: ColumnDef<Pengurus, unknown>[] = [
-    { accessorKey: "name", header: "Nama Mundzir", cell: info => <span className="font-bold">{info.getValue() as string}</span> },
+    { accessorKey: "name", header: "Nama Mundzir", cell: info => (
+      <div className="flex items-center gap-3">
+        <UserAvatar name={info.getValue() as string} avatarUrl={info.row.original.avatarUrl} size="md" />
+        <span className="font-bold">{info.getValue() as string}</span>
+      </div>
+    ) },
     { accessorKey: "role", header: "Jabatan Eksekutif", cell: info => <span className="text-sm font-medium font-bold text-blue-600 dark:text-blue-400">{info.getValue() as string}</span> },
     { accessorKey: "phone", header: "No. Telepon", cell: info => <span className="font-mono text-xs">{info.getValue() as string}</span> },
     {

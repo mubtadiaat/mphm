@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
         personName: u.person.fullName,
         personId: u.personId,
         personPhone: u.person.phoneNumber || "",
+        avatarUrl: u.person.avatarUrl || null,
       };
     });
 
