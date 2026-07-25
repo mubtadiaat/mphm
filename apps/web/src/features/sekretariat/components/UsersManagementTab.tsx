@@ -16,7 +16,7 @@ interface PersonWithoutAccount {
 }
 
 export function UsersManagementTab() {
-  const [activeTab, setActiveTab] = useState<"all" | "generate" | "trash">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "generate" | "trash" | "guardian">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
@@ -287,6 +287,7 @@ export function UsersManagementTab() {
         >
           <Users className="w-4 h-4" /> Daftar Akun (Monitoring)
         </button>
+
         <button
           onClick={() => setActiveTab("generate")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
@@ -303,6 +304,15 @@ export function UsersManagementTab() {
           }`}
         >
           <Trash2 className="w-4 h-4" /> Keranjang Sampah Dorman (&gt;6 Bulan)
+        </button>
+
+        <button
+          onClick={() => setActiveTab("guardian")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+            activeTab === "guardian" ? "bg-white dark:bg-zinc-700 text-emerald-600 shadow-sm" : "text-zinc-500 hover:text-emerald-600"
+          }`}
+        >
+          <Users className="w-4 h-4 text-emerald-500" /> Wali Santri (Yang Sudah Mendaftar)
         </button>
       </div>
 
@@ -648,6 +658,108 @@ export function UsersManagementTab() {
               <p className="text-sm text-zinc-500 leading-relaxed">
                 Akun yang tidak pernah login lebih dari 6 Bulan otomatis dinonaktifkan oleh sistem. Saat pengguna mencoba masuk, sistem akan menolak login dan menampilkan kontak WhatsApp Sekretariat (<strong>+{systemWa}</strong>) untuk konfirmasi aktivasi.
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* ===== TAB: WALI SANTRI (YANG SUDAH MENDAFTAR) ===== */}
+        {activeTab === "guardian" && (
+          <div className="flex flex-col">
+            <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Daftar Akun Wali Santri (Terdaftar)</h3>
+                <p className="text-sm text-zinc-500 mt-1">
+                  Monitoring seluruh akun Wali Santri / Orang Tua murid yang sudah mendaftar dan memiliki akses portal.
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase tracking-wider">
+                  <tr>
+                    <th className="px-4 py-3 text-left">No.</th>
+                    <th className="px-4 py-3 text-left">Nama Wali Santri</th>
+                    <th className="px-4 py-3 text-left">Role Akun</th>
+                    <th className="px-4 py-3 text-left">Username / Login</th>
+                    <th className="px-4 py-3 text-left">No. WhatsApp</th>
+                    <th className="px-4 py-3 text-left">Status Akun</th>
+                    <th className="px-4 py-3 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-zinc-500">Memuat akun wali santri...</td>
+                    </tr>
+                  ) : users.filter(u => (u.role || "").toLowerCase().includes("wali") || (u.role || "").toLowerCase().includes("guardian")).length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-zinc-500">
+                        Belum ada akun Wali Santri yang terdaftar di sistem.
+                      </td>
+                    </tr>
+                  ) : (
+                    users
+                      .filter(u => (u.role || "").toLowerCase().includes("wali") || (u.role || "").toLowerCase().includes("guardian"))
+                      .map((user, idx) => (
+                        <tr key={user.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                          <td className="px-4 py-3 font-mono text-xs text-zinc-400">{idx + 1}</td>
+                          <td className="px-4 py-3 font-bold text-zinc-900 dark:text-white">
+                            {user.personName || user.fullName || user.username}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 rounded-md inline-block">
+                              Wali Santri
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-blue-600 dark:text-blue-400">
+                            {user.username}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                            {user.personPhone || "-"}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2.5 py-0.5 rounded text-xs font-bold ${user.isActive ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300'}`}>
+                              {user.isActive ? "AKTIF" : "NON-AKTIF"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => setResetModal({ userId: user.id, username: user.username })}
+                                className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-amber-600 rounded-lg transition-colors cursor-pointer"
+                                title="Reset Password"
+                              >
+                                <KeyRound className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => sendWhatsAppCredentials(user.personName || user.username, user.username, "mphm123", user.personPhone)}
+                                className="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-emerald-600 rounded-lg transition-colors cursor-pointer"
+                                title="Kirim WA"
+                              >
+                                <MessageSquare className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleOpenEditUser(user)}
+                                className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-blue-600 rounded-lg transition-colors cursor-pointer"
+                                title="Edit Akun"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(user.id, user.username)}
+                                className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 rounded-lg transition-colors cursor-pointer"
+                                title="Hapus Akun"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
