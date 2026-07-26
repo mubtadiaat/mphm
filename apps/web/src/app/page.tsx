@@ -319,7 +319,7 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             
             {/* Feature 1: Raport Digital */}
             <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-indigo-500/60 rounded-3xl space-y-4 transition-all group">
@@ -362,28 +362,6 @@ export default function Page() {
               <h3 className="font-black text-lg text-white">Informasi Realtime Pesantren</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Dapatkan update pengumuman penting, jadwal kegiatan santriwati, serta kalender pendidikan pesantren secara langsung dan akurat.
-              </p>
-            </div>
-
-            {/* Feature 5: Keamanan & Privasi */}
-            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/60 rounded-3xl space-y-4 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                <Lock className="w-6 h-6" />
-              </div>
-              <h3 className="font-black text-lg text-white">Keamanan &amp; Privasi Terjamin</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Seluruh data pribadi keluarga dan informasi akademik dilindungi dengan sistem otentikasi aman dan standar enkripsi data tertinggi.
-              </p>
-            </div>
-
-            {/* Feature 6: Akses Multi-Device */}
-            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-teal-500/60 rounded-3xl space-y-4 transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
-                <Smartphone className="w-6 h-6" />
-              </div>
-              <h3 className="font-black text-lg text-white">Akses Multi-Device Cepat</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Dukungan antarmuka modern yang responsif dan fleksibel untuk perangkat Smartphone Android (.apk) maupun Software Desktop (.exe).
               </p>
             </div>
 
