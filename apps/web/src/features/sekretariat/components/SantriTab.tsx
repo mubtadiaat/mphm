@@ -443,6 +443,11 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     "Tahun Keluar",
     "Tahun Lulus",
     "Status Keaktifan",
+    "Provinsi",
+    "Kabupaten / Kota",
+    "Kecamatan",
+    "Desa / Kelurahan",
+    "Alamat Lengkap (Jalan / RT / RW / No. Rumah)",
     "Alamat Lengkap",
     "Nama Lengkap Wali",
     "Hubungan Keluarga",
@@ -571,6 +576,18 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   fullClassName = `${rawJenjang.trim()} ${rawKelas.trim()}`;
                 }
 
+                const rawProv = r["Provinsi"] || r["provinsi"] || "";
+                const rawKab = r["Kabupaten / Kota"] || r["Kabupaten"] || r["Kota"] || r["kabupaten"] || "";
+                const rawKec = r["Kecamatan"] || r["kecamatan"] || "";
+                const rawDesa = r["Desa / Kelurahan"] || r["Kelurahan"] || r["Desa"] || r["desa"] || "";
+                const rawStreet = r["Alamat Lengkap (Jalan / RT / RW / No. Rumah)"] || r["Jalan / RT / RW"] || r["Alamat Lengkap"] || r["Alamat"] || "";
+
+                let formattedAddress = rawStreet;
+                const addrParts = [rawStreet, rawDesa, rawKec, rawKab, rawProv].map((s: string) => (s || "").trim()).filter(Boolean);
+                if (addrParts.length > 1) {
+                  formattedAddress = addrParts.join(", ");
+                }
+
                 await createSantri({
                   name: nameVal,
                   nik: r["NIK Santri (16 Digit)"] || r["NIK Santri"] || r["NIK"] || r["nik"] || "",
@@ -585,7 +602,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   enrollmentYear: Number(r["Tahun Masuk"]) || new Date().getFullYear(),
                   graduationYear: r["Tahun Lulus"] ? Number(r["Tahun Lulus"]) : undefined,
                   status: r["Status Keaktifan"] || "ACTIVE",
-                  address: r["Alamat Lengkap"] || r["Alamat"] || "",
+                  address: formattedAddress || "",
                   mustahiq: isPondok ? "Ustadzah Musyrifah" : "Ustadz Mustahiq",
                   mufattisy: "Ustadz Mufattisy",
                   guardianName: r["Nama Lengkap Wali"] || r["Nama Wali"] || "Wali Santri",

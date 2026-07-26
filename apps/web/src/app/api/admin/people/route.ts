@@ -64,9 +64,32 @@ export async function GET(req: NextRequest) {
         }),
       ]);
 
-      const formatted = (list as any[]).map((sp: any) => {
+      const formatted = await Promise.all((list as any[]).map(async (sp: any) => {
         const primaryEnrollment = sp.enrollments?.[0];
         const primaryGuardian = sp.person?.guardianProfiles?.[0];
+
+        let gName = primaryGuardian?.person?.fullName || "-";
+        let gPhone = primaryGuardian?.person?.phoneNumber || "-";
+        let gRelation = primaryGuardian?.relation || "WALI";
+        let kkNum = primaryGuardian?.familyCardNumber || "-";
+
+        if (primaryGuardian?.familyCardNumber && (gName === "-" || gName === sp.person?.fullName)) {
+          const matchedWali = await prisma.guardianProfile.findFirst({
+            where: {
+              familyCardNumber: primaryGuardian.familyCardNumber,
+              personId: { not: sp.personId },
+              deletedAt: null,
+            },
+            include: { person: true },
+          });
+
+          if (matchedWali?.person) {
+            gName = matchedWali.person.fullName;
+            gPhone = matchedWali.person.phoneNumber || gPhone;
+            gRelation = matchedWali.relation || gRelation;
+          }
+        }
+
         return {
           id: sp.id,
           personId: sp.personId,
@@ -89,12 +112,12 @@ export async function GET(req: NextRequest) {
           phoneNumber: sp.person?.phoneNumber,
           avatarUrl: sp.person?.avatarUrl,
           enrollmentYear: sp.enrollmentYear,
-          guardianName: primaryGuardian?.person?.fullName || "-",
-          guardianPhone: primaryGuardian?.person?.phoneNumber || "-",
-          guardianRelation: primaryGuardian?.relation || "WALI",
-          familyCardNumber: primaryGuardian?.familyCardNumber || "-",
+          guardianName: gName,
+          guardianPhone: gPhone,
+          guardianRelation: gRelation,
+          familyCardNumber: kkNum,
         };
-      });
+      }));
 
       return NextResponse.json({ status: "Success", data: formatted, total });
     }
@@ -528,26 +551,63 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // 3. Create Guardian if guardian information provided
+      // 3. Create / Link Guardian if guardian information provided
       if (familyCardNumber || guardianName) {
+        const kkNumber = familyCardNumber || `KK-${Date.now()}`;
         let guardianPerson = person;
+
         if (guardianName && guardianName !== personFullName) {
-          guardianPerson = await tx.person.create({
+          const existingWaliPerson = await tx.person.findFirst({
+            where: {
+              fullName: { equals: guardianName.trim(), mode: "insensitive" },
+              deletedAt: null,
+            },
+          });
+
+          if (existingWaliPerson) {
+            guardianPerson = existingWaliPerson;
+          } else {
+            guardianPerson = await tx.person.create({
+              data: {
+                fullName: guardianName.trim(),
+                gender: guardianRelation === "IBU" ? "P" : "L",
+                phoneNumber: guardianPhone || null,
+              },
+            });
+          }
+        }
+
+        // Create GuardianProfile for Guardian Person if not exists
+        const existingWaliProfile = await tx.guardianProfile.findFirst({
+          where: { personId: guardianPerson.id, deletedAt: null },
+        });
+
+        if (!existingWaliProfile) {
+          await tx.guardianProfile.create({
             data: {
-              fullName: guardianName,
-              gender: guardianRelation === "IBU" ? "P" : "L",
-              phoneNumber: guardianPhone || null,
+              personId: guardianPerson.id,
+              familyCardNumber: kkNumber,
+              relation: guardianRelation || "WALI",
             },
           });
         }
 
-        await tx.guardianProfile.create({
-          data: {
-            personId: guardianPerson.id,
-            familyCardNumber: familyCardNumber || `KK-${Date.now()}`,
-            relation: guardianRelation,
-          },
-        });
+        // ALSO Create GuardianProfile for Student Person so that person.guardianProfiles finds it!
+        if (person.id !== guardianPerson.id) {
+          const existingSantriGuardian = await tx.guardianProfile.findFirst({
+            where: { personId: person.id, deletedAt: null },
+          });
+
+          if (!existingSantriGuardian) {
+            await tx.guardianProfile.create({
+              data: {
+                personId: person.id,
+                familyCardNumber: kkNumber,
+                relation: guardianRelation || "WALI",
+              },
+            });
+          }
+        }
       }
 
       return { person, studentProfile };

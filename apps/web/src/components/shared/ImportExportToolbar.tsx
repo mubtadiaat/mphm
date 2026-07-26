@@ -182,8 +182,16 @@ export function ImportExportToolbar({
         commentText = "Tingkat pendidikan Diniyyah: 'Ibtida'iyyah', 'Tsanawiyyah', atau 'Aliyyah'.";
       } else if (lowerH.includes("asrama") || lowerH.includes("kamar") || lowerH.includes("blok")) {
         commentText = "Nama kamar / asrama tempat tinggal santriwati (Contoh: Asrama Aisyah 1).";
+      } else if (lowerH.includes("provinsi")) {
+        commentText = "Nama Provinsi domisili (Contoh: Jawa Timur, Jawa Tengah).";
+      } else if (lowerH.includes("kabupaten") || lowerH.includes("kota")) {
+        commentText = "Nama Kabupaten atau Kota domisili (Contoh: Kota Kediri, Kab. Nganjuk).";
+      } else if (lowerH.includes("kecamatan")) {
+        commentText = "Nama Kecamatan domisili (Contoh: Mojoroto, Pesantren).";
+      } else if (lowerH.includes("desa") || lowerH.includes("kelurahan")) {
+        commentText = "Nama Desa atau Kelurahan domisili (Contoh: Lirboyo, Bandar Kidul).";
       } else if (lowerH.includes("alamat")) {
-        commentText = "Alamat domisili lengkap mencakup Jalan, RT/RW, Desa/Kelurahan, Kecamatan, dan Kabupaten.";
+        commentText = "Nama Jalan, RT/RW, dan Nomor Rumah (Contoh: Jl. KH. Abdul Karim No. 12 RT 01/RW 02).";
       } else if (lowerH.includes("jabatan") || lowerH.includes("posisi") || lowerH.includes("peran")) {
         commentText = "Nama Jabatan / Posisi Eksekutif (Contoh: Mundzir Asrama, AM, Sekretaris, Ketua Harian). Jika belum terdaftar di sistem, akan otomatis ditambahkan.";
       } else if (lowerH.includes("hubungan")) {

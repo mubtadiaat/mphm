@@ -1278,13 +1278,13 @@ export function SystemSettingsCockpit() {
                       onChange={(e) => setRegionApiSource(e.target.value)}
                       className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-205 w-full transition-colors"
                     >
-                      <option value="cahyadsn">cahyadsn/wilayah (wilayah.id) (Online - Gratis & Kemendagri Resmi)</option>
+                      <option value="cahyadsn">Develzy/Wilayah Indonesia (Resmi Kemendagri By. DEVELZY) ®2025</option>
                       <option value="emsifa">Emsifa API (Online - Gratis & Tanpa API Key)</option>
                       <option value="binderbyte">BinderByte API (Online - Memerlukan API Key)</option>
                       <option value="offline">Database Luring (Offline Fallback - Instan & Luring)</option>
                     </select>
                     <span className="text-[11px] text-zinc-400 dark:text-zinc-500 italic block leading-relaxed">
-                      * cahyadsn/wilayah (wilayah.id) direkomendasikan karena bersifat resmi, gratis, dan mengikuti standarisasi kode wilayah Kemendagri terbaru.
+                      * Develzy/Wilayah Indonesia (Resmi Kemendagri By. DEVELZY) ®2025 direkomendasikan karena bersifat resmi, gratis, dan mengikuti standarisasi kode wilayah Kemendagri terbaru.
                     </span>
                   </div>
 
