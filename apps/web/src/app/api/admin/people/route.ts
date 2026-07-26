@@ -297,11 +297,19 @@ export async function GET(req: NextRequest) {
 
     // People who don't have a UserAccount yet (for Generate Akun tab)
     if (role === "without_account") {
+      const whereCond: any = {
+        deletedAt: null,
+        userAccount: { is: null }, // No account yet
+        studentProfile: { is: null }, // Exclude Santriwati / Siswi
+        guardianProfiles: { none: {} }, // Exclude Wali Santri
+        OR: [
+          { teacherProfile: { isNot: null } },
+          { organizationMemberships: { some: { deletedAt: null } } },
+        ],
+      };
+
       const people = await (prisma.person as any).findMany({
-        where: {
-          deletedAt: null,
-          userAccount: { is: null }, // No account yet
-        },
+        where: whereCond,
         include: {
           teacherProfile: true,
           organizationMemberships: { take: 1 },
@@ -311,11 +319,8 @@ export async function GET(req: NextRequest) {
         skip: offset,
       });
 
-      const total = await prisma.person.count({
-        where: {
-          deletedAt: null,
-          userAccount: { is: null },
-        },
+      const total = await (prisma.person as any).count({
+        where: whereCond,
       });
 
       const formatted = people.map((p: any) => {

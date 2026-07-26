@@ -748,10 +748,18 @@ export function UsersManagementTab() {
                             </button>
                             <button
                               onClick={async () => {
-                                if (window.confirm(`Hapus permanen akun ${user.username}? Action tidak dapat dibatalkan.`)) {
+                                const isConfirmed = await confirm({
+                                  title: "Hapus Permanen Akun User",
+                                  message: `Apakah Anda yakin ingin menghapus permanen akun "${user.username}"? Action ini tidak dapat dibatalkan.`,
+                                  confirmText: "Ya, Hapus Permanen",
+                                  cancelText: "Batal",
+                                  type: "danger",
+                                });
+
+                                if (isConfirmed) {
                                   try {
                                     await forceDeleteUser(user.id);
-                                    toast("Akun berhasil dihapus permanen", "success");
+                                    toast("Akun berhasil dihapus permanen", "success", "Berhasil Hapus");
                                   } catch (err: any) {
                                     toast(err.message || "Gagal menghapus permanen", "error");
                                   }
