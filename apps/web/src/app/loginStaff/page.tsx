@@ -70,7 +70,7 @@ export default function LoginStaffPage() {
       else if (roleStr.includes("keamanan")) router.push("/keamanan");
       else router.push("/mustahiq");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Gagal masuk ke Portal Staf Lapangan.");
+      setError(err instanceof Error ? err.message : "Gagal masuk ke Portal Staf & Pengurus.");
     } finally {
       setLoading(false);
     }

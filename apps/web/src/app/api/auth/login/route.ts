@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       const allowedStaff = ["mustahiq", "mufattisy", "mundzir", "pimpinan", "keamanan", "petugas keamanan"];
       if (!allowedStaff.includes(roleLower)) {
         return NextResponse.json(
-          { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Staf Lapangan." },
+          { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Staf & Pengurus." },
           { status: 403 }
         );
       }

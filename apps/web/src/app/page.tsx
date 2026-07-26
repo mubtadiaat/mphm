@@ -408,7 +408,7 @@ export default function Page() {
                 onClick={() => toggleFaq(1)}
                 className="w-full p-5 text-left font-extrabold text-sm text-white flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition-colors"
               >
-                <span>Bagaimana cara Ustadz Mustahiq &amp; Pengurus Lapangan masuk ke akun?</span>
+                <span>Bagaimana cara Ustadz Mustahiq &amp; Pengurus masuk ke akun?</span>
                 <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${activeFaq === 1 ? 'rotate-180 text-indigo-400' : ''}`} />
               </button>
               {activeFaq === 1 && (
