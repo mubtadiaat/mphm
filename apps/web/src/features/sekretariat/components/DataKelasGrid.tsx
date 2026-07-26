@@ -296,13 +296,18 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                           e.stopPropagation();
                           const isConfirmed = await confirm({
                             title: "Hapus Kelas Diniyyah?",
-                            message: `Apakah Anda yakin ingin menghapus kelas ${cls.name}?`,
+                            message: `Apakah Anda yakin ingin menghapus kelas ${cls.name}? Data kelas ini akan dipindahkan ke keranjang sampah.`,
                             confirmText: "Ya, Hapus Kelas",
                             cancelText: "Batal",
                             type: "danger",
                           });
                           if (isConfirmed) {
-                            deleteClass(cls.id);
+                            try {
+                              await deleteClass(cls.id);
+                              toast(`Kelas ${cls.name} berhasil dihapus!`, "success", "Kelas Dihapus");
+                            } catch (err: any) {
+                              toast(err?.message || "Gagal menghapus kelas", "error", "Gagal Hapus");
+                            }
                           }
                         }}
                         className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md text-zinc-400 hover:text-rose-600 transition-colors cursor-pointer"
