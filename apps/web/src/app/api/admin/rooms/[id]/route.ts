@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { determineBuildingName } from "@/lib/determineBuilding";
 
 export async function PUT(
   req: NextRequest,
@@ -19,8 +20,10 @@ export async function PUT(
     const updated = await prismaRoom.update({
       where: { id },
       data: {
-        ...(name || roomName ? { name: name || roomName } : {}),
-        ...(buildingName ? { buildingName } : {}),
+        ...(name || roomName ? { 
+          name: name || roomName,
+          buildingName: buildingName || determineBuildingName(name || roomName),
+        } : buildingName ? { buildingName } : {}),
         ...(capacity !== undefined ? { capacity: Number(capacity) } : {}),
         ...(supervisorId !== undefined ? { supervisorId: supervisorId || null } : {}),
       },
