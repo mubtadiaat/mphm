@@ -39,6 +39,7 @@ export default function LoginGuardianPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formattedDate, setFormattedDate] = useState("");
 
   // Registration Form State
   const [regFullName, setRegFullName] = useState("");
@@ -49,6 +50,17 @@ export default function LoginGuardianPage() {
   const [regConfirmPassword, setRegConfirmPassword] = useState("");
   const [regLoading, setRegLoading] = useState(false);
   const [regSuccess, setRegSuccess] = useState<{ username: string; name: string } | null>(null);
+
+  useEffect(() => {
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+    setFormattedDate(now.toLocaleDateString("id-ID", options));
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -163,19 +175,16 @@ export default function LoginGuardianPage() {
 
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col justify-between items-center p-3 sm:p-6 select-none relative font-sans">
-      {/* Background Soft Glow - Restricted Max-W to prevent horizontal scroll */}
+      {/* Background Soft Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-96 bg-gradient-to-b from-amber-300/20 via-blue-400/15 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-      {/* iPhone Top Status Header & Dynamic Island Simulation */}
-      <div className="w-full max-w-md flex items-center justify-between px-4 py-2 mb-3 rounded-2xl bg-white/70 backdrop-blur-md border border-slate-200/70 text-[11px] text-slate-600 font-semibold shadow-sm z-20">
+      {/* Top Realtime Header Bar */}
+      <div className="w-full max-w-md flex items-center justify-between px-4 py-2.5 mb-3 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 text-[11px] text-slate-600 font-semibold shadow-sm z-20">
         <div className="flex items-center gap-1.5 text-slate-700">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-bold">e-Mubtadiaat Wali App</span>
+          <span className="font-bold">e-Mubtadiaat Wali</span>
         </div>
-        <div className="w-16 h-3.5 bg-slate-900 rounded-full flex items-center justify-center">
-          <span className="w-2 h-2 rounded-full bg-amber-400" />
-        </div>
-        <span className="text-blue-700 font-bold">iOS Native</span>
+        <span className="text-slate-600 font-bold">{formattedDate || "Realtime Info"}</span>
       </div>
 
       {/* Main Elevated iPhone Card Sheet */}
