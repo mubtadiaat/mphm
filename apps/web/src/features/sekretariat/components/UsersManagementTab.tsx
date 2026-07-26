@@ -55,7 +55,24 @@ export function UsersManagementTab() {
   ];
 
   // Users from API
-  const { data: users = [], isLoading, createUser, isCreating, updateUser, isUpdating, deleteUser, isDeleting, resetPassword, isResetting } = useUsers(searchQuery || undefined);
+  const {
+    data: users = [],
+    dormanUsers = [],
+    isLoadingDorman,
+    isLoading,
+    createUser,
+    isCreating,
+    updateUser,
+    isUpdating,
+    deleteUser,
+    isDeleting,
+    restoreUser,
+    isRestoring,
+    forceDeleteUser,
+    isForceDeleting,
+    resetPassword,
+    isResetting,
+  } = useUsers(searchQuery || undefined);
 
   // People without accounts (for Generate tab)
   const [peopleWithoutAccounts, setPeopleWithoutAccounts] = useState<PersonWithoutAccount[]>([]);
@@ -659,15 +676,99 @@ export function UsersManagementTab() {
 
         {/* ===== TAB: KERANJANG SAMPAH DORMAN ===== */}
         {activeTab === "trash" && (
-          <div className="flex flex-col items-center justify-center py-12 text-center gap-4 text-zinc-500">
-            <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
-              <Trash2 className="w-8 h-8" />
+          <div className="flex flex-col">
+            <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Keranjang Sampah Dorman (&gt;6 Bulan) & Akun Non-Aktif</h3>
+                <p className="text-sm text-zinc-500 mt-1">
+                  Akun yang dinonaktifkan atau dihapus dari sistem tersimpan di sini. Anda dapat memulihkan (Restore) atau menghapusnya secara permanen.
+                </p>
+              </div>
             </div>
-            <div className="max-w-md space-y-2">
-              <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Keranjang Sampah Dorman (&gt;6 Bulan)</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">
-                Akun yang tidak pernah login lebih dari 6 Bulan otomatis dinonaktifkan oleh sistem. Saat pengguna mencoba masuk, sistem akan menolak login dan menampilkan kontak WhatsApp Sekretariat (<strong>+{systemWa}</strong>) untuk konfirmasi aktivasi.
-              </p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase tracking-wider">
+                  <tr>
+                    <th className="px-4 py-3 text-left">No.</th>
+                    <th className="px-4 py-3 text-left">Nama Pemilik Akun</th>
+                    <th className="px-4 py-3 text-left">Role Akun</th>
+                    <th className="px-4 py-3 text-left">Username / Login</th>
+                    <th className="px-4 py-3 text-left">Status Dorman</th>
+                    <th className="px-4 py-3 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                  {isLoadingDorman ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-8 text-zinc-500">Memuat data keranjang sampah dorman...</td>
+                    </tr>
+                  ) : dormanUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-12 text-zinc-500">
+                        <div className="flex flex-col items-center gap-2">
+                          <Trash2 className="w-8 h-8 text-zinc-300 dark:text-zinc-600" />
+                          <span className="font-medium text-zinc-600 dark:text-zinc-400">Keranjang sampah dorman kosong</span>
+                          <span className="text-xs text-zinc-400">Tidak ada akun non-aktif atau akun yang terhapus saat ini.</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    dormanUsers.map((user, idx) => (
+                      <tr key={user.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                        <td className="px-4 py-3 font-mono text-xs text-zinc-400">{idx + 1}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <UserAvatar name={user.personName || user.fullName || user.username} avatarUrl={user.avatarUrl} size="md" />
+                            <span className="font-bold text-zinc-900 dark:text-white">{user.personName || user.fullName || user.username}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 font-semibold text-zinc-700 dark:text-zinc-300">{user.role}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-400">{user.username}</td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                            Non-Aktif / Dorman
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await restoreUser(user.id);
+                                  toast("Akun berhasil dipulihkan ke status Aktif", "success", "Dipulihkan");
+                                } catch (err: any) {
+                                  toast(err.message || "Gagal memulihkan akun", "error");
+                                }
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-extrabold transition-all cursor-pointer"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5" />
+                              <span>Restore (Aktifkan)</span>
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (window.confirm(`Hapus permanen akun ${user.username}? Action tidak dapat dibatalkan.`)) {
+                                  try {
+                                    await forceDeleteUser(user.id);
+                                    toast("Akun berhasil dihapus permanen", "success");
+                                  } catch (err: any) {
+                                    toast(err.message || "Gagal menghapus permanen", "error");
+                                  }
+                                }
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 rounded-lg text-xs font-extrabold transition-all cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Hapus Permanen</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

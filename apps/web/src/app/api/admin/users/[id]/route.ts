@@ -34,6 +34,7 @@ export async function PUT(
         ...(email !== undefined ? { email } : {}),
         ...(role ? { role } : {}),
         ...(status ? { status } : {}),
+        ...(body.deletedAt !== undefined ? { deletedAt: body.deletedAt } : {}),
         ...(password ? { passwordHash: password } : {}),
         person: {
           update: {
@@ -65,15 +66,25 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(req.url);
+    const force = searchParams.get("force") === "true";
+
+    if (force) {
+      await prisma.userAccount.delete({ where: { id } });
+      return NextResponse.json({
+        status: "Success",
+        message: "Akun berhasil dihapus secara permanen.",
+      });
+    }
 
     await prisma.userAccount.update({
       where: { id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date(), status: "INACTIVE" },
     });
 
     return NextResponse.json({
       status: "Success",
-      message: "User berhasil dihapus",
+      message: "User berhasil dipindahkan ke Keranjang Sampah Dorman.",
     });
   } catch (err: any) {
     console.error("ADMIN_USER_ID_DELETE_ERROR:", err.message);

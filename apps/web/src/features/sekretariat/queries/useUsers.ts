@@ -30,6 +30,15 @@ export function useUsers(query?: string) {
     },
   });
 
+  const dormanUsersQuery = useQuery<UserAccount[]>({
+    queryKey: ["sekretariat-users-dorman", query],
+    queryFn: async () => {
+      const url = query ? `/api/admin/users?status=dorman&query=${query}` : "/api/admin/users?status=dorman";
+      const res = await apiRequest<{ data: UserAccount[] }>(url);
+      return res.data || [];
+    },
+  });
+
   const createMutation = useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
       const res = await apiRequest<{ data: UserAccount }>("/api/admin/users", {
@@ -40,6 +49,7 @@ export function useUsers(query?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-users"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users-dorman"] });
     },
   });
 
@@ -53,6 +63,7 @@ export function useUsers(query?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-users"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users-dorman"] });
     },
   });
 
@@ -65,6 +76,34 @@ export function useUsers(query?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-users"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users-dorman"] });
+    },
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest<{ status: string }>(`/api/admin/users/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: "ACTIVE", deletedAt: null }),
+      });
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users-dorman"] });
+    },
+  });
+
+  const forceDeleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest<{ status: string }>(`/api/admin/users/${id}?force=true`, {
+        method: "DELETE",
+      });
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users-dorman"] });
     },
   });
 
@@ -78,17 +117,24 @@ export function useUsers(query?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sekretariat-users"] });
+      queryClient.invalidateQueries({ queryKey: ["sekretariat-users-dorman"] });
     },
   });
 
   return {
     ...usersQuery,
+    dormanUsers: dormanUsersQuery.data || [],
+    isLoadingDorman: dormanUsersQuery.isLoading,
     createUser: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
     updateUser: updateMutation.mutateAsync,
     isUpdating: updateMutation.isPending,
     deleteUser: deleteMutation.mutateAsync,
     isDeleting: deleteMutation.isPending,
+    restoreUser: restoreMutation.mutateAsync,
+    isRestoring: restoreMutation.isPending,
+    forceDeleteUser: forceDeleteMutation.mutateAsync,
+    isForceDeleting: forceDeleteMutation.isPending,
     resetPassword: resetPasswordMutation.mutateAsync,
     isResetting: resetPasswordMutation.isPending,
   };

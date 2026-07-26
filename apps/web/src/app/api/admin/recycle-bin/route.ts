@@ -76,15 +76,6 @@ export async function GET(req: NextRequest) {
           rawDeletedAt: p.deletedAt,
         };
       }),
-      ...deletedUsers.map((u) => ({
-        id: u.id,
-        entityType: "UserAccount",
-        type: "AKUN USER",
-        name: u.username,
-        deletedAt: formatIndonesianDateTime(u.deletedAt),
-        expiresAt: calculateExpiresAt(u.deletedAt),
-        rawDeletedAt: u.deletedAt,
-      })),
       ...deletedClasses.map((c) => ({
         id: c.id,
         entityType: "AcademicClass",

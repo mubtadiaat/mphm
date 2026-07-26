@@ -10,8 +10,11 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    const whereCondition = {
+    const statusParam = searchParams.get("status");
+
+    let whereCondition: any = {
       deletedAt: null,
+      status: { not: "INACTIVE" },
       ...(query
         ? {
             OR: [
@@ -23,6 +26,23 @@ export async function GET(req: NextRequest) {
           }
         : {}),
     };
+
+    if (statusParam === "dorman" || statusParam === "trash") {
+      whereCondition = {
+        OR: [
+          { deletedAt: { not: null } },
+          { status: "INACTIVE" },
+        ],
+        ...(query
+          ? {
+              OR: [
+                { username: { contains: query, mode: "insensitive" as const } },
+                { person: { fullName: { contains: query, mode: "insensitive" as const } } },
+              ],
+            }
+          : {}),
+      };
+    }
 
     const [total, users] = await Promise.all([
       prisma.userAccount.count({ where: whereCondition }),
