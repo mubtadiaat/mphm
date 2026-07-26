@@ -110,13 +110,75 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const [peopleResult, usersResult, classesResult] = await prisma.$transaction([
-      prisma.person.deleteMany({ where: { deletedAt: { not: null } } }),
-      prisma.userAccount.deleteMany({ where: { deletedAt: { not: null } } }),
-      prisma.academicClass.deleteMany({ where: { deletedAt: { not: null } } }),
-    ]);
+    let totalPurged = 0;
 
-    const totalPurged = (peopleResult.count || 0) + (usersResult.count || 0) + (classesResult.count || 0);
+    await prisma.$transaction(async (tx) => {
+      // 1. Find all deleted Person IDs
+      const deletedPeople = await tx.person.findMany({
+        where: { deletedAt: { not: null } },
+        select: { id: true },
+      });
+      const personIds = deletedPeople.map((p) => p.id);
+
+      if (personIds.length > 0) {
+        // Find associated StudentProfiles
+        const students = await tx.studentProfile.findMany({
+          where: { personId: { in: personIds } },
+          select: { id: true },
+        });
+        const studentIds = students.map((s) => s.id);
+
+        if (studentIds.length > 0) {
+          // Delete ClassEnrollments
+          await tx.classEnrollment.deleteMany({
+            where: { studentId: { in: studentIds } },
+          });
+          // Delete StudentProfiles
+          await tx.studentProfile.deleteMany({
+            where: { id: { in: studentIds } },
+          });
+        }
+
+        // Delete TeacherProfiles
+        await tx.teacherProfile.deleteMany({
+          where: { personId: { in: personIds } },
+        });
+
+        // Delete GuardianProfiles
+        await tx.guardianProfile.deleteMany({
+          where: { personId: { in: personIds } },
+        });
+
+        // Delete OrganizationMemberships
+        await tx.organizationMembership.deleteMany({
+          where: { personId: { in: personIds } },
+        });
+
+        // Delete UserAccounts
+        await tx.userAccount.deleteMany({
+          where: { personId: { in: personIds } },
+        });
+
+        // Delete Persons
+        const pRes = await tx.person.deleteMany({
+          where: { id: { in: personIds } },
+        });
+
+        totalPurged += pRes.count || personIds.length;
+      }
+
+      // 2. Delete remaining deleted UserAccounts (standalone)
+      const uRes = await tx.userAccount.deleteMany({
+        where: { deletedAt: { not: null } },
+      });
+      totalPurged += uRes.count || 0;
+
+      // 3. Delete remaining deleted AcademicClasses (standalone)
+      const cRes = await tx.academicClass.deleteMany({
+        where: { deletedAt: { not: null } },
+      });
+      totalPurged += cRes.count || 0;
+    });
 
     return NextResponse.json({
       status: "Success",
