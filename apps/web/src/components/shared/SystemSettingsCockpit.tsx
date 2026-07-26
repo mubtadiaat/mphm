@@ -1834,6 +1834,16 @@ function PurgeAllDataTab() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const CATEGORY_MAP: Record<string, { label: string; desc: string; icon: string }> = {
+    class: {
+      label: "DATA KELAS DINIYYAH / ROMBEL",
+      desc: "Menghapus seluruh data Rombongan Belajar / Kelas Diniyyah MPHM beserta riwayat pendaftarannya.",
+      icon: "🏫",
+    },
+    room: {
+      label: "DATA KAMAR / ASRAMA",
+      desc: "Menghapus seluruh data Master Kamar Asrama P3HM dan membebaskan penempatan santri.",
+      icon: "🚪",
+    },
     student: {
       label: "SANTRIWATI / SISWI (& WALI TERKAIT)",
       desc: "Menghapus seluruh data Induk Santriwati Asrama P3HM dan Siswi Diniyyah MPHM beserta profil Wali Santri terkait.",
@@ -1873,6 +1883,31 @@ function PurgeAllDataTab() {
       label: "DEWAN PLENO",
       desc: "Menghapus seluruh data Pengurus Anggota Dewan Pleno Organisasi.",
       icon: "📊",
+    },
+    subject: {
+      label: "MATA PELAJARAN & KURIKULUM",
+      desc: "Menghapus seluruh data Master Mata Pelajaran, Struktur Kurikulum, dan Pemetaan Mapel.",
+      icon: "📖",
+    },
+    violation: {
+      label: "CATATAN PELANGGARAN SANTRI",
+      desc: "Menghapus seluruh riwayat rekapitulasi takzir dan pelanggaran kedisiplinan santri.",
+      icon: "⚠️",
+    },
+    certificate: {
+      label: "SERTIFIKAT & IJAZAH SANTRI",
+      desc: "Menghapus seluruh arsip dokumen Sertifikat Akademik & Ijazah Kelulusan.",
+      icon: "📜",
+    },
+    khidmah: {
+      label: "DATA KHIDMAH ALUMNI",
+      desc: "Menghapus seluruh data tugas penugasan Khidmah Alumni Pondok.",
+      icon: "🤝",
+    },
+    all: {
+      label: "HAPUS SEMUA DATA MASTER & OPERASIONAL (TOTAL RESET)",
+      desc: "⚠️ SANGAT BAHAYA: Menghapus seluruh data santri, wali, kelas, kamar, nilai, pengurus, dan data operasional sistem secara total.",
+      icon: "🚨",
     },
   };
 
@@ -1942,13 +1977,21 @@ function PurgeAllDataTab() {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-4 py-3.5 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-300 dark:border-zinc-700 rounded-xl text-base font-extrabold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all cursor-pointer"
             >
-              <option value="student">SANTRIWATI / SISWI</option>
+              <option value="class">DATA KELAS DINIYYAH / ROMBEL</option>
+              <option value="room">DATA KAMAR / ASRAMA</option>
+              <option value="student">SANTRIWATI / SISWI (& WALI TERKAIT)</option>
+              <option value="wali">WALI SANTRI (ORANG TUA)</option>
               <option value="mustahiq">MUSTAHIQ (DEWAN PENGAJAR)</option>
               <option value="mufattisy">MUFATISH (DEWAN PENGAWAS)</option>
               <option value="mundzir">MUNDZIR (PIMPINAN PESANTREN)</option>
               <option value="pengurus">PENGURUS STRUKTURAL</option>
               <option value="dewan_harian">DEWAN HARIAN</option>
               <option value="dewan_pleno">DEWAN PLENO</option>
+              <option value="subject">MATA PELAJARAN & KURIKULUM</option>
+              <option value="violation">CATATAN PELANGGARAN SANTRI</option>
+              <option value="certificate">SERTIFIKAT & IJAZAH SANTRI</option>
+              <option value="khidmah">DATA KHIDMAH ALUMNI</option>
+              <option value="all">⚠️ HAPUS SEMUA DATA MASTER & OPERASIONAL (TOTAL RESET)</option>
             </select>
           </div>
         </div>

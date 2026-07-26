@@ -185,40 +185,104 @@ export async function POST(req: NextRequest) {
           where: { id: { in: personIds }, deletedAt: null },
           data: { deletedAt: now },
         });
-      } else if (category === "pengurus" || category === "dewan_pleno" || category === "dewan_harian") {
-        categoryLabel = category === "dewan_harian" ? "Dewan Harian" : category === "dewan_pleno" ? "Dewan Pleno" : "Pengurus";
-        const memberships = await tx.organizationMembership.findMany({
-          where: {
-            deletedAt: null,
-            NOT: [
-              { role: { contains: "Mustahiq", mode: "insensitive" } },
-              { role: { contains: "Mufattisy", mode: "insensitive" } },
-              { role: { contains: "Mufatish", mode: "insensitive" } },
-              { role: { contains: "Mundzir", mode: "insensitive" } },
-            ],
-          },
-          select: { id: true, personId: true },
+      } else if (category === "class" || category === "kelas" || category === "rombel") {
+        categoryLabel = "Data Kelas Diniyyah / Rombel";
+        const classes = await tx.academicClass.findMany({
+          where: { deletedAt: null },
+          select: { id: true },
         });
+        deletedCount = classes.length;
 
-        const personIds = Array.from(new Set(memberships.map((m) => m.personId)));
-        deletedCount = personIds.length;
-
-        await tx.organizationMembership.updateMany({
-          where: {
-            deletedAt: null,
-            NOT: [
-              { role: { contains: "Mustahiq", mode: "insensitive" } },
-              { role: { contains: "Mufattisy", mode: "insensitive" } },
-              { role: { contains: "Mufatish", mode: "insensitive" } },
-              { role: { contains: "Mundzir", mode: "insensitive" } },
-            ],
-          },
+        await tx.classEnrollment.updateMany({
+          where: { deletedAt: null },
           data: { deletedAt: now },
         });
 
-        await tx.person.updateMany({
-          where: { id: { in: personIds }, deletedAt: null },
+        await tx.academicClass.updateMany({
+          where: { deletedAt: null },
           data: { deletedAt: now },
+        });
+      } else if (category === "room" || category === "kamar" || category === "asrama") {
+        categoryLabel = "Data Kamar / Asrama";
+        const rooms = await (tx as any).room.findMany({
+          where: { deletedAt: null },
+          select: { id: true },
+        });
+        deletedCount = rooms.length;
+
+        await tx.studentProfile.updateMany({
+          where: { roomId: { not: null }, deletedAt: null },
+          data: { roomId: null },
+        });
+
+        await (tx as any).room.updateMany({
+          where: { deletedAt: null },
+          data: { deletedAt: now },
+        });
+      } else if (category === "subject" || category === "mapel") {
+        categoryLabel = "Mata Pelajaran & Kurikulum";
+        const subjects = await tx.subject.findMany({ where: { deletedAt: null }, select: { id: true } });
+        deletedCount = subjects.length;
+
+        await tx.curriculumSubject.deleteMany({});
+        await tx.subject.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.curriculum.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+      } else if (category === "violation" || category === "pelanggaran") {
+        categoryLabel = "Catatan Pelanggaran Santri";
+        const violations = await tx.studentViolation.findMany({ where: { deletedAt: null }, select: { id: true } });
+        deletedCount = violations.length;
+
+        await tx.studentViolation.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+      } else if (category === "certificate" || category === "sertifikat" || category === "ijazah") {
+        categoryLabel = "Sertifikat & Ijazah Santri";
+        const certs = await tx.academicCertificate.findMany({ where: { deletedAt: null }, select: { id: true } });
+        deletedCount = certs.length;
+
+        await tx.academicCertificate.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+      } else if (category === "khidmah") {
+        categoryLabel = "Data Khidmah Alumni";
+        const prismaKhidmah = (tx as any).khidmahAssignment || (tx as any).khidmah_assignment;
+        if (prismaKhidmah) {
+          const khs = await prismaKhidmah.findMany({ where: { deletedAt: null }, select: { id: true } });
+          deletedCount = khs.length;
+          await prismaKhidmah.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        } else {
+          const alumni = await tx.alumniRecord.findMany({ where: { deletedAt: null }, select: { id: true } });
+          deletedCount = alumni.length;
+          await tx.alumniRecord.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        }
+      } else if (category === "all" || category === "semua") {
+        categoryLabel = "SEMUA DATA MASTER & OPERASIONAL SISTEM";
+
+        const [stCount, rmCount, clCount] = await Promise.all([
+          tx.studentProfile.count({ where: { deletedAt: null } }),
+          (tx as any).room ? (tx as any).room.count({ where: { deletedAt: null } }) : Promise.resolve(0),
+          tx.academicClass.count({ where: { deletedAt: null } }),
+        ]);
+        deletedCount = stCount + rmCount + clCount;
+
+        await tx.classEnrollment.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.studentViolation.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.academicCertificate.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.studentProfile.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.guardianProfile.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        if ((tx as any).room) await (tx as any).room.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.academicClass.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.teacherProfile.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.organizationMembership.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.subject.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        await tx.curriculum.updateMany({ where: { deletedAt: null }, data: { deletedAt: now } });
+        
+        // Disable non-admin user accounts
+        await tx.userAccount.updateMany({
+          where: {
+            deletedAt: null,
+            NOT: [
+              { role: { contains: "sek", mode: "insensitive" } },
+              { role: { contains: "admin", mode: "insensitive" } },
+            ],
+          },
+          data: { deletedAt: now, status: "INACTIVE" },
         });
       } else {
         return NextResponse.json(
