@@ -364,7 +364,7 @@ export function UsersManagementTab() {
                     <th className="px-4 py-3 text-left">Role Akses</th>
                     <th className="px-4 py-3 text-left">Status Akun</th>
                     <th className="px-4 py-3 text-left">Aktivitas</th>
-                    <th className="px-4 py-3 text-right">Aksi Operasional</th>
+                    <th className="px-4 py-3 text-center min-w-[200px]">AKSI OPERASIONAL AKUN</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -422,8 +422,8 @@ export function UsersManagementTab() {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
                             {/* Tombol WA Kirim Kredensial */}
                             <button
                               onClick={() => sendWhatsAppCredentials(user?.personName || user?.username, user.username, "mphm123", user.personPhone)}
@@ -695,7 +695,7 @@ export function UsersManagementTab() {
                     <th className="px-4 py-3 text-left">Role Akun</th>
                     <th className="px-4 py-3 text-left">Username / Login</th>
                     <th className="px-4 py-3 text-left">Status Dorman</th>
-                    <th className="px-4 py-3 text-right">Aksi</th>
+                    <th className="px-4 py-3 text-center min-w-[280px]">AKSI PEMULIHAN & HAPUS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -730,8 +730,8 @@ export function UsersManagementTab() {
                             Non-Aktif / Dorman
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={async () => {
                                 try {
@@ -795,7 +795,7 @@ export function UsersManagementTab() {
                     <th className="px-4 py-3 text-left">Username / Login</th>
                     <th className="px-4 py-3 text-left">No. WhatsApp</th>
                     <th className="px-4 py-3 text-left">Status Akun</th>
-                    <th className="px-4 py-3 text-right">Aksi</th>
+                    <th className="px-4 py-3 text-center min-w-[200px]">AKSI KONTROL AKUN</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -837,8 +837,8 @@ export function UsersManagementTab() {
                               {user.isActive ? "AKTIF" : "NON-AKTIF"}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-1">
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex items-center justify-center gap-1">
                               <button
                                 onClick={() => setResetModal({ userId: user.id, username: user.username })}
                                 className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-amber-600 rounded-lg transition-colors cursor-pointer"
