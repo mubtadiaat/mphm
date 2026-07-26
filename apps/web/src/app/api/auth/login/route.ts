@@ -64,26 +64,29 @@ export async function POST(req: NextRequest) {
 
     const roleLower = String(userAccount.role || "").trim().toLowerCase();
 
-    // Strict Portal Role Validation
+    // Flexible Portal Role Validation
     if (body.portal === "sekretariat") {
-      const allowedSek = ["sek.pondok", "sek.madrasah", "admin", "superadmin", "sekretariat"];
-      if (!allowedSek.includes(roleLower)) {
+      const allowedKeywords = ["sek", "admin", "sekretariat", "superadmin", "super_admin", "super admin"];
+      const isAllowed = allowedKeywords.some((kw) => roleLower.includes(kw));
+      if (!isAllowed) {
         return NextResponse.json(
           { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Sekretariat Windows." },
           { status: 403 }
         );
       }
     } else if (body.portal === "staff") {
-      const allowedStaff = ["mustahiq", "mufattisy", "mundzir", "pimpinan", "keamanan", "petugas keamanan"];
-      if (!allowedStaff.includes(roleLower)) {
+      const allowedKeywords = ["mustahiq", "mufattisy", "mufat", "mundzir", "pimpinan", "keamanan", "petugas", "staf", "staff"];
+      const isAllowed = allowedKeywords.some((kw) => roleLower.includes(kw));
+      if (!isAllowed) {
         return NextResponse.json(
           { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Staf & Pengurus." },
           { status: 403 }
         );
       }
     } else if (body.portal === "guardian") {
-      const allowedGuardian = ["wali.santri", "wali_santri", "wali santri", "guardian"];
-      if (!allowedGuardian.includes(roleLower)) {
+      const allowedKeywords = ["wali", "santri", "guardian"];
+      const isAllowed = allowedKeywords.some((kw) => roleLower.includes(kw));
+      if (!isAllowed) {
         return NextResponse.json(
           { status: "Error", message: "Akun Anda bukan merupakan akun Wali Santri." },
           { status: 403 }
