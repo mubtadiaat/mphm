@@ -10,6 +10,7 @@ import { Database, Lock } from "lucide-react";
 import { useRoleUIConfig } from "@/lib/useRoleUIConfig";
 import { useToast } from "@/components/shared/ToastContext";
 import { apiRequest } from "@/lib/api";
+import { useOnlineStatus } from "@/lib/useOnlineStatus";
 
 interface CustomNavItem {
   label: string;
@@ -36,6 +37,7 @@ export function Sidebar({ role }: { role: RoleTypes }) {
   const { activeWorkspace } = useWorkspace();
   const { config, accentColorClasses } = useRoleUIConfig(role);
   const { toast } = useToast();
+  const { isOnline, pendingSyncCount } = useOnlineStatus();
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({
     hasMundzir: true,
     hasMufattisy: true,
@@ -245,15 +247,42 @@ export function Sidebar({ role }: { role: RoleTypes }) {
       </nav>
 
       <div className="p-4 border-t border-slate-900 bg-slate-950/50 mt-auto">
-        <div className="bg-slate-900 rounded-xl p-3 border border-slate-800/50 flex flex-col items-center justify-center text-center gap-1">
-          <span className="text-xs font-bold text-slate-300">
-            {role === "sek.pondok" || activeWorkspace === "pondok" ? "Sistem Informasi Pesantren" : "Sistem Informasi Akademik"}
-          </span>
-          <span className="text-[10px] text-slate-500">
+        <div className="bg-slate-900 rounded-xl p-3 border border-slate-800/50 flex flex-col items-center justify-center text-center gap-1.5 shadow-md">
+          <div className="flex items-center justify-center gap-2">
+            {/* PULSING GREEN (ONLINE) / RED (OFFLINE) INDICATOR DOT */}
+            <span className="relative flex h-3 w-3 shrink-0">
+              <span
+                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                  isOnline ? "bg-emerald-400" : "bg-rose-400"
+                }`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-3 w-3 ${
+                  isOnline ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]"
+                }`}
+              />
+            </span>
+            <span className="text-xs font-extrabold text-slate-200">
+              {role === "sek.pondok" || activeWorkspace === "pondok" ? "Sistem Informasi Pesantren" : "Sistem Informasi Akademik"}
+            </span>
+          </div>
+
+          <span className="text-[10px] font-medium text-slate-400">
             {role === "sek.pondok" || activeWorkspace === "pondok"
               ? "Pondok Pesantren Putri Hidayatul Mubtadi'at"
               : "Madrasah Putri Hidayatul Mubtadi'at"}
           </span>
+
+          <div className="mt-0.5 flex items-center justify-center gap-2 text-[10px] font-mono">
+            <span className={`font-bold flex items-center gap-1 ${isOnline ? "text-emerald-400" : "text-rose-400"}`}>
+              {isOnline ? "● Online (Realtime Sync)" : "▲ Offline (Cache Luring)"}
+            </span>
+            {pendingSyncCount > 0 && (
+              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-md text-[9px] font-bold animate-pulse">
+                {pendingSyncCount} Pending Sync
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </aside>
