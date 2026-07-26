@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cleanOrphanedGuardians } from "@/lib/cleanGuardians";
 
 function formatIndonesianDateTime(dateInput: Date | string | null): string {
   if (!dateInput) return "-";
@@ -32,6 +33,7 @@ function calculateExpiresAt(deletedAtInput: Date | string | null): string {
 
 export async function GET(req: NextRequest) {
   try {
+    await cleanOrphanedGuardians();
     const deletedPeople = await prisma.person.findMany({
       where: { deletedAt: { not: null } },
       include: {
@@ -101,6 +103,7 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    await cleanOrphanedGuardians();
     let totalPurged = 0;
 
     await prisma.$transaction(async (tx) => {

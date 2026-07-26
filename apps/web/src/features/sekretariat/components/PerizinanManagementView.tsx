@@ -25,7 +25,11 @@ export interface StudentPermitData {
   createdAt: string;
 }
 
-export function PerizinanManagementView() {
+interface PerizinanManagementViewProps {
+  isReadOnly?: boolean;
+}
+
+export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagementViewProps) {
   const { data: user } = useAuth();
   const { toast, confirm } = useToast();
   const queryClient = useQueryClient();
@@ -198,13 +202,15 @@ export function PerizinanManagementView() {
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="z-10 inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Buat Perizinan Baru</span>
-        </button>
+        {!isReadOnly && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="z-10 inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Buat Perizinan Baru</span>
+          </button>
+        )}
       </div>
 
       {/* KPI Stats Widgets */}
@@ -377,56 +383,58 @@ export function PerizinanManagementView() {
                     </td>
 
                     <td className="py-4 px-6 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {item.status === "PENDING" && (
-                          <>
-                            <button
-                              title="Setujui Perizinan"
-                              onClick={() => updateStatusMutation.mutate({ id: item.id, status: "APPROVED" })}
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer"
-                            >
-                              <CheckCircle2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              title="Tolak Perizinan"
-                              onClick={() => updateStatusMutation.mutate({ id: item.id, status: "REJECTED" })}
-                              className="p-1.5 text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
+                      {!isReadOnly && (
+                        <div className="flex items-center justify-end gap-1.5">
+                          {item.status === "PENDING" && (
+                            <>
+                              <button
+                                title="Setujui Perizinan"
+                                onClick={() => updateStatusMutation.mutate({ id: item.id, status: "APPROVED" })}
+                                className="p-1.5 text-emerald-600 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                title="Tolak Perizinan"
+                                onClick={() => updateStatusMutation.mutate({ id: item.id, status: "REJECTED" })}
+                                className="p-1.5 text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
 
-                        {item.status === "APPROVED" && (
+                          {item.status === "APPROVED" && (
+                            <button
+                              title="Tandai Santri Kembali (Selesai)"
+                              onClick={() => updateStatusMutation.mutate({ id: item.id, status: "COMPLETED" })}
+                              className="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                            >
+                              <CheckCheck className="w-3.5 h-3.5" />
+                              <span>Kembali</span>
+                            </button>
+                          )}
+
                           <button
-                            title="Tandai Santri Kembali (Selesai)"
-                            onClick={() => updateStatusMutation.mutate({ id: item.id, status: "COMPLETED" })}
-                            className="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                            title="Hapus Record"
+                            onClick={async () => {
+                              const isConfirmed = await confirm({
+                                title: "Hapus Data Perizinan?",
+                                message: "Apakah Anda yakin ingin menghapus data perizinan ini?",
+                                confirmText: "Ya, Hapus Record",
+                                cancelText: "Batal",
+                                type: "danger",
+                              });
+                              if (isConfirmed) {
+                                deletePermitMutation.mutate(item.id);
+                              }
+                            }}
+                            className="p-1.5 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                           >
-                            <CheckCheck className="w-3.5 h-3.5" />
-                            <span>Kembali</span>
+                            <Trash2 className="w-4 h-4" />
                           </button>
-                        )}
-
-                        <button
-                          title="Hapus Record"
-                          onClick={async () => {
-                            const isConfirmed = await confirm({
-                              title: "Hapus Data Perizinan?",
-                              message: "Apakah Anda yakin ingin menghapus data perizinan ini?",
-                              confirmText: "Ya, Hapus Record",
-                              cancelText: "Batal",
-                              type: "danger",
-                            });
-                            if (isConfirmed) {
-                              deletePermitMutation.mutate(item.id);
-                            }
-                          }}
-                          className="p-1.5 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

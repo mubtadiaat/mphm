@@ -43,17 +43,17 @@ export function PimpinanDashboard() {
   const attendanceTrend = data?.attendanceTrend || [];
 
   return (
-    <div className="flex flex-col gap-6 pb-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="flex flex-col gap-4 sm:gap-6 pb-8 sm:pb-12">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-            <Award className="w-4 h-4" />
+          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>Pimpinan / Mundzir Pondok Pesantren</span>
           </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
             Dashboard Pengasuhan Pimpinan
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+          <p className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-sm">
             Ringkasan pengawasan tingkat tinggi untuk kehadiran, bimbingan, dan kedisiplinan santriwati.
           </p>
         </div>
@@ -63,7 +63,7 @@ export function PimpinanDashboard() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6"
       >
         {stats.map((stat, i) => {
           const Icon = stat.icon;
@@ -71,18 +71,18 @@ export function PimpinanDashboard() {
             <motion.div
               key={i}
               variants={cardVariants}
-              className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs flex items-center justify-between hover:shadow-md transition-shadow duration-200"
+              className="p-4 sm:p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs flex items-center justify-between hover:shadow-md transition-shadow duration-200"
             >
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-zinc-400 dark:text-zinc-500">
+                <span className="text-xs sm:text-sm font-medium text-zinc-400 dark:text-zinc-500">
                   {stat.label}
                 </span>
-                <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+                <span className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
                   {stat.value}
                 </span>
               </div>
-              <div className={`p-3 rounded-xl ${stat.color}`}>
-                <Icon className="w-6 h-6" />
+              <div className={`p-2.5 sm:p-3 rounded-xl ${stat.color}`}>
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </motion.div>
           );
@@ -90,20 +90,20 @@ export function PimpinanDashboard() {
       </motion.div>
 
       {/* GRAFIK INDIKATOR PIMPINAN */}
-      <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
-        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl">
-              <BarChart3 className="w-5 h-5" />
+      <div className="p-4 sm:p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4 sm:space-y-6">
+        <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3 sm:pb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+              <h2 className="text-sm sm:text-lg font-bold text-zinc-900 dark:text-white flex flex-wrap items-center gap-2">
                 Grafik Indikator Kehadiran & Presensi Santri (6 Bulan)
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/20">
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs font-semibold border border-amber-500/20">
                   Ringkasan Pimpinan
                 </span>
               </h2>
-              <p className="text-xs text-zinc-500">
+              <p className="text-[11px] sm:text-xs text-zinc-500">
                 Indikator stabilitas presensi pengajian dan kegiatan pondok secara berkala.
               </p>
             </div>
@@ -122,13 +122,13 @@ export function PimpinanDashboard() {
             Belum ada data presensi santri.
           </div>
         ) : (
-          <div className="pt-4 pb-2">
-            <div className="h-48 flex items-end gap-4 sm:gap-8 px-4">
+          <div className="pt-4 pb-2 overflow-x-auto">
+            <div className="h-48 flex items-end gap-3 sm:gap-8 px-2 sm:px-4 min-w-[280px]">
               {attendanceTrend.map((item, index) => {
                 const heightPercent = Math.max(item.rate, 20);
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+                    <span className="text-[11px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
                       {item.rate}%
                     </span>
                     <div className="w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-xl h-full flex items-end overflow-hidden p-1">
@@ -139,7 +139,7 @@ export function PimpinanDashboard() {
                         className="w-full bg-linear-to-t from-amber-600 to-emerald-500 rounded-lg shadow-sm group-hover:brightness-110 transition-all"
                       />
                     </div>
-                    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    <span className="text-[11px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400">
                       {item.month}
                     </span>
                   </div>

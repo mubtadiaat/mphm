@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookOpen, Search, Filter, GraduationCap, Users, CheckCircle2, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/api";
 import { useAcademicYear } from "@/components/shared/AcademicYearContext";
+import { useAuth } from "@/lib/auth";
 
 interface ClassItem {
   id: string;
@@ -17,8 +18,19 @@ interface ClassItem {
 
 export default function MufattisyAkademikPage() {
   const { selectedYearId } = useAcademicYear();
+  const { data: authSession } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string>("ALL");
+
+  useEffect(() => {
+    if (authSession?.supervisedLevel && selectedLevel === "ALL") {
+      const sup = authSession.supervisedLevel.toUpperCase();
+      if (sup.includes("IBTIDA")) setSelectedLevel("IBTIDAIYYAH");
+      else if (sup.includes("TSANAW")) setSelectedLevel("TSANAWIYYAH");
+      else if (sup.includes("ALIY")) setSelectedLevel("ALIYYAH");
+      else if (sup.includes("DADIY")) setSelectedLevel("I'DADIYYAH");
+    }
+  }, [authSession?.supervisedLevel]);
 
   const { data: classesRes, isLoading } = useQuery({
     queryKey: ["mufattisy-academic-classes", selectedYearId],

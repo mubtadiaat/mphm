@@ -37,12 +37,13 @@ export function useSantri(
   pageSize: number = 10,
   searchQuery: string = "",
   statusTab: string = "aktif",
-  classFilter?: string
+  classFilter?: string,
+  jenjangFilter?: string
 ) {
   const queryClient = useQueryClient();
 
   const query = useQuery<{ data: Santri[]; total: number }>({
-    queryKey: ["sekretariat-santri", academicYearId, pageIndex, pageSize, searchQuery, statusTab, classFilter],
+    queryKey: ["sekretariat-santri", academicYearId, pageIndex, pageSize, searchQuery, statusTab, classFilter, jenjangFilter],
     queryFn: async () => {
       const queryParams = new URLSearchParams({
         role: "student",
@@ -54,6 +55,7 @@ export function useSantri(
       if (searchQuery) queryParams.append("q", searchQuery);
       if (statusTab) queryParams.append("status", statusTab);
       if (classFilter) queryParams.append("classFilter", classFilter);
+      if (jenjangFilter) queryParams.append("jenjang", jenjangFilter);
 
       const url = `/api/admin/people?${queryParams.toString()}`;
       const res = await apiRequest<{ data: Santri[]; total: number }>(url);

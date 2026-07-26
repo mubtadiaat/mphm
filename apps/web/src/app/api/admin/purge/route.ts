@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromCookies } from "@/lib/jwt";
 import { createAuditLog } from "@/lib/auditLog";
+import { cleanOrphanedGuardians } from "@/lib/cleanGuardians";
 
 export async function POST(req: NextRequest) {
   try {
@@ -236,6 +237,8 @@ export async function POST(req: NextRequest) {
         afterState: { category: categoryLabel, deletedCount },
       });
     }
+
+    await cleanOrphanedGuardians();
 
     return NextResponse.json({
       status: "Success",

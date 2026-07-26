@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cleanOrphanedGuardians } from "@/lib/cleanGuardians";
 
 export async function GET(
   req: NextRequest,
@@ -300,6 +301,8 @@ export async function DELETE(
         }
       }
     });
+
+    await cleanOrphanedGuardians();
 
     return NextResponse.json({
       status: "Success",

@@ -3,5 +3,5 @@
 import { PerizinanManagementView } from "@/features/sekretariat/components/PerizinanManagementView";
 
 export default function PimpinanPerizinanPage() {
-  return <PerizinanManagementView />;
+  return <PerizinanManagementView isReadOnly={true} />;
 }

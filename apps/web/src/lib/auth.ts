@@ -13,6 +13,7 @@ export interface UserSession {
   googleLinked?: boolean;
   assignedClassId: string | null;
   familyCardNumber: string | null;
+  supervisedLevel?: string | null;
   mustChangePassword?: boolean;
 }
 
@@ -37,12 +38,48 @@ export function useLogout() {
   
   return useMutation({
     mutationFn: async () => {
+      const session = queryClient.getQueryData<UserSession>(["auth-session"]);
+      const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+
       await apiRequest("/api/auth/logout", { method: "POST" });
+
+      return { session, pathname };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.setQueryData(["auth-session"], null);
       if (typeof window !== "undefined") {
-        window.location.href = "/";
+        const role = String(data?.session?.role || "").trim().toLowerCase();
+        const path = String(data?.pathname || "").trim().toLowerCase();
+
+        let targetLogin = "/";
+
+        if (
+          role.includes("sek") ||
+          role.includes("admin") ||
+          path.startsWith("/sekretariat")
+        ) {
+          targetLogin = "/loginsekr";
+        } else if (
+          role.includes("wali") ||
+          role.includes("guardian") ||
+          path.startsWith("/guardian")
+        ) {
+          targetLogin = "/loginguardiant";
+        } else if (
+          role.includes("mustahiq") ||
+          role.includes("mufat") ||
+          role.includes("mundzir") ||
+          role.includes("pimpinan") ||
+          role.includes("keamanan") ||
+          path.startsWith("/mustahiq") ||
+          path.startsWith("/mufattisy") ||
+          path.startsWith("/pimpinan") ||
+          path.startsWith("/keamanan")
+        ) {
+          targetLogin = "/loginStaff";
+        }
+
+        window.location.href = targetLogin;
       }
     },
   });

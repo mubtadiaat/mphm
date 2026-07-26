@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSessionFromCookies } from "@/lib/jwt";
+import { cleanOrphanedGuardians } from "@/lib/cleanGuardians";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,8 +14,28 @@ export async function GET(req: NextRequest) {
 
     if (role === "student" || role === "santri") {
       const isUnassignedTab = statusTab === "tanpa_kelas" || statusTab === "unassigned";
+      let jenjangParam = searchParams.get("jenjang") || searchParams.get("level") || undefined;
+      const classParam = searchParams.get("classFilter") || searchParams.get("class") || undefined;
+
+      const session = await getSessionFromCookies();
+
+      if ((!jenjangParam || jenjangParam === "ALL" || jenjangParam === "all") && session) {
+        const userRoleLower = String(session.role || "").toLowerCase();
+        if (userRoleLower.includes("mufat") || userRoleLower.includes("mundzir")) {
+          let sup = session.supervisedLevel;
+          if (!sup && session.personId) {
+            const om = await prisma.organizationMembership.findFirst({
+              where: { personId: session.personId, deletedAt: null },
+            });
+            sup = om?.supervisedLevel || null;
+          }
+          if (sup) {
+            jenjangParam = sup;
+          }
+        }
+      }
       
-      const whereCondition = {
+      const whereCondition: any = {
         deletedAt: null,
         person: { deletedAt: null },
         ...(isUnassignedTab
@@ -33,6 +55,30 @@ export async function GET(req: NextRequest) {
             }
           : {}),
       };
+
+      if (jenjangParam && jenjangParam !== "all" && jenjangParam !== "ALL") {
+        whereCondition.enrollments = {
+          some: {
+            deletedAt: null,
+            academicClass: {
+              institutionLevel: { contains: jenjangParam, mode: "insensitive" as const }
+            }
+          }
+        };
+      }
+
+      if (classParam && classParam !== "all" && classParam !== "ALL") {
+        whereCondition.enrollments = {
+          ...whereCondition.enrollments,
+          some: {
+            ...(whereCondition.enrollments?.some || {}),
+            deletedAt: null,
+            academicClass: {
+              name: { contains: classParam, mode: "insensitive" as const }
+            }
+          }
+        };
+      }
 
       const [total, list] = await Promise.all([
         prisma.studentProfile.count({ where: whereCondition }),
@@ -361,6 +407,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === "guardian") {
+      await cleanOrphanedGuardians();
 
       const whereCondition = {
         deletedAt: null,

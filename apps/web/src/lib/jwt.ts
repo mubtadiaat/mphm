@@ -16,6 +16,7 @@ export interface JWTPayload {
   googleLinked?: boolean;
   assignedClassId: string | null;
   familyCardNumber: string | null;
+  supervisedLevel?: string | null;
   mustChangePassword?: boolean;
   exp?: number;
 }

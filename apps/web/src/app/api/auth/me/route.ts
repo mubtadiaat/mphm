@@ -26,6 +26,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const orgMem = await prisma.organizationMembership.findFirst({
+      where: { personId: userAccount.personId, deletedAt: null },
+    });
+
     const isDefaultPassword = 
       userAccount.passwordHash === "mubtadiaat123" || 
       userAccount.passwordHash === "mphm123" || 
@@ -43,6 +47,7 @@ export async function GET(req: NextRequest) {
       googleLinked: Boolean(userAccount.firebaseUid),
       assignedClassId: null,
       familyCardNumber: null,
+      supervisedLevel: orgMem?.supervisedLevel || null,
       mustChangePassword: isDefaultPassword,
     };
 

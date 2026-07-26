@@ -94,6 +94,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const orgMem = await prisma.organizationMembership.findFirst({
+      where: { personId: userAccount.personId, deletedAt: null },
+    });
+
     const sessionPayload = {
       userId: userAccount.id,
       accountId: userAccount.id,
@@ -106,6 +110,7 @@ export async function POST(req: NextRequest) {
       googleLinked: Boolean(userAccount.firebaseUid),
       assignedClassId: null,
       familyCardNumber: null,
+      supervisedLevel: orgMem?.supervisedLevel || null,
     };
 
     const response = NextResponse.json({

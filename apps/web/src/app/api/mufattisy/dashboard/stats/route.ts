@@ -1,11 +1,42 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSessionFromCookies } from "@/lib/jwt";
 
 export async function GET() {
   try {
-    const totalSantri = await prisma.studentProfile.count({ where: { status: "ACTIVE", deletedAt: null } });
+    const session = await getSessionFromCookies();
+    let supervisedLevel: string | null = session?.supervisedLevel || null;
+
+    if (!supervisedLevel && session?.personId) {
+      const om = await prisma.organizationMembership.findFirst({
+        where: { personId: session.personId, deletedAt: null },
+      });
+      supervisedLevel = om?.supervisedLevel || null;
+    }
+
+    const classWhere = {
+      deletedAt: null,
+      ...(supervisedLevel ? { institutionLevel: { contains: supervisedLevel, mode: "insensitive" as const } } : {}),
+    };
+
+    const studentWhere = {
+      status: "ACTIVE",
+      deletedAt: null,
+      ...(supervisedLevel
+        ? {
+            enrollments: {
+              some: {
+                deletedAt: null,
+                academicClass: { institutionLevel: { contains: supervisedLevel, mode: "insensitive" as const } },
+              },
+            },
+          }
+        : {}),
+    };
+
+    const totalSantri = await prisma.studentProfile.count({ where: studentWhere as any });
     const totalTeachers = await prisma.teacherProfile.count({ where: { status: "ACTIVE", deletedAt: null } });
-    const totalClasses = await prisma.academicClass.count({ where: { deletedAt: null } });
+    const totalClasses = await prisma.academicClass.count({ where: classWhere as any });
     const totalCurriculums = await prisma.curriculum.count({ where: { deletedAt: null } });
     const totalSubjects = await prisma.subject.count({ where: { deletedAt: null } });
     const totalViolations = await prisma.studentViolation.count({ where: { deletedAt: null } });
@@ -16,7 +47,7 @@ export async function GET() {
 
     // Real DB breakdown by institution level
     const classes = await prisma.academicClass.findMany({
-      where: { deletedAt: null },
+      where: classWhere as any,
       include: {
         enrollments: { where: { status: "ACTIVE", deletedAt: null } },
         studentScores: true,
@@ -55,6 +86,7 @@ export async function GET() {
         averageGpa,
         curriculumCompliance,
         levelPerformances,
+        supervisedLevel,
       },
     });
   } catch (err: any) {
