@@ -71,10 +71,10 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 animate-pulse">Memuat dashboard...</span>
+          <span className="text-sm font-semibold text-zinc-500 animate-pulse">Memuat dashboard...</span>
         </div>
       </div>
     );

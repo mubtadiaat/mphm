@@ -119,17 +119,17 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
   return (
     <AcademicYearProvider>
       <WorkspaceProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex relative w-full">
+        <div className="min-h-screen bg-gray-50 flex relative w-full">
           <CommandPalette />
           
           {/* Sidebar */}
           <Sidebar role={role} />
           
           <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${paddingClass}`}>
-            <header className="h-20 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 flex items-center px-4 sm:px-6 sticky top-0 z-40 justify-between">
+            <header className="h-20 bg-white/80 backdrop-blur-md border-b border-zinc-200 flex items-center px-4 sm:px-6 sticky top-0 z-40 justify-between">
               <div className="flex-1 flex items-center gap-2 sm:gap-2.5 md:hidden min-w-0">
                 <img src="/logo.png" alt="Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain rounded-lg shadow-xs shrink-0" />
-                <span className="font-black text-base sm:text-lg text-zinc-900 dark:text-white tracking-tight truncate">
+                <span className="font-black text-base sm:text-lg text-zinc-900 tracking-tight truncate">
                   {role === "sek.pondok" ? "P3HM Lirboyo" : "MPHM Lirboyo"}
                 </span>
               </div>

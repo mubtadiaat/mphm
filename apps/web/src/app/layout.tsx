@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${inter.variable}`}>
-      <body className="font-sans antialiased text-gray-900 bg-gray-50 dark:bg-zinc-950 dark:text-gray-100">
+      <body className="font-sans antialiased text-gray-900 bg-gray-50">
         <Providers>
           {children}
         </Providers>
