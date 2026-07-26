@@ -26,6 +26,7 @@ export interface Santri {
   guardianRelation: "AYAH" | "IBU" | "WALI";
   familyCardNumber: string;
   khidmahPlacement?: string;
+  room?: string;
   roomName?: string;
   buildingName?: string;
   roomSupervisor?: string;

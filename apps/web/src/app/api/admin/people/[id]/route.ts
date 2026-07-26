@@ -172,6 +172,41 @@ export async function PUT(
             },
           });
         }
+
+        // 2c. Update or Auto-Create Room if room/kamar specified
+        const targetRoomName = (body.room || body.roomName || body.kamar || body.asrama || "").trim();
+        if (targetRoomName && targetRoomName !== "Belum Ditentukan") {
+          let targetRoom = await tx.room.findFirst({
+            where: {
+              name: { equals: targetRoomName, mode: "insensitive" },
+              deletedAt: null,
+            },
+          });
+
+          if (!targetRoom) {
+            let bName = "Asrama Utama";
+            if (/aisyah/i.test(targetRoomName)) bName = "Gedung Aisyah";
+            else if (/khadijah/i.test(targetRoomName)) bName = "Gedung Khadijah";
+            else if (/fatimah/i.test(targetRoomName)) bName = "Gedung Fatimah";
+            else if (/zainab/i.test(targetRoomName)) bName = "Gedung Zainab";
+
+            targetRoom = await tx.room.create({
+              data: {
+                name: targetRoomName,
+                buildingName: bName,
+                capacity: 20,
+                supervisorId: null,
+              },
+            });
+          }
+
+          if (targetRoom) {
+            await tx.studentProfile.update({
+              where: { id: existingStudent.id },
+              data: { roomId: targetRoom.id },
+            });
+          }
+        }
       }
 
       return person;

@@ -275,6 +275,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         nis: newNis || newStambuk,
         nisn: newNisn,
         class: newClass,
+        room: newRoom,
         enrollmentYear: Number(newEnrollmentYear),
         graduationYear: newGraduationYear ? Number(newGraduationYear) : undefined,
         status: newStatus,
@@ -457,6 +458,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     "NISN",
     "Jenjang Aktif",
     "Kelas Aktif",
+    "Kamar Aktif",
+    "Kamar / Asrama",
     "Tahun Masuk",
     "Tahun Keluar",
     "Tahun Lulus",
@@ -687,6 +690,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   formattedAddress = addrParts.join(", ");
                 }
 
+                const rawKamar = r["Kamar Aktif"] || r["Kamar / Asrama"] || r["Kamar Asrama"] || r["Nama Kamar"] || r["Kamar"] || r["Asrama"] || r["kamar"] || "";
+
                 await createSantri({
                   name: nameVal,
                   nik: r["NIK Santri (16 Digit)"] || r["NIK Santri"] || r["NIK"] || r["nik"] || "",
@@ -698,6 +703,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   nis: r["NIS"] || r["Nomor Stambuk"] || r["stambuk"] || "",
                   nisn: r["NISN"] || "",
                   class: fullClassName || "Belum Ditentukan",
+                  room: rawKamar.trim() || undefined,
                   enrollmentYear: Number(r["Tahun Masuk"]) || new Date().getFullYear(),
                   graduationYear: r["Tahun Lulus"] ? Number(r["Tahun Lulus"]) : undefined,
                   status: r["Status Keaktifan"] || "ACTIVE",
