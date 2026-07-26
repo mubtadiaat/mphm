@@ -10,6 +10,8 @@ import { useRooms, Room } from "../queries/useRooms";
 import { useGuru } from "../queries/useGuru";
 import { useToast } from "@/components/shared/ToastContext";
 
+import { determineBuildingName } from "@/lib/determineBuilding";
+
 interface RoomsTabProps {
   isReadOnly?: boolean;
 }
@@ -311,23 +313,30 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Kamar Al-Ghazali 01"
+                    placeholder="Contoh: A-02, E-01, dll."
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setName(val);
+                      if (val.trim()) {
+                        setBuildingName(determineBuildingName(val));
+                      }
+                    }}
                     className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Nama Gedung *</label>
-                  <input
-                    type="text"
+                  <label className="text-xs font-bold text-zinc-500 uppercase">Nama Gedung (Komplek) *</label>
+                  <select
                     required
-                    placeholder="Contoh: Gedung A / Blok Barat"
-                    value={buildingName}
+                    value={buildingName || "Gedung Kota"}
                     onChange={(e) => setBuildingName(e.target.value)}
-                    className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white"
-                  />
+                    className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white font-semibold cursor-pointer"
+                  >
+                    <option value="Gedung Kota">Gedung Kota (Kamar A - D)</option>
+                    <option value="Gedung Desa">Gedung Desa (Kamar E - Z)</option>
+                  </select>
                 </div>
 
                   <div className="flex flex-col gap-1.5">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { determineBuildingName } from "@/lib/determineBuilding";
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
     const rooms = dbRooms.map((r: any) => ({
       id: r.id,
       name: r.name,
-      buildingName: r.buildingName,
+      buildingName: determineBuildingName(r.name, r.buildingName),
       capacity: r.capacity,
       supervisorId: r.supervisorId,
       supervisorName: r.supervisor?.fullName || null,
@@ -62,12 +63,14 @@ export async function POST(req: NextRequest) {
     const { name, roomName, buildingName, capacity, supervisorId } = body;
 
     const targetName = name || roomName;
-    if (!targetName || !buildingName) {
+    if (!targetName) {
       return NextResponse.json(
-        { status: "Error", message: "Nama kamar dan gedung wajib diisi." },
+        { status: "Error", message: "Nama kamar wajib diisi." },
         { status: 400 }
       );
     }
+
+    const finalBuilding = determineBuildingName(targetName, buildingName);
 
     const prismaRoom = (prisma as any).room;
     if (!prismaRoom) {
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
     const created = await prismaRoom.create({
       data: {
         name: targetName,
-        buildingName,
+        buildingName: finalBuilding,
         capacity: Number(capacity) || 20,
         supervisorId: supervisorId || null,
       },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cleanOrphanedGuardians } from "@/lib/cleanGuardians";
+import { determineBuildingName } from "@/lib/determineBuilding";
 
 export async function GET(
   req: NextRequest,
@@ -184,11 +185,7 @@ export async function PUT(
           });
 
           if (!targetRoom) {
-            let bName = "Asrama Utama";
-            if (/aisyah/i.test(targetRoomName)) bName = "Gedung Aisyah";
-            else if (/khadijah/i.test(targetRoomName)) bName = "Gedung Khadijah";
-            else if (/fatimah/i.test(targetRoomName)) bName = "Gedung Fatimah";
-            else if (/zainab/i.test(targetRoomName)) bName = "Gedung Zainab";
+            const bName = determineBuildingName(targetRoomName);
 
             targetRoom = await tx.room.create({
               data: {
