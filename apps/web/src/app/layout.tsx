@@ -13,8 +13,11 @@ const inter = Inter({
 // export const runtime = "edge";
 
 export const metadata: Metadata = {
-  title: "MPHM Enterprise v4.0",
-  description: "Pesantren Management System",
+  title: "P3HM & MPHM Lirboyo - Sistem Informasi Pesantren",
+  description: "Portal Resmi Sistem Informasi Pesantren & Akademik Pondok Pesantren Putri Hidayatul Mubtadi'at Lirboyo Kediri",
+  verification: {
+    google: "NWFc77K47PFCLGvevFoceljSg4NFF9ls9J9cXgoAU3s",
+  },
 };
 
 export default function RootLayout({
