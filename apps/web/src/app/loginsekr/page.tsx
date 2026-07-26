@@ -119,15 +119,15 @@ export default function LoginSekretariatPage() {
       {/* 3D Dark Background Image with Cinematic Overlay & Vignette */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <Image
-          src="/pesantren-dark-bg.jpg"
+          src="/pesantren-dark-bg.png"
           alt="Latar Belakang Pesantren P3HM & MPHM Lirboyo"
           fill
           priority
-          className="object-cover object-center brightness-[0.35] contrast-[1.25] scale-105"
+          className="object-cover object-center scale-100"
         />
         {/* Dark Vignette & Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/60 to-slate-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40" />
         {/* Ambient Gold & Blue Glowing Orbs */}
         <div className="absolute top-1/4 left-10 w-96 h-96 bg-amber-500/10 rounded-full blur-[140px]" />
         <div className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[160px]" />
