@@ -238,7 +238,7 @@ export default function LoginGuardianPage() {
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            <span>Masuk Aplikasi</span>
+            <span>Masuk</span>
           </button>
           <button
             type="button"
@@ -253,7 +253,7 @@ export default function LoginGuardianPage() {
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
-            <span>Pendaftaran Baru</span>
+            <span>Daftar</span>
           </button>
         </div>
 
@@ -347,7 +347,7 @@ export default function LoginGuardianPage() {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  <span>Masuk Aplikasi Wali</span>
+                  <span>Masuk</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
