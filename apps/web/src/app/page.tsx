@@ -61,88 +61,88 @@ export default function Page() {
     <div className="min-h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col justify-between items-center relative overflow-x-hidden font-sans selection:bg-indigo-500 selection:text-white">
       {/* Background Ambient Glowing Orbs */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-indigo-500/15 via-teal-500/10 to-transparent rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute top-[35%] right-10 w-[700px] h-[700px] bg-cyan-600/10 rounded-full blur-[180px] pointer-events-none" />
+      <div className="absolute top-[45%] right-10 w-[700px] h-[700px] bg-cyan-600/10 rounded-full blur-[180px] pointer-events-none" />
       <div className="absolute bottom-[20%] left-10 w-[700px] h-[700px] bg-emerald-600/10 rounded-full blur-[180px] pointer-events-none" />
 
       {/* Main Content Container */}
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-12 py-8 sm:py-16 space-y-16 sm:space-y-28 relative z-10">
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
 
         {/* ========================================================================= */}
-        {/* SECTION 1: HERO & MAIN PORTAL GATEWAYS */}
+        {/* LAYAR 1: HERO & CENTRAL PORTAL CARDS (FITS 100% PERFECTLY IN VIEWPORT) */}
         {/* ========================================================================= */}
-        <section className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto pt-2 sm:pt-6">
+        <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto py-6 relative">
           
           {/* Logo Badge & Live Online Badge */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="flex flex-col items-center space-y-4"
+            className="flex flex-col items-center space-y-3"
           >
             <div className="relative group cursor-pointer">
               <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500 via-teal-400 to-cyan-500 rounded-3xl blur-xl opacity-60 group-hover:opacity-100 transition duration-500" />
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32 bg-zinc-950 border border-zinc-800 rounded-3xl p-3.5 flex items-center justify-center shadow-2xl">
+              <div className="relative w-20 h-20 sm:w-28 sm:h-28 bg-zinc-950 border border-zinc-800 rounded-3xl p-3 flex items-center justify-center shadow-2xl">
                 <Image 
                   src="/logo.png" 
                   alt="Logo P3HM & MPHM Lirboyo" 
-                  width={96} 
-                  height={96} 
+                  width={80} 
+                  height={80} 
                   className="object-contain drop-shadow-xl group-hover:scale-105 transition-transform" 
                   priority
                 />
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-indigo-500/30 text-indigo-400 text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-xl">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/90 border border-indigo-500/30 text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-xl">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
               <span>Realtime System 2026/2027 • Mobile Portal Staf &amp; Wali</span>
             </div>
           </motion.div>
 
           {/* Hero Heading */}
-          <div className="space-y-4 max-w-3xl">
+          <div className="space-y-2.5 max-w-3xl">
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
               Portal Layanan <br />
               <span className="bg-gradient-to-r from-indigo-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
                 Staf &amp; Wali Santri
               </span>
             </h1>
-            <p className="text-xs sm:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto font-normal">
+            <p className="text-xs sm:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto font-normal">
               Pondok Pesantren Putri Hidayatul Mubtadi&apos;at (P3HM) &amp; Madrasah Putri Hidayatul Mubtadi&apos;at (MPHM) Lirboyo Kediri.
             </p>
           </div>
 
-          {/* 2 Primary Gateway Access Cards */}
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-2 max-w-3xl mx-auto">
+          {/* 2 Primary Gateway Access Cards (Perfectly Framed) */}
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-1 max-w-3xl mx-auto">
             
             {/* Gateway 1: Portal Login Staf */}
             <motion.div 
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
               onClick={() => router.push("/loginStaff")}
-              className="p-5 sm:p-7 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 hover:from-zinc-900 hover:to-zinc-900 border border-indigo-500/40 hover:border-indigo-500/90 rounded-3xl transition-all duration-300 cursor-pointer group shadow-2xl flex flex-col justify-between space-y-6 text-left relative overflow-hidden"
+              className="p-5 sm:p-6 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 hover:from-zinc-900 hover:to-zinc-900 border border-indigo-500/40 hover:border-indigo-500/90 rounded-3xl transition-all duration-300 cursor-pointer group shadow-2xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-indigo-500 group-hover:h-2 transition-all" />
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                  <Smartphone className="w-6 h-6 sm:w-7 sm:h-7" />
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                  <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-0.5 transition-transform" />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
 
               <div>
-                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20 inline-block mb-2">
+                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-0.5 rounded-full border border-indigo-500/20 inline-block mb-1.5">
                   Portal Guru &amp; Pengurus
                 </span>
-                <h3 className="font-black text-xl sm:text-2xl text-white">Portal Login Staf</h3>
-                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                <h3 className="font-black text-lg sm:text-xl text-white">Portal Login Staf</h3>
+                <p className="text-[11px] sm:text-xs text-zinc-400 mt-1 leading-relaxed">
                   Mustahiq • Mufatish • Mundzir • Musyrifah • Petugas Keamanan.
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs text-indigo-400 font-bold">
+              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-indigo-400 font-bold">
                 <span>Masuk Portal Login Staf</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -153,41 +153,47 @@ export default function Page() {
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
               onClick={() => router.push("/loginguardiant")}
-              className="p-5 sm:p-7 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 hover:from-zinc-900 hover:to-zinc-900 border border-cyan-500/40 hover:border-cyan-500/90 rounded-3xl transition-all duration-300 cursor-pointer group shadow-2xl flex flex-col justify-between space-y-6 text-left relative overflow-hidden"
+              className="p-5 sm:p-6 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 hover:from-zinc-900 hover:to-zinc-900 border border-cyan-500/40 hover:border-cyan-500/90 rounded-3xl transition-all duration-300 cursor-pointer group shadow-2xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-cyan-500 group-hover:h-2 transition-all" />
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                  <Users className="w-6 h-6 sm:w-7 sm:h-7" />
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all">
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-0.5 transition-transform" />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all">
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
 
               <div>
-                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20 inline-block mb-2">
+                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-3 py-0.5 rounded-full border border-cyan-500/20 inline-block mb-1.5">
                   Orang Tua Santri (Smart KK)
                 </span>
-                <h3 className="font-black text-xl sm:text-2xl text-white">Portal Wali Santri</h3>
-                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                <h3 className="font-black text-lg sm:text-xl text-white">Portal Wali Santri</h3>
+                <p className="text-[11px] sm:text-xs text-zinc-400 mt-1 leading-relaxed">
                   Masuk Portal &amp; Pendaftaran Baru Akun Orang Tua Mandiri.
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs text-cyan-400 font-bold">
+              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-cyan-400 font-bold">
                 <span>Masuk &amp; Daftar Wali Santri</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </motion.div>
 
           </div>
+
+          {/* Scroll Down Indicator */}
+          <div className="pt-2 animate-bounce flex flex-col items-center gap-1 text-zinc-500 text-[11px]">
+            <span>Scroll ke bawah untuk melihat fitur &amp; panduan</span>
+            <ChevronDown className="w-4 h-4 text-zinc-400" />
+          </div>
         </section>
 
         {/* ========================================================================= */}
-        {/* SECTION 2: EXACT USER UPLOADED SHOWCASE IMAGE (100% RESPONSIVE) */}
+        {/* LAYAR 2: EXACT USER UPLOADED SHOWCASE IMAGE (AFTER SCROLL) */}
         {/* ========================================================================= */}
-        <section className="space-y-6">
+        <section className="py-12 space-y-6">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
               <Zap className="w-4 h-4" />
@@ -221,7 +227,7 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Exact User Uploaded Image Container (100% Responsive) */}
+              {/* Exact User Uploaded Image Container */}
               <div className="relative w-full rounded-2xl overflow-hidden border border-zinc-800/80 bg-zinc-900 shadow-2xl">
                 <Image
                   src="/user-showcase.jpg"
@@ -253,9 +259,9 @@ export default function Page() {
         </section>
 
         {/* ========================================================================= */}
-        {/* SECTION 3: INFORMASI LENGKAP MODUL STAF & WALI SANTRI */}
+        {/* LAYAR 3: INFORMASI LENGKAP MODUL STAF & WALI SANTRI */}
         {/* ========================================================================= */}
-        <section className="space-y-8 sm:space-y-10">
+        <section className="py-8 space-y-8 sm:space-y-10">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
               <GraduationCap className="w-4 h-4" />
@@ -306,7 +312,7 @@ export default function Page() {
         </section>
 
         {/* ========================================================================= */}
-        {/* SECTION 4: CARA PENDAFTARAN WALI SANTRI (SMART KK GUIDE) */}
+        {/* LAYAR 4: CARA PENDAFTARAN WALI SANTRI (SMART KK GUIDE) */}
         {/* ========================================================================= */}
         <section className="p-6 sm:p-10 lg:p-12 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border border-cyan-500/40 rounded-3xl space-y-8 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -383,9 +389,9 @@ export default function Page() {
         </section>
 
         {/* ========================================================================= */}
-        {/* SECTION 5: FAQ & PETUNJUK PENGGUNAAN WEBSITE */}
+        {/* LAYAR 5: FAQ & PETUNJUK PENGGUNAAN WEBSITE */}
         {/* ========================================================================= */}
-        <section className="space-y-6 sm:space-y-8 max-w-4xl mx-auto w-full">
+        <section className="space-y-6 sm:space-y-8 max-w-4xl mx-auto w-full py-4">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
               <HelpCircle className="w-4 h-4" />
