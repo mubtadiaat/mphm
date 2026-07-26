@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSessionFromCookies } from "@/lib/jwt";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const academicYearId = searchParams.get("academicYearId");
+
+    const session = await getSessionFromCookies();
+    let supervisedLevel: string | null = session?.supervisedLevel || null;
+
+    if (!supervisedLevel && session?.personId) {
+      const om = await prisma.organizationMembership.findFirst({
+        where: { personId: session.personId, deletedAt: null },
+      });
+      supervisedLevel = om?.supervisedLevel || null;
+    }
 
     let targetYearId: string | null = academicYearId;
     if (!targetYearId) {
@@ -39,6 +50,7 @@ export async function GET(req: NextRequest) {
     const classes = await (prisma.academicClass as any).findMany({
       where: {
         ...(targetYearId ? { academicYearId: targetYearId } : {}),
+        ...(supervisedLevel ? { institutionLevel: { contains: supervisedLevel, mode: "insensitive" as const } } : {}),
         deletedAt: null,
       },
       include: {

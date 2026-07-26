@@ -563,82 +563,102 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       </div>
 
       {/* Filter Pengawasan Jenjang & Kelas */}
-      <div className="bg-white dark:bg-zinc-900 p-3 sm:p-4 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-          <span className="font-bold text-zinc-400 uppercase tracking-wider text-[11px]">Filter Jenjang:</span>
-          <button
-            type="button"
-            onClick={() => setSelectedJenjangFilter("ALL")}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-              selectedJenjangFilter === "ALL"
-                ? "bg-blue-600 text-white font-extrabold shadow-xs"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-            }`}
-          >
-            Semua
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedJenjangFilter("Ibtida'iyyah")}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-              selectedJenjangFilter === "Ibtida'iyyah"
-                ? "bg-blue-600 text-white font-extrabold shadow-xs"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-            }`}
-          >
-            Ibtida'iyyah
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedJenjangFilter("Tsanawiyyah")}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-              selectedJenjangFilter === "Tsanawiyyah"
-                ? "bg-blue-600 text-white font-extrabold shadow-xs"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-            }`}
-          >
-            Tsanawiyyah
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedJenjangFilter("Aliyyah")}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-              selectedJenjangFilter === "Aliyyah"
-                ? "bg-blue-600 text-white font-extrabold shadow-xs"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-            }`}
-          >
-            Aliyyah
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedJenjangFilter("I'dadiyyah")}
-            className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-              selectedJenjangFilter === "I'dadiyyah"
-                ? "bg-blue-600 text-white font-extrabold shadow-xs"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-            }`}
-          >
-            I'dadiyyah
-          </button>
-        </div>
+      {(() => {
+        const userSupervisedLevel = authSession?.supervisedLevel;
+        const availableClasses = userSupervisedLevel
+          ? dbClasses.filter((cls) => (cls.institutionLevel || cls.name || "").toLowerCase().includes(userSupervisedLevel.toLowerCase()))
+          : selectedJenjangFilter !== "ALL"
+          ? dbClasses.filter((cls) => (cls.institutionLevel || cls.name || "").toLowerCase().includes(selectedJenjangFilter.toLowerCase()))
+          : dbClasses;
 
-        {dbClasses.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider shrink-0">Filter Kelas:</span>
-            <select
-              value={selectedClassFilter}
-              onChange={(e) => setSelectedClassFilter(e.target.value)}
-              className="px-2.5 py-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none cursor-pointer"
-            >
-              <option value="ALL">Semua Kelas ({dbClasses.length})</option>
-              {dbClasses.map((cls) => (
-                <option key={cls.id} value={cls.name}>{cls.name}</option>
-              ))}
-            </select>
+        return (
+          <div className="bg-white dark:bg-zinc-900 p-3 sm:p-4 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
+            {userSupervisedLevel ? (
+              <div className="flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                <span className="font-bold text-zinc-400 uppercase tracking-wider text-[11px]">Jenjang Pengawasan Terkunci:</span>
+                <span className="px-3 py-1 rounded-lg text-xs font-extrabold bg-blue-600 text-white shadow-xs">
+                  {userSupervisedLevel}
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                <span className="font-bold text-zinc-400 uppercase tracking-wider text-[11px]">Filter Jenjang:</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedJenjangFilter("ALL")}
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    selectedJenjangFilter === "ALL"
+                      ? "bg-blue-600 text-white font-extrabold shadow-xs"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
+                  }`}
+                >
+                  Semua
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedJenjangFilter("Ibtida'iyyah")}
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    selectedJenjangFilter === "Ibtida'iyyah"
+                      ? "bg-blue-600 text-white font-extrabold shadow-xs"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
+                  }`}
+                >
+                  Ibtida'iyyah
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedJenjangFilter("Tsanawiyyah")}
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    selectedJenjangFilter === "Tsanawiyyah"
+                      ? "bg-blue-600 text-white font-extrabold shadow-xs"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
+                  }`}
+                >
+                  Tsanawiyyah
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedJenjangFilter("Aliyyah")}
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    selectedJenjangFilter === "Aliyyah"
+                      ? "bg-blue-600 text-white font-extrabold shadow-xs"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
+                  }`}
+                >
+                  Aliyyah
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedJenjangFilter("I'dadiyyah")}
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    selectedJenjangFilter === "I'dadiyyah"
+                      ? "bg-blue-600 text-white font-extrabold shadow-xs"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
+                  }`}
+                >
+                  I'dadiyyah
+                </button>
+              </div>
+            )}
+
+            {availableClasses.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider shrink-0">Filter Kelas:</span>
+                <select
+                  value={selectedClassFilter}
+                  onChange={(e) => setSelectedClassFilter(e.target.value)}
+                  className="px-2.5 py-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none cursor-pointer"
+                >
+                  <option value="ALL">Semua Kelas ({availableClasses.length})</option>
+                  {availableClasses.map((cls) => (
+                    <option key={cls.id} value={cls.name}>{cls.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
       <UniversalDataGrid
         columns={gridProps.columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
