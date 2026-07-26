@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
+import { signInWithGoogle } from "@/lib/firebase/client";
+import { motion } from "framer-motion";
 import { 
   ShieldCheck, 
   KeyRound, 
@@ -13,7 +17,8 @@ import {
   Eye, 
   EyeOff, 
   ArrowRight,
-  Monitor
+  Monitor,
+  Sparkles
 } from "lucide-react";
 
 export default function LoginSekretariatPage() {
@@ -24,6 +29,7 @@ export default function LoginSekretariatPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,34 +66,90 @@ export default function LoginSekretariatPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4 select-none relative overflow-hidden">
-      {/* Background glow effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setGoogleLoading(true);
 
-      <div className="w-full max-w-md bg-zinc-900/90 border border-emerald-500/20 backdrop-blur-xl rounded-3xl p-8 shadow-2xl relative z-10">
-        {/* Header */}
+    try {
+      const { user: fbUser, error: fbError } = await signInWithGoogle();
+      if (fbError || !fbUser) {
+        throw new Error(fbError || "Gagal otentikasi dengan Google.");
+      }
+
+      const res = await fetch("/api/auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: fbUser.uid,
+          email: fbUser.email,
+        }),
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || "Gagal masuk dengan Google.");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+      router.push("/sekretariat");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Login Google gagal.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4 sm:p-6 select-none relative overflow-hidden font-sans">
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="w-full max-w-md bg-zinc-900/90 border border-emerald-500/30 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 overflow-hidden"
+      >
+        {/* Top Glow Accent Line */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+
+        {/* Logo & Header */}
         <div className="flex flex-col items-center text-center space-y-3 mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/10">
-            <Monitor className="w-8 h-8" />
+          <div className="relative group cursor-pointer">
+            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-md opacity-40 group-hover:opacity-80 transition duration-300" />
+            <div className="relative w-20 h-20 bg-zinc-950 border border-emerald-500/40 rounded-2xl p-2 flex items-center justify-center shadow-xl">
+              <Image 
+                src="/logo.png" 
+                alt="Logo P3HM & MPHM Lirboyo" 
+                width={64} 
+                height={64} 
+                className="object-contain drop-shadow-md group-hover:scale-105 transition-transform" 
+                priority
+              />
+            </div>
           </div>
+
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Windows Desktop Client</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-extrabold uppercase tracking-wider mb-2">
+              <Monitor className="w-3.5 h-3.5" />
+              <span>Portal Sekretariat Administrator</span>
             </div>
             <h1 className="text-2xl font-black tracking-tight text-white">Portal Sekretariat</h1>
-            <p className="text-xs text-zinc-400 mt-1">Khusus Otentikasi Sek.Pondok &amp; Sek.Madrasah</p>
+            <p className="text-xs text-zinc-400 mt-1">Super Admin • Sek.Pondok • Sek.Madrasah</p>
           </div>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3 text-rose-400 text-xs animate-shake">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3 text-rose-300 text-xs leading-relaxed"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
             <p className="font-semibold">{error}</p>
-          </div>
+          </motion.div>
         )}
 
         {/* Login Form */}
@@ -103,8 +165,8 @@ export default function LoginSekretariatPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="cth: sek_pondok"
-                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-4 py-3 text-sm font-medium transition-all outline-none"
+                placeholder="Masukkan username admin..."
+                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-4 py-3 text-sm font-semibold transition-all outline-none"
               />
             </div>
           </div>
@@ -121,7 +183,7 @@ export default function LoginSekretariatPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan kata sandi"
-                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-10 py-3 text-sm font-medium transition-all outline-none"
+                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-10 py-3 text-sm font-semibold transition-all outline-none"
               />
               <button
                 type="button"
@@ -142,17 +204,47 @@ export default function LoginSekretariatPage() {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                <span>Masuk Portal Sekretariat</span>
+                <span>Masuk Sekretariat</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-zinc-800/80 text-center text-xs text-zinc-500">
-          <a href="/" className="hover:text-emerald-400 transition-colors">← Kembali ke Halaman Utama</a>
+        {/* Google OAuth Login */}
+        <div className="mt-4 pt-4 border-t border-zinc-800/80">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading}
+            className="w-full py-3 px-4 rounded-2xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 font-semibold text-xs transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
+          >
+            {googleLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+            ) : (
+              <>
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                <span>Masuk Sekretariat dengan Google</span>
+              </>
+            )}
+          </button>
         </div>
-      </div>
+
+        {/* Footer Navigation */}
+        <div className="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-500">
+          <Link href="/" className="hover:text-emerald-400 transition-colors font-medium">← Beranda Utama</Link>
+          <div className="flex items-center gap-3">
+            <Link href="/loginStaff" className="hover:text-indigo-400 transition-colors">Portal Login</Link>
+            <span>•</span>
+            <Link href="/loginguardiant" className="hover:text-cyan-400 transition-colors">Portal Wali</Link>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
