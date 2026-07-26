@@ -20,7 +20,11 @@ import {
   Zap,
   Lock,
   GraduationCap,
-  ShieldAlert
+  ShieldAlert,
+  Download,
+  Monitor,
+  CheckCircle2,
+  FileCode
 } from "lucide-react";
 
 const ROLE_REDIRECT_MAP: Record<string, string> = {
@@ -68,9 +72,9 @@ export default function Page() {
       <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-12 relative z-10">
 
         {/* ========================================================================= */}
-        {/* LAYAR 1: HERO & CENTRAL PORTAL CARDS (FITS 100% PERFECTLY IN VIEWPORT) */}
+        {/* LAYAR 1: HERO & CENTRAL DOWNLOAD CARDS */}
         {/* ========================================================================= */}
-        <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 max-w-4xl mx-auto py-6 relative">
+        <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 max-w-5xl mx-auto py-10 relative">
           
           {/* Logo Badge & Live Online Badge */}
           <motion.div
@@ -93,18 +97,18 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/90 border border-indigo-500/30 text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-xl">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-              <span>Realtime System 2026/2027 • Mobile Portal Staf &amp; Wali</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/90 border border-emerald-500/30 text-emerald-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-xl">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Official Download Center • Software &amp; Mobile App APK</span>
             </div>
           </motion.div>
 
           {/* Hero Heading */}
           <div className="space-y-2.5 max-w-3xl">
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-              Portal Layanan <br />
+              Unduh Aplikasi Resmi <br />
               <span className="bg-gradient-to-r from-indigo-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-                Staf &amp; Wali Santri
+                Staf, Wali Santri &amp; Admin
               </span>
             </h1>
             <p className="text-xs sm:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto font-normal">
@@ -112,92 +116,137 @@ export default function Page() {
             </p>
           </div>
 
-          {/* 2 Primary Gateway Access Cards (Perfectly Framed) */}
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-1 max-w-3xl mx-auto">
+          {/* 3 Primary Download Cards */}
+          <div id="download-section" className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 pt-2 max-w-5xl mx-auto">
             
-            {/* Gateway 1: Portal Login Staf */}
+            {/* Download Card 1: Staff APK */}
             <motion.div 
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
-              onClick={() => router.push("/loginStaff")}
-              className="p-5 sm:p-6 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 hover:from-zinc-900 hover:to-zinc-900 border border-indigo-500/40 hover:border-indigo-500/90 rounded-3xl transition-all duration-300 cursor-pointer group shadow-2xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden"
+              className="p-5 sm:p-6 bg-gradient-to-b from-zinc-900/95 to-zinc-950/95 hover:from-zinc-900 hover:to-zinc-900 border border-indigo-500/40 hover:border-indigo-500/90 rounded-3xl transition-all duration-300 shadow-2xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden group"
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-indigo-500 group-hover:h-2 transition-all" />
               <div className="flex items-center justify-between">
                 <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                   <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
+                  Android APK
+                </span>
               </div>
 
               <div>
-                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-0.5 rounded-full border border-indigo-500/20 inline-block mb-1.5">
-                  Portal Guru &amp; Pengurus
-                </span>
-                <h3 className="font-black text-lg sm:text-xl text-white">Portal Login Staf</h3>
-                <p className="text-[11px] sm:text-xs text-zinc-400 mt-1 leading-relaxed">
-                  Mustahiq • Mufatish • Mundzir • Musyrifah • Petugas Keamanan.
+                <h3 className="font-black text-lg sm:text-xl text-white">App Staff (.apk)</h3>
+                <p className="text-[11px] sm:text-xs text-zinc-400 mt-1.5 leading-relaxed">
+                  Khusus Guru Mustahiq, Mufatish, Mundzir, Musyrifah, dan Petugas Keamanan.
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-indigo-400 font-bold">
-                <span>Masuk Portal Login Staf</span>
+              <a
+                href="https://github.com/mubtadiaat/app_software/releases/latest/download/Mubtadiaat.apk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-600/25"
+              >
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  <span>Download APK Staf</span>
+                </div>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
+              </a>
             </motion.div>
 
-            {/* Gateway 2: Portal Wali Santri */}
+            {/* Download Card 2: Wali Santri APK */}
             <motion.div 
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
-              onClick={() => router.push("/loginguardiant")}
-              className="p-5 sm:p-6 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 hover:from-zinc-900 hover:to-zinc-900 border border-cyan-500/40 hover:border-cyan-500/90 rounded-3xl transition-all duration-300 cursor-pointer group shadow-2xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden"
+              className="p-5 sm:p-6 bg-gradient-to-b from-zinc-900/95 to-zinc-950/95 hover:from-zinc-900 hover:to-zinc-900 border border-cyan-500/40 hover:border-cyan-500/90 rounded-3xl transition-all duration-300 shadow-2xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden group"
             >
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-cyan-500 group-hover:h-2 transition-all" />
               <div className="flex items-center justify-between">
                 <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all">
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
+                  Android APK
+                </span>
               </div>
 
               <div>
-                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-3 py-0.5 rounded-full border border-cyan-500/20 inline-block mb-1.5">
-                  Orang Tua Santri (Smart KK)
-                </span>
-                <h3 className="font-black text-lg sm:text-xl text-white">Portal Wali Santri</h3>
-                <p className="text-[11px] sm:text-xs text-zinc-400 mt-1 leading-relaxed">
-                  Masuk Portal &amp; Pendaftaran Baru Akun Orang Tua Mandiri.
+                <h3 className="font-black text-lg sm:text-xl text-white">App Wali Santri (.apk)</h3>
+                <p className="text-[11px] sm:text-xs text-zinc-400 mt-1.5 leading-relaxed">
+                  Pantau Nilai Raport Akademik, Perizinan Pulang, &amp; Smart KK Orang Tua.
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-cyan-400 font-bold">
-                <span>Masuk &amp; Daftar Wali Santri</span>
+              <a
+                href="https://github.com/mubtadiaat/app_software/releases/latest/download/e-Mubtadiaat.apk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-white bg-cyan-600 hover:bg-cyan-500 px-4 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-cyan-600/25"
+              >
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  <span>Download APK Wali</span>
+                </div>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </motion.div>
+
+            {/* Download Card 3: Software Admin EXE */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+              className="p-5 sm:p-6 bg-gradient-to-b from-zinc-900/95 to-zinc-950/95 hover:from-zinc-900 hover:to-zinc-900 border border-emerald-500/40 hover:border-emerald-500/90 rounded-3xl transition-all duration-300 shadow-2xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden group"
+            >
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500 group-hover:h-2 transition-all" />
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Monitor className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                  Windows EXE
+                </span>
               </div>
+
+              <div>
+                <h3 className="font-black text-lg sm:text-xl text-white">Software Admin (.exe)</h3>
+                <p className="text-[11px] sm:text-xs text-zinc-400 mt-1.5 leading-relaxed">
+                  Aplikasi Desktop khusus Sekretariat Pondok, Sek. Madrasah &amp; Super Admin.
+                </p>
+              </div>
+
+              <a
+                href="https://github.com/mubtadiaat/app_software/releases/latest/download/Admin.Mubtadiaat.Setup.exe"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-white bg-emerald-600 hover:bg-emerald-500 px-4 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-emerald-600/25"
+              >
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  <span>Download Setup Admin</span>
+                </div>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </a>
             </motion.div>
 
           </div>
 
           {/* Scroll Down Indicator */}
           <div className="pt-2 animate-bounce flex flex-col items-center gap-1 text-zinc-500 text-[11px]">
-            <span>Scroll ke bawah untuk melihat fitur &amp; panduan</span>
+            <span>Scroll ke bawah untuk melihat fitur &amp; panduan pendaftaran</span>
             <ChevronDown className="w-4 h-4 text-zinc-400" />
           </div>
         </section>
 
         {/* ========================================================================= */}
-        {/* LAYAR 2: EXACT USER UPLOADED SHOWCASE IMAGE (AFTER SCROLL) */}
+        {/* LAYAR 2: SHOWCASE IMAGE MULTI-DEVICE */}
         {/* ========================================================================= */}
         <section className="py-12 space-y-6">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
               <Zap className="w-4 h-4" />
-              <span>Visual Ekosistem Multi-Device</span>
+              <span>Visual Ekosistem Multi-Perangkat</span>
             </div>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">Antarmuka Realtime Perangkat</h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
@@ -206,7 +255,7 @@ export default function Page() {
           </div>
 
           <div className="w-full relative group max-w-5xl mx-auto">
-            {/* Ambient Background Glow Behind User Image */}
+            {/* Ambient Background Glow */}
             <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500/25 via-teal-500/25 to-cyan-500/25 rounded-3xl blur-3xl opacity-70 group-hover:opacity-100 transition duration-500" />
 
             <div className="relative rounded-3xl bg-zinc-950 border border-zinc-800/80 p-2 sm:p-4 shadow-2xl overflow-hidden backdrop-blur-2xl">
@@ -227,7 +276,7 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Exact User Uploaded Image Container */}
+              {/* User Uploaded Image Container */}
               <div className="relative w-full rounded-2xl overflow-hidden border border-zinc-800/80 bg-zinc-900 shadow-2xl">
                 <Image
                   src="/user-showcase.jpg"
@@ -282,7 +331,7 @@ export default function Page() {
               </div>
               <h3 className="font-black text-lg sm:text-xl text-white">Akademik Diniyyah (MPHM)</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Khusus Ustadz/Ustadzah Mustahiq untuk mengisi presensi jam mengajar harian, penilaian kwartal rombel kelas (I'dadiyyah hingga Aliyyah), serta penerbitan Raport Digital.
+                Khusus Ustadz/Ustadzah Mustahiq untuk mengisi presensi jam mengajar harian, penilaian kwartal rombel kelas (I&apos;dadiyyah hingga Aliyyah), serta penerbitan Raport Digital.
               </p>
             </div>
 
@@ -325,17 +374,19 @@ export default function Page() {
               </div>
               <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Cara Pendaftaran Akun Wali Santri Baru (Smart KK)</h2>
               <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
-                Ikuti 4 langkah praktis berikut untuk mendaftarkan akun wali santri agar terhubung secara otomatis dengan data anak Anda di pesantren:
+                Ikuti 4 langkah praktis berikut untuk mengunduh aplikasi dan mendaftarkan akun wali santri agar terhubung otomatis dengan data anak Anda di pesantren:
               </p>
             </div>
 
-            <button
-              onClick={() => router.push("/loginguardiant")}
-              className="px-6 py-3.5 sm:py-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs sm:text-sm transition-all shadow-xl shadow-cyan-600/30 flex items-center justify-center gap-3 shrink-0 cursor-pointer"
+            <a
+              href="https://github.com/mubtadiaat/app_software/releases/latest/download/e-Mubtadiaat.apk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3.5 sm:py-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs sm:text-sm transition-all shadow-xl shadow-cyan-600/30 flex items-center justify-center gap-3 shrink-0"
             >
-              <span>Buka Portal Wali Santri</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+              <Download className="w-4 h-4" />
+              <span>Download App Wali Santri (.apk)</span>
+            </a>
           </div>
 
           {/* 4 Steps Timeline Grid */}
@@ -346,9 +397,9 @@ export default function Page() {
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 text-cyan-400 font-mono font-bold text-sm sm:text-base flex items-center justify-center border border-cyan-500/40">
                 01
               </div>
-              <h4 className="font-extrabold text-sm sm:text-base text-white">Buka Portal Wali Santri</h4>
+              <h4 className="font-extrabold text-sm sm:text-base text-white">Unduh &amp; Buka App Wali</h4>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Klik tombol <strong>Portal Wali Santri</strong> pada bagian atas halaman utama ini.
+                Unduh file <strong>e-Mubtadiaat.apk</strong> dari tombol di atas lalu buka aplikasi di HP Android Anda.
               </p>
             </div>
 
@@ -359,7 +410,7 @@ export default function Page() {
               </div>
               <h4 className="font-extrabold text-sm sm:text-base text-white">Pilih Tab Pendaftaran Baru</h4>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Pada halaman portal wali, pilih opsi tab <strong>Pendaftaran Baru</strong> untuk membuka formulir registrasi.
+                Di layar aplikasi Wali Santri, pilih opsi tab <strong>Pendaftaran Baru</strong> untuk membuka formulir registrasi.
               </p>
             </div>
 
@@ -389,17 +440,17 @@ export default function Page() {
         </section>
 
         {/* ========================================================================= */}
-        {/* LAYAR 5: FAQ & PETUNJUK PENGGUNAAN WEBSITE */}
+        {/* LAYAR 5: FAQ & PETUNJUK PENGGUNAAN */}
         {/* ========================================================================= */}
         <section className="space-y-6 sm:space-y-8 max-w-4xl mx-auto w-full py-4">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
               <HelpCircle className="w-4 h-4" />
-              <span>Panduan Penggunaan Website</span>
+              <span>Panduan Penggunaan Aplikasi</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">Pertanyaan Umum &amp; Petunjuk Akses</h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
-              Petunjuk singkat mengenai cara mengakses portal sesuai dengan wewenang akun Anda.
+              Petunjuk singkat mengenai cara mengunduh dan memasang aplikasi sesuai hak akses akun Anda.
             </p>
           </div>
 
@@ -411,16 +462,16 @@ export default function Page() {
                 onClick={() => toggleFaq(1)}
                 className="w-full p-4 sm:p-5 text-left font-extrabold text-xs sm:text-sm text-white flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition-colors"
               >
-                <span>Bagaimana cara Ustadz Mustahiq &amp; Pengurus masuk ke akun?</span>
+                <span>Bagaimana cara Ustadz Mustahiq &amp; Pengurus mengakses aplikasi?</span>
                 <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${activeFaq === 1 ? 'rotate-180 text-indigo-400' : ''}`} />
               </button>
               {activeFaq === 1 && (
                 <div className="p-4 sm:p-5 pt-0 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60 space-y-2">
                   <p>
-                    Mustahiq, Mufattisy, Mundzir, Musyrifah, dan Petugas Keamanan dapat masuk melalui <strong>Portal Login Staf</strong> di bagian atas halaman utama.
+                    Mustahiq, Mufattisy, Mundzir, Musyrifah, dan Petugas Keamanan dapat mengunduh <strong>App Staff (.apk)</strong> dari tombol unduh bagian atas.
                   </p>
                   <p>
-                    Setelah masuk, Mustahiq dapat menginput presensi jam mengajar serta mengisi nilai kwartal santriwati pada rombel kelas masing-masing.
+                    Pasang file APK di HP Android Anda, lalu buka aplikasi untuk login. Mustahiq dapat langsung menginput presensi jam mengajar serta mengisi nilai kwartal santriwati.
                   </p>
                 </div>
               )}
@@ -438,10 +489,10 @@ export default function Page() {
               {activeFaq === 2 && (
                 <div className="p-4 sm:p-5 pt-0 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60 space-y-2">
                   <p>
-                    Orang tua santriwati cukup menekan tombol <strong>Portal Wali Santri</strong>, kemudian memilih tab <strong>Pendaftaran Baru</strong>. Masukkan nomor Kartu Keluarga (KK) yang terdaftar untuk membuat akun mandiri.
+                    Orang tua santriwati mengunduh <strong>App Wali Santri (.apk)</strong>, kemudian membuka aplikasi di HP dan memilih tab <strong>Pendaftaran Baru</strong>. Masukkan nomor Kartu Keluarga (KK) yang terdaftar untuk membuat akun mandiri.
                   </p>
                   <p>
-                    Setelah akun aktif, Anda dapat langsung melihat nilai raport kwartal anak, status perizinan pulang, dan rekapan poin kedisiplinan.
+                    Setelah akun aktif, Anda dapat melihat nilai raport kwartal anak, status perizinan pulang, dan rekapan poin kedisiplinan langsung dari aplikasi HP Anda.
                   </p>
                 </div>
               )}
@@ -453,12 +504,12 @@ export default function Page() {
                 onClick={() => toggleFaq(3)}
                 className="w-full p-4 sm:p-5 text-left font-extrabold text-xs sm:text-sm text-white flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition-colors"
               >
-                <span>Apakah bisa masuk langsung menggunakan Akun Google?</span>
-                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${activeFaq === 3 ? 'rotate-180 text-indigo-400' : ''}`} />
+                <span>Bagaimana cara Sekretariat mengunduh Software Admin Desktop?</span>
+                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${activeFaq === 3 ? 'rotate-180 text-emerald-400' : ''}`} />
               </button>
               {activeFaq === 3 && (
                 <div className="p-4 sm:p-5 pt-0 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60">
-                  Ya! Seluruh gerbang portal login staf maupun portal wali santri mendukung otentikasi cepat **Login dengan Akun Google**. Pastikan email Google Anda telah ditautkan di dalam sistem.
+                  Sekretariat Pondok, Sek. Madrasah, &amp; Super Admin dapat mengunduh <strong>Software Admin (.exe)</strong> untuk Windows. Jalankan installer `Admin.Mubtadiaat.Setup.exe` dan login menggunakan kredensial Sekretariat yang diberikan.
                 </div>
               )}
             </div>
@@ -469,7 +520,7 @@ export default function Page() {
       </div>
 
       {/* ========================================================================= */}
-      {/* FOOTER INFORMAL KETENTUAN (PRIVACY & TERMS - TANPA HEADER) */}
+      {/* FOOTER */}
       {/* ========================================================================= */}
       <footer className="w-full bg-zinc-950 border-t border-zinc-900 py-10 sm:py-12 px-4 sm:px-6 lg:px-12 mt-12 sm:mt-16 relative z-10 text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">

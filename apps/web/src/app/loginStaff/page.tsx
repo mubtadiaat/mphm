@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { signInWithGoogle } from "@/lib/firebase/client";
@@ -115,31 +114,40 @@ export default function LoginStaffPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-4 sm:p-6 select-none relative overflow-hidden font-sans">
+    <div className="min-h-dvh w-full bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center p-3 sm:p-6 select-none relative overflow-y-auto font-sans">
+      {/* Native App Status Bar Accent Simulation */}
+      <div className="w-full max-w-md flex items-center justify-between px-4 py-2 mb-2 text-[10px] text-zinc-500 font-mono">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-zinc-400 font-semibold">Mubtadiaat Staff App</span>
+        </div>
+        <span>v2.0 • Secured</span>
+      </div>
+
       {/* Background glow effects */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-teal-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        initial={{ opacity: 0, scale: 0.96, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="w-full max-w-md bg-zinc-900/90 border border-indigo-500/30 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 overflow-hidden"
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="w-full max-w-md bg-zinc-900/95 border border-indigo-500/30 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 overflow-hidden"
       >
         {/* Top Glow Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-teal-400 to-indigo-600" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-teal-400 to-indigo-600" />
 
         {/* Logo & Header */}
         <div className="flex flex-col items-center text-center space-y-3 mb-6">
-          <div className="relative group cursor-pointer">
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-teal-500 rounded-2xl blur-md opacity-40 group-hover:opacity-80 transition duration-300" />
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-teal-500 rounded-2xl blur-md opacity-50 group-hover:opacity-90 transition duration-300" />
             <div className="relative w-20 h-20 bg-zinc-950 border border-indigo-500/40 rounded-2xl p-2 flex items-center justify-center shadow-xl">
               <Image 
                 src="/logo.png" 
                 alt="Logo P3HM & MPHM Lirboyo" 
                 width={64} 
                 height={64} 
-                className="object-contain drop-shadow-md group-hover:scale-105 transition-transform" 
+                className="object-contain drop-shadow-md" 
                 priority
               />
             </div>
@@ -148,9 +156,9 @@ export default function LoginStaffPage() {
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[11px] font-extrabold uppercase tracking-wider mb-2">
               <Smartphone className="w-3.5 h-3.5" />
-              <span>Android Mobile Staff Portal</span>
+              <span>Aplikasi Android Staf &amp; Pengurus</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-white">Portal Login</h1>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Login Staf</h1>
             <p className="text-xs text-zinc-400 mt-1">Mustahiq • Mufatish • Mundzir • Musyrifah • Keamanan</p>
           </div>
         </div>
@@ -181,7 +189,7 @@ export default function LoginStaffPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username staf..."
-                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-4 py-3 text-sm font-semibold transition-all outline-none"
+                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-4 py-3.5 text-sm font-semibold transition-all outline-none"
               />
             </div>
           </div>
@@ -198,12 +206,12 @@ export default function LoginStaffPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan kata sandi"
-                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-10 py-3 text-sm font-semibold transition-all outline-none"
+                className="w-full bg-zinc-950/80 border border-zinc-800 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder-zinc-600 rounded-2xl pl-10 pr-10 py-3.5 text-sm font-semibold transition-all outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors p-1"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -213,13 +221,13 @@ export default function LoginStaffPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2.5 group disabled:opacity-50 cursor-pointer"
+            className="w-full mt-3 py-4 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all duration-200 shadow-xl shadow-indigo-600/25 flex items-center justify-center gap-2.5 group disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                <span>Masuk Portal Login</span>
+                <span>Masuk ke Aplikasi</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
@@ -227,12 +235,12 @@ export default function LoginStaffPage() {
         </form>
 
         {/* Google OAuth Login */}
-        <div className="mt-4 pt-4 border-t border-zinc-800/80">
+        <div className="mt-5 pt-4 border-t border-zinc-800/80">
           <button
             type="button"
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full py-3 px-4 rounded-2xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 font-semibold text-xs transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
+            className="w-full py-3.5 px-4 rounded-2xl bg-zinc-950 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 font-semibold text-xs transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
           >
             {googleLoading ? (
               <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
@@ -249,17 +257,12 @@ export default function LoginStaffPage() {
             )}
           </button>
         </div>
-
-        {/* Footer Navigation */}
-        <div className="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-500">
-          <Link href="/" className="hover:text-indigo-400 transition-colors font-medium">← Beranda Utama</Link>
-          <div className="flex items-center gap-3">
-            <Link href="/loginsekr" className="hover:text-emerald-400 transition-colors">Portal Sekr</Link>
-            <span>•</span>
-            <Link href="/loginguardiant" className="hover:text-cyan-400 transition-colors">Portal Wali</Link>
-          </div>
-        </div>
       </motion.div>
+
+      {/* App Copyright Footer */}
+      <div className="w-full max-w-md text-center mt-4 text-[10px] text-zinc-600 font-mono">
+        P3HM &amp; MPHM Lirboyo Kediri &copy; 2026
+      </div>
     </div>
   );
 }
