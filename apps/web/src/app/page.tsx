@@ -305,52 +305,85 @@ export default function Page() {
         </section>
 
         {/* ========================================================================= */}
-        {/* LAYAR 3: INFORMASI LENGKAP MODUL STAF & WALI SANTRI */}
+        {/* LAYAR 3: FITUR UTAMA DAN PANDUAN PENGGUNAAN */}
         {/* ========================================================================= */}
         <section className="py-8 space-y-8 sm:space-y-10">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
-              <GraduationCap className="w-4 h-4" />
-              <span>Modul Layanan Staf &amp; Wali</span>
+              <Sparkles className="w-4 h-4" />
+              <span>Layanan Digital Pesantren</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">Fitur Utama Pengurus &amp; Orang Tua</h2>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">Fitur Utama Dan Panduan Penggunaan</h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-              Panduan lengkap fasilitas digital bagi Dewan Pengajar Mustahiq, Pengurus Mufattisy, Mundzir, Musyrifah, dan Wali Santri.
+              Fasilitas digital modern terpadu untuk kemudahan akses informasi akademik, perizinan, dan pendaftaran mandiri keluarga santriwati P3HM &amp; MPHM Lirboyo Kediri.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
             
-            {/* Feature 1: Akademik Diniyyah */}
-            <div className="p-6 sm:p-7 bg-zinc-900/80 border border-zinc-800 hover:border-indigo-500/60 rounded-3xl space-y-4 transition-all group">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                <BookOpen className="w-6 h-6 sm:w-7 sm:h-7" />
+            {/* Feature 1: Raport Digital */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-indigo-500/60 rounded-3xl space-y-4 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                <BookOpen className="w-6 h-6" />
               </div>
-              <h3 className="font-black text-lg sm:text-xl text-white">Akademik Diniyyah (MPHM)</h3>
+              <h3 className="font-black text-lg text-white">Monitoring Raport Digital</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Khusus Ustadz/Ustadzah Mustahiq untuk mengisi presensi jam mengajar harian, penilaian kwartal rombel kelas (I&apos;dadiyyah hingga Aliyyah), serta penerbitan Raport Digital.
+                Akses hasil penilaian akademik diniyyah santriwati secara cepat, terstruktur, dan transparan dari rombel kelas I&apos;dadiyyah hingga Aliyyah.
               </p>
             </div>
 
-            {/* Feature 2: Pengasuhan & Perizinan */}
-            <div className="p-6 sm:p-7 bg-zinc-900/80 border border-zinc-800 hover:border-rose-500/60 rounded-3xl space-y-4 transition-all group">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
-                <ShieldAlert className="w-6 h-6 sm:w-7 sm:h-7" />
+            {/* Feature 2: Perizinan & Kedisiplinan */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-rose-500/60 rounded-3xl space-y-4 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
+                <ShieldAlert className="w-6 h-6" />
               </div>
-              <h3 className="font-black text-lg sm:text-xl text-white">Pengasuhan &amp; Perizinan</h3>
+              <h3 className="font-black text-lg text-white">Sistem Perizinan &amp; Kedisiplinan</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Digunakan oleh Mufattisy, Musyrifah, dan Keamanan untuk menerbitkan Surat Izin Pulang, mencatat poin kedisiplinan, serta memvalidasi kepulangan santriwati.
+                Pengajuan dan pemantauan perizinan pulang santriwati secara resmi serta rekapitulasi kedisiplinan yang terintegrasi secara realtime.
               </p>
             </div>
 
-            {/* Feature 3: Portal Wali Santri */}
-            <div className="p-6 sm:p-7 bg-zinc-900/80 border border-zinc-800 hover:border-cyan-500/60 rounded-3xl space-y-4 transition-all group">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6 sm:w-7 sm:h-7" />
+            {/* Feature 3: Smart KK Mandiri */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-cyan-500/60 rounded-3xl space-y-4 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6" />
               </div>
-              <h3 className="font-black text-lg sm:text-xl text-white">Portal Smart KK Wali Santri</h3>
+              <h3 className="font-black text-lg text-white">Integrasi Smart KK Mandiri</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Memudahkan orang tua memantau perkembangan akademik anak, mengecek status persetujuan perizinan pulang, serta melakukan pendaftaran mandiri dengan Nomor Kartu Keluarga.
+                Kemudahan pendaftaran akun wali santri baru hanya menggunakan Nomor Kartu Keluarga (KK) yang otomatis terhubung dengan data anak di pesantren.
+              </p>
+            </div>
+
+            {/* Feature 4: Informasi Realtime */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/60 rounded-3xl space-y-4 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h3 className="font-black text-lg text-white">Informasi Realtime Pesantren</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Dapatkan update pengumuman penting, jadwal kegiatan santriwati, serta kalender pendidikan pesantren secara langsung dan akurat.
+              </p>
+            </div>
+
+            {/* Feature 5: Keamanan & Privasi */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-emerald-500/60 rounded-3xl space-y-4 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <Lock className="w-6 h-6" />
+              </div>
+              <h3 className="font-black text-lg text-white">Keamanan &amp; Privasi Terjamin</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Seluruh data pribadi keluarga dan informasi akademik dilindungi dengan sistem otentikasi aman dan standar enkripsi data tertinggi.
+              </p>
+            </div>
+
+            {/* Feature 6: Akses Multi-Device */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 hover:border-teal-500/60 rounded-3xl space-y-4 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+                <Smartphone className="w-6 h-6" />
+              </div>
+              <h3 className="font-black text-lg text-white">Akses Multi-Device Cepat</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Dukungan antarmuka modern yang responsif dan fleksibel untuk perangkat Smartphone Android (.apk) maupun Software Desktop (.exe).
               </p>
             </div>
 
