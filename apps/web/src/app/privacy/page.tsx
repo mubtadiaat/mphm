@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
           <Image src="/logo.png" alt="Logo" width={48} height={48} className="rounded-xl drop-shadow-md" />
           <div>
             <h1 className="text-2xl font-black text-white tracking-tight">Kebijakan Privasi (Privacy Policy)</h1>
-            <p className="text-xs text-slate-400">P3HM & MPHM Lirboyo Kediri - Sistem Informasi Pesantren</p>
+            <p className="text-xs text-slate-400">P3HM &amp; MPHM Lirboyo Kediri - Sistem Informasi Pesantren</p>
           </div>
         </div>
 
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-bold text-white">1. Pendahuluan</h2>
             <p>
-              Kebijakan Privasi ini menjelaskan bagaimana Pondok Pesantren Putri Hidayatul Mubtadi'at (P3HM) dan Madrasah Diniyyah Putri Hidayatul Mubtadi'at (MPHM) Lirboyo Kediri mengumpulkan, menggunakan, dan melindungi informasi pribadi pengguna portal.
+              Kebijakan Privasi ini menjelaskan bagaimana Pondok Pesantren Putri Hidayatul Mubtadi&apos;at (P3HM) dan Madrasah Diniyyah Putri Hidayatul Mubtadi&apos;at (MPHM) Lirboyo Kediri mengumpulkan, menggunakan, dan melindungi informasi pribadi pengguna portal.
             </p>
           </section>
 
@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
               <li>Nama Lengkap dan Alamat Email Akun Google</li>
               <li>Foto Profil Akun Google (Avatar)</li>
               <li>Nomor Telepon / WhatsApp untuk koordinasi sekretariat</li>
-              <li>Data Akademik & Pengasuhan Santriwati</li>
+              <li>Data Akademik &amp; Pengasuhan Santriwati</li>
             </ul>
           </section>
 
@@ -58,7 +58,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <div className="pt-6 border-t border-slate-800 flex justify-between items-center text-xs text-slate-500">
-          <span>&copy; 2026 P3HM & MPHM Lirboyo. All rights reserved.</span>
+          <span>&copy; 2026 P3HM &amp; MPHM Lirboyo. All rights reserved.</span>
           <Link href="/" className="text-blue-400 hover:underline font-bold">Kembali ke Beranda</Link>
         </div>
       </div>
