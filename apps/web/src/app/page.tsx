@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { useAuth } from "../lib/auth";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShieldCheck, 
   Sparkles,
@@ -15,10 +16,22 @@ import {
   Database,
   UserCheck,
   CheckCircle2,
-  Phone,
   Lock,
   Layers,
-  Activity
+  Activity,
+  Tablet,
+  BookOpen,
+  FileSpreadsheet,
+  Award,
+  HelpCircle,
+  ChevronDown,
+  UserPlus,
+  Phone,
+  FileText,
+  Clock,
+  Zap,
+  Globe,
+  Heart
 } from "lucide-react";
 
 const ROLE_REDIRECT_MAP: Record<string, string> = {
@@ -42,6 +55,7 @@ function getRedirectUrlByRole(role: string): string {
 export default function Page() {
   const router = useRouter();
   const { data: user } = useAuth();
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -50,311 +64,479 @@ export default function Page() {
     }
   }, [user, router]);
 
-  return (
-    <div className="min-h-screen w-full bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-hidden font-sans selection:bg-emerald-500 selection:text-white">
-      {/* Background Ambient Glow Lights */}
-      <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-emerald-500/10 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none" />
+  const toggleFaq = (index: number) => {
+    setActiveFaq(activeFaq === index ? null : index);
+  };
 
-      {/* Main Container Grid */}
-      <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        
-        {/* Left Hero Section & Portal Choice Cards */}
-        <motion.div 
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="lg:col-span-6 space-y-6 p-2 lg:p-4"
-        >
-          {/* Institution Logo & Version Badge */}
-          <div className="flex items-center gap-3.5">
-            <div className="relative group cursor-pointer shrink-0">
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-md opacity-40 group-hover:opacity-80 transition duration-300" />
-              <div className="relative w-14 h-14 bg-zinc-950 border border-emerald-500/40 rounded-2xl p-1.5 flex items-center justify-center shadow-xl">
+  return (
+    <div className="min-h-screen w-full bg-zinc-950 text-zinc-100 flex flex-col justify-between items-center relative overflow-x-hidden font-sans selection:bg-emerald-500 selection:text-white">
+      {/* Background Ambient Glow Lights */}
+      <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[180px] pointer-events-none" />
+      <div className="absolute top-[40%] right-1/4 w-[700px] h-[700px] bg-indigo-600/10 rounded-full blur-[180px] pointer-events-none" />
+      <div className="absolute bottom-10 left-1/3 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[180px] pointer-events-none" />
+
+      {/* Main Container */}
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-16 sm:space-y-24 relative z-10">
+
+        {/* SECTION 1: HERO SECTION */}
+        <section className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto pt-4">
+          
+          {/* Logo Badge & Live Online Badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="flex flex-col items-center space-y-4"
+          >
+            <div className="relative group cursor-pointer">
+              <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500 via-indigo-500 to-cyan-500 rounded-3xl blur-lg opacity-50 group-hover:opacity-100 transition duration-500" />
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 bg-zinc-950 border border-zinc-800 rounded-3xl p-3 flex items-center justify-center shadow-2xl">
                 <Image 
                   src="/logo.png" 
                   alt="Logo P3HM & MPHM Lirboyo" 
-                  width={48} 
-                  height={48} 
-                  className="object-contain drop-shadow-md group-hover:scale-105 transition-transform" 
+                  width={80} 
+                  height={80} 
+                  className="object-contain drop-shadow-lg group-hover:scale-105 transition-transform" 
                   priority
                 />
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>P3HM &amp; MPHM Lirboyo • System 2026/2027</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>P3HM &amp; MPHM Lirboyo • System Realtime 2026/2027</span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Heading */}
-          <div className="space-y-3">
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-none">
-              Portal Layanan <br />
+          <div className="space-y-4">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight">
+              Sistem Informasi Pesantren <br />
               <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-                Pesantren &amp; Diniyyah
+                &amp; Akademik Diniyyah
               </span>
             </h1>
-            <p className="text-sm text-zinc-400 leading-relaxed font-normal">
-              Pondok Pesantren Putri Hidayatul Mubtadi&apos;at &amp; Madrasah Putri Hidayatul Mubtadi&apos;at Lirboyo Kediri.
+            <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto font-normal">
+              Platform Manajemen Terpadu Pondok Pesantren Putri Hidayatul Mubtadi&apos;at (P3HM) &amp; Madrasah Putri Hidayatul Mubtadi&apos;at (MPHM) Lirboyo Kediri.
             </p>
           </div>
 
-          {/* Dedicated Portal Choice Cards */}
-          <div className="grid grid-cols-1 gap-3.5 pt-1">
+          {/* 3 Dedicated Portal Gateway Access Cards */}
+          <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
             {/* Card 1: Sekretariat */}
             <div 
               onClick={() => router.push("/loginsekr")}
-              className="p-4 bg-zinc-900/90 hover:bg-zinc-900 border border-emerald-500/30 hover:border-emerald-500/70 rounded-2xl transition-all duration-200 cursor-pointer group shadow-lg flex items-center justify-between gap-4"
+              className="p-5 bg-zinc-900/90 hover:bg-zinc-900 border border-emerald-500/30 hover:border-emerald-500/80 rounded-3xl transition-all duration-300 cursor-pointer group shadow-xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform shrink-0">
-                  <Monitor className="w-5 h-5" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500 group-hover:h-1.5 transition-all" />
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Monitor className="w-6 h-6" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-sm text-white">Portal Sekretariat</h3>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      Sek.Pondok &amp; Sek.Madrasah
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Super Admin, Sekretaris, &amp; Pengelola Data</p>
-                </div>
+                <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
               </div>
-              <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform shrink-0" />
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 inline-block mb-1.5">
+                  Desktop &amp; Web
+                </span>
+                <h3 className="font-black text-base text-white">Portal Sekretariat</h3>
+                <p className="text-xs text-zinc-400 mt-1">Super Admin &amp; Pengelola Pondok/Madrasah</p>
+              </div>
             </div>
 
             {/* Card 2: Staff / Portal Login */}
             <div 
               onClick={() => router.push("/loginStaff")}
-              className="p-4 bg-zinc-900/90 hover:bg-zinc-800/90 border border-indigo-500/30 hover:border-indigo-500/70 rounded-2xl transition-all duration-200 cursor-pointer group shadow-lg flex items-center justify-between gap-4"
+              className="p-5 bg-zinc-900/90 hover:bg-zinc-900 border border-indigo-500/30 hover:border-indigo-500/80 rounded-3xl transition-all duration-300 cursor-pointer group shadow-xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shrink-0">
-                  <Smartphone className="w-5 h-5" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500 group-hover:h-1.5 transition-all" />
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                  <Smartphone className="w-6 h-6" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-sm text-white">Portal Login</h3>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-                      Staf Lapangan &amp; Pengurus
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Mustahiq • Mufatish • Mundzir • Musyrifah</p>
-                </div>
+                <ArrowRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-1 transition-transform" />
               </div>
-              <ArrowRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-1 transition-transform shrink-0" />
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 inline-block mb-1.5">
+                  Android Mobile App
+                </span>
+                <h3 className="font-black text-base text-white">Portal Login</h3>
+                <p className="text-xs text-zinc-400 mt-1">Mustahiq • Mufatish • Mundzir • Musyrifah</p>
+              </div>
             </div>
 
             {/* Card 3: Wali Santri */}
             <div 
               onClick={() => router.push("/loginguardiant")}
-              className="p-4 bg-zinc-900/90 hover:bg-zinc-800/90 border border-cyan-500/30 hover:border-cyan-500/70 rounded-2xl transition-all duration-200 cursor-pointer group shadow-lg flex items-center justify-between gap-4"
+              className="p-5 bg-zinc-900/90 hover:bg-zinc-900 border border-cyan-500/30 hover:border-cyan-500/80 rounded-3xl transition-all duration-300 cursor-pointer group shadow-xl flex flex-col justify-between space-y-4 text-left relative overflow-hidden"
             >
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform shrink-0">
-                  <Users className="w-5 h-5" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-cyan-500 group-hover:h-1.5 transition-all" />
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                  <Users className="w-6 h-6" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-sm text-white">Portal Wali Santri</h3>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
-                      Orang Tua &amp; Smart KK
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Masuk &amp; Pendaftaran Akun Baru Wali Santri</p>
-                </div>
+                <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" />
               </div>
-              <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform shrink-0" />
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20 inline-block mb-1.5">
+                  Wali &amp; Orang Tua
+                </span>
+                <h3 className="font-black text-base text-white">Portal Wali Santri</h3>
+                <p className="text-xs text-zinc-400 mt-1">Masuk &amp; Pendaftaran Akun Wali</p>
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* Security Guarantee Footer */}
-          <div className="flex items-center gap-3 text-xs text-zinc-500 pt-1 border-t border-zinc-800/60">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Dilindungi otentikasi berlapis SSL &amp; database terenkripsi 2026/2027.</span>
+        {/* SECTION 2: 3-DEVICE MULTI-MOCKUP REAL UI SHOWCASE (Laptop, Notebook/Tablet, Smartphone) */}
+        <section className="space-y-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
+              <Layers className="w-3.5 h-3.5" />
+              <span>Multi-Device Responsive Ecosystem</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Tampilan Asli Aplikasi (Multi-Device Preview)</h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
+              Satu ekosistem terintegrasi sempurna yang responsif di Laptop, Notebook/Tablet, dan Smartphone Handphone.
+            </p>
           </div>
-        </motion.div>
 
-        {/* Right Section: Authentic 100% Real Live Application UI Showcase */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="lg:col-span-6 w-full flex flex-col items-center justify-center"
-        >
-          <div className="w-full relative group">
-            {/* Ambient Background Glow Behind UI Showcase */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-indigo-500/20 rounded-3xl blur-2xl opacity-70 group-hover:opacity-100 transition duration-500" />
-
-            <div className="relative rounded-3xl bg-zinc-950 border border-zinc-800 shadow-2xl overflow-hidden text-xs">
-              
-              {/* Window Controls Bar */}
-              <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            {/* DEVICE 1: LAPTOP VIEW (Col 6) */}
+            <div className="lg:col-span-6 bg-zinc-950 border border-zinc-800 rounded-3xl p-4 shadow-2xl flex flex-col justify-between relative overflow-hidden group">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block" />
-                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500/80 inline-block" />
-                  <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
+                  <Monitor className="w-4 h-4 text-emerald-400" />
+                  <span className="font-bold text-xs text-white">Laptop Desktop (Sekretariat System)</span>
                 </div>
-                <div className="px-3 py-1 bg-zinc-950 border border-zinc-800 rounded-full font-mono text-[11px] text-zinc-400 flex items-center gap-2">
-                  <Lock className="w-3 h-3 text-emerald-400" />
-                  <span>https://m.p3hm.my.id/sekretariat/users</span>
-                </div>
-                <div className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Online</span>
-                </div>
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  1920 x 1080 Full HD
+                </span>
               </div>
 
-              {/* Inside Dashboard Mockup Container */}
-              <div className="flex h-[380px] bg-zinc-950">
-                
-                {/* Mini Sidebar Showcase */}
-                <div className="w-48 bg-slate-950 border-r border-slate-900 p-3 flex flex-col justify-between shrink-0 hidden sm:flex">
-                  <div className="space-y-4">
-                    {/* Brand */}
-                    <div className="flex items-center gap-2.5 px-2 py-1">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 p-1 flex items-center justify-center">
-                        <Image src="/logo.png" alt="Logo" width={20} height={20} className="object-contain" />
-                      </div>
-                      <div>
-                        <div className="font-extrabold text-[11px] text-white">P3HM Lirboyo</div>
-                        <div className="text-[9px] text-emerald-400 font-mono">SEK.PONDOK</div>
-                      </div>
-                    </div>
-
-                    {/* Nav Items */}
-                    <div className="space-y-1 text-[11px] font-medium">
-                      <div className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-between font-bold">
-                        <span>Pusat Akun (Users)</span>
-                        <Activity className="w-3 h-3" />
-                      </div>
-                      <div className="px-2.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-900 flex items-center justify-between">
-                        <span>Santriwati (P3HM)</span>
-                      </div>
-                      <div className="px-2.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-900 flex items-center justify-between">
-                        <span>Wali Santri (Smart KK)</span>
-                      </div>
-                      <div className="px-2.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-900 flex items-center justify-between">
-                        <span>Data Asrama &amp; Kamar</span>
-                      </div>
-                      <div className="px-2.5 py-1.5 rounded-lg text-slate-400 hover:bg-slate-900 flex items-center justify-between">
-                        <span>Alumni Pondok</span>
-                      </div>
-                    </div>
+              {/* Mockup Dashboard Table */}
+              <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3 space-y-3 font-mono text-xs">
+                <div className="flex items-center justify-between bg-zinc-950 p-2 rounded-xl border border-zinc-800">
+                  <div className="flex items-center gap-2">
+                    <Image src="/logo.png" alt="Logo" width={18} height={18} className="object-contain" />
+                    <span className="font-bold text-white text-[11px]">P3HM Lirboyo</span>
                   </div>
-
-                  {/* Sidebar Footer Online Indicator */}
-                  <div className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-center space-y-1">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-[10px] font-bold text-slate-200">Sistem Informasi Pesantren</span>
-                    </div>
-                    <div className="text-[8px] text-slate-500">Pondok Pesantren Putri Hidayatul Mubtadi'at</div>
-                  </div>
+                  <span className="text-[9px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">● Online (Realtime)</span>
                 </div>
 
-                {/* Main Content Area Mockup */}
-                <div className="flex-1 p-4 space-y-3.5 overflow-hidden bg-zinc-900/50">
-                  
-                  {/* Banner */}
-                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 text-white shadow-md space-y-1">
-                    <div className="text-[10px] uppercase font-bold tracking-wider opacity-80 flex items-center gap-1">
-                      <Layers className="w-3 h-3" />
-                      <span>Manajemen Akses &amp; Otorisasi Pengguna</span>
-                    </div>
-                    <div className="text-base font-black tracking-tight">Pusat Pengelolaan Akun (Users)</div>
-                    <div className="text-[10px] opacity-90">Atur kredensial akun Pengurus, Mustahiq, Mufattisy, Mundzir &amp; Wali Santri.</div>
-                  </div>
-
-                  {/* Sub Tabs */}
-                  <div className="flex items-center gap-2 border-b border-zinc-800 pb-2 text-[11px] font-bold">
-                    <span className="px-2.5 py-1 bg-zinc-800 text-white rounded-lg border border-zinc-700">Daftar Akun (Monitoring)</span>
-                    <span className="px-2.5 py-1 text-zinc-400 hover:text-zinc-200">Generate Akun Instansi</span>
-                    <span className="px-2.5 py-1 text-zinc-400 hover:text-zinc-200">Keranjang Sampah Dorman</span>
-                  </div>
-
-                  {/* Mini Table */}
-                  <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden text-[11px]">
-                    <div className="grid grid-cols-12 bg-zinc-900 p-2 text-zinc-400 font-bold border-b border-zinc-800 text-[10px] uppercase">
-                      <div className="col-span-4">NAMA PEMILIK AKUN</div>
-                      <div className="col-span-3">ROLE AKSES</div>
-                      <div className="col-span-3">STATUS AKUN</div>
-                      <div className="col-span-2 text-center">AKTIVITAS</div>
-                    </div>
-
-                    {/* Row 1 */}
-                    <div className="grid grid-cols-12 p-2 border-b border-zinc-800/60 items-center font-medium">
-                      <div className="col-span-4 font-bold text-white flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-bold flex items-center justify-center">SA</div>
-                        <span>Super Admin Sistem</span>
-                      </div>
-                      <div className="col-span-3 font-mono text-[10px] text-blue-400">sek.madrasah</div>
-                      <div className="col-span-3">
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">AKTIF</span>
-                      </div>
-                      <div className="col-span-2 text-center font-bold text-emerald-400 flex items-center justify-center gap-1 text-[10px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
-                      </div>
-                    </div>
-
-                    {/* Row 2 */}
-                    <div className="grid grid-cols-12 p-2 border-b border-zinc-800/60 items-center font-medium">
-                      <div className="col-span-4 font-bold text-white flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 text-[9px] font-bold flex items-center justify-center">UM</div>
-                        <span>Ustadz Mustahiq</span>
-                      </div>
-                      <div className="col-span-3 font-mono text-[10px] text-indigo-400">Mustahiq</div>
-                      <div className="col-span-3">
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">AKTIF</span>
-                      </div>
-                      <div className="col-span-2 text-center font-bold text-emerald-400 flex items-center justify-center gap-1 text-[10px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
-                      </div>
-                    </div>
-
-                    {/* Row 3 */}
-                    <div className="grid grid-cols-12 p-2 items-center font-medium">
-                      <div className="col-span-4 font-bold text-white flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] font-bold flex items-center justify-center">WS</div>
-                        <span>Wali Santri (Smart KK)</span>
-                      </div>
-                      <div className="col-span-3 font-mono text-[10px] text-cyan-400">Wali Santri</div>
-                      <div className="col-span-3">
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">AKTIF</span>
-                      </div>
-                      <div className="col-span-2 text-center font-semibold text-zinc-500 flex items-center justify-center gap-1 text-[10px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" /> Offline
-                      </div>
-                    </div>
-                  </div>
-
+                <div className="p-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 text-white font-sans space-y-1">
+                  <div className="text-xs font-black">Pusat Pengelolaan Akun (Users)</div>
+                  <div className="text-[10px] opacity-90">Monitoring 1,450 Santriwati &amp; 128 Pengurus</div>
                 </div>
 
-              </div>
-
-              {/* Bottom Feature Badges */}
-              <div className="p-3 bg-zinc-900 border-t border-zinc-800 grid grid-cols-3 gap-2">
-                <div className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center gap-1.5 text-[10px] font-bold text-emerald-400">
-                  <Monitor className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>Desktop Windows App</span>
-                </div>
-                <div className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center gap-1.5 text-[10px] font-bold text-indigo-400">
-                  <Smartphone className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                  <span>Android Mobile Portal</span>
-                </div>
-                <div className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center gap-1.5 text-[10px] font-bold text-cyan-400">
-                  <Database className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>Realtime Cloud Sync</span>
+                <div className="space-y-1.5 text-[10px] font-sans">
+                  <div className="flex justify-between p-2 bg-zinc-950 rounded-lg border border-zinc-800/80">
+                    <span className="font-bold text-white">Super Admin Sistem</span>
+                    <span className="text-blue-400 font-mono">sek.madrasah</span>
+                    <span className="text-emerald-400 font-bold">🟢 Online</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-zinc-950 rounded-lg border border-zinc-800/80">
+                    <span className="font-bold text-white">Ustadz Mustahiq</span>
+                    <span className="text-indigo-400 font-mono">Mustahiq</span>
+                    <span className="text-emerald-400 font-bold">🟢 Online</span>
+                  </div>
                 </div>
               </div>
+              <div className="mt-3 text-[11px] text-zinc-500 font-medium text-center">Tampilan Utama Laptop Client Sekretariat</div>
+            </div>
 
+            {/* DEVICE 2: NOTEBOOK / TABLET VIEW (Col 3) */}
+            <div className="lg:col-span-3 bg-zinc-950 border border-zinc-800 rounded-3xl p-4 shadow-2xl flex flex-col justify-between relative overflow-hidden group">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <Tablet className="w-4 h-4 text-indigo-400" />
+                  <span className="font-bold text-xs text-white">Notebook / Tablet</span>
+                </div>
+                <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                  Tablet View
+                </span>
+              </div>
+
+              {/* Mockup Mustahiq Raport */}
+              <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3 space-y-3 text-xs">
+                <div className="p-2 bg-indigo-600/20 border border-indigo-500/30 rounded-xl text-indigo-300 font-bold text-[11px] flex items-center justify-between">
+                  <span>Portal Mustahiq</span>
+                  <BookOpen className="w-3.5 h-3.5" />
+                </div>
+                <div className="space-y-1.5 text-[10px]">
+                  <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <div className="text-white font-bold">Rombel: Ibtida'iyyah III A</div>
+                    <div className="text-zinc-400 text-[9px]">Input Nilai Raport Kwartal</div>
+                  </div>
+                  <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800 flex justify-between items-center">
+                    <span className="text-zinc-300">Presensi Mengajar</span>
+                    <span className="text-emerald-400 font-bold text-[9px] bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">Hadir (100%)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 text-[11px] text-zinc-500 font-medium text-center">Tampilan Optimasi Tablet / Notebook</div>
+            </div>
+
+            {/* DEVICE 3: HANDPHONE / SMARTPHONE VIEW (Col 3) */}
+            <div className="lg:col-span-3 bg-zinc-950 border border-zinc-800 rounded-3xl p-4 shadow-2xl flex flex-col justify-between relative overflow-hidden group">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-cyan-400" />
+                  <span className="font-bold text-xs text-white">Smartphone Android</span>
+                </div>
+                <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                  Mobile App
+                </span>
+              </div>
+
+              {/* Mockup Mobile App */}
+              <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-3 space-y-3 text-xs">
+                <div className="p-2 bg-cyan-500/20 border border-cyan-500/30 rounded-xl text-cyan-300 font-bold text-[11px] flex items-center justify-between">
+                  <span>Portal Wali Santri</span>
+                  <Heart className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
+                </div>
+                <div className="space-y-1.5 text-[10px]">
+                  <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <div className="text-white font-bold">Data Anak: Aisyah Fatimah</div>
+                    <div className="text-cyan-400 text-[9px] font-mono">KK: 350101******0001</div>
+                  </div>
+                  <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800 flex justify-between items-center">
+                    <span className="text-zinc-300">Izin Pulang</span>
+                    <span className="text-emerald-400 font-bold text-[9px]">DISETUJUI</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 text-[11px] text-zinc-500 font-medium text-center">Tampilan Mobile Wali &amp; Staff</div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* SECTION 3: PENJELASAN LENGKAP EKOSISTEM SISTEM & MODEL APLIKASI */}
+        <section className="space-y-8">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <Zap className="w-3.5 h-3.5" />
+              <span>Struktur Arsitektur Modul</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black text-white">Ekosistem Modul &amp; Fitur Utama Sistem</h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto">
+              Dirancang khusus untuk memenuhi kebutuhan tata kelola Pondok Pesantren Putri &amp; Madrasah Diniyyah.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Modul 1 */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 rounded-3xl space-y-4 hover:border-emerald-500/50 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <Monitor className="w-6 h-6" />
+              </div>
+              <h3 className="font-black text-base text-white">1. Modul Sekretariat &amp; Induk</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Pengelolaan Data Induk Santriwati (P3HM), Pengurus Pondok, Dewan Pengajar Mustahiq, Dewan Pengawas Mufattisy, Pimpinan Mundzir, serta Manajemen Asrama Blok &amp; Kamar.
+              </p>
+            </div>
+
+            {/* Modul 2 */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 rounded-3xl space-y-4 hover:border-indigo-500/50 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <h3 className="font-black text-base text-white">2. Akademik Diniyyah (MPHM)</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Manajemen Rombel &amp; Kelas Diniyyah (I'dadiyyah, Ibtida'iyyah, Tsanawiyyah, Aliyyah), Presensi Kelas Harian, Penilaian Kwartal, serta Cetak Raport Digital.
+              </p>
+            </div>
+
+            {/* Modul 3 */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 rounded-3xl space-y-4 hover:border-rose-500/50 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="font-black text-base text-white">3. Pengasuhan &amp; Kedisiplinan</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Penerbitan Surat Perizinan Pulang Santriwati, Catatan Pelanggaran Kedisiplinan, Master Takzir, Sistem Poin Kedisiplinan, serta Keamanan Gerbang Pondok.
+              </p>
+            </div>
+
+            {/* Modul 4 */}
+            <div className="p-6 bg-zinc-900/80 border border-zinc-800 rounded-3xl space-y-4 hover:border-cyan-500/50 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <Users className="w-6 h-6" />
+              </div>
+              <h3 className="font-black text-base text-white">4. Portal Smart KK Wali Santri</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Aplikasi khusus orang tua untuk memantau nilai akademik anak, status perizinan pulang, rekapan kedisiplinan, dan pendaftaran mandiri berbasis Nomor Kartu Keluarga (KK).
+              </p>
             </div>
           </div>
-        </motion.div>
+        </section>
+
+        {/* SECTION 4: PANDUAN CARA PENDAFTARAN WALI SANTRI (SMART KK REGISTRATION GUIDE) */}
+        <section className="p-6 sm:p-10 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border border-cyan-500/30 rounded-3xl space-y-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-800 pb-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Panduan Pendaftaran Wali Santri</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white">Cara Pendaftaran Akun Wali Santri Baru (Smart KK)</h2>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-xl">
+                Langkah praktis bagi Orang Tua / Wali Santri untuk mendaftarkan akun portal mandiri dalam 4 langkah mudah:
+              </p>
+            </div>
+
+            <button
+              onClick={() => router.push("/loginguardiant")}
+              className="px-5 py-3 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-all shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            >
+              <span>Buka Form Pendaftaran Wali</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* 4 Registration Steps Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Step 1 */}
+            <div className="p-5 bg-zinc-950/80 border border-zinc-800 rounded-2xl space-y-3">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 font-mono font-bold text-sm flex items-center justify-center border border-cyan-500/40">
+                01
+              </div>
+              <h4 className="font-bold text-sm text-white">Buka Portal Wali Santri</h4>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Akses <span className="text-cyan-400 font-mono">/loginguardiant</span> atau klik tombol <strong>Portal Wali Santri</strong> di halaman utama.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="p-5 bg-zinc-950/80 border border-zinc-800 rounded-2xl space-y-3">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 font-mono font-bold text-sm flex items-center justify-center border border-cyan-500/40">
+                02
+              </div>
+              <h4 className="font-bold text-sm text-white">Pilih Tab Pendaftaran Baru</h4>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Klik tab <strong>Pendaftaran Baru</strong> untuk membuka formulir registrasi akun orang tua murid.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="p-5 bg-zinc-950/80 border border-zinc-800 rounded-2xl space-y-3">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 font-mono font-bold text-sm flex items-center justify-center border border-cyan-500/40">
+                03
+              </div>
+              <h4 className="font-bold text-sm text-white">Isi No. KK &amp; WhatsApp</h4>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Isikan Nama Lengkap, Nomor KK 16 digit, Nomor WhatsApp aktif, serta tentukan Username &amp; Password pilihan Anda.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="p-5 bg-zinc-950/80 border border-zinc-800 rounded-2xl space-y-3">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 font-mono font-bold text-sm flex items-center justify-center border border-cyan-500/40">
+                04
+              </div>
+              <h4 className="font-bold text-sm text-white">Selesai &amp; Otomatis Terhubung</h4>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Klik <strong>Daftar Akun</strong>. Akun Anda otomatis aktif dan langsung terhubung dengan data anak melalui sistem Smart KK!
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 5: FAQ & PANDUAN PENGGUNAAN WEBSITE */}
+        <section className="space-y-6 max-w-3xl mx-auto w-full">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>Panduan Penggunaan Website</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Pertanyaan Umum &amp; Cara Penggunaan</h2>
+          </div>
+
+          <div className="space-y-3">
+            {/* FAQ 1 */}
+            <div className="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-900/60">
+              <button
+                onClick={() => toggleFaq(1)}
+                className="w-full p-4 text-left font-bold text-sm text-white flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition-colors"
+              >
+                <span>Bagaimana cara masuk ke Portal Sekretariat Pondok / Madrasah?</span>
+                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${activeFaq === 1 ? 'rotate-180 text-emerald-400' : ''}`} />
+              </button>
+              {activeFaq === 1 && (
+                <div className="p-4 pt-0 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60">
+                  Untuk Sekretaris Pondok (`sek.pondok`) dan Sekretaris Madrasah (`sek.madrasah`), silakan masuk melalui <strong>Portal Sekretariat</strong> di `/loginsekr`. Masukkan username &amp; password kredensial resmi dari administrator.
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 2 */}
+            <div className="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-900/60">
+              <button
+                onClick={() => toggleFaq(2)}
+                className="w-full p-4 text-left font-bold text-sm text-white flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition-colors"
+              >
+                <span>Bagaimana cara Ustadz Mustahiq mengisi Nilai Raport Diniyyah?</span>
+                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${activeFaq === 2 ? 'rotate-180 text-indigo-400' : ''}`} />
+              </button>
+              {activeFaq === 2 && (
+                <div className="p-4 pt-0 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60">
+                  Mustahiq dapat masuk melalui <strong>Portal Login</strong> di `/loginStaff`. Setelah masuk, pilih menu Rombel/Kelas yang diampu untuk menginput presensi dan penilaian kwartal santriwati.
+                </div>
+              )}
+            </div>
+
+            {/* FAQ 3 */}
+            <div className="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-900/60">
+              <button
+                onClick={() => toggleFaq(3)}
+                className="w-full p-4 text-left font-bold text-sm text-white flex items-center justify-between cursor-pointer hover:bg-zinc-900 transition-colors"
+              >
+                <span>Apakah bisa masuk menggunakan Akun Google?</span>
+                <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${activeFaq === 3 ? 'rotate-180 text-cyan-400' : ''}`} />
+              </button>
+              {activeFaq === 3 && (
+                <div className="p-4 pt-0 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/60">
+                  Ya! Seluruh portal login mendukung otentikasi cepat **Login dengan Akun Google**. Pastikan email Google Anda telah ditautkan dengan data akun staf atau wali di sistem.
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
       </div>
+
+      {/* FOOTER INFORMAL KETENTUAN (PRIVACY & TERMS - TANPA HEADER) */}
+      <footer className="w-full bg-zinc-950 border-t border-zinc-900 py-10 px-4 sm:px-6 lg:px-12 mt-12 relative z-10 text-xs text-zinc-500">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="Logo P3HM & MPHM Lirboyo" width={32} height={32} className="rounded-lg opacity-80" />
+            <div>
+              <div className="font-extrabold text-zinc-300">P3HM &amp; MPHM Lirboyo Kediri</div>
+              <div className="text-[11px] text-zinc-500">Pondok Pesantren Putri Hidayatul Mubtadi'at &amp; Madrasah Putri Hidayatul Mubtadi'at</div>
+            </div>
+          </div>
+
+          {/* Privacy & Terms Direct Links */}
+          <div className="flex items-center gap-6 font-semibold text-zinc-400">
+            <Link href="/privacy" className="hover:text-emerald-400 transition-colors">
+              Kebijakan Privasi (Privacy Policy)
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-emerald-400 transition-colors">
+              Syarat &amp; Ketentuan (Terms of Service)
+            </Link>
+          </div>
+
+          <div className="text-center md:text-right text-[11px]">
+            <div>&copy; 2026 P3HM &amp; MPHM Lirboyo. All rights reserved.</div>
+            <div className="text-zinc-600 font-mono text-[10px] mt-0.5">Dev: DEVELZY Indonesia ®2025</div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
