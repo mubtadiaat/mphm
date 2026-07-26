@@ -20,20 +20,37 @@ export async function proxy(req: NextRequest) {
   );
 
   if (isDashboardRoute && !session) {
-    const loginUrl = new URL("/", req.url);
+    let targetLogin = "/";
+    if (pathname.startsWith("/sekretariat")) {
+      targetLogin = "/loginsekr";
+    } else if (pathname.startsWith("/guardian")) {
+      targetLogin = "/loginguardiant";
+    } else if (
+      pathname.startsWith("/mufattisy") ||
+      pathname.startsWith("/mustahiq") ||
+      pathname.startsWith("/pimpinan") ||
+      pathname.startsWith("/keamanan")
+    ) {
+      targetLogin = "/loginStaff";
+    }
+
+    const loginUrl = new URL(targetLogin, req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === "/" && session) {
+  const loginPages = ["/loginsekr", "/loginguardiant", "/loginStaff"];
+  const isLoginPage = loginPages.includes(pathname);
+
+  if ((pathname === "/" || isLoginPage) && session) {
     const roleStr = String(session.role || "").trim().toLowerCase();
     let target = "/sekretariat";
-    if (roleStr === "sek.pondok" || roleStr === "sek.madrasah") target = "/sekretariat";
+    if (roleStr === "sek.pondok" || roleStr === "sek.madrasah" || roleStr === "admin" || roleStr === "superadmin" || roleStr === "sekretariat") target = "/sekretariat";
     else if (roleStr === "mufattisy") target = "/mufattisy";
     else if (roleStr === "mundzir" || roleStr === "pimpinan") target = "/pimpinan";
     else if (roleStr === "mustahiq") target = "/mustahiq";
     else if (roleStr === "keamanan" || roleStr === "petugas keamanan") target = "/keamanan";
-    else if (roleStr === "wali santri" || roleStr === "guardian") target = "/guardian";
+    else if (roleStr === "wali santri" || roleStr === "wali.santri" || roleStr === "guardian") target = "/guardian";
 
     return NextResponse.redirect(new URL(target, req.url));
   }
