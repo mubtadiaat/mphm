@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const { whatsapp, familyCardNumber } = await req.json();
+    const { fullName, whatsapp, familyCardNumber, username: customUsername, password } = await req.json();
 
     if (!whatsapp || !familyCardNumber) {
       return NextResponse.json(
@@ -12,38 +12,61 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Check if person already exists by phone
+    const cleanKk = String(familyCardNumber).trim();
+    const cleanWa = String(whatsapp).trim();
+    const cleanName = fullName?.trim() || `Wali Santri (KK: ${cleanKk.slice(-4)})`;
+    const cleanUsername = customUsername?.trim().toLowerCase() || `wali_${cleanKk.slice(-6)}`;
+    const cleanPassword = password || "mubtadiaat123";
+
+    // 1. Check if username is already taken
+    if (customUsername) {
+      const existingUser = await prisma.userAccount.findFirst({
+        where: { username: cleanUsername, deletedAt: null },
+      });
+      if (existingUser) {
+        return NextResponse.json(
+          { status: "Error", message: `Username "${cleanUsername}" sudah digunakan. Silakan gunakan username lain.` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 2. Check if person already exists by phone or name
     let person = await prisma.person.findFirst({
-      where: { phoneNumber: whatsapp, deletedAt: null },
+      where: { phoneNumber: cleanWa, deletedAt: null },
     });
 
     if (!person) {
       person = await prisma.person.create({
         data: {
-          fullName: `Wali Santri (${familyCardNumber.slice(-4)})`,
+          fullName: cleanName,
           gender: "L",
-          phoneNumber: whatsapp,
+          phoneNumber: cleanWa,
         },
+      });
+    } else if (fullName) {
+      await prisma.person.update({
+        where: { id: person.id },
+        data: { fullName: cleanName },
       });
     }
 
-    // 2. Check or create GuardianProfile
+    // 3. Check or create GuardianProfile
     let guardian = await prisma.guardianProfile.findFirst({
-      where: { familyCardNumber, deletedAt: null },
+      where: { familyCardNumber: cleanKk, deletedAt: null },
     });
 
     if (!guardian) {
       guardian = await prisma.guardianProfile.create({
         data: {
           personId: person.id,
-          familyCardNumber: familyCardNumber,
+          familyCardNumber: cleanKk,
           relation: "WALI",
         },
       });
     }
 
-    // 3. Create or find UserAccount
-    const username = `wali_${familyCardNumber.slice(-6)}_${Math.floor(Math.random() * 1000)}`;
+    // 4. Create or update UserAccount
     let userAccount = await prisma.userAccount.findFirst({
       where: { personId: person.id, deletedAt: null },
     });
@@ -52,9 +75,18 @@ export async function POST(req: NextRequest) {
       userAccount = await prisma.userAccount.create({
         data: {
           personId: person.id,
-          username: username,
-          passwordHash: "mubtadiaat123",
+          username: cleanUsername,
+          passwordHash: cleanPassword,
           role: "Wali Santri",
+          status: "ACTIVE",
+        },
+      });
+    } else {
+      userAccount = await prisma.userAccount.update({
+        where: { id: userAccount.id },
+        data: {
+          username: cleanUsername,
+          passwordHash: cleanPassword,
           status: "ACTIVE",
         },
       });
@@ -62,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       status: "Success",
-      message: "Pendaftaran wali santri berhasil.",
+      message: "Pendaftaran Akun Wali Santri berhasil diselesaikan.",
       data: {
         username: userAccount.username,
         personName: person.fullName,
@@ -71,7 +103,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("AUTH_REGISTER_ERROR:", err.message);
     return NextResponse.json(
-      { status: "Error", message: err.message },
+      { status: "Error", message: err.message || "Gagal mendaftarkan akun Wali Santri." },
       { status: 500 }
     );
   }

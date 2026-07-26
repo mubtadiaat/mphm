@@ -89,8 +89,8 @@ export default function LoginStaffPage() {
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Android Mobile Staff App</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-white">Portal Staf Lapangan</h1>
-            <p className="text-xs text-zinc-400 mt-1">Mustahiq • Mufatish • Mundzir • Keamanan</p>
+            <h1 className="text-2xl font-black tracking-tight text-white">Portal Login</h1>
+            <p className="text-xs text-zinc-400 mt-1">Mustahiq • Mufatish • Mundzir • Musyrifah • Keamanan</p>
           </div>
         </div>
 
