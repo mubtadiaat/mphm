@@ -64,7 +64,29 @@ export async function GET(req: NextRequest) {
         }),
       ]);
 
-      const formatted = await Promise.all((list as any[]).map(async (sp: any) => {
+      // 1-Batch query lookup for matching Wali by familyCardNumber
+      const kkList = (list as any[])
+        .map((sp) => sp.person?.guardianProfiles?.[0]?.familyCardNumber)
+        .filter((kk): kk is string => Boolean(kk && kk !== "-"));
+
+      const waliMap = new Map<string, any>();
+      if (kkList.length > 0) {
+        const matchedWalis = await prisma.guardianProfile.findMany({
+          where: {
+            familyCardNumber: { in: Array.from(new Set(kkList)) },
+            deletedAt: null,
+          },
+          include: { person: true },
+        });
+
+        for (const w of matchedWalis) {
+          if (w.person) {
+            waliMap.set(w.familyCardNumber, w);
+          }
+        }
+      }
+
+      const formatted = (list as any[]).map((sp: any) => {
         const primaryEnrollment = sp.enrollments?.[0];
         const primaryGuardian = sp.person?.guardianProfiles?.[0];
 
@@ -73,16 +95,8 @@ export async function GET(req: NextRequest) {
         let gRelation = primaryGuardian?.relation || "WALI";
         let kkNum = primaryGuardian?.familyCardNumber || "-";
 
-        if (primaryGuardian?.familyCardNumber && (gName === "-" || gName === sp.person?.fullName)) {
-          const matchedWali = await prisma.guardianProfile.findFirst({
-            where: {
-              familyCardNumber: primaryGuardian.familyCardNumber,
-              personId: { not: sp.personId },
-              deletedAt: null,
-            },
-            include: { person: true },
-          });
-
+        if (kkNum !== "-" && (gName === "-" || gName === sp.person?.fullName)) {
+          const matchedWali = waliMap.get(kkNum);
           if (matchedWali?.person) {
             gName = matchedWali.person.fullName;
             gPhone = matchedWali.person.phoneNumber || gPhone;
@@ -117,7 +131,7 @@ export async function GET(req: NextRequest) {
           guardianRelation: gRelation,
           familyCardNumber: kkNum,
         };
-      }));
+      });
 
       return NextResponse.json({ status: "Success", data: formatted, total });
     }
