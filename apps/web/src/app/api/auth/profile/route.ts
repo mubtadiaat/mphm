@@ -30,16 +30,10 @@ export async function PUT(req: NextRequest) {
 
     if (newPassword) {
       if (userAccount.passwordHash && oldPassword) {
-        const isOldValid =
-          userAccount.passwordHash === oldPassword ||
-          userAccount.passwordHash === "mubtadiaat123" ||
-          oldPassword === "admin123" ||
-          oldPassword === "mphm123" ||
-          oldPassword === "mubtadiaat123" ||
-          oldPassword === "mubtadiaat26";
+        const isOldValid = userAccount.passwordHash === oldPassword;
         if (!isOldValid) {
           return NextResponse.json(
-            { status: "Error", message: "Password lama tidak sesuai" },
+            { status: "Error", message: "Password lama tidak sesuai." },
             { status: 400 }
           );
         }
