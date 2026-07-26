@@ -262,6 +262,43 @@ export async function DELETE(
         where: { personId: targetPersonId!, deletedAt: null },
         data: { status: "INACTIVE", deletedAt: now },
       });
+
+      // 6. Soft delete GuardianProfile & associated Wali Person / Account if linked by familyCardNumber
+      const santriGuardians = await tx.guardianProfile.findMany({
+        where: { personId: targetPersonId!, deletedAt: null },
+        select: { familyCardNumber: true },
+      });
+
+      await tx.guardianProfile.updateMany({
+        where: { personId: targetPersonId!, deletedAt: null },
+        data: { deletedAt: now },
+      });
+
+      const kkList = santriGuardians.map((g) => g.familyCardNumber).filter((kk): kk is string => Boolean(kk && kk !== "-"));
+      if (kkList.length > 0) {
+        const waliGuardians = await tx.guardianProfile.findMany({
+          where: { familyCardNumber: { in: kkList }, deletedAt: null },
+          select: { id: true, personId: true },
+        });
+
+        const waliPersonIds = waliGuardians.map((g) => g.personId);
+        if (waliPersonIds.length > 0) {
+          await tx.guardianProfile.updateMany({
+            where: { id: { in: waliGuardians.map((g) => g.id) } },
+            data: { deletedAt: now },
+          });
+
+          await tx.userAccount.updateMany({
+            where: { personId: { in: waliPersonIds }, deletedAt: null },
+            data: { status: "INACTIVE", deletedAt: now },
+          });
+
+          await tx.person.updateMany({
+            where: { id: { in: waliPersonIds }, deletedAt: null },
+            data: { deletedAt: now },
+          });
+        }
+      }
     });
 
     return NextResponse.json({

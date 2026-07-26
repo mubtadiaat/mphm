@@ -21,24 +21,75 @@ export async function POST(req: NextRequest) {
 
     await prisma.$transaction(async (tx) => {
       if (category === "student" || category === "santri") {
-        categoryLabel = "Santriwati / Siswi";
+        categoryLabel = "Santriwati / Siswi & Wali Terkait";
         const students = await tx.studentProfile.findMany({
           where: { deletedAt: null },
           select: { id: true, personId: true },
         });
 
-        const personIds = Array.from(new Set(students.map((s) => s.personId)));
-        deletedCount = personIds.length;
+        const studentPersonIds = Array.from(new Set(students.map((s) => s.personId)));
 
+        // Find all active GuardianProfiles
+        const activeGuardians = await tx.guardianProfile.findMany({
+          where: { deletedAt: null },
+          select: { id: true, personId: true },
+        });
+
+        const guardianPersonIds = Array.from(new Set(activeGuardians.map((g) => g.personId)));
+        const allPersonIds = Array.from(new Set([...studentPersonIds, ...guardianPersonIds]));
+        deletedCount = studentPersonIds.length;
+
+        // Soft delete StudentProfile
         await tx.studentProfile.updateMany({
           where: { deletedAt: null },
           data: { deletedAt: now },
         });
 
-        await tx.person.updateMany({
-          where: { id: { in: personIds }, deletedAt: null },
+        // Soft delete GuardianProfile
+        await tx.guardianProfile.updateMany({
+          where: { deletedAt: null },
           data: { deletedAt: now },
         });
+
+        // Soft delete UserAccounts for Wali
+        if (guardianPersonIds.length > 0) {
+          await tx.userAccount.updateMany({
+            where: { personId: { in: guardianPersonIds }, deletedAt: null },
+            data: { deletedAt: now, status: "INACTIVE" },
+          });
+        }
+
+        // Soft delete Person for both Santri and Wali
+        await tx.person.updateMany({
+          where: { id: { in: allPersonIds }, deletedAt: null },
+          data: { deletedAt: now },
+        });
+      } else if (category === "wali" || category === "guardian") {
+        categoryLabel = "Wali Santri";
+        const guardians = await tx.guardianProfile.findMany({
+          where: { deletedAt: null },
+          select: { id: true, personId: true },
+        });
+
+        const guardianPersonIds = Array.from(new Set(guardians.map((g) => g.personId)));
+        deletedCount = guardianPersonIds.length;
+
+        await tx.guardianProfile.updateMany({
+          where: { deletedAt: null },
+          data: { deletedAt: now },
+        });
+
+        if (guardianPersonIds.length > 0) {
+          await tx.userAccount.updateMany({
+            where: { personId: { in: guardianPersonIds }, deletedAt: null },
+            data: { deletedAt: now, status: "INACTIVE" },
+          });
+
+          await tx.person.updateMany({
+            where: { id: { in: guardianPersonIds }, deletedAt: null },
+            data: { deletedAt: now },
+          });
+        }
       } else if (category === "mustahiq") {
         categoryLabel = "Mustahiq (Dewan Pengajar)";
         const teachers = await tx.teacherProfile.findMany({

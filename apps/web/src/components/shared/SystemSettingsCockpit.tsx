@@ -1835,9 +1835,14 @@ function PurgeAllDataTab() {
 
   const CATEGORY_MAP: Record<string, { label: string; desc: string; icon: string }> = {
     student: {
-      label: "SANTRIWATI / SISWI",
-      desc: "Menghapus seluruh data Induk Santriwati Asrama P3HM dan Siswi Diniyyah MPHM beserta profilnya.",
+      label: "SANTRIWATI / SISWI (& WALI TERKAIT)",
+      desc: "Menghapus seluruh data Induk Santriwati Asrama P3HM dan Siswi Diniyyah MPHM beserta profil Wali Santri terkait.",
       icon: "👩‍🎓",
+    },
+    wali: {
+      label: "WALI SANTRI (ORANG TUA)",
+      desc: "Menghapus seluruh data Wali Santri / Orang Tua murid beserta akun portalnya.",
+      icon: "👨‍👩‍👧",
     },
     mustahiq: {
       label: "MUSTAHIQ (DEWAN PENGAJAR)",
