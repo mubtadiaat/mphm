@@ -143,14 +143,13 @@ export default function Page() {
               </div>
 
               <a
-                href="https://github.com/mubtadiaat/app_software/releases/latest/download/Mubtadiaat.apk"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/api/download?type=staff"
+                download="Mubtadiaat-v1.4.09.apk"
                 className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-indigo-600/25"
               >
                 <div className="flex items-center gap-2">
                   <Download className="w-4 h-4" />
-                  <span>Download APK Staf</span>
+                  <span>Download APK Staf (v1.4.09)</span>
                 </div>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
@@ -180,14 +179,13 @@ export default function Page() {
               </div>
 
               <a
-                href="https://github.com/mubtadiaat/app_software/releases/latest/download/e-Mubtadiaat.apk"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/api/download?type=guardian"
+                download="e-Mubtadiaat-v1.4.09.apk"
                 className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-white bg-cyan-600 hover:bg-cyan-500 px-4 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-cyan-600/25"
               >
                 <div className="flex items-center gap-2">
                   <Download className="w-4 h-4" />
-                  <span>Download APK Wali</span>
+                  <span>Download APK Wali (v1.4.09)</span>
                 </div>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
@@ -217,14 +215,13 @@ export default function Page() {
               </div>
 
               <a
-                href="https://github.com/mubtadiaat/app_software/releases/latest/download/Admin.Mubtadiaat.Setup.exe"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/api/download?type=admin"
+                download="Admin.Mubtadiaat.Setup.1.4.9.exe"
                 className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs text-white bg-emerald-600 hover:bg-emerald-500 px-4 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-emerald-600/25"
               >
                 <div className="flex items-center gap-2">
                   <Download className="w-4 h-4" />
-                  <span>Download Setup Admin</span>
+                  <span>Download Setup Admin (v1.4.9)</span>
                 </div>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
@@ -379,9 +376,8 @@ export default function Page() {
             </div>
 
             <a
-              href="https://github.com/mubtadiaat/app_software/releases/latest/download/e-Mubtadiaat.apk"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/api/download?type=guardian"
+              download="e-Mubtadiaat-v1.4.09.apk"
               className="px-6 py-3.5 sm:py-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs sm:text-sm transition-all shadow-xl shadow-cyan-600/30 flex items-center justify-center gap-3 shrink-0"
             >
               <Download className="w-4 h-4" />
