@@ -161,8 +161,12 @@ export function Sidebar({ role }: { role: RoleTypes }) {
       <div className="h-20 flex items-center px-6 gap-3 border-b border-slate-900/80 bg-slate-950/50">
         <Image src="/logo.png" alt="MPHM Logo" width={36} height={36} unoptimized className="drop-shadow-md rounded-md" />
         <div className="flex flex-col">
-          <span className="font-extrabold text-base tracking-tight text-white">MPHM Lirboyo</span>
-          <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{role.replace("_", " ")}</span>
+          <span className="font-extrabold text-base tracking-tight text-white">
+            {role === "sek.pondok" || activeWorkspace === "pondok" ? "P3HM Lirboyo" : "MPHM Lirboyo"}
+          </span>
+          <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">
+            {role === "sek.pondok" || activeWorkspace === "pondok" ? "sek.pondok" : role.replace("_", " ")}
+          </span>
         </div>
       </div>
       <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
@@ -242,8 +246,14 @@ export function Sidebar({ role }: { role: RoleTypes }) {
 
       <div className="p-4 border-t border-slate-900 bg-slate-950/50 mt-auto">
         <div className="bg-slate-900 rounded-xl p-3 border border-slate-800/50 flex flex-col items-center justify-center text-center gap-1">
-          <span className="text-xs font-bold text-slate-300">Sistem Informasi Akademik</span>
-          <span className="text-[10px] text-slate-500">Madrasah Putri Hidayatul Mubtadi&apos;at</span>
+          <span className="text-xs font-bold text-slate-300">
+            {role === "sek.pondok" || activeWorkspace === "pondok" ? "Sistem Informasi Pesantren" : "Sistem Informasi Akademik"}
+          </span>
+          <span className="text-[10px] text-slate-500">
+            {role === "sek.pondok" || activeWorkspace === "pondok"
+              ? "Pondok Pesantren Putri Hidayatul Mubtadi'at"
+              : "Madrasah Putri Hidayatul Mubtadi'at"}
+          </span>
         </div>
       </div>
     </aside>

@@ -128,8 +128,10 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
           <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${paddingClass}`}>
             <header className="h-20 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 flex items-center px-4 sm:px-6 sticky top-0 z-40 justify-between">
               <div className="flex-1 flex items-center gap-2 sm:gap-2.5 md:hidden min-w-0">
-                <img src="/logo.png" alt="MPHM Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain rounded-lg shadow-xs shrink-0" />
-                <span className="font-black text-base sm:text-lg text-zinc-900 dark:text-white tracking-tight truncate">MPHM Lirboyo</span>
+                <img src="/logo.png" alt="Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain rounded-lg shadow-xs shrink-0" />
+                <span className="font-black text-base sm:text-lg text-zinc-900 dark:text-white tracking-tight truncate">
+                  {role === "sek.pondok" ? "P3HM Lirboyo" : "MPHM Lirboyo"}
+                </span>
               </div>
               <div className="flex-1 hidden md:block"></div>
               <GlobalHeaderActions role={role} />
