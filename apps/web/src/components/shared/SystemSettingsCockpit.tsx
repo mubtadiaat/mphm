@@ -81,6 +81,74 @@ const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: str
   ]
 };
 
+function FriendlyGuideCard({ title, description, steps }: { title: string; description: string; steps?: string[] }) {
+  return (
+    <div className="p-5 bg-linear-to-r from-blue-50/80 via-indigo-50/40 to-blue-50/20 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-transparent border border-blue-200/60 dark:border-blue-800/40 rounded-2xl space-y-2 shadow-xs mb-6">
+      <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-extrabold text-sm">
+        <span className="text-base">💡</span>
+        <span>Petunjuk Penggunaan: {title}</span>
+      </div>
+      <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
+        {description}
+      </p>
+      {steps && steps.length > 0 && (
+        <ul className="text-xs text-zinc-600 dark:text-zinc-400 space-y-1 pt-1 list-disc list-inside">
+          {steps.map((s, i) => (
+            <li key={i} className="leading-snug">{s}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function FriendlySwitch({ 
+  label, 
+  description, 
+  value, 
+  onChange, 
+  activeBadge = "AKTIF", 
+  inactiveBadge = "NON-AKTIF" 
+}: { 
+  label: string; 
+  description?: string; 
+  value: boolean; 
+  onChange: (val: boolean) => void;
+  activeBadge?: string;
+  inactiveBadge?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/60 rounded-xl gap-4 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+      <div className="space-y-0.5 max-w-md">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-zinc-900 dark:text-white">{label}</span>
+          <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md uppercase tracking-wider ${
+            value 
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
+              : "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border border-zinc-500/20"
+          }`}>
+            {value ? activeBadge : inactiveBadge}
+          </span>
+        </div>
+        {description && (
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-normal">{description}</p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange(!value)}
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+          value ? "bg-blue-600" : "bg-zinc-300 dark:bg-zinc-700"
+        }`}
+      >
+        <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+          value ? "translate-x-5" : "translate-x-0"
+        }`} />
+      </button>
+    </div>
+  );
+}
+
 export function SystemSettingsCockpit() {
   const { settings, refetchSettings } = useSystemSettings();
   const { toast } = useToast();
@@ -893,393 +961,306 @@ export function SystemSettingsCockpit() {
         <div className="flex-1 w-full space-y-6">
           {settingsTab === "visibility" && (
             <div className="space-y-6">
+              <FriendlyGuideCard 
+                title="Tampilan & Modul Aktif"
+                description="Halaman ini digunakan untuk mengaktifkan atau menyembunyikan modul fitur bagi peran pengguna lain (Mustahiq, Wali Santri, Keamanan) serta mengatur kolom tabel apa saja yang ingin Anda tampilkan."
+                steps={[
+                  "Geser tombol ke posisi [AKTIF] untuk membuka modul pada portal pengguna.",
+                  "Centang kolom tabel di bawah ini untuk menampilkan informasi penting pada tabel utama.",
+                  "Jangan lupa klik tombol 'Simpan Seluruh Konfigurasi' di bagian atas layar setelah selesai!"
+                ]}
+              />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Modul Mustahiq</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Spreadsheet Penilaian</span>
-                    <button
-                      onClick={() => setShowMustahiqScores(!showMustahiqScores)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${showMustahiqScores ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showMustahiqScores ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Absensi Kehadiran Santri</span>
-                    <button
-                      onClick={() => setShowMustahiqAttendance(!showMustahiqAttendance)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${showMustahiqAttendance ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showMustahiqAttendance ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    Modul Pengajar (Mustahiq)
+                  </h3>
+                  <div className="space-y-3">
+                    <FriendlySwitch 
+                      label="Spreadsheet Penilaian Nilai"
+                      description="Mengizinkan Ustadz Mustahiq mengisi & mengedit nilai kwartal santri."
+                      value={showMustahiqScores}
+                      onChange={setShowMustahiqScores}
+                    />
+                    <FriendlySwitch 
+                      label="Absensi Kehadiran Santri"
+                      description="Mengizinkan Mustahiq mencatat kehadiran harian siswi di kelas."
+                      value={showMustahiqAttendance}
+                      onChange={setShowMustahiqAttendance}
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Modul Wali Santri</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Transkrip & Rapor Nilai</span>
-                    <button
-                      onClick={() => setShowGuardianScores(!showGuardianScores)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${showGuardianScores ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showGuardianScores ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Modul Kedisiplinan & Poin</span>
-                    <button
-                      onClick={() => setShowGuardianDiscipline(!showGuardianDiscipline)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${showGuardianDiscipline ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showGuardianDiscipline ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    Modul Portal Wali Santri
+                  </h3>
+                  <div className="space-y-3">
+                    <FriendlySwitch 
+                      label="Transkrip & Rapor Nilai"
+                      description="Mengizinkan orang tua/wali melihat transkrip nilai kwartal anak."
+                      value={showGuardianScores}
+                      onChange={setShowGuardianScores}
+                    />
+                    <FriendlySwitch 
+                      label="Catatan Kedisiplinan & Poin"
+                      description="Mengizinkan orang tua melihat rekap takzir & poin kedisiplinan."
+                      value={showGuardianDiscipline}
+                      onChange={setShowGuardianDiscipline}
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Modul Pos Keamanan</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Pencarian & Lookup Cepat</span>
-                    <button
-                      onClick={() => setShowKeamananLookup(!showKeamananLookup)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${showKeamananLookup ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showKeamananLookup ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                    Modul Pos Keamanan
+                  </h3>
+                  <div className="space-y-3">
+                    <FriendlySwitch 
+                      label="Pencarian & Lookup Santri"
+                      description="Mengizinkan petugas keamanan mencari biodata & status santriwati di gerbang."
+                      value={showKeamananLookup}
+                      onChange={setShowKeamananLookup}
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Modul Mufattisy</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-750 dark:text-zinc-400 font-medium">Dashboard Pengawasan Asrama</span>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                    Modul Pengawas (Mufattisy)
+                  </h3>
+                  <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="text-sm font-bold text-zinc-900 dark:text-white block">Dashboard Pengawasan Asrama</span>
+                      <span className="text-xs text-zinc-500">Modul utama pengawasan ketertiban santriwati.</span>
+                    </div>
                     <PillBadge label="WAJIB AKTIF" variant="success" />
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Konfigurasi Kolom Tabel */}
-            <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
-              <div>
-                <h3 className="font-bold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Konfigurasi Kolom Tabel</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  Pilih kolom mana saja yang ingin ditampilkan secara default pada masing-masing modul tabel.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Table Santri */}
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Tabel Data Induk Santri</span>
-                  <div className="space-y-2">
-                    {Object.entries({
-                      name: "Nama Lengkap",
-                      nik: "NIK",
-                      stambuk: "Nomor Stambuk",
-                      class: "Kelas Aktif",
-                      address: "Alamat",
-                      status: "Status"
-                    }).map(([colKey, label]) => {
-                      const isChecked = santriCols[colKey] !== false;
-                      return (
-                        <label key={colKey} className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-350 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleToggleCol("santri", colKey, isChecked)}
-                            className="rounded border-zinc-350 dark:border-zinc-650 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span>{label}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
+              {/* Konfigurasi Kolom Tabel */}
+              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
+                <div>
+                  <h3 className="font-extrabold text-base text-zinc-900 dark:text-white">Pilihan Kolom Tabel Utama</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    Centang atau hilangkan centang untuk memilih kolom yang akan muncul pada tabel data aplikasi.
+                  </p>
                 </div>
 
-                {/* Table Kelas */}
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Tabel Data Kelas Rombel</span>
-                  <div className="space-y-2">
-                    {Object.entries({
-                      name: "Nama Kelas",
-                      mustahiq: "Wali Kelas (Mustahiq)",
-                      mufattisy: "Pengawas (Mufattisy)",
-                      capacity: "Kapasitas"
-                    }).map(([colKey, label]) => {
-                      const isChecked = kelasCols[colKey] !== false;
-                      return (
-                        <label key={colKey} className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-350 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleToggleCol("kelas", colKey, isChecked)}
-                            className="rounded border-zinc-350 dark:border-zinc-650 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span>{label}</span>
-                        </label>
-                      );
-                    })}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Table Santri */}
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
+                    <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">Tabel Data Santriwati</span>
+                    <div className="space-y-2">
+                      {Object.entries({
+                        name: "Nama Lengkap",
+                        nik: "NIK (16 Digit)",
+                        stambuk: "Nomor Stambuk",
+                        class: "Kelas Aktif",
+                        address: "Alamat Asal",
+                        status: "Status Aktif"
+                      }).map(([colKey, label]) => {
+                        const isChecked = santriCols[colKey] !== false;
+                        return (
+                          <label key={colKey} className="flex items-center gap-2 text-xs font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer hover:text-blue-600">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleToggleCol("santri", colKey, isChecked)}
+                              className="rounded border-zinc-350 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                            />
+                            <span>{label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
 
-                {/* Table Kurikulum */}
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Tabel Kurikulum/Mapel</span>
-                  <div className="space-y-2">
-                    {Object.entries({
-                      code: "Kode Mapel",
-                      name: "Nama Pelajaran",
-                      subjectType: "Jenis Pelajaran",
-                      isActive: "Status Keaktifan"
-                    }).map(([colKey, label]) => {
-                      const isChecked = kurikulumCols[colKey] !== false;
-                      return (
-                        <label key={colKey} className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-350 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleToggleCol("kurikulum", colKey, isChecked)}
-                            className="rounded border-zinc-350 dark:border-zinc-650 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span>{label}</span>
-                        </label>
-                      );
-                    })}
+                  {/* Table Kelas */}
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
+                    <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Tabel Kelas / Rombel</span>
+                    <div className="space-y-2">
+                      {Object.entries({
+                        name: "Nama Kelas",
+                        mustahiq: "Wali Kelas (Mustahiq)",
+                        mufattisy: "Pengawas (Mufattisy)",
+                        capacity: "Kapasitas Kuota"
+                      }).map(([colKey, label]) => {
+                        const isChecked = kelasCols[colKey] !== false;
+                        return (
+                          <label key={colKey} className="flex items-center gap-2 text-xs font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer hover:text-blue-600">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleToggleCol("kelas", colKey, isChecked)}
+                              className="rounded border-zinc-350 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                            />
+                            <span>{label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
 
-                {/* Table Pelanggaran */}
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Tabel Pelanggaran Master</span>
-                  <div className="space-y-2">
-                    {Object.entries({
-                      name: "Nama Pelanggaran",
-                      category: "Kategori",
-                      severity: "Tingkat Keparahan",
-                      points: "Poin Penalty"
-                    }).map(([colKey, label]) => {
-                      const isChecked = pelanggaranCols[colKey] !== false;
-                      return (
-                        <label key={colKey} className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-350 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleToggleCol("pelanggaran", colKey, isChecked)}
-                            className="rounded border-zinc-350 dark:border-zinc-650 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span>{label}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Table Tahun Ajaran */}
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Tabel Tahun Akademik</span>
-                  <div className="space-y-2">
-                    {Object.entries({
-                      name: "Tahun Akademik",
-                      startDate: "Tanggal Mulai",
-                      endDate: "Tanggal Berakhir",
-                      isActive: "Status Aktif"
-                    }).map(([colKey, label]) => {
-                      const isChecked = tahunAjaranCols[colKey] !== false;
-                      return (
-                        <label key={colKey} className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-350 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleToggleCol("tahun_ajaran", colKey, isChecked)}
-                            className="rounded border-zinc-350 dark:border-zinc-650 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span>{label}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Table Audit Log */}
-                <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Tabel forensic Audit Log</span>
-                  <div className="space-y-2">
-                    {Object.entries({
-                      timestamp: "Waktu Kejadian",
-                      userId: "Pelaku Aksi",
-                      role: "Role",
-                      module: "Modul Sistem",
-                      action: "HTTP Method"
-                    }).map(([colKey, label]) => {
-                      const isChecked = auditLogCols[colKey] !== false;
-                      return (
-                        <label key={colKey} className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-350 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleToggleCol("audit_log", colKey, isChecked)}
-                            className="rounded border-zinc-350 dark:border-zinc-650 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span>{label}</span>
-                        </label>
-                      );
-                    })}
+                  {/* Table Kurikulum */}
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-3">
+                    <span className="text-xs font-extrabold text-purple-600 dark:text-purple-400 uppercase tracking-wider block">Tabel Mata Pelajaran</span>
+                    <div className="space-y-2">
+                      {Object.entries({
+                        code: "Kode Mapel",
+                        name: "Nama Pelajaran",
+                        subjectType: "Jenis Pelajaran",
+                        isActive: "Status Keaktifan"
+                      }).map(([colKey, label]) => {
+                        const isChecked = kurikulumCols[colKey] !== false;
+                        return (
+                          <label key={colKey} className="flex items-center gap-2 text-xs font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer hover:text-blue-600">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleToggleCol("kurikulum", colKey, isChecked)}
+                              className="rounded border-zinc-350 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                            />
+                            <span>{label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             </div>
           )}
 
           {settingsTab === "permissions" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Otoritas Mustahiq</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Override Predikat Akhlaq</span>
-                    <button
-                      onClick={() => setAllowMustahiqAkhlaqOverride(!allowMustahiqAkhlaqOverride)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${allowMustahiqAkhlaqOverride ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${allowMustahiqAkhlaqOverride ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-6">
+              <FriendlyGuideCard 
+                title="Hak Akses & Otorisasi Fitur"
+                description="Atur wewenang khusus bagi setiap peran pengurus dan orang tua santri untuk menjamin keamanan operasional."
+                steps={[
+                  "Pilih fitur yang ingin diizinkan atau dibatasi untuk setiap peran di bawah ini.",
+                  "Klik tombol 'Simpan Seluruh Konfigurasi' di bagian atas layar untuk menerapkan perubahan ke seluruh sistem."
+                ]}
+              />
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Otoritas Wali Santri</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Pengajuan Izin Safar/Sakit</span>
-                    <button
-                      onClick={() => setAllowGuardianPermits(!allowGuardianPermits)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${allowGuardianPermits ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${allowGuardianPermits ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Otoritas Ustadz Mustahiq</h3>
+                  <FriendlySwitch 
+                    label="Ubah / Override Predikat Akhlaq"
+                    description="Memberikan wewenang kepada Mustahiq untuk memperbarui predikat akhlaq santri secara langsung."
+                    value={allowMustahiqAkhlaqOverride}
+                    onChange={setAllowMustahiqAkhlaqOverride}
+                  />
                 </div>
-              </div>
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Otoritas Mufattisy</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Persetujuan/Approval Izin</span>
-                    <button
-                      onClick={() => setAllowMufattisyApproval(!allowMufattisyApproval)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${allowMufattisyApproval ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${allowMufattisyApproval ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Otoritas Wali Santri</h3>
+                  <FriendlySwitch 
+                    label="Pengajuan Surat Izin Safar / Sakit"
+                    description="Mengizinkan orang tua/wali santri mengajukan permohonan izin pulang atau sakit melalui portal wali."
+                    value={allowGuardianPermits}
+                    onChange={setAllowGuardianPermits}
+                  />
                 </div>
-              </div>
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Otoritas Pos Keamanan</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Eskalasi Pelanggaran Santri</span>
-                    <button
-                      onClick={() => setAllowKeamananEscalation(!allowKeamananEscalation)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${allowKeamananEscalation ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${allowKeamananEscalation ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Otoritas Ustadz Mufattisy</h3>
+                  <FriendlySwitch 
+                    label="Persetujuan (Approval) Perizinan"
+                    description="Memberikan wewenang kepada Mufattisy untuk menyetujui atau menolak permohonan izin santri."
+                    value={allowMufattisyApproval}
+                    onChange={setAllowMufattisyApproval}
+                  />
+                </div>
+
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Otoritas Pos Keamanan</h3>
+                  <FriendlySwitch 
+                    label="Eskalasi Pelanggaran Santri"
+                    description="Mengizinkan petugas pos keamanan melaporkan dan mengeskalasi insiden pelanggaran santri ke tingkat pengurus."
+                    value={allowKeamananEscalation}
+                    onChange={setAllowKeamananEscalation}
+                  />
                 </div>
               </div>
             </div>
           )}
 
           {settingsTab === "security" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Status Pemeliharaan</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Maintenance Mode</span>
-                    <button
-                      onClick={() => setSystemMaintenance(!systemMaintenance)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${systemMaintenance ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${systemMaintenance ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-6">
+              <FriendlyGuideCard 
+                title="Parameter & Sesi Keamanan"
+                description="Kelola pengaturan dasar keamanan sistem, durasi otomatis keluar (logout), mode pemeliharaan, dan nomor kontak bantuan WhatsApp."
+              />
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Rotasi Session Cookie</h3>
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm text-zinc-750 dark:text-zinc-400 font-medium">Session Lifetime Duration</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Mode Pemeliharaan (Maintenance)</h3>
+                  <FriendlySwitch 
+                    label="Mode Pemeliharaan Sistem"
+                    description="Aktifkan HANYA jika Anda ingin menutup akses sementara bagi pengurus lain saat perbaikan data."
+                    value={systemMaintenance}
+                    onChange={setSystemMaintenance}
+                    activeBadge="MAINTENANCE"
+                    inactiveBadge="NORMAL"
+                  />
+                </div>
+
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Durasi Otomatis Keluar (Session)</h3>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">
+                      Waktu Logout Otomatis Saat Tidak Bergerak
+                    </label>
+                    <p className="text-xs text-zinc-500">Sistem akan meminta login ulang jika pengguna diam tanpa aktivitas selama waktu ini.</p>
                     <select
                       value={cookieLifetime}
                       onChange={(e) => setCookieLifetime(Number(e.target.value))}
-                      className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white focus:outline-none"
                     >
-                      <option value={15}>15 Menit</option>
-                      <option value={30}>30 Menit (Default)</option>
-                      <option value={60}>60 Menit</option>
-                      <option value={120}>120 Menit</option>
+                      <option value={15}>⏱️ 15 Menit</option>
+                      <option value={30}>⏱️ 30 Menit (Sangat Direkomendasikan)</option>
+                      <option value={60}>⏱️ 60 Menit (1 Jam)</option>
+                      <option value={120}>⏱️ 120 Menit (2 Jam)</option>
                     </select>
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Keamanan Jaringan</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Strict HTTPS Enforcement</span>
-                    <button
-                      onClick={() => setEnforceHttps(!enforceHttps)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${enforceHttps ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${enforceHttps ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Enkripsi HTTPS</h3>
+                  <FriendlySwitch 
+                    label="Enforce Koneksi HTTPS Aman"
+                    description="Wajibkan enkripsi SSL/HTTPS untuk mencegah penyadapan data pada jaringan publik."
+                    value={enforceHttps}
+                    onChange={setEnforceHttps}
+                  />
                 </div>
-              </div>
 
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Single Sign-On</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">Aktifkan Login SSO</span>
-                    <button
-                      onClick={() => setSsoActive(!ssoActive)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${ssoActive ? "bg-blue-600" : "bg-zinc-200 dark:bg-zinc-750"}`}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${ssoActive ? "translate-x-5" : "translate-x-0"}`} />
-                    </button>
-                  </div>
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Single Sign-On (SSO)</h3>
+                  <FriendlySwitch 
+                    label="Fitur Login Terintegrasi SSO"
+                    description="Mengizinkan pengurus login menggunakan akun Single Sign-On jaringan pesantren."
+                    value={ssoActive}
+                    onChange={setSsoActive}
+                  />
                 </div>
-              </div>
 
-              {/* WhatsApp Contact Input */}
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4 md:col-span-2">
-                <h3 className="font-bold text-sm text-zinc-400 uppercase tracking-wider">Kontak Utama (WhatsApp Sekretariat)</h3>
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-zinc-700 dark:text-zinc-300 font-semibold">
-                      Nomor WhatsApp (Gunakan Awalan 62)
+                {/* WhatsApp Contact Input */}
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4 md:col-span-2">
+                  <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">Nomor WhatsApp Layanan Bantuan Sekretariat</h3>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">
+                      Nomor WhatsApp Bantuan (Format Awalan 62...)
                     </label>
-                    <p className="text-xs text-zinc-500">Nomor ini akan dihubungi langsung oleh civitas akademik yang membutuhkan bantuan.</p>
+                    <p className="text-xs text-zinc-500">Nomor ini akan dihubungi oleh pengurus atau orang tua santri ketika mengklik tombol bantuan pada layar login.</p>
                     <input 
                       type="text"
                       value={whatsappContact}
@@ -1294,7 +1275,7 @@ export function SystemSettingsCockpit() {
                         }
                       }}
                       placeholder="Contoh: 6281234567890"
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
+                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                     />
                   </div>
                 </div>
@@ -1304,11 +1285,20 @@ export function SystemSettingsCockpit() {
 
           {settingsTab === "region_api" && (
             <div className="space-y-6 animate-fade-in">
+              <FriendlyGuideCard 
+                title="Integrasi API Wilayah Indonesia"
+                description="Fitur ini berfungsi untuk menyediakan data pilihan otomatis Provinsi, Kabupaten, Kecamatan, dan Kelurahan saat pengisian alamat santriwati."
+                steps={[
+                  "Pilihan default 'Develzy/Wilayah Indonesia (Resmi Kemendagri By. DEVELZY) ®2025' sangat direkomendasikan karena resmi dan gratis.",
+                  "Jika lokasi Anda tidak memiliki koneksi internet, Anda bisa memilih mode 'Database Luring (Offline Fallback)'."
+                ]}
+              />
+
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
                 <div>
-                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Integrasi API Wilayah Indonesia</h3>
+                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Penyedia Data Wilayah Indonesia</h3>
                   <p className="text-zinc-500 dark:text-zinc-400 text-xs mt-0.5">
-                    Konfigurasikan sumber data wilayah administratif (Provinsi, Kabupaten, Kecamatan, Kelurahan) yang digunakan untuk input alamat data induk.
+                    Konfigurasikan sumber data wilayah administratif yang digunakan untuk input alamat data induk santriwati.
                   </p>
                 </div>
                 
@@ -1318,14 +1308,14 @@ export function SystemSettingsCockpit() {
                     <select
                       value={regionApiSource}
                       onChange={(e) => setRegionApiSource(e.target.value)}
-                      className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-205 w-full transition-colors"
+                      className="px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none dark:text-zinc-200 w-full transition-colors font-bold"
                     >
                       <option value="cahyadsn">Develzy/Wilayah Indonesia (Resmi Kemendagri By. DEVELZY) ®2025</option>
                       <option value="emsifa">Emsifa API (Online - Gratis & Tanpa API Key)</option>
                       <option value="binderbyte">BinderByte API (Online - Memerlukan API Key)</option>
                       <option value="offline">Database Luring (Offline Fallback - Instan & Luring)</option>
                     </select>
-                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500 italic block leading-relaxed">
+                    <span className="text-[11px] text-zinc-500 italic block leading-relaxed">
                       * Develzy/Wilayah Indonesia (Resmi Kemendagri By. DEVELZY) ®2025 direkomendasikan karena bersifat resmi, gratis, dan mengikuti standarisasi kode wilayah Kemendagri terbaru.
                     </span>
                   </div>
@@ -1343,7 +1333,7 @@ export function SystemSettingsCockpit() {
                         />
                       </div>
                       <p className="text-[10px] text-blue-600 dark:text-blue-400 leading-relaxed font-semibold">
-                        Info: Kunci API default saat ini diambil dari Postman BinderByte (berlaku batas kuota panggilan per hari). Silakan ganti dengan API Key milik Anda sendiri untuk keamanan penuh.
+                        Info: Kunci API default saat ini diambil dari BinderByte (berlaku batas kuota panggilan per hari). Silakan ganti dengan API Key milik Anda sendiri untuk keamanan penuh.
                       </p>
                     </div>
                   )}
@@ -1362,12 +1352,26 @@ export function SystemSettingsCockpit() {
 
           {settingsTab === "math_formula" && (
             <div className="space-y-6 animate-fade-in">
+              <FriendlyGuideCard 
+                title="Parameter Matematis & KKM"
+                description="Atur pembobotan persentase nilai Kwartal 1, 2, 3, dan 4 serta batas Kriteria Ketuntasan Minimal (KKM) untuk kelulusan dan promosi kenaikan kelas."
+              />
               <MathFormulaBuilder />
             </div>
           )}
 
           {settingsTab === "custom_tables" && (
             <div className="space-y-6">
+              <FriendlyGuideCard 
+                title="Tabel Kustom & Menu Baru"
+                description="Fitur ini memungkinkan Anda menambahkan modul tabel atau formulir data baru ke sidebar aplikasi tanpa memerlukan keahlian pemrograman."
+                steps={[
+                  "Ketik nama modul baru yang ingin ditambahkan (misal: Data Inventaris, Arsip Donasi).",
+                  "Tambahkan kolom form input yang dibutuhkan (misal: Nama Donatur, Jumlah Donasi).",
+                  "Klik 'Daftarkan Tabel & Menu' untuk memunculkan menu di sidebar secara otomatis!"
+                ]}
+              />
+
               {/* Form to create new table */}
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-4">
                 <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Buat Tabel Kustom & Menu Baru</h3>
@@ -1376,19 +1380,18 @@ export function SystemSettingsCockpit() {
                 <form onSubmit={handleSaveCustomTable} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Batas Maksimal Percobaan Login</label>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">Akun akan terkunci sementara jika gagal login melebihi batas ini.</p>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">Nama Modul / Tabel Baru *</label>
+                      <p className="text-xs text-zinc-500 mb-1">Nama yang akan tampil di menu sidebar (misal: Arsip Donasi).</p>
                       <input 
                         type="text" 
                         required
                         value={newTableName} 
                         onChange={(e) => {
                           setNewTableName(e.target.value);
-                          // Auto slug suggestion
                           setNewTableKey(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9_-]/g, ""));
                         }}
                         placeholder="Misal: Arsip Donasi"
-                        className="px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
+                        className="px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
@@ -1512,6 +1515,11 @@ export function SystemSettingsCockpit() {
 
             return (
               <div className="space-y-6">
+                <FriendlyGuideCard 
+                  title="Manajemen Peran & Tampilan Peran"
+                  description="Klik tab peran di bawah ini (Mustahiq, Keamanan, Wali Santri, dll) untuk mengatur ucapan selamat datang, gaya navigasi, warna tema, serta mencentang menu apa saja yang boleh diakses oleh peran tersebut."
+                />
+
                 {/* Role selector tabs */}
                 <div className="flex flex-wrap gap-2 p-1.5 bg-zinc-100 dark:bg-zinc-800/60 rounded-2xl border border-zinc-200 dark:border-zinc-850">
                   {(["sek.pondok", "sek.madrasah", "mustahiq", "keamanan", "wali_santri", "mufattisy", "mundzir"] as const).map((r) => {
@@ -1702,6 +1710,16 @@ export function SystemSettingsCockpit() {
           })()}
           {settingsTab === "job_titles" && (
             <div className="space-y-6">
+              <FriendlyGuideCard 
+                title="Jabatan Struktural Pengurus"
+                description="Kelola susunan hirarki Jabatan dan Posisi Pengurus untuk Madrasah (MPHM) dan Pondok (P3HM)."
+                steps={[
+                  "Pilih filter lembaga (Madrasah atau Pondok).",
+                  "Ketik nama Jabatan baru (misal: Dewan Harian, Mundzir, Mustahiq) lalu klik '+ Tambah Jabatan'.",
+                  "Ketik posisi di bawah jabatan tersebut (misal: Ketua, Sekretaris, Bendahara) lalu tekan Enter."
+                ]}
+              />
+
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
                   <div>
@@ -1843,11 +1861,23 @@ export function SystemSettingsCockpit() {
           )}
 
           {settingsTab === "master_pelanggaran" && (
-            <MasterPelanggaranTab />
+            <div className="space-y-6">
+              <FriendlyGuideCard 
+                title="Master Pelanggaran & Takzir"
+                description="Kelola 7 kategori jenis pelanggaran pesantren, bobot poin sanksi, dan tingkat keparahan yang berlaku untuk seluruh santriwati."
+              />
+              <MasterPelanggaranTab />
+            </div>
           )}
 
           {settingsTab === "purge_data" && (
-            <PurgeAllDataTab />
+            <div className="space-y-6">
+              <FriendlyGuideCard 
+                title="Cockpit Purge Data (Pembersihan Masal)"
+                description="Peringatan Keamanan: Fitur ini digunakan khusus saat uji coba awal aplikasi selesai dan pengurus ingin membersihkan data sampel sebelum sistem dipakai secara resmi."
+              />
+              <PurgeAllDataTab />
+            </div>
           )}
 
 
