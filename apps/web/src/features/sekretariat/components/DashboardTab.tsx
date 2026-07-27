@@ -21,7 +21,9 @@ import {
   School,
   Home,
   Database,
-  Inbox
+  Inbox,
+  BookOpen,
+  ClipboardList
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
@@ -168,6 +170,27 @@ export function DashboardTab() {
 
   const stats = isPondok ? pondokStats : madrasahStats;
 
+  // Tailored Quick Action Shortcuts per Institution
+  const madrasahQuickActions = [
+    { label: "Santri Diniyyah", subtext: "Input Biodata", href: "/sekretariat/santri", icon: Plus, iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400", hoverBg: "hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-500/40" },
+    { label: "Rombel Kelas", subtext: "Kapasitas & Mustahiq", href: "/sekretariat/kelas", icon: BookOpen, iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", hoverBg: "hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500/40" },
+    { label: "Presensi Siswi", subtext: "Absensi Kelas Harian", href: "/sekretariat/kehadiran", icon: Calendar, iconBg: "bg-teal-500/10 text-teal-600 dark:text-teal-400", hoverBg: "hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-500/40" },
+    { label: "Kurikulum & Mapel", subtext: "Jadwal Diniyyah", href: "/sekretariat/kurikulum", icon: ClipboardList, iconBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400", hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:border-purple-500/40" },
+    { label: "Transkrip Rapor", subtext: "Cetak Rapor Kwartal", href: "/sekretariat/raport", icon: FileText, iconBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400", hoverBg: "hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-500/40" },
+    { label: "Konfigurasi", subtext: "Settings Cockpit", href: "/sekretariat/settings", icon: Layers, iconBg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400", hoverBg: "hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:border-indigo-500/40" },
+  ];
+
+  const pondokQuickActions = [
+    { label: "Santri Asrama", subtext: "Input Biodata", href: "/sekretariat/santri", icon: Plus, iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", hoverBg: "hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:border-emerald-500/40" },
+    { label: "Wali Santri", subtext: "Profil Smart KK", href: "/sekretariat/wali-santri", icon: UserCheck, iconBg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400", hoverBg: "hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:border-indigo-500/40" },
+    { label: "Data Asrama", subtext: "Blok & Kamar", href: "/sekretariat/rooms", icon: Building2, iconBg: "bg-teal-500/10 text-teal-600 dark:text-teal-400", hoverBg: "hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-500/40" },
+    { label: "Perizinan Santri", subtext: "Safar, Pulang & Izin", href: "/sekretariat/perizinan", icon: Ticket, iconBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400", hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:border-purple-500/40" },
+    { label: "Takzir & Poin", subtext: "Master Kedisiplinan", href: "/sekretariat/pelanggaran", icon: ShieldAlert, iconBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400", hoverBg: "hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-500/40" },
+    { label: "Konfigurasi", subtext: "Settings Cockpit", href: "/sekretariat/settings", icon: Layers, iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400", hoverBg: "hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:border-blue-500/40" },
+  ];
+
+  const quickActions = isPondok ? pondokQuickActions : madrasahQuickActions;
+
   // Real Database Chart Data (Strictly from DB)
   const madrasahChartData = (statsData?.performances || []).map(p => ({
     name: p.level,
@@ -252,89 +275,32 @@ export function DashboardTab() {
         </div>
       </div>
 
-      {/* Quick Action Shortcuts Bar */}
+      {/* Tailored Quick Action Shortcuts Bar */}
       <div className="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-3">
         <span className="text-xs font-extrabold text-zinc-400 uppercase tracking-wider block">
-          ⚡ Akses Cepat Tindakan Sekretariat
+          ⚡ Akses Cepat Sekretariat {isPondok ? "Pondok (P3HM)" : "Madrasah (MPHM)"}
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-          <Link
-            href="/sekretariat/santri"
-            className="p-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 border border-zinc-200 dark:border-zinc-700 hover:border-blue-500/40 rounded-xl flex items-center gap-2.5 transition-all group"
-          >
-            <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg group-hover:scale-110 transition-transform">
-              <Plus className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">Santri Baru</span>
-              <span className="text-[10px] text-zinc-400">Input Biodata</span>
-            </div>
-          </Link>
-
-          <Link
-            href="/sekretariat/kehadiran"
-            className="p-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-zinc-200 dark:border-zinc-700 hover:border-emerald-500/40 rounded-xl flex items-center gap-2.5 transition-all group"
-          >
-            <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg group-hover:scale-110 transition-transform">
-              <Calendar className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Presensi</span>
-              <span className="text-[10px] text-zinc-400">Absensi Harian</span>
-            </div>
-          </Link>
-
-          <Link
-            href="/sekretariat/perizinan"
-            className="p-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-purple-50 dark:hover:bg-purple-950/30 border border-zinc-200 dark:border-zinc-700 hover:border-purple-500/40 rounded-xl flex items-center gap-2.5 transition-all group"
-          >
-            <div className="p-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg group-hover:scale-110 transition-transform">
-              <Ticket className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">Perizinan</span>
-              <span className="text-[10px] text-zinc-400">Safar & Pulang</span>
-            </div>
-          </Link>
-
-          <Link
-            href="/sekretariat/rooms"
-            className="p-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-teal-50 dark:hover:bg-teal-950/30 border border-zinc-200 dark:border-zinc-700 hover:border-teal-500/40 rounded-xl flex items-center gap-2.5 transition-all group"
-          >
-            <div className="p-2 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-lg group-hover:scale-110 transition-transform">
-              <Building2 className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 group-hover:text-teal-600 dark:group-hover:text-teal-400">Data Asrama</span>
-              <span className="text-[10px] text-zinc-400">Blok & Kamar</span>
-            </div>
-          </Link>
-
-          <Link
-            href="/sekretariat/raport"
-            className="p-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-amber-50 dark:hover:bg-amber-950/30 border border-zinc-200 dark:border-zinc-700 hover:border-amber-500/40 rounded-xl flex items-center gap-2.5 transition-all group"
-          >
-            <div className="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg group-hover:scale-110 transition-transform">
-              <FileText className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">Transkrip Rapor</span>
-              <span className="text-[10px] text-zinc-400">Cetak Rapor</span>
-            </div>
-          </Link>
-
-          <Link
-            href="/sekretariat/settings"
-            className="p-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 border border-zinc-200 dark:border-zinc-700 hover:border-indigo-500/40 rounded-xl flex items-center gap-2.5 transition-all group"
-          >
-            <div className="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg group-hover:scale-110 transition-transform">
-              <Layers className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Konfigurasi</span>
-              <span className="text-[10px] text-zinc-400">Settings Cockpit</span>
-            </div>
-          </Link>
+          {quickActions.map((action, idx) => {
+            const IconComponent = action.icon;
+            return (
+              <Link
+                key={idx}
+                href={action.href}
+                className={`p-3 bg-zinc-50 dark:bg-zinc-800/50 ${action.hoverBg} border border-zinc-200 dark:border-zinc-700 rounded-xl flex items-center gap-2.5 transition-all group`}
+              >
+                <div className={`p-2 ${action.iconBg} rounded-lg group-hover:scale-110 transition-transform`}>
+                  <IconComponent className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    {action.label}
+                  </span>
+                  <span className="text-[10px] text-zinc-400">{action.subtext}</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
