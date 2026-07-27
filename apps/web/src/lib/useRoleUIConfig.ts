@@ -174,7 +174,8 @@ export const DEFAULT_ROLE_CONFIGS: Record<RoleTypes, RoleUIConfig> = {
     enabledMenus: [
       "/keamanan",
       "/keamanan/jurnal",
-      "/keamanan/santri"
+      "/keamanan/santri",
+      "/keamanan/perizinan"
     ],
     capabilities: {}
   },

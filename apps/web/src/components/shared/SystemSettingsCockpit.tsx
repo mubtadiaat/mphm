@@ -69,7 +69,8 @@ const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: str
   keamanan: [
     { label: "Dashboard", href: "/keamanan" },
     { label: "Jurnal Pelanggaran", href: "/keamanan/jurnal" },
-    { label: "Pencarian Santri", href: "/keamanan/santri" }
+    { label: "Pencarian Santri", href: "/keamanan/santri" },
+    { label: "Perizinan", href: "/keamanan/perizinan" }
   ],
   wali_santri: [
     { label: "Dashboard", href: "/guardian" },
@@ -702,22 +703,34 @@ export function SystemSettingsCockpit() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header Section - Premium Gradient Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 dark:border-blue-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-md text-white">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-blue-100 text-xs font-bold uppercase tracking-wider">
             <Settings className="w-4 h-4" />
-            <span>Konfigurasi Utama</span>
+            <span>Pusat Konfigurasi Sistem (V4 Enterprise)</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
             Konfigurasi & Parameter Sistem
           </h1>
-          <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Kelola tampilan modul aktif, kolom tabel data induk, hak akses otorisasi, parameter keamanan, dan integrasi API wilayah.
+          <p className="text-blue-100/90 text-sm max-w-xl">
+            Kelola modul aktif, otorisasi peran, hirarki jabatan struktural, parameter keamanan, dan integrasi API wilayah.
           </p>
         </div>
+
+        <button
+          onClick={handleSaveSettings}
+          disabled={updateSettingsMutation.isPending}
+          className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 disabled:opacity-50"
+        >
+          {updateSettingsMutation.isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          )}
+          <span>Simpan Seluruh Konfigurasi</span>
+        </button>
       </div>
 
       {settingsSaved && (
@@ -727,124 +740,153 @@ export function SystemSettingsCockpit() {
           exit={{ opacity: 0, y: -20 }}
           className="p-4 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl flex items-center gap-2 text-sm font-semibold shadow-sm"
         >
-          <CheckCircle2 className="w-5 h-5 shrink-0" />
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500" />
           <span>Konfigurasi sistem berhasil disimpan dan didistribusikan secara realtime.</span>
         </motion.div>
       )}
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* Internal Sidebar */}
-        <div className="w-full lg:w-64 shrink-0 flex flex-col gap-1.5 p-2 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl">
-          <button
-            onClick={() => setSettingsTab("visibility")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "visibility"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Tampilan & Modul</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("permissions")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "permissions"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <Lock className="w-4 h-4" />
-            <span>Hak Akses & Otorisasi</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("security")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "security"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            <span>Parameter & Keamanan</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("custom_tables")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "custom_tables"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <Database className="w-4 h-4" />
-            <span>Tabel Kustom & Menu</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("roles")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "roles"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <Sliders className="w-4 h-4" />
-            <span>Manajemen Peran & UI</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("job_titles")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "job_titles"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <Briefcase className="w-4 h-4" />
-            <span>Jabatan Struktural</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("master_pelanggaran")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "master_pelanggaran"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <AlertCircle className="w-4 h-4 text-rose-500" />
-            <span>Master Pelanggaran</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("region_api")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "region_api"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <MapPin className="w-4 h-4 text-emerald-500" />
-            <span>Integrasi API Wilayah</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("math_formula")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 ${
-              settingsTab === "math_formula"
-                ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 border border-transparent"
-            }`}
-          >
-            <Calculator className="w-4 h-4 text-emerald-500" />
-            <span>Parameter Matematis</span>
-          </button>
-          <button
-            onClick={() => setSettingsTab("purge_data")}
-            className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left text-sm font-bold transition-all duration-200 ${
-              settingsTab === "purge_data"
-                ? "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 shadow-xs border border-rose-200 dark:border-rose-900"
-                : "text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-rose-50/50 dark:hover:bg-rose-950/30 border border-transparent"
-            }`}
-          >
-            <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-            <span>Hapus All Data</span>
-          </button>
+        {/* Internal Categorized Sidebar */}
+        <div className="w-full lg:w-72 shrink-0 flex flex-col gap-4 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs">
+          
+          {/* Group 1: Modul & Otorisasi */}
+          <div className="space-y-1">
+            <span className="px-3 text-[10px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">
+              A. MODUL & OTORISASI
+            </span>
+            <button
+              onClick={() => setSettingsTab("visibility")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "visibility"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <Users className="w-4 h-4 shrink-0" />
+              <span>Tampilan & Modul Aktif</span>
+            </button>
+            <button
+              onClick={() => setSettingsTab("permissions")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "permissions"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <Lock className="w-4 h-4 shrink-0" />
+              <span>Hak Akses & Otorisasi</span>
+            </button>
+            <button
+              onClick={() => setSettingsTab("security")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "security"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <Settings className="w-4 h-4 shrink-0" />
+              <span>Parameter & Keamanan</span>
+            </button>
+          </div>
+
+          {/* Group 2: Peran & Hirarki */}
+          <div className="space-y-1 pt-2 border-t border-zinc-150 dark:border-zinc-800">
+            <span className="px-3 text-[10px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">
+              B. PERAN & HIRARKI
+            </span>
+            <button
+              onClick={() => setSettingsTab("roles")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "roles"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <Sliders className="w-4 h-4 shrink-0" />
+              <span>Manajemen Peran & UI</span>
+            </button>
+            <button
+              onClick={() => setSettingsTab("job_titles")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "job_titles"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <Briefcase className="w-4 h-4 shrink-0" />
+              <span>Jabatan Struktural</span>
+            </button>
+            <button
+              onClick={() => setSettingsTab("custom_tables")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "custom_tables"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <Database className="w-4 h-4 shrink-0" />
+              <span>Tabel Kustom & Menu</span>
+            </button>
+          </div>
+
+          {/* Group 3: Aturan & Integrasi */}
+          <div className="space-y-1 pt-2 border-t border-zinc-150 dark:border-zinc-800">
+            <span className="px-3 text-[10px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">
+              C. ATURAN & INTEGRASI
+            </span>
+            <button
+              onClick={() => setSettingsTab("master_pelanggaran")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "master_pelanggaran"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+              <span>Master Pelanggaran</span>
+            </button>
+            <button
+              onClick={() => setSettingsTab("region_api")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "region_api"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <MapPin className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Integrasi API Wilayah</span>
+            </button>
+            <button
+              onClick={() => setSettingsTab("math_formula")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "math_formula"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              <Calculator className="w-4 h-4 text-purple-500 shrink-0" />
+              <span>Parameter Matematis</span>
+            </button>
+          </div>
+
+          {/* Group 4: Pembersihan Data */}
+          <div className="space-y-1 pt-2 border-t border-zinc-150 dark:border-zinc-800">
+            <span className="px-3 text-[10px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">
+              D. PEMELIHARAAN DATA
+            </span>
+            <button
+              onClick={() => setSettingsTab("purge_data")}
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                settingsTab === "purge_data"
+                  ? "bg-rose-600 text-white shadow-md"
+                  : "text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+              }`}
+            >
+              <Trash2 className="w-4 h-4 text-rose-500 shrink-0" />
+              <span>Cockpit Purge Data</span>
+            </button>
+          </div>
+
         </div>
 
         {/* Details 2x2 Grid Panel */}
