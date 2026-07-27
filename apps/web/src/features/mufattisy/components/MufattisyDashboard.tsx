@@ -35,7 +35,7 @@ export function MufattisyDashboard() {
   const stats = [
     { label: "Total Santriwati", value: isLoading ? "..." : data?.totalSantri || 0, icon: Users, color: "text-blue-500 bg-blue-500/10" },
     { label: "Rata-rata Nilai Akademik", value: isLoading ? "..." : data?.averageGpa || 0, icon: GraduationCap, color: "text-emerald-500 bg-emerald-500/10" },
-    { label: "Kepatuhan Kurikulum", value: isLoading ? "..." : `${data?.curriculumCompliance || 85}%`, icon: ShieldCheck, color: "text-purple-500 bg-purple-500/10" },
+    { label: "Kepatuhan Kurikulum", value: isLoading ? "..." : `${data?.curriculumCompliance ?? 100}%`, icon: ShieldCheck, color: "text-purple-500 bg-purple-500/10" },
   ];
 
   const levelPerformances = data?.levelPerformances || [];
