@@ -8,6 +8,11 @@ export interface DashboardStats {
   activeViolations: number;
   totalClasses?: number;
   activePermits?: number;
+  totalMundzir?: number;
+  totalMufattisy?: number;
+  totalMustahiq?: number;
+  totalSubjects?: number;
+  totalViolationTypes?: number;
   performances: {
     level: string;
     score: number;

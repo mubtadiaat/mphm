@@ -52,6 +52,11 @@ export async function GET(req: NextRequest) {
       dbRooms,
       recentAuditLogs,
       activePermits,
+      totalMundzir,
+      totalMufattisy,
+      totalMustahiq,
+      totalSubjects,
+      totalViolationTypes,
     ] = await Promise.all([
       prisma.studentProfile.count({
         where: { status: "ACTIVE", deletedAt: null },
@@ -108,6 +113,21 @@ export async function GET(req: NextRequest) {
         },
       }),
       prismaPermit ? prismaPermit.count({ where: { status: "APPROVED", deletedAt: null } }) : Promise.resolve(0),
+      prisma.userAccount.count({
+        where: { role: { contains: "Mundzir", mode: "insensitive" }, deletedAt: null },
+      }),
+      prisma.userAccount.count({
+        where: { role: { contains: "Mufattisy", mode: "insensitive" }, deletedAt: null },
+      }),
+      prisma.teacherProfile.count({
+        where: { deletedAt: null },
+      }),
+      prisma.subject.count({
+        where: { deletedAt: null },
+      }),
+      prisma.violationType.count({
+        where: { deletedAt: null },
+      }),
     ]);
 
     const averageGpa = Math.round((scoreAgg._avg.score || 0) * 100) / 100;
@@ -157,6 +177,11 @@ export async function GET(req: NextRequest) {
       roomDistributions,
       totalClasses: classes.length,
       activePermits,
+      totalMundzir,
+      totalMufattisy,
+      totalMustahiq,
+      totalSubjects,
+      totalViolationTypes,
       recentAuditLogs: recentAuditLogs.map((l) => ({
         id: l.id,
         action: l.action,

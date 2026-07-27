@@ -211,25 +211,33 @@ export function DashboardTab() {
   // Real Database Audit Logs (Strictly from DB)
   const auditLogs = statsData?.recentAuditLogs || [];
 
-  // System Readiness Wizard Calculation
-  const hasRooms = (statsData?.totalRooms ?? 0) > 0;
+  // System Readiness Wizard Calculation (100% Real DB Queries)
+  const hasMundzir = (statsData?.totalMundzir ?? 0) > 0;
+  const hasMufattisy = (statsData?.totalMufattisy ?? 0) > 0;
+  const hasMustahiq = (statsData?.totalMustahiq ?? 0) > 0;
   const hasClasses = (statsData?.totalClasses ?? 0) > 0;
+  const hasSubjects = (statsData?.totalSubjects ?? 0) > 0;
   const hasStudents = (statsData?.totalStudents ?? 0) > 0;
+  const hasRooms = (statsData?.totalRooms ?? 0) > 0;
+  const hasViolationTypes = (statsData?.totalViolationTypes ?? 0) > 0;
 
   const pondokSteps = [
     { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
-    { label: "Data Kamar Asrama", ready: hasRooms, href: "/sekretariat/rooms" },
-    { label: "Master Pelanggaran", ready: true, href: "/sekretariat/settings" },
+    { label: "Data Mundzir (Pimpinan)", ready: hasMundzir, href: "/sekretariat/mundzir" },
+    { label: "Data Asrama (Blok & Kamar)", ready: hasRooms, href: "/sekretariat/rooms" },
+    { label: "Master Pelanggaran", ready: hasViolationTypes, href: "/sekretariat/pelanggaran" },
     { label: "Data Induk Santriwati", ready: hasStudents, href: "/sekretariat/santri" },
-    { label: "Perizinan & Khidmah", ready: true, href: "/sekretariat/perizinan" },
+    { label: "Perizinan & Khidmah", ready: (statsData?.activePermits ?? 0) > 0 || hasStudents, href: "/sekretariat/perizinan" },
   ];
 
   const madrasahSteps = [
     { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
-    { label: "Mustahiq & Rombel Kelas", ready: hasClasses, href: "/sekretariat/kelas" },
-    { label: "Kurikulum & Mapel", ready: true, href: "/sekretariat/kurikulum" },
+    { label: "Data Mundzir (Pimpinan)", ready: hasMundzir, href: "/sekretariat/mundzir" },
+    { label: "Data Mufattisy (Pengawas)", ready: hasMufattisy, href: "/sekretariat/mufattisy" },
+    { label: "Data Mustahiq (Wali Kelas)", ready: hasMustahiq, href: "/sekretariat/mustahiq" },
+    { label: "Rombel Kelas Diniyyah", ready: hasClasses, href: "/sekretariat/kelas" },
+    { label: "Kurikulum & Mapel", ready: hasSubjects, href: "/sekretariat/kurikulum" },
     { label: "Data Siswi Diniyyah", ready: hasStudents, href: "/sekretariat/santri" },
-    { label: "Transkrip & Cetak Rapor", ready: true, href: "/sekretariat/raport" },
   ];
 
   const currentSteps = isPondok ? pondokSteps : madrasahSteps;
