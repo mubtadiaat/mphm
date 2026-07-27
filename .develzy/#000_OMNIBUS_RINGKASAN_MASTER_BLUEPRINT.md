@@ -27,10 +27,13 @@ Sistem menggunakan hukum tata kelola data terpusat dan terenkripsi.
   - **Data Siswi Madrasah (MPHM) Ditarik dari Santriwati Pondok**: Data Siswi Diniyyah di Madrasah (MPHM) ditarik dari Data Santriwati Pondok (P3HM). 
   - **Fitur Auto-Fill Registrasi Siswi**: Pada modal registrasi Siswi Baru di Madrasah, Sekretariat MPHM dapat memilih Santriwati Pondok melalui menu **`🔍 Tarik Data dari Santriwati Pondok (P3HM)`**. Pilihan ini secara otomatis mengisi Nama, NIK, Tempat/Tgl Lahir, Alamat, No KK, Wali, No HP, Pas Foto, dan No Kamar dari database master.
 - **Sub-Tab "Belum Ada Kelas (Tarik Data Pondok)":** Memudahkan penempatan kelas bagi siswi baru yang didaftarkan di Pondok tapi belum dipasangkan rombel diniyyah.
+- **Transisi Tahun Ajaran Baru (Automatic Roll-over):**
+  - Identitas santriwati **100% ABADI (0% ketik ulang saat ganti Tahun Ajaran Baru)**.
+  - Saat ganti Tahun Ajaran baru, data biodata, kamar, mapel, dan poin takzir tetap utuh. Yang diubah HANYA penempatan rombel baru via **Proses Kenaikan Kelas 1-Klik** (`PROMOTED`, `RETAINED`, `GRADUATED`).
 - **Pusat Pengelolaan Akun (Users) & 4 Sub-Menu Utama:**
   - Terpusat pada menu `/sekretariat/users` dengan 4 Sub-Menu Resmi:
     1. **Daftar Akun (Monitoring):** Pemantauan seluruh akun terdaftar beserta status keaktifan.
-    2. **Generate Akun Instansi:** Generator massal kredensial akun instansi dengan **Deteksi Role Otomatis (`⭐ Otomatis`)** berdasarkan jabatan.
+    2. **Generate Akun Instansi:** Generator massal kredensial akun instansi dengan **Deteksi Role Otomatis (`⭐ Otomatis`)**.
     3. **Keranjang Sampah Dorman (>6 Bulan):** Isolasi otomatis bagi akun tidak aktif >6 bulan.
     4. **Wali Santri (Yang Sudah Mendaftar):** Modul khusus pemantauan & manajemen akun Wali Santri.
 - **Automatic Orphaned Guardians Cleanup (`cleanOrphanedGuardians`):**
@@ -45,7 +48,7 @@ Sistem menggunakan hukum tata kelola data terpusat dan terenkripsi.
 
 ## 3. AKADEMIK, ROMBEL & KURIKULUM (Modul #03, #10)
 Sistem menggunakan konsep "Academic Workspace" per Tahun Ajaran.
-- **Isolasi Tahun Ajaran:** Data transaksional (Rapor, Kelas, Absen) terikat pada ID Tahun Ajaran (`academic_years`).
+- **Isolasi & Pengingat Tahun Ajaran Syawal:** Data transaksional (Rapor, Kelas, Absen) terikat pada ID Tahun Ajaran (`academic_years`). Di awal bulan Syawal Hijriyyah, sistem memberikan notifikasi pengingat otomatis pembuatan Tahun Ajaran Baru.
 - **Data Model Mustahiq (Tanpa Kode Guru):** Tabel Mustahiq (`/sekretariat/mustahiq`) menyajikan kolom `Nama Lengkap Mustahiq`, `Jenjang`, `Tingkat | Lokal`, `No. HP / WA`, `Status`, `Aksi`.
 - **Auto-Generate Academic Classes:** Backend (`GET /api/admin/classes`) secara otomatis membuat entitas kelas (`AcademicClass`) untuk setiap Mustahiq yang terdaftar.
 - **Pemuatan Otomatis Mufattisy (Pengawas):** Mufattisy dipetakan ke kartu kelas berdasarkan `Jenjang Pengawasan`.
@@ -53,11 +56,14 @@ Sistem menggunakan konsep "Academic Workspace" per Tahun Ajaran.
 
 ---
 
-## 4. ENGINE PENILAIAN & KENAIKAN KELAS (Modul #04, #05)
+## 4. ENGINE PENILAIAN, BATASAN NIKAI & KENAIKAN KELAS (Modul #04, #05)
 - **Algoritma 4 Kwartal:** Tamrin Sem I, Ujian Sem I, Tamrin Sem II, Ujian Sem II.
+- **Kwartal Grade Lock Engine:** Status Kwartal (`DIBUKA/DRAFT` vs `TERKUNCI/FINAL`). Saat terkunci, Mustahiq tidak dapat mengubah nilai lagi kecuali ada *24-hour Override Window* dari Sekretariat.
+- **Batasan Cetak Dokumen Resmi:**
+  - Rapor Kwartal 1-3 dicetak setelah nilai berstatus `FINAL`.
+  - Rapor Kwartal 4 & Ijazah HANYA dapat dicetak setelah **Eksekusi Kenaikan Kelas Masal** dengan status `GRADUATED`.
 - **The Holy Guard Limit (Akhlaq):** Pengontrolan nilai kualitatif Akhlaq dengan proteksi otomatis.
-- **Ranking Elimination Engine:**Fitur isolasi nilai Non-Mapel dari perhitungan ranking kelas.
-- **Promotion Engine:** State Machine Kenaikan Kelas (Draft -> Review -> Final).
+- **Ranking Elimination Engine:** Fitur isolasi nilai Non-Mapel dari perhitungan ranking kelas.
 
 ---
 
@@ -83,7 +89,7 @@ Sistem menggunakan konsep "Academic Workspace" per Tahun Ajaran.
 - **System Settings Cockpit (`SystemSettingsCockpit.tsx`)**:
   - Dikelompokkan ke 4 Kategori (Modul & Otorisasi, Peran & Hirarki, Aturan & Integrasi, Pemeliharaan Data) dengan 10 Sub-Tab.
   - Dilengkapi **`FriendlyGuideCard`** (💡 Petunjuk Penggunaan) dan **`FriendlySwitch`** (`[ AKTIF ]` / `[ NON-AKTIF ]`).
-- **Dashboard Real-Time 100% Database Murni**:
+- **Dashboard Real-Time & System Readiness Wizard**:
   - Tanpa data uji coba, mock array, maupun fallback palsu.
-  - Polling *real-time* otomatis 10 detik (`refetchInterval: 10000`).
-  - **Akses Cepat (Quick Action Shortcuts)** disesuaikan khusus per instansi (Madrasah vs Pondok).
+  - Banner **`🚀 Panduan Kesiapan Sistem`** menuntun Sekretariat mengisi prasyarat data langkah demi langkah.
+  - Komponen **`GuidedEmptyState`** memberikan kartu petunjuk dan tombol pintas ke menu prasyarat.
