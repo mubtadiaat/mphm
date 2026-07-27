@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertCircle, CheckCircle, Loader2, ClipboardList } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2, ClipboardList, BookOpen } from "lucide-react";
 import { PillBadge } from "@/components/shared/PillBadge";
 import { useAcademicYear } from "@/components/shared/AcademicYearContext";
+import { GuidedEmptyState } from "@/components/shared/GuidedEmptyState";
 
 import { useClasses } from "../queries/useClasses";
 import { useAssessmentMatrix, useSaveScoreMutation, StudentScore } from "../queries/useManajemenNilai";
@@ -121,6 +122,19 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
 
     return () => clearTimeout(delayDebounceFn);
   }, [pendingSaves, saveMutation, selectedClassId, selectedKwartal]);
+
+  if (classes.length === 0) {
+    return (
+      <GuidedEmptyState
+        title="Menu Manajemen Nilai Belum Dapat Digunakan"
+        description="Sistem mendeteksi belum ada Rombel Kelas Diniyyah yang dibuat untuk Tahun Ajaran ini. Silakan daftarkan Rombel Kelas & tetapkan Mustahiq terlebih dahulu."
+        prerequisiteStep="Mustahiq & Rombel Kelas Diniyyah"
+        actionLabel="+ Buat Rombel Kelas Diniyyah Sekarang"
+        actionHref="/sekretariat/kelas"
+        icon={BookOpen}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

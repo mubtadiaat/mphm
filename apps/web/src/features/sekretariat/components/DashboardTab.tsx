@@ -23,7 +23,10 @@ import {
   Database,
   Inbox,
   BookOpen,
-  ClipboardList
+  ClipboardList,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
@@ -208,6 +211,33 @@ export function DashboardTab() {
   // Real Database Audit Logs (Strictly from DB)
   const auditLogs = statsData?.recentAuditLogs || [];
 
+  // System Readiness Wizard Calculation
+  const hasRooms = (statsData?.totalRooms ?? 0) > 0;
+  const hasClasses = (statsData?.totalClasses ?? 0) > 0;
+  const hasStudents = (statsData?.totalStudents ?? 0) > 0;
+
+  const pondokSteps = [
+    { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
+    { label: "Data Kamar Asrama", ready: hasRooms, href: "/sekretariat/rooms" },
+    { label: "Master Pelanggaran", ready: true, href: "/sekretariat/settings" },
+    { label: "Data Induk Santriwati", ready: hasStudents, href: "/sekretariat/santri" },
+    { label: "Perizinan & Khidmah", ready: true, href: "/sekretariat/perizinan" },
+  ];
+
+  const madrasahSteps = [
+    { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
+    { label: "Mustahiq & Rombel Kelas", ready: hasClasses, href: "/sekretariat/kelas" },
+    { label: "Kurikulum & Mapel", ready: true, href: "/sekretariat/kurikulum" },
+    { label: "Data Siswi Diniyyah", ready: hasStudents, href: "/sekretariat/santri" },
+    { label: "Transkrip & Cetak Rapor", ready: true, href: "/sekretariat/raport" },
+  ];
+
+  const currentSteps = isPondok ? pondokSteps : madrasahSteps;
+  const completedCount = currentSteps.filter(s => s.ready).length;
+  const totalStepCount = currentSteps.length;
+  const readinessPercent = Math.round((completedCount / totalStepCount) * 100);
+  const nextMissingStep = currentSteps.find(s => !s.ready);
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-12">
       {/* Real-time Header Banner */}
@@ -272,6 +302,67 @@ export function DashboardTab() {
           >
             <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin text-blue-400" : ""}`} />
           </button>
+        </div>
+      </div>
+
+      {/* System Readiness Wizard Progress Banner */}
+      <div className="p-5 bg-gradient-to-r from-zinc-900 via-zinc-850 to-zinc-900 border border-zinc-800 rounded-2xl shadow-md space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-xs font-extrabold text-white tracking-wide flex items-center gap-2">
+                🚀 Panduan Kesiapan Sistem Sekretariat {isPondok ? "Pondok" : "Madrasah"}
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  {readinessPercent}% Selesai
+                </span>
+              </span>
+              <p className="text-[11px] text-zinc-400 mt-0.5">
+                {readinessPercent === 100
+                  ? "Seluruh fondasi data dasar dan prasyarat operasional telah terisi 100% sempurna."
+                  : `Langkah Selanjutnya: ${nextMissingStep?.label || "Lengkapi Data Prasyarat"}`
+                }
+              </p>
+            </div>
+          </div>
+
+          {nextMissingStep && (
+            <Link
+              href={nextMissingStep.href}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer"
+            >
+              <span>+ Isi {nextMissingStep.label} Now</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
+        </div>
+
+        {/* Progress Bar & Steps Badges */}
+        <div className="space-y-2">
+          <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden border border-zinc-700/50">
+            <div
+              className={`h-full transition-all duration-500 ${isPondok ? "bg-emerald-500" : "bg-blue-500"}`}
+              style={{ width: `${readinessPercent}%` }}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {currentSteps.map((stepItem, sIdx) => (
+              <div
+                key={sIdx}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1.5 border transition-all ${
+                  stepItem.ready
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                    : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                }`}
+              >
+                <CheckCircle2 className={`w-3 h-3 ${stepItem.ready ? "text-emerald-400" : "text-zinc-500"}`} />
+                <span>{stepItem.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
