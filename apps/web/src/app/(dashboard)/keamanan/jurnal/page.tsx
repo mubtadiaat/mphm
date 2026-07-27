@@ -10,7 +10,11 @@ import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 import { useToast } from "@/components/shared/ToastContext";
 import { PillBadge } from "@/components/shared/PillBadge";
 
-export default function KeamananJurnalPage() {
+interface KeamananJurnalPageProps {
+  isReadOnly?: boolean;
+}
+
+export default function KeamananJurnalPage({ isReadOnly = false }: KeamananJurnalPageProps) {
   const { selectedYearId } = useAcademicYear();
   const { toast } = useToast();
   
@@ -96,15 +100,17 @@ export default function KeamananJurnalPage() {
             <span>Keamanan & Kedisiplinan</span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Jurnal Pelanggaran
+            Jurnal Pelanggaran Santri
           </h1>
           <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl mt-1">
             Pencatatan insiden kedisiplinan santri harian di lingkungan pondok pesantren secara terpadu.
           </p>
         </div>
-        <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-rose-500/20 active:scale-95 cursor-pointer">
-          <Plus className="w-4 h-4" /> Catat Kejadian
-        </button>
+        {!isReadOnly && (
+          <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-rose-500/20 active:scale-95 cursor-pointer">
+            <Plus className="w-4 h-4" /> Catat Kejadian
+          </button>
+        )}
       </div>
 
       {/* Filter and Search Bar */}
@@ -214,112 +220,114 @@ export default function KeamananJurnalPage() {
       </div>
 
       {/* Record Violation Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setShowModal(false)} />
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden max-h-[90vh]">
-              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-800/30">
-                <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-rose-500" />
-                  Pencatatan Pelanggaran Baru
-                </h3>
-                <button onClick={() => setShowModal(false)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5"/></button>
-              </div>
-
-              <form onSubmit={handleSave} className="p-4 space-y-4 overflow-y-auto flex-1 font-sans">
-                {/* Student Selection */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500">Santri Pelanggar *</label>
-                  <select 
-                    required 
-                    value={studentId} 
-                    onChange={e => setStudentId(e.target.value)} 
-                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none"
-                  >
-                    <option value="">Pilih Santri...</option>
-                    {studentsList.map(student => (
-                      <option key={student.id} value={student.id}>{student.name} ({student.nis})</option>
-                    ))}
-                  </select>
+      {!isReadOnly && (
+        <AnimatePresence>
+          {showModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setShowModal(false)} />
+              <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden max-h-[90vh]">
+                <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-800/30">
+                  <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                    <ShieldAlert className="w-5 h-5 text-rose-500" />
+                    Pencatatan Pelanggaran Baru
+                  </h3>
+                  <button onClick={() => setShowModal(false)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5"/></button>
                 </div>
 
-                {/* Violation Type Selection */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500">Jenis Pelanggaran *</label>
-                  <select 
-                    required 
-                    value={violationTypeId} 
-                    onChange={e => setViolationTypeId(e.target.value)} 
-                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none"
-                  >
-                    <option value="">Pilih Pelanggaran...</option>
-                    {violationTypes.map(type => (
-                      <option key={type.id} value={type.id}>{type.name} ({type.points} Poin - {type.severity})</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Date */}
+                <form onSubmit={handleSave} className="p-4 space-y-4 overflow-y-auto flex-1 font-sans">
+                  {/* Student Selection */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-500">Tanggal Kejadian *</label>
-                    <input 
-                      type="date" 
+                    <label className="text-xs font-bold text-zinc-500">Santri Pelanggar *</label>
+                    <select 
                       required 
-                      value={incidentDate} 
-                      onChange={e => setIncidentDate(e.target.value)} 
-                      className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none font-mono"
-                    />
+                      value={studentId} 
+                      onChange={e => setStudentId(e.target.value)} 
+                      className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none"
+                    >
+                      <option value="">Pilih Santri...</option>
+                      {studentsList.map(student => (
+                        <option key={student.id} value={student.id}>{student.name} ({student.nis})</option>
+                      ))}
+                    </select>
                   </div>
 
-                  {/* Time */}
+                  {/* Violation Type Selection */}
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-500">Waktu Kejadian</label>
+                    <label className="text-xs font-bold text-zinc-500">Jenis Pelanggaran *</label>
+                    <select 
+                      required 
+                      value={violationTypeId} 
+                      onChange={e => setViolationTypeId(e.target.value)} 
+                      className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none"
+                    >
+                      <option value="">Pilih Pelanggaran...</option>
+                      {violationTypes.map(type => (
+                        <option key={type.id} value={type.id}>{type.name} ({type.points} Poin - {type.severity})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Date */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-zinc-500">Tanggal Kejadian *</label>
+                      <input 
+                        type="date" 
+                        required 
+                        value={incidentDate} 
+                        onChange={e => setIncidentDate(e.target.value)} 
+                        className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none font-mono"
+                      />
+                    </div>
+
+                    {/* Time */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-zinc-500">Waktu Kejadian</label>
+                      <input 
+                        type="time" 
+                        value={incidentTime} 
+                        onChange={e => setIncidentTime(e.target.value)} 
+                        className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-zinc-500">Lokasi Insiden</label>
                     <input 
-                      type="time" 
-                      value={incidentTime} 
-                      onChange={e => setIncidentTime(e.target.value)} 
-                      className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none font-mono"
+                      type="text" 
+                      placeholder="Contoh: Asrama Putra, Kelas, Kantin" 
+                      value={location} 
+                      onChange={e => setLocation(e.target.value)} 
+                      className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none"
                     />
                   </div>
-                </div>
 
-                {/* Location */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500">Lokasi Insiden</label>
-                  <input 
-                    type="text" 
-                    placeholder="Contoh: Asrama Putra, Kelas, Kantin" 
-                    value={location} 
-                    onChange={e => setLocation(e.target.value)} 
-                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none"
-                  />
-                </div>
+                  {/* Description */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-zinc-500">Rincian Deskripsi Kejadian</label>
+                    <textarea 
+                      rows={3}
+                      placeholder="Deskripsikan secara rinci kronologi kejadian..." 
+                      value={description} 
+                      onChange={e => setDescription(e.target.value)} 
+                      className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none resize-none"
+                    />
+                  </div>
 
-                {/* Description */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500">Rincian Deskripsi Kejadian</label>
-                  <textarea 
-                    rows={3}
-                    placeholder="Deskripsikan secara rinci kronologi kejadian..." 
-                    value={description} 
-                    onChange={e => setDescription(e.target.value)} 
-                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none resize-none"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/10 -mx-4 -mb-4 p-4">
-                  <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-semibold hover:bg-zinc-200 transition-colors cursor-pointer font-sans">Batal</button>
-                  <button type="submit" disabled={isCreating} className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-semibold hover:bg-rose-700 disabled:opacity-50 transition-colors cursor-pointer font-sans">
-                    {isCreating ? "Menyimpan..." : "Simpan Pelanggaran"}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                  <div className="flex justify-end gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/10 -mx-4 -mb-4 p-4">
+                    <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-semibold hover:bg-zinc-200 transition-colors cursor-pointer font-sans">Batal</button>
+                    <button type="submit" disabled={isCreating} className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-semibold hover:bg-rose-700 disabled:opacity-50 transition-colors cursor-pointer font-sans">
+                      {isCreating ? "Menyimpan..." : "Simpan Pelanggaran"}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 }

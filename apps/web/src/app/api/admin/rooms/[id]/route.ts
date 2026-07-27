@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { determineBuildingName } from "@/lib/determineBuilding";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
     const body = await req.json();
 
     const { name, roomName, buildingName, capacity, supervisorId } = body;
 
-    const prismaRoom = (prisma as any).room;
-    if (!prismaRoom) {
-      return NextResponse.json({ status: "Error", message: "Model room belum dikonfigurasi" }, { status: 500 });
-    }
-
-    const updated = await prismaRoom.update({
+    const updated = await prisma.room.update({
       where: { id },
       data: {
         ...(name || roomName ? { 
@@ -53,15 +52,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
 
-    const prismaRoom = (prisma as any).room;
-    if (!prismaRoom) {
-      return NextResponse.json({ status: "Error", message: "Model room belum dikonfigurasi" }, { status: 500 });
-    }
-
     // Soft delete in database
-    await prismaRoom.update({
+    await prisma.room.update({
       where: { id },
       data: { deletedAt: new Date() },
     });

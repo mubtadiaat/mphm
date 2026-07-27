@@ -47,28 +47,31 @@ function base64UrlDecode(str: string): string {
 }
 
 /**
- * Simple HMAC-like signature using Web-safe operations.
- * Uses a deterministic hash combining the input with the secret.
+ * Cryptographically secure HMAC-SHA256 signature using Web Crypto API.
  */
-function createSignature(input: string, secret: string): string {
-  // Use a stronger multi-pass hash to create signature
-  const combined = input + "|" + secret;
-  let h1 = 0xdeadbeef;
-  let h2 = 0x41c6ce57;
-  for (let i = 0; i < combined.length; i++) {
-    const ch = combined.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
+async function createSignature(input: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(input));
+  const bytes = new Uint8Array(signature);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
   }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
-  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
-  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  const hash = (h2 >>> 0) * 4294967296 + (h1 >>> 0);
-  return hash.toString(36);
+  return btoa(binary)
+    .replace(/=/g, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
 }
 
-export function signJWT(payload: Omit<JWTPayload, "exp">, expiresInDays: number = 7): string {
+export async function signJWT(payload: Omit<JWTPayload, "exp">, expiresInDays: number = 7): Promise<string> {
   const header = { alg: "HS256", typ: "JWT" };
   const exp = Math.floor(Date.now() / 1000) + expiresInDays * 24 * 60 * 60;
   const fullPayload: JWTPayload = { ...payload, exp };
@@ -76,19 +79,19 @@ export function signJWT(payload: Omit<JWTPayload, "exp">, expiresInDays: number 
   const encodedHeader = base64UrlEncode(JSON.stringify(header));
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
   const signatureInput = `${encodedHeader}.${encodedPayload}`;
-  const signature = createSignature(signatureInput, JWT_SECRET);
+  const signature = await createSignature(signatureInput, JWT_SECRET);
 
   return `${signatureInput}.${signature}`;
 }
 
-export function verifyJWT(token: string): JWTPayload | null {
+export async function verifyJWT(token: string): Promise<JWTPayload | null> {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
 
     const [encodedHeader, encodedPayload, signature] = parts;
     const signatureInput = `${encodedHeader}.${encodedPayload}`;
-    const expectedSignature = createSignature(signatureInput, JWT_SECRET);
+    const expectedSignature = await createSignature(signatureInput, JWT_SECRET);
 
     if (signature !== expectedSignature) {
       return null;
@@ -106,7 +109,7 @@ export function verifyJWT(token: string): JWTPayload | null {
 }
 
 export async function setSessionCookie(res: NextResponse, payload: Omit<JWTPayload, "exp">) {
-  const token = signJWT(payload);
+  const token = await signJWT(payload);
   res.cookies.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -121,7 +124,7 @@ export async function getSessionFromCookies(): Promise<JWTPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
-  return verifyJWT(token);
+  return await verifyJWT(token);
 }
 
 export async function clearSessionCookie(res: NextResponse) {

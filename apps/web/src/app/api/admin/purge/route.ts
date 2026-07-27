@@ -3,9 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { getSessionFromCookies } from "@/lib/jwt";
 import { createAuditLog } from "@/lib/auditLog";
 import { cleanOrphanedGuardians } from "@/lib/cleanGuardians";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export async function POST(req: NextRequest) {
   try {
+    const { session, errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const body = await req.json();
     const { category, confirmationText } = body;
 
@@ -292,7 +296,6 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const session = await getSessionFromCookies();
     if (session) {
       await createAuditLog({
         userId: session.username || "admin",

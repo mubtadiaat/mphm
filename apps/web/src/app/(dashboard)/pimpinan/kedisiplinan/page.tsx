@@ -1,10 +1,7 @@
 "use client";
 
-import { useAcademicYear } from "@/components/shared/AcademicYearContext";
-import { PelanggaranTab } from "@/features/sekretariat/components/PelanggaranTab";
+import KeamananJurnalPage from "../../keamanan/jurnal/page";
 
 export default function PimpinanKedisiplinanPage() {
-  const { selectedYearId } = useAcademicYear();
-  
-  return <PelanggaranTab selectedYearId={selectedYearId} isReadOnly={true} onViewDetail={() => {}} />;
+  return <KeamananJurnalPage isReadOnly={true} />;
 }

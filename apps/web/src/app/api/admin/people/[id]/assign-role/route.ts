@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
+import bcrypt from "bcryptjs";
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { id: personId } = await params;
     const body = await req.json();
     const { role, roleName, username, email, password, teacherCode, supervisedLevel } = body;
@@ -80,6 +85,7 @@ export async function POST(
       username ||
       `${role}_${person.fullName.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 10)}`;
     const uniqueUsername = username || `${baseUsername}_${Date.now().toString(36)}`;
+    const hashedPassword = await bcrypt.hash(password || "mubtadiaat123", 10);
 
     // Check if person already has a UserAccount
     const existingAccount = await prisma.userAccount.findUnique({
@@ -95,6 +101,7 @@ export async function POST(
           role: mappedRole,
           status: "ACTIVE",
           ...(email ? { email } : {}),
+          ...(password ? { passwordHash: hashedPassword } : {}),
         },
       });
     } else {
@@ -104,7 +111,7 @@ export async function POST(
           personId,
           username: uniqueUsername,
           email: email || null,
-          passwordHash: password || "mubtadiaat123",
+          passwordHash: hashedPassword,
           role: mappedRole,
           status: "ACTIVE",
         },

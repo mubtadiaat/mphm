@@ -4,7 +4,7 @@ import { verifyJWT } from "@/lib/jwt";
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("mphm_session")?.value;
-  const session = token ? verifyJWT(token) : null;
+  const session = token ? await verifyJWT(token) : null;
 
   const dashboardPrefixes = [
     "/sekretariat",

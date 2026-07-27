@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { determineBuildingName } from "@/lib/determineBuilding";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
     const { searchParams } = new URL(req.url);
     const buildingName = searchParams.get("buildingName") || searchParams.get("building");
     const query = searchParams.get("q");
 
-    const prismaRoom = (prisma as any).room;
-    if (!prismaRoom) {
-      return NextResponse.json({ status: "Success", data: [], total: 0 });
-    }
-
-    const dbRooms = await prismaRoom.findMany({
+    const dbRooms = await prisma.room.findMany({
       where: {
         deletedAt: null,
         ...(buildingName ? { buildingName: { contains: buildingName, mode: "insensitive" } } : {}),
@@ -30,7 +29,7 @@ export async function GET(req: NextRequest) {
       orderBy: { name: "asc" },
     });
 
-    const rooms = dbRooms.map((r: any) => ({
+    const rooms = dbRooms.map((r) => ({
       id: r.id,
       name: r.name,
       buildingName: determineBuildingName(r.name, r.buildingName),
@@ -59,6 +58,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const body = await req.json();
     const { name, roomName, buildingName, capacity, supervisorId } = body;
 
@@ -72,12 +74,7 @@ export async function POST(req: NextRequest) {
 
     const finalBuilding = determineBuildingName(targetName, buildingName);
 
-    const prismaRoom = (prisma as any).room;
-    if (!prismaRoom) {
-      return NextResponse.json({ status: "Error", message: "Model room belum dikonfigurasi" }, { status: 500 });
-    }
-
-    const created = await prismaRoom.create({
+    const created = await prisma.room.create({
       data: {
         name: targetName,
         buildingName: finalBuilding,

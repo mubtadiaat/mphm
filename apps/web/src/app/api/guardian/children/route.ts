@@ -1,9 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const students = await (prisma as any).studentProfile.findMany({
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
+    const students = await prisma.studentProfile.findMany({
       where: { status: "ACTIVE", deletedAt: null },
       include: {
         person: true,
@@ -15,7 +19,7 @@ export async function GET() {
       take: 10,
     });
 
-    const children = students.map((s: any) => ({
+    const children = students.map((s) => ({
       id: s.id,
       name: s.person?.fullName || "-",
       nis: s.nis || "-",

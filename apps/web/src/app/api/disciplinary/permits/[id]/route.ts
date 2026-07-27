@@ -1,16 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export async function PUT(
-  request: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
-    const body = await request.json();
+    const body = await req.json();
     const { status, approvedById, notes } = body;
 
-    const existing = await (prisma as any).studentPermit.findUnique({
+    const existing = await prisma.studentPermit.findUnique({
       where: { id },
     });
 
@@ -21,7 +25,7 @@ export async function PUT(
       );
     }
 
-    const updated = await (prisma as any).studentPermit.update({
+    const updated = await prisma.studentPermit.update({
       where: { id },
       data: {
         ...(status && { status }),
@@ -45,13 +49,16 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
 
-    await (prisma as any).studentPermit.update({
+    await prisma.studentPermit.update({
       where: { id },
       data: { deletedAt: new Date() },
     });

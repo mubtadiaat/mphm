@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
-    const academicClass: any = await (prisma.academicClass as any).findUnique({
+    const academicClass = await prisma.academicClass.findUnique({
       where: { id },
       include: {
         mustahiq: true,
@@ -57,7 +61,7 @@ export async function GET(
       curriculumName: academicClass.curriculum?.name || "-",
     };
 
-    const students = (academicClass.enrollments || []).map((e: any) => ({
+    const students = (academicClass.enrollments || []).map((e) => ({
       studentId: e.studentId,
       name: e.student?.person?.fullName || "-",
       fullName: e.student?.person?.fullName || "-",
@@ -87,6 +91,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
     const body = await req.json();
     const { name, fullName, institutionLevel, levelNumber, mustahiqId, curriculumId } = body;
@@ -122,6 +129,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
 
     await prisma.academicClass.update({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromCookies } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/auditLog";
+import bcrypt from "bcryptjs";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -30,7 +31,10 @@ export async function PUT(req: NextRequest) {
 
     if (newPassword) {
       if (userAccount.passwordHash && oldPassword) {
-        const isOldValid = userAccount.passwordHash === oldPassword;
+        let isOldValid = await bcrypt.compare(oldPassword, userAccount.passwordHash);
+        if (!isOldValid && userAccount.passwordHash === oldPassword) {
+          isOldValid = true;
+        }
         if (!isOldValid) {
           return NextResponse.json(
             { status: "Error", message: "Password lama tidak sesuai." },
@@ -39,9 +43,10 @@ export async function PUT(req: NextRequest) {
         }
       }
 
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       await prisma.userAccount.update({
         where: { id: userAccount.id },
-        data: { passwordHash: newPassword },
+        data: { passwordHash: hashedNewPassword },
       });
     }
 

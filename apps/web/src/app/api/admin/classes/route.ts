@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromCookies } from "@/lib/jwt";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
     const { searchParams } = new URL(req.url);
     const academicYearId = searchParams.get("academicYearId");
 
@@ -47,7 +51,7 @@ export async function GET(req: NextRequest) {
       return match?.person.fullName || "-";
     };
 
-    const classes = await (prisma.academicClass as any).findMany({
+    const classes = await prisma.academicClass.findMany({
       where: {
         ...(targetYearId ? { academicYearId: targetYearId } : {}),
         ...(supervisedLevel ? { institutionLevel: { contains: supervisedLevel, mode: "insensitive" as const } } : {}),
@@ -63,7 +67,7 @@ export async function GET(req: NextRequest) {
       orderBy: { levelNumber: "asc" },
     });
 
-    const formatted = classes.map((c: any) => ({
+    const formatted = classes.map((c) => ({
       id: c.id,
       name: c.name,
       fullName: c.fullName,
@@ -90,6 +94,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const body = await req.json();
     const { academicYearId, name, fullName, institutionLevel, levelNumber, mustahiqId } = body;
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/jwt";
 import { createAuditLog } from "@/lib/auditLog";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!userAccount) {
+    if (!userAccount || !userAccount.passwordHash) {
       return NextResponse.json(
         { status: "Error", message: "Username atau password salah." },
         { status: 401 }
@@ -51,9 +52,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const isPasswordValid =
-      !userAccount.passwordHash ||
-      userAccount.passwordHash === password;
+    // Check password with bcrypt first
+    let isPasswordValid = await bcrypt.compare(password, userAccount.passwordHash);
+
+    // Auto-migration for legacy plain-text passwords
+    if (!isPasswordValid && userAccount.passwordHash === password) {
+      isPasswordValid = true;
+      const newHash = await bcrypt.hash(password, 10);
+      await prisma.userAccount.update({
+        where: { id: userAccount.id },
+        data: { passwordHash: newHash },
+      });
+    }
 
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -70,7 +80,7 @@ export async function POST(req: NextRequest) {
       const isAllowed = allowedKeywords.some((kw) => roleLower.includes(kw));
       if (!isAllowed) {
         return NextResponse.json(
-          { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Sekretariat Windows." },
+          { status: "Error", message: "Akun Anda tidak memiliki hak akses ke Portal Sekretariat." },
           { status: 403 }
         );
       }
@@ -121,7 +131,6 @@ export async function POST(req: NextRequest) {
 
     await setSessionCookie(response, sessionPayload);
 
-    // Audit Log 24-hour entry
     await createAuditLog({
       userId: userAccount.username,
       action: "LOGIN",

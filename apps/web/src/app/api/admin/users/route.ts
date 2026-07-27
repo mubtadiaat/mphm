@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSessionFromCookies } from "@/lib/jwt";
 import { createAuditLog } from "@/lib/auditLog";
+import { requireAuthSession } from "@/lib/apiGuard";
+import bcrypt from "bcryptjs";
 
 export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("q") || undefined;
     const limit = parseInt(searchParams.get("limit") || "20");
@@ -56,7 +60,6 @@ export async function GET(req: NextRequest) {
     ]);
 
     const formatted = users.map((u) => {
-      // Online simulation: admin & active users are online, or randomly online for demo
       const isOnline = u.status === "ACTIVE" && (u.role === "sek.pondok" || u.role === "sek.madrasah" || u.username.includes("admin"));
       return {
         id: u.id,
@@ -85,6 +88,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { session, errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const body = await req.json();
     const { personId, username, email, password, role = "Mustahiq" } = body;
 
@@ -106,19 +112,20 @@ export async function POST(req: NextRequest) {
       targetPersonId = newPerson.id;
     }
 
+    const hashedPassword = await bcrypt.hash(password || "mubtadiaat123", 10);
+
     const newUser = await prisma.userAccount.create({
       data: {
         personId: targetPersonId,
         username,
         email: email || null,
-        passwordHash: password || "mubtadiaat123",
+        passwordHash: hashedPassword,
         role,
         status: "ACTIVE",
       },
       include: { person: true },
     });
 
-    const session = await getSessionFromCookies();
     await createAuditLog({
       userId: session?.username || "ADMIN",
       action: "CREATE_USER",

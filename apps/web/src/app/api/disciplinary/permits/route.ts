@@ -1,9 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
+    const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
     const type = searchParams.get("type");
 
@@ -11,7 +15,7 @@ export async function GET(request: Request) {
     if (status) where.status = status;
     if (type) where.permitType = type;
 
-    const permits = await (prisma as any).studentPermit.findMany({
+    const permits = await prisma.studentPermit.findMany({
       where,
       include: {
         student: {
@@ -24,7 +28,7 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
-    const formatted = permits.map((p: any) => ({
+    const formatted = permits.map((p) => ({
       id: p.id,
       studentId: p.studentId,
       studentName: p.student.person.fullName,
@@ -52,9 +56,12 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
+    const body = await req.json();
     const { studentId, permitType, reason, startDate, endDate, notes } = body;
 
     if (!studentId || !permitType || !reason || !startDate || !endDate) {
@@ -64,7 +71,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const permit = await (prisma as any).studentPermit.create({
+    const permit = await prisma.studentPermit.create({
       data: {
         studentId,
         permitType,

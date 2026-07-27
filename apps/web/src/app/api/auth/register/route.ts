@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,6 +18,7 @@ export async function POST(req: NextRequest) {
     const cleanName = fullName?.trim() || `Wali Santri (KK: ${cleanKk.slice(-4)})`;
     const cleanUsername = customUsername?.trim().toLowerCase() || `wali_${cleanKk.slice(-6)}`;
     const cleanPassword = password || "mubtadiaat123";
+    const hashedPassword = await bcrypt.hash(cleanPassword, 10);
 
     // 1. Check if username is already taken
     if (customUsername) {
@@ -76,7 +78,7 @@ export async function POST(req: NextRequest) {
         data: {
           personId: person.id,
           username: cleanUsername,
-          passwordHash: cleanPassword,
+          passwordHash: hashedPassword,
           role: "Wali Santri",
           status: "ACTIVE",
         },
@@ -86,7 +88,7 @@ export async function POST(req: NextRequest) {
         where: { id: userAccount.id },
         data: {
           username: cleanUsername,
-          passwordHash: cleanPassword,
+          passwordHash: hashedPassword,
           status: "ACTIVE",
         },
       });

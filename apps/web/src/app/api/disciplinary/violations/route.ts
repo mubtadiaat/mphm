@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export async function GET(req: NextRequest) {
   try {
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
     const { searchParams } = new URL(req.url);
     const studentId = searchParams.get("studentId");
     const limit = parseInt(searchParams.get("limit") || "20", 10);
 
-    const violations = await (prisma as any).studentViolation.findMany({
+    const violations = await prisma.studentViolation.findMany({
       where: {
         deletedAt: null,
         ...(studentId ? { studentId } : {}),
@@ -28,7 +32,7 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
-    const formatted = (violations as any[]).map((v) => ({
+    const formatted = violations.map((v) => ({
       id: v.id,
       name: v.student?.person?.fullName || "-",
       stambuk: v.student?.stambukNumber || v.student?.nis || "-",
@@ -55,6 +59,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { errorResponse } = await requireAuthSession(req);
+    if (errorResponse) return errorResponse;
+
     const body = await req.json();
     const { studentId, violationTypeId, penalty, evidenceUrl, notes } = body;
 

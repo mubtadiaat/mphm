@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
+import bcrypt from "bcryptjs";
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
     const body = await req.json();
     const { username, email, role, status, fullName, phone, password } = body;
@@ -27,6 +32,8 @@ export async function PUT(
       }
     }
 
+    const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
+
     const updated = await prisma.userAccount.update({
       where: { id },
       data: {
@@ -35,7 +42,7 @@ export async function PUT(
         ...(role ? { role } : {}),
         ...(status ? { status } : {}),
         ...(body.deletedAt !== undefined ? { deletedAt: body.deletedAt } : {}),
-        ...(password ? { passwordHash: password } : {}),
+        ...(passwordHash ? { passwordHash } : {}),
         person: {
           update: {
             ...(fullName ? { fullName } : {}),
@@ -65,6 +72,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
+
     const { id } = await params;
     const { searchParams } = new URL(req.url);
     const force = searchParams.get("force") === "true";
