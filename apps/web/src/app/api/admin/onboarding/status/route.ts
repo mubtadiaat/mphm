@@ -56,7 +56,9 @@ export async function GET() {
       where: { deletedAt: null },
     });
 
-    const roomsCount = await (prisma as any).room ? await (prisma as any).room.count() : 0;
+    const roomsCount = await prisma.room.count({
+      where: { deletedAt: null },
+    });
 
     const mundzirCount = mundzirOrgCount + mundzirUserCount;
     const mufattisyCount = mufattisyOrgCount + mufattisyUserCount;
