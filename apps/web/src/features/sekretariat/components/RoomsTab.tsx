@@ -12,16 +12,10 @@ import {
   Edit, 
   AlertCircle, 
   Building2, 
-  Users, 
-  CheckCircle2, 
   Search,
-  Filter,
-  Layers,
-  ArrowRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
-import { PillBadge } from "@/components/shared/PillBadge";
 import { useRooms, Room } from "../queries/useRooms";
 import { useGuru } from "../queries/useGuru";
 import { useToast } from "@/components/shared/ToastContext";
@@ -64,22 +58,24 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
 
   // Form States
   const [name, setName] = useState("");
-  const [buildingName, setBuildingName] = useState<"Komplek Kota" | "Komplek Desa">("Komplek Kota");
+  const [buildingName, setBuildingName] = useState<string>("Blok A");
   const [capacity, setCapacity] = useState<number>(20);
   const [supervisorId, setSupervisorId] = useState<string>("");
 
   const resetForm = () => {
     setName("");
-    setBuildingName("Komplek Kota");
+    setBuildingName("Blok A");
     setCapacity(20);
     setSupervisorId("");
   };
 
-  const handleOpenAdd = (presetBuilding?: "Komplek Kota" | "Komplek Desa") => {
+  const handleOpenAdd = (presetBuilding?: string) => {
     setEditingRoom(null);
     resetForm();
     if (presetBuilding) {
       setBuildingName(presetBuilding);
+    } else if (allBlockNames.length > 0) {
+      setBuildingName(allBlockNames[0]);
     }
     setShowModal(true);
   };
@@ -87,11 +83,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
   const handleOpenEdit = (room: Room) => {
     setEditingRoom(room);
     setName(room.name);
-    setBuildingName(
-      room.buildingName?.toLowerCase().includes("desa")
-        ? "Komplek Desa"
-        : "Komplek Kota"
-    );
+    setBuildingName(room.buildingName || "Blok A");
     setCapacity(room.capacity || 20);
     setSupervisorId(room.supervisorId || "");
     setShowModal(true);
@@ -118,15 +110,15 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !buildingName || !capacity) {
+    if (!name.trim() || !buildingName.trim() || !capacity) {
       toast("Harap lengkapi seluruh field bertanda bintang (*)", "warning", "Validasi Gagal");
       return;
     }
 
     try {
       const payload = {
-        name,
-        buildingName,
+        name: name.trim(),
+        buildingName: buildingName.trim(),
         capacity,
         supervisorId: supervisorId || null,
       };
@@ -144,40 +136,27 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
     }
   };
 
-  // Grouping rooms for Blok / Komplek Grid
+  // Extract unique Block / Komplek names dynamically from database
+  const rawBlockNames = Array.from(
+    new Set(allRooms.map((r) => r.buildingName?.trim()).filter(Boolean))
+  );
+  const allBlockNames = rawBlockNames.length > 0 ? rawBlockNames : ["Blok A", "Blok B"];
+
+  // Filter all rooms by grid search query
   const filteredAllRooms = allRooms.filter((r) => {
     if (!gridSearchQuery) return true;
     const q = gridSearchQuery.toLowerCase();
     return (
       r.name.toLowerCase().includes(q) ||
       (r.supervisorName || "").toLowerCase().includes(q) ||
-      r.buildingName.toLowerCase().includes(q)
+      (r.buildingName || "").toLowerCase().includes(q)
     );
   });
 
-  const komplekKotaRooms = filteredAllRooms.filter((r) =>
-    r.buildingName.toLowerCase().includes("kota")
-  );
-  const komplekDesaRooms = filteredAllRooms.filter((r) =>
-    r.buildingName.toLowerCase().includes("desa")
-  );
-  const otherRooms = filteredAllRooms.filter(
-    (r) =>
-      !r.buildingName.toLowerCase().includes("kota") &&
-      !r.buildingName.toLowerCase().includes("desa")
-  );
-
-  // Compute Statistics per Block
-  const getBlockStats = (rooms: Room[]) => {
-    const totalRooms = rooms.length;
-    const totalCapacity = rooms.reduce((acc, r) => acc + (r.capacity || 0), 0);
-    const filledCapacity = rooms.reduce((acc, r) => acc + (r.filledCapacity || 0), 0);
-    const occupancyRate = totalCapacity > 0 ? Math.round((filledCapacity / totalCapacity) * 100) : 0;
-    return { totalRooms, totalCapacity, filledCapacity, occupancyRate };
-  };
-
-  const kotaStats = getBlockStats(komplekKotaRooms);
-  const desaStats = getBlockStats(komplekDesaRooms);
+  // Calculate Overall Asrama Statistics
+  const totalRoomsCount = allRooms.length;
+  const totalCapacitySum = allRooms.reduce((acc, r) => acc + (r.capacity || 0), 0);
+  const filledCapacitySum = allRooms.reduce((acc, r) => acc + (r.filledCapacity || 0), 0);
 
   // Columns definition for Master Table in "Kamar" Sub-tab
   const columns: ColumnDef<Room, unknown>[] = [
@@ -298,13 +277,13 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
             Data Asrama (Blok & Kamar)
           </h1>
           <p className="text-blue-100/90 text-sm max-w-xl">
-            Kelola pemetaan Blok Komplek Kota & Desa, alokasi kamar asrama, kapasitas hunian santriwati, dan Wali Kamar.
+            Kelola pemetaan Blok / Komplek asrama, alokasi kamar, kapasitas hunian santriwati, dan Wali Kamar.
           </p>
         </div>
 
         {!isReadOnly && (
           <button
-            onClick={() => handleOpenAdd("Komplek Kota")}
+            onClick={() => handleOpenAdd()}
             className="flex items-center gap-2 px-5 py-3 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer w-fit z-10 shrink-0"
           >
             <Plus className="w-4 h-4" /> Tambah Kamar Baru
@@ -328,7 +307,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
             <span className={`px-2 py-0.5 rounded-md text-xs font-extrabold ${
               activeSubTab === "blok" ? "bg-white/20 text-white" : "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300"
             }`}>
-              2 Komplek
+              {allBlockNames.length} Blok
             </span>
           </button>
 
@@ -370,21 +349,21 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
           {/* Summary Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-1.5">
-              <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Total Komplek Asrama</span>
-              <p className="text-2xl font-black text-blue-600 dark:text-blue-400">2 Blok Komplek</p>
-              <span className="text-xs text-zinc-500 font-medium">Komplek Kota & Komplek Desa</span>
+              <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Total Blok / Komplek</span>
+              <p className="text-2xl font-black text-blue-600 dark:text-blue-400">{allBlockNames.length} Blok Komplek</p>
+              <span className="text-xs text-zinc-500 font-medium">Terdaftar di Sistem</span>
             </div>
 
             <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-1.5">
               <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Total Kamar Terdaftar</span>
-              <p className="text-2xl font-black text-zinc-900 dark:text-white">{allRooms.length} Kamar</p>
-              <span className="text-xs text-zinc-500 font-medium">Kota: {komplekKotaRooms.length} | Desa: {komplekDesaRooms.length}</span>
+              <p className="text-2xl font-black text-zinc-900 dark:text-white">{totalRoomsCount} Kamar</p>
+              <span className="text-xs text-zinc-500 font-medium">Dalam Seluruh Komplek</span>
             </div>
 
             <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-1.5">
               <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Santri Mukim Terdaftar</span>
               <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                {kotaStats.filledCapacity + desaStats.filledCapacity} Santriwati
+                {filledCapacitySum} Santriwati
               </p>
               <span className="text-xs text-zinc-500 font-medium">Penghuni Aktif Asrama</span>
             </div>
@@ -392,203 +371,123 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
             <div className="p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-1.5">
               <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">Total Kapasitas Asrama</span>
               <p className="text-2xl font-black text-purple-600 dark:text-purple-400">
-                {kotaStats.totalCapacity + desaStats.totalCapacity} Tempat
+                {totalCapacitySum} Tempat
               </p>
               <span className="text-xs text-zinc-500 font-medium">Kapasitas Maksimal Hunian</span>
             </div>
           </div>
 
-          {/* BLOCK 1: KOMPLEK KOTA */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-6">
-            {/* Block Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center shrink-0 border border-blue-500/20">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-black text-zinc-900 dark:text-white">Komplek Kota</h2>
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-500/20">
-                      Kamar Kode A - D
-                    </span>
-                  </div>
-                  <p className="text-xs text-zinc-500 mt-0.5">
-                    Gedung Utama Komplek Kota | Total {kotaStats.totalRooms} Kamar | Hunian: {kotaStats.filledCapacity} / {kotaStats.totalCapacity} ({kotaStats.occupancyRate}%)
-                  </p>
-                </div>
-              </div>
+          {/* DYNAMIC BLOCK GRID CARDS */}
+          {allBlockNames.map((blockName) => {
+            const blockRooms = filteredAllRooms.filter(
+              (r) => (r.buildingName || "Blok Utama").trim().toLowerCase() === blockName.trim().toLowerCase()
+            );
 
-              {!isReadOnly && (
-                <button
-                  onClick={() => handleOpenAdd("Komplek Kota")}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-xl border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Tambah Kamar di Komplek Kota
-                </button>
-              )}
-            </div>
+            const totalRooms = blockRooms.length;
+            const totalCapacity = blockRooms.reduce((acc, r) => acc + (r.capacity || 0), 0);
+            const filledCapacity = blockRooms.reduce((acc, r) => acc + (r.filledCapacity || 0), 0);
+            const occupancyRate = totalCapacity > 0 ? Math.round((filledCapacity / totalCapacity) * 100) : 0;
 
-            {/* Room Cards Grid */}
-            {komplekKotaRooms.length === 0 ? (
-              <div className="p-8 text-center bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700">
-                <p className="text-xs font-semibold text-zinc-400">Belum ada kamar di Komplek Kota.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {komplekKotaRooms.map((room) => {
-                  const filled = room.filledCapacity || 0;
-                  const cap = room.capacity || 20;
-                  const isFull = filled >= cap;
-
-                  return (
-                    <div
-                      key={room.id}
-                      onClick={() => setViewingDetail(room)}
-                      className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/80 rounded-xl hover:border-blue-500/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-3 group"
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 font-black text-base text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            <Bed className="w-4 h-4 text-blue-500" />
-                            <span>{room.name}</span>
-                          </div>
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                              isFull
-                                ? "bg-rose-500/10 text-rose-600 border border-rose-500/20"
-                                : "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                            }`}
-                          >
-                            {isFull ? "Penuh" : "Tersedia"}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-                          <User className="w-3.5 h-3.5 text-zinc-400" />
-                          <span className="truncate">
-                            {room.supervisorName || <span className="italic text-zinc-400">Belum ada Wali</span>}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Progress Capacity Bar */}
-                      <div className="pt-2 border-t border-zinc-200/60 dark:border-zinc-700/60 space-y-1">
-                        <div className="flex justify-between items-center text-[11px] font-semibold">
-                          <span className="text-zinc-400 uppercase tracking-wider">Hunian:</span>
-                          <span className="font-mono font-bold text-zinc-700 dark:text-zinc-300">
-                            {filled} / {cap}
-                          </span>
-                        </div>
-                        <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${isFull ? "bg-rose-500" : "bg-emerald-500"}`}
-                            style={{ width: `${Math.min(100, (filled / cap) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
+            return (
+              <div
+                key={blockName}
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-6"
+              >
+                {/* Block Header */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center shrink-0 border border-blue-500/20">
+                      <Building2 className="w-6 h-6" />
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* BLOCK 2: KOMPLEK DESA */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-6">
-            {/* Block Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center shrink-0 border border-indigo-500/20">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-black text-zinc-900 dark:text-white">Komplek Desa</h2>
-                    <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-500/20">
-                      Kamar Kode E - Z
-                    </span>
-                  </div>
-                  <p className="text-xs text-zinc-500 mt-0.5">
-                    Gedung Utama Komplek Desa | Total {desaStats.totalRooms} Kamar | Hunian: {desaStats.filledCapacity} / {desaStats.totalCapacity} ({desaStats.occupancyRate}%)
-                  </p>
-                </div>
-              </div>
-
-              {!isReadOnly && (
-                <button
-                  onClick={() => handleOpenAdd("Komplek Desa")}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Tambah Kamar di Komplek Desa
-                </button>
-              )}
-            </div>
-
-            {/* Room Cards Grid */}
-            {komplekDesaRooms.length === 0 ? (
-              <div className="p-8 text-center bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700">
-                <p className="text-xs font-semibold text-zinc-400">Belum ada kamar di Komplek Desa.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {komplekDesaRooms.map((room) => {
-                  const filled = room.filledCapacity || 0;
-                  const cap = room.capacity || 20;
-                  const isFull = filled >= cap;
-
-                  return (
-                    <div
-                      key={room.id}
-                      onClick={() => setViewingDetail(room)}
-                      className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/80 rounded-xl hover:border-indigo-500/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-3 group"
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 font-black text-base text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                            <Bed className="w-4 h-4 text-indigo-500" />
-                            <span>{room.name}</span>
-                          </div>
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                              isFull
-                                ? "bg-rose-500/10 text-rose-600 border border-rose-500/20"
-                                : "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                            }`}
-                          >
-                            {isFull ? "Penuh" : "Tersedia"}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-                          <User className="w-3.5 h-3.5 text-zinc-400" />
-                          <span className="truncate">
-                            {room.supervisorName || <span className="italic text-zinc-400">Belum ada Wali</span>}
-                          </span>
-                        </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-black text-zinc-900 dark:text-white">{blockName}</h2>
+                        <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-500/20">
+                          {totalRooms} Kamar
+                        </span>
                       </div>
-
-                      {/* Progress Capacity Bar */}
-                      <div className="pt-2 border-t border-zinc-200/60 dark:border-zinc-700/60 space-y-1">
-                        <div className="flex justify-between items-center text-[11px] font-semibold">
-                          <span className="text-zinc-400 uppercase tracking-wider">Hunian:</span>
-                          <span className="font-mono font-bold text-zinc-700 dark:text-zinc-300">
-                            {filled} / {cap}
-                          </span>
-                        </div>
-                        <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${isFull ? "bg-rose-500" : "bg-emerald-500"}`}
-                            style={{ width: `${Math.min(100, (filled / cap) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
+                      <p className="text-xs text-zinc-500 mt-0.5">
+                        Hunian Terisi: <strong>{filledCapacity}</strong> / {totalCapacity} Tempat ({occupancyRate}%)
+                      </p>
                     </div>
-                  );
-                })}
+                  </div>
+
+                  {!isReadOnly && (
+                    <button
+                      onClick={() => handleOpenAdd(blockName)}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-xl border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Tambah Kamar di {blockName}
+                    </button>
+                  )}
+                </div>
+
+                {/* Room Cards Grid */}
+                {blockRooms.length === 0 ? (
+                  <div className="p-8 text-center bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700">
+                    <p className="text-xs font-semibold text-zinc-400">Belum ada kamar terdaftar di {blockName}.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {blockRooms.map((room) => {
+                      const filled = room.filledCapacity || 0;
+                      const cap = room.capacity || 20;
+                      const isFull = filled >= cap;
+
+                      return (
+                        <div
+                          key={room.id}
+                          onClick={() => setViewingDetail(room)}
+                          className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/80 rounded-xl hover:border-blue-500/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-3 group"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 font-black text-base text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                <Bed className="w-4 h-4 text-blue-500" />
+                                <span>{room.name}</span>
+                              </div>
+                              <span
+                                className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                                  isFull
+                                    ? "bg-rose-500/10 text-rose-600 border border-rose-500/20"
+                                    : "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                }`}
+                              >
+                                {isFull ? "Penuh" : "Tersedia"}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                              <User className="w-3.5 h-3.5 text-zinc-400" />
+                              <span className="truncate">
+                                {room.supervisorName || <span className="italic text-zinc-400">Belum ada Wali</span>}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Progress Capacity Bar */}
+                          <div className="pt-2 border-t border-zinc-200/60 dark:border-zinc-700/60 space-y-1">
+                            <div className="flex justify-between items-center text-[11px] font-semibold">
+                              <span className="text-zinc-400 uppercase tracking-wider">Hunian:</span>
+                              <span className="font-mono font-bold text-zinc-700 dark:text-zinc-300">
+                                {filled} / {cap}
+                              </span>
+                            </div>
+                            <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${isFull ? "bg-rose-500" : "bg-emerald-500"}`}
+                                style={{ width: `${Math.min(100, cap > 0 ? (filled / cap) * 100 : 0)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })}
         </div>
       )}
 
@@ -614,7 +513,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                 for (const r of rows) {
                   const nameVal = r["Nama Kamar Asrama"] || r["name"] || "";
                   if (!nameVal.trim()) continue;
-                  const buildingVal = r["Nama Blok Komplek"] || r["buildingName"] || "";
+                  const buildingVal = r["Nama Blok Komplek"] || r["buildingName"] || "Blok A";
                   const capacityVal = parseInt(r["Kapasitas Kamar"] || r["capacity"] || "20") || 20;
                   try {
                     await createRoom({
@@ -679,34 +578,39 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: A-02, E-01, dll."
+                    placeholder="Contoh: Kamar A-02, Kamar E-01, dll."
                     value={name}
                     onChange={(e) => {
                       const val = e.target.value;
                       setName(val);
-                      if (val.trim()) {
-                        setBuildingName(determineBuildingName(val));
+                      if (val.trim() && !editingRoom) {
+                        setBuildingName(determineBuildingName(val, buildingName));
                       }
                     }}
                     className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white font-bold"
                   />
-                  <p className="text-[11px] text-zinc-400">
-                    Sistem secara otomatis mendeteksi Blok (A-D = Komplek Kota, E-Z = Komplek Desa).
-                  </p>
                 </div>
 
-                {/* Form Field: Nama Blok (Komplek) */}
+                {/* Form Field: Nama Blok (Komplek) - Editable with Datalist */}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold text-zinc-500 uppercase">Nama Blok (Komplek) *</label>
-                  <select
+                  <input
+                    type="text"
                     required
+                    list="block-names-list"
+                    placeholder="Contoh: Blok A, Blok B, Komplek Al-Mahrusiyah, dll."
                     value={buildingName}
-                    onChange={(e) => setBuildingName(e.target.value as "Komplek Kota" | "Komplek Desa")}
-                    className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white font-extrabold cursor-pointer"
-                  >
-                    <option value="Komplek Kota">Komplek Kota (Kamar A - D)</option>
-                    <option value="Komplek Desa">Komplek Desa (Kamar E - Z)</option>
-                  </select>
+                    onChange={(e) => setBuildingName(e.target.value)}
+                    className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white font-extrabold"
+                  />
+                  <datalist id="block-names-list">
+                    {allBlockNames.map((bName) => (
+                      <option key={bName} value={bName} />
+                    ))}
+                  </datalist>
+                  <p className="text-[11px] text-zinc-400">
+                    Sekretariat dapat memilih dari list terdaftar atau mengetik nama Blok/Komplek baru.
+                  </p>
                 </div>
 
                 {/* Form Field: Kapasitas */}
@@ -742,7 +646,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                 <div className="mt-2 p-4 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/50 flex items-start gap-2.5 text-xs text-blue-800 dark:text-blue-300">
                   <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
-                    Setiap kamar yang disimpan akan otomatis masuk dalam statistik Blok/Komplek terkait dan dapat dipilih pada pendaftaran santriwati.
+                    Kamar yang dibuat akan otomatis dikelompokkan ke dalam Blok/Komplek yang Anda tentukan.
                   </p>
                 </div>
 
