@@ -86,10 +86,120 @@ export default function Page() {
   useEffect(() => {
     async function fetchReleases() {
       try {
-        const res = await fetch("/api/download/releases");
+        // 1. Try internal route first
+        const res = await fetch("/api/download/releases", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
-          setReleaseData(data);
+          if (data?.latest) {
+            setReleaseData(data);
+          }
+        }
+
+        // 2. Fetch directly from GitHub API client-side for 100% instant real-time updates
+        const ghRes = await fetch("https://api.github.com/repos/mubtadiaat/app_software/releases?per_page=20");
+        if (ghRes.ok) {
+          const rawReleases = await ghRes.json();
+          if (Array.isArray(rawReleases) && rawReleases.length > 0) {
+            const validReleases = rawReleases.filter((r: any) => !r.draft);
+            if (validReleases.length > 0) {
+              const latestObj = validReleases[0];
+              const version = (latestObj.tag_name || "").replace(/^v/i, "");
+              
+              let windowsAsset: any;
+              let staffAsset: any;
+              let guardianAsset: any;
+              let winDl = 0, staffDl = 0, guardDl = 0, totalDl = 0;
+
+              validReleases.forEach((rel: any) => {
+                if (Array.isArray(rel.assets)) {
+                  rel.assets.forEach((a: any) => {
+                    const dl = Number(a.download_count || 0);
+                    totalDl += dl;
+                    const n = (a.name || "").toLowerCase();
+                    if (n.endsWith(".exe")) winDl += dl;
+                    else if (n.startsWith("mubtadiaat") && n.endsWith(".apk")) staffDl += dl;
+                    else if (n.startsWith("e-mubtadiaat") && n.endsWith(".apk")) guardDl += dl;
+                  });
+                }
+              });
+
+              if (Array.isArray(latestObj.assets)) {
+                latestObj.assets.forEach((a: any) => {
+                  const n = (a.name || "").toLowerCase();
+                  const assetData = {
+                    name: a.name,
+                    size: a.size || 0,
+                    formattedSize: `${(a.size / (1024 * 1024)).toFixed(1)} MB`,
+                    downloadCount: Number(a.download_count || 0),
+                    downloadUrl: a.browser_download_url || "",
+                  };
+                  if (n.endsWith(".exe")) windowsAsset = assetData;
+                  else if (n.startsWith("mubtadiaat") && n.endsWith(".apk")) staffAsset = assetData;
+                  else if (n.startsWith("e-mubtadiaat") && n.endsWith(".apk")) guardianAsset = assetData;
+                });
+              }
+
+              const processedLatest = {
+                version,
+                tagName: latestObj.tag_name || `v${version}`,
+                publishedAt: latestObj.published_at || latestObj.created_at,
+                htmlUrl: latestObj.html_url || "",
+                isLatest: true,
+                isStable: !latestObj.prerelease,
+                totalDownloads: (windowsAsset?.downloadCount || 0) + (staffAsset?.downloadCount || 0) + (guardianAsset?.downloadCount || 0),
+                windows: windowsAsset,
+                staff: staffAsset,
+                guardian: guardianAsset,
+              };
+
+              const processedHistory = validReleases.slice(1).map((rel: any) => {
+                let winA: any, stfA: any, trdA: any;
+                let relDownloads = 0;
+                if (Array.isArray(rel.assets)) {
+                  rel.assets.forEach((a: any) => {
+                    const dl = Number(a.download_count || 0);
+                    relDownloads += dl;
+                    const n = (a.name || "").toLowerCase();
+                    const assetData = {
+                      name: a.name,
+                      size: a.size || 0,
+                      formattedSize: `${(a.size / (1024 * 1024)).toFixed(1)} MB`,
+                      downloadCount: dl,
+                      downloadUrl: a.browser_download_url || "",
+                    };
+                    if (n.endsWith(".exe")) winA = assetData;
+                    else if (n.startsWith("mubtadiaat") && n.endsWith(".apk")) stfA = assetData;
+                    else if (n.startsWith("e-mubtadiaat") && n.endsWith(".apk")) trdA = assetData;
+                  });
+                }
+                const v = (rel.tag_name || "").replace(/^v/i, "");
+                return {
+                  version: v,
+                  tagName: rel.tag_name || `v${v}`,
+                  publishedAt: rel.published_at || rel.created_at,
+                  htmlUrl: rel.html_url || "",
+                  isLatest: false,
+                  isStable: !rel.prerelease,
+                  totalDownloads: relDownloads,
+                  windows: winA,
+                  staff: stfA,
+                  guardian: trdA,
+                };
+              });
+
+              setReleaseData({
+                latest: processedLatest,
+                history: processedHistory,
+                stats: {
+                  windowsDownloads: winDl,
+                  staffDownloads: staffDl,
+                  guardianDownloads: guardDl,
+                  totalDownloads: totalDl,
+                },
+                source: "github",
+              });
+            }
+          }
         }
       } catch (e) {
         console.error("Failed to fetch release info:", e);
@@ -99,8 +209,8 @@ export default function Page() {
     }
 
     fetchReleases();
-    // Auto-polling background refresh every 3 minutes (180,000 ms)
-    const interval = setInterval(fetchReleases, 180000);
+    // Auto-polling background refresh every 15 seconds for instant release detection
+    const interval = setInterval(fetchReleases, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -112,7 +222,6 @@ export default function Page() {
     e.preventDefault();
     setActiveDownloadNotice(filename);
     
-    // Create invisible anchor element to trigger direct native download from internal server proxy stream
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", filename);
@@ -125,7 +234,7 @@ export default function Page() {
 
   // Helper variables for latest release (Strictly real data, no mock figures)
   const latestRelease = releaseData?.latest;
-  const latestVersion = latestRelease?.version || "1.4.10";
+  const latestVersion = latestRelease?.version || "1.4.11";
   const formattedPublishDate = latestRelease?.publishedAt
     ? new Date(latestRelease.publishedAt).toLocaleDateString("id-ID", {
         day: "numeric",
@@ -450,7 +559,7 @@ export default function Page() {
               <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Cari versi (misal: v1.4.09)..."
+                placeholder="Cari versi (misal: v1.4.10)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-200 focus:outline-none focus:border-indigo-500 transition"

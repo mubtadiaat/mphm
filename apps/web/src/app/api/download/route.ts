@@ -1,29 +1,32 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const FALLBACK_CONFIGS: Record<string, { url: string; filename: string; contentType: string }> = {
   windows: {
-    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/Admin.Mubtadiaat.Setup.1.4.10.exe",
-    filename: "Admin.Mubtadiaat.Setup.1.4.10.exe",
+    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/Admin.Mubtadiaat.Setup.1.4.11.exe",
+    filename: "Admin.Mubtadiaat.Setup.1.4.11.exe",
     contentType: "application/x-msdownload",
   },
   admin: {
-    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/Admin.Mubtadiaat.Setup.1.4.10.exe",
-    filename: "Admin.Mubtadiaat.Setup.1.4.10.exe",
+    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/Admin.Mubtadiaat.Setup.1.4.11.exe",
+    filename: "Admin.Mubtadiaat.Setup.1.4.11.exe",
     contentType: "application/x-msdownload",
   },
   staff: {
-    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/Mubtadiaat-v1.4.10.apk",
-    filename: "Mubtadiaat-v1.4.10.apk",
+    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/Mubtadiaat-v1.4.11.apk",
+    filename: "Mubtadiaat-v1.4.11.apk",
     contentType: "application/vnd.android.package-archive",
   },
   guardian: {
-    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/e-Mubtadiaat-v1.4.10.apk",
-    filename: "e-Mubtadiaat-v1.4.10.apk",
+    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/e-Mubtadiaat-v1.4.11.apk",
+    filename: "e-Mubtadiaat-v1.4.11.apk",
     contentType: "application/vnd.android.package-archive",
   },
   wali: {
-    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/e-Mubtadiaat-v1.4.10.apk",
-    filename: "e-Mubtadiaat-v1.4.10.apk",
+    url: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/e-Mubtadiaat-v1.4.11.apk",
+    filename: "e-Mubtadiaat-v1.4.11.apk",
     contentType: "application/vnd.android.package-archive",
   },
 };
@@ -50,7 +53,7 @@ export async function GET(request: Request) {
 
     const res = await fetch("https://api.github.com/repos/mubtadiaat/app_software/releases/latest", {
       headers: reqHeaders,
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
 
     if (res.ok) {
@@ -91,7 +94,6 @@ export async function GET(request: Request) {
     filename = fallback.filename;
   }
 
-  // Stream binary file directly from GitHub release asset to browser
   try {
     const fileRes = await fetch(targetUrl, {
       redirect: "follow",
@@ -104,7 +106,7 @@ export async function GET(request: Request) {
       const responseHeaders = new Headers();
       responseHeaders.set("Content-Type", contentType);
       responseHeaders.set("Content-Disposition", `attachment; filename="${filename}"`);
-      responseHeaders.set("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+      responseHeaders.set("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=120");
 
       const contentLength = fileRes.headers.get("content-length");
       if (contentLength) {

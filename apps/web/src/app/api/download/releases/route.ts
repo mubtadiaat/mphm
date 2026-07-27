@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export interface ReleaseAsset {
   name: string;
   size: number;
@@ -44,67 +47,66 @@ function formatBytes(bytes: number, decimals = 1): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
-// Minimal fallback response with REAL 0 counts (No dummy/mock figures)
 const FALLBACK_DATA: DownloadReleasesResponse = {
   latest: {
-    version: "1.4.10",
-    tagName: "v1.4.10",
-    publishedAt: "2026-07-27T15:57:15Z",
-    htmlUrl: "https://github.com/mubtadiaat/app_software/releases/tag/v1.4.10",
+    version: "1.4.11",
+    tagName: "v1.4.11",
+    publishedAt: "2026-07-27T16:38:02Z",
+    htmlUrl: "https://github.com/mubtadiaat/app_software/releases/tag/v1.4.11",
     isLatest: true,
     isStable: true,
     totalDownloads: 0,
     windows: {
-      name: "Admin.Mubtadiaat.Setup.1.4.10.exe",
+      name: "Admin.Mubtadiaat.Setup.1.4.11.exe",
       size: 79611496,
       formattedSize: "75.9 MB",
       downloadCount: 0,
-      downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/Admin.Mubtadiaat.Setup.1.4.10.exe",
+      downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/Admin.Mubtadiaat.Setup.1.4.11.exe",
     },
     staff: {
-      name: "Mubtadiaat-v1.4.10.apk",
+      name: "Mubtadiaat-v1.4.11.apk",
       size: 6131907,
       formattedSize: "5.8 MB",
       downloadCount: 0,
-      downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/Mubtadiaat-v1.4.10.apk",
+      downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/Mubtadiaat-v1.4.11.apk",
     },
     guardian: {
-      name: "e-Mubtadiaat-v1.4.10.apk",
+      name: "e-Mubtadiaat-v1.4.11.apk",
       size: 6128939,
       formattedSize: "5.8 MB",
       downloadCount: 0,
-      downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/e-Mubtadiaat-v1.4.10.apk",
+      downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.11/e-Mubtadiaat-v1.4.11.apk",
     },
   },
   history: [
     {
-      version: "1.4.09",
-      tagName: "v1.4.09",
-      publishedAt: "2026-07-20T00:00:00Z",
-      htmlUrl: "https://github.com/mubtadiaat/app_software/releases/tag/v1.4.09",
+      version: "1.4.10",
+      tagName: "v1.4.10",
+      publishedAt: "2026-07-27T16:01:15Z",
+      htmlUrl: "https://github.com/mubtadiaat/app_software/releases/tag/v1.4.10",
       isLatest: false,
       isStable: true,
       totalDownloads: 0,
       windows: {
-        name: "Admin.Mubtadiaat.Setup.1.4.9.exe",
-        size: 79611376,
+        name: "Admin.Mubtadiaat.Setup.1.4.10.exe",
+        size: 79611496,
         formattedSize: "75.9 MB",
         downloadCount: 0,
-        downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.09/Admin.Mubtadiaat.Setup.1.4.9.exe",
+        downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/Admin.Mubtadiaat.Setup.1.4.10.exe",
       },
       staff: {
-        name: "Mubtadiaat-v1.4.09.apk",
+        name: "Mubtadiaat-v1.4.10.apk",
         size: 6131907,
         formattedSize: "5.8 MB",
         downloadCount: 0,
-        downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.09/Mubtadiaat-v1.4.09.apk",
+        downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/Mubtadiaat-v1.4.10.apk",
       },
       guardian: {
-        name: "e-Mubtadiaat-v1.4.09.apk",
-        size: 6128943,
+        name: "e-Mubtadiaat-v1.4.10.apk",
+        size: 6128939,
         formattedSize: "5.8 MB",
         downloadCount: 0,
-        downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.09/e-Mubtadiaat-v1.4.09.apk",
+        downloadUrl: "https://github.com/mubtadiaat/app_software/releases/download/v1.4.10/e-Mubtadiaat-v1.4.10.apk",
       },
     },
   ],
@@ -132,16 +134,16 @@ export async function GET() {
       "https://api.github.com/repos/mubtadiaat/app_software/releases?per_page=20",
       {
         headers,
-        next: { revalidate: 300 },
+        cache: "no-store", // Always fetch live releases from GitHub
       }
     );
 
     if (!res.ok) {
-      console.warn(`GitHub API status ${res.status}. Using clean fallback response.`);
+      console.warn(`GitHub API status ${res.status}. Using fallback response.`);
       return NextResponse.json(FALLBACK_DATA, {
         status: 200,
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "Cache-Control": "public, max-age=5, s-maxage=5, stale-while-revalidate=10",
         },
       });
     }
@@ -244,7 +246,7 @@ export async function GET() {
     return NextResponse.json(responsePayload, {
       status: 200,
       headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "public, max-age=5, s-maxage=5, stale-while-revalidate=10",
       },
     });
   } catch (error) {
@@ -252,7 +254,7 @@ export async function GET() {
     return NextResponse.json(FALLBACK_DATA, {
       status: 200,
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        "Cache-Control": "public, max-age=5, s-maxage=5, stale-while-revalidate=10",
       },
     });
   }
