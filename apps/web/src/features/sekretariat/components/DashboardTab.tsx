@@ -389,7 +389,7 @@ export function DashboardTab() {
                 <span>{isPondok ? "Distribusi Santri per Kamar Asrama" : "Distribusi Santri per Jenjang Diniyyah"}</span>
               </h2>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-                Data aktual persebaran dari database PostgreSQL Neon.
+                Data aktual persebaran dari database.
               </p>
             </div>
             <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-bold rounded-lg font-mono">
