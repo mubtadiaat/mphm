@@ -56,6 +56,8 @@ export async function GET() {
       where: { deletedAt: null },
     });
 
+    const roomsCount = await (prisma as any).room ? await (prisma as any).room.count() : 0;
+
     const mundzirCount = mundzirOrgCount + mundzirUserCount;
     const mufattisyCount = mufattisyOrgCount + mufattisyUserCount;
     const mustahiqCount = mustahiqTeacherCount + mustahiqUserCount;
@@ -68,6 +70,7 @@ export async function GET() {
         hasMustahiq: mustahiqCount > 0,
         hasClasses: classesCount > 0,
         hasSantri: santriCount > 0,
+        hasRooms: roomsCount > 0,
       },
     });
   } catch (err: any) {

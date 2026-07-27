@@ -29,6 +29,7 @@ interface OnboardingStatus {
   hasMustahiq: boolean;
   hasClasses: boolean;
   hasSantri: boolean;
+  hasRooms: boolean;
 }
 
 export function Sidebar({ role }: { role: RoleTypes }) {
@@ -43,7 +44,8 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     hasMufattisy: true,
     hasMustahiq: true,
     hasClasses: true,
-    hasSantri: true
+    hasSantri: true,
+    hasRooms: true,
   });
   const isSekretariatRole = role === "sek.pondok" || role === "sek.madrasah";
 
@@ -105,8 +107,10 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     return null;
   }
 
+  const isPondokWorkspace = role === "sek.pondok" || activeWorkspace === "pondok";
+
   const filteredStaticItems = isSekretariatRole
-    ? (role === "sek.pondok" || activeWorkspace === "pondok" ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
+    ? (isPondokWorkspace ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV)
     : (NAVIGATION_CONFIG[role] || []);
 
   let navItems: NavMenu[] = [];
@@ -119,41 +123,47 @@ export function Sidebar({ role }: { role: RoleTypes }) {
       });
     }
   } else {
-    // strict RBAC: only Sekretariat gets custom menus in MVP to prevent leakage
     navItems = [...filteredStaticItems];
   }
 
   const isMenuLocked = (href: string): boolean => {
     if (!isSekretariatRole) return false;
-    if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) return true;
-    if (href === "/sekretariat/mustahiq" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMufattisy)) return true;
-    if (href === "/sekretariat/kelas" && !onboardingStatus.hasMustahiq) return true;
-    if (href === "/sekretariat/santri" && !onboardingStatus.hasClasses) return true;
+
+    if (isPondokWorkspace) {
+      if (href === "/sekretariat/santri" && !onboardingStatus.hasRooms) return true;
+      if ((href === "/sekretariat/perizinan" || href === "/sekretariat/pelanggaran") && !onboardingStatus.hasSantri) return true;
+    } else {
+      if (href === "/sekretariat/santri" && !onboardingStatus.hasClasses) return true;
+      if ((href === "/sekretariat/penilaian" || href === "/sekretariat/raport") && !onboardingStatus.hasSantri) return true;
+    }
     return false;
   };
 
   const checkAccess = (e: React.MouseEvent, href: string) => {
     if (!isSekretariatRole || loadingStatus) return;
 
-    if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) {
-      e.preventDefault();
-      toast("Harap isi Data Mundzir terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
-    }
-    if (href === "/sekretariat/mustahiq" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMufattisy)) {
-      e.preventDefault();
-      toast("Harap isi Data Mufattisy terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
-    }
-    if (href === "/sekretariat/kelas" && !onboardingStatus.hasMustahiq) {
-      e.preventDefault();
-      toast("Harap isi Data Mustahiq terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
-    }
-    if (href === "/sekretariat/santri" && !onboardingStatus.hasClasses) {
-      e.preventDefault();
-      toast("Harap isi Data Kelas terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
+    if (isPondokWorkspace) {
+      if (href === "/sekretariat/santri" && !onboardingStatus.hasRooms) {
+        e.preventDefault();
+        toast("Harap buat Data Kamar Asrama terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
+        return;
+      }
+      if ((href === "/sekretariat/perizinan" || href === "/sekretariat/pelanggaran") && !onboardingStatus.hasSantri) {
+        e.preventDefault();
+        toast("Harap daftarkan Santriwati Asrama terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
+        return;
+      }
+    } else {
+      if (href === "/sekretariat/santri" && !onboardingStatus.hasClasses) {
+        e.preventDefault();
+        toast("Harap buat Rombel Kelas & tetapkan Mustahiq terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
+        return;
+      }
+      if ((href === "/sekretariat/penilaian" || href === "/sekretariat/raport") && !onboardingStatus.hasSantri) {
+        e.preventDefault();
+        toast("Harap daftarkan / tarik data Siswi Diniyyah terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
+        return;
+      }
     }
   };
 
