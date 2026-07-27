@@ -8,19 +8,15 @@ import {
   Calendar, 
   ShieldAlert, 
   Heart, 
-  Sparkles, 
   Building2, 
   UserCheck, 
   Clock, 
   RefreshCw, 
   Plus, 
   Ticket, 
-  BookOpen, 
   ArrowUpRight, 
   Activity, 
   FileText, 
-  CheckCircle2, 
-  AlertCircle,
   Layers,
   School,
   Home,
@@ -31,7 +27,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
 import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
-import { SEKRETARIAT_MADRASAH_NAV, SEKRETARIAT_PONDOK_NAV } from "@/config/navigation.config";
 import Link from "next/link";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 
@@ -65,7 +60,7 @@ function getRelativeTimeString(isoString: string): string {
 }
 
 export function DashboardTab() {
-  const { activeWorkspace, setActiveWorkspace } = useWorkspace();
+  const { activeWorkspace } = useWorkspace();
   const { selectedYearId } = useAcademicYear();
   const { data: statsData, isLoading, refetch, isRefetching } = useDashboardStats(selectedYearId, activeWorkspace);
 
@@ -173,7 +168,7 @@ export function DashboardTab() {
 
   const stats = isPondok ? pondokStats : madrasahStats;
 
-  // Real Database Chart Data (Strictly from DB, No Fallback Mock Array)
+  // Real Database Chart Data (Strictly from DB)
   const madrasahChartData = (statsData?.performances || []).map(p => ({
     name: p.level,
     santri: p.active
@@ -187,12 +182,12 @@ export function DashboardTab() {
   const chartData = isPondok ? pondokChartData : madrasahChartData;
   const primaryThemeColor = isPondok ? "#10b981" : "#3b82f6";
 
-  // Real Database Audit Logs (Strictly from DB, No Fallback Mock Array)
+  // Real Database Audit Logs (Strictly from DB)
   const auditLogs = statsData?.recentAuditLogs || [];
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-12">
-      {/* Real-time Header & Dynamic Workspace Switcher Banner */}
+      {/* Real-time Header Banner */}
       <div className={`p-6 sm:p-8 rounded-3xl border shadow-sm transition-all duration-300 relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 ${
         isPondok
           ? "bg-gradient-to-r from-emerald-950/40 via-teal-900/20 to-zinc-900 border-emerald-500/20 dark:border-emerald-800/40"
@@ -227,40 +222,22 @@ export function DashboardTab() {
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-2xl">
               {isPondok 
-                ? "Pusat kendali operasional Pondok Pesantren Putri (P3HM). Seluruh data diambil secara langsung dari Database Neon PostgreSQL."
-                : "Pusat kendali operasional Madrasah Diniyyah (MPHM). Seluruh data diambil secara langsung dari Database Neon PostgreSQL."
+                ? "Pusat kendali operasional Sekretariat Pondok Pesantren Putri (P3HM)."
+                : "Pusat kendali operasional Sekretariat Madrasah Diniyyah (MPHM)."
               }
             </p>
           </div>
         </div>
 
-        {/* Dynamic Workspace Switcher Pills */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 z-10 shrink-0">
-          <div className="p-1 bg-zinc-900/80 backdrop-blur-md rounded-2xl border border-zinc-800 flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setActiveWorkspace("madrasah")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                !isPondok
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              <School className="w-4 h-4" />
-              <span>🏫 Madrasah (MPHM)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveWorkspace("pondok")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                isPondok
-                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              <Home className="w-4 h-4" />
-              <span>🏠 Pondok (P3HM)</span>
-            </button>
+        {/* Institution Badge & Refresh Trigger */}
+        <div className="flex items-center gap-3 z-10 shrink-0">
+          <div className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 border ${
+            isPondok
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+              : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+          }`}>
+            {isPondok ? <Home className="w-4 h-4 text-emerald-400" /> : <School className="w-4 h-4 text-blue-400" />}
+            <span>{isPondok ? "Pondok Pesantren (P3HM)" : "Madrasah Diniyyah (MPHM)"}</span>
           </div>
 
           <button
@@ -268,7 +245,7 @@ export function DashboardTab() {
             onClick={() => refetch()}
             disabled={isRefetching}
             className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-2xl border border-zinc-700 transition-all flex items-center justify-center cursor-pointer shadow-xs"
-            title="Sembunyikan / Muat Ulang Data Database"
+            title="Muat Ulang Data Database"
           >
             <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin text-blue-400" : ""}`} />
           </button>
@@ -412,7 +389,7 @@ export function DashboardTab() {
                 <span>{isPondok ? "Distribusi Santri per Kamar Asrama" : "Distribusi Santri per Jenjang Diniyyah"}</span>
               </h2>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-                Data aktual persebaran dari database database PostgreSQL Neon.
+                Data aktual persebaran dari database PostgreSQL Neon.
               </p>
             </div>
             <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-bold rounded-lg font-mono">
@@ -494,63 +471,6 @@ export function DashboardTab() {
               ))
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Workspace Menu Shortcuts Grid */}
-      <div className="flex flex-col gap-4 mt-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Direktori Modul {isPondok ? "Pondok Pesantren (P3HM)" : "Madrasah Diniyyah (MPHM)"}
-          </h2>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
-            Daftar lengkap seluruh modul operasional {isPondok ? "asrama dan kedisiplinan" : "akademik dan kurikulum"}.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-8 mt-2">
-          {(isPondok ? SEKRETARIAT_PONDOK_NAV : SEKRETARIAT_MADRASAH_NAV).map((group, groupIdx) => {
-            if (!("items" in group)) return null;
-
-            return (
-              <div key={groupIdx} className="flex flex-col gap-4">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                  {group.group}
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {group.items.map((item, itemIdx) => {
-                    const ItemIcon = item.icon;
-                    return (
-                      <Link 
-                        key={itemIdx} 
-                        href={item.href}
-                        className={`flex flex-col items-center justify-center gap-3 p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl transition-all duration-200 group text-center shadow-xs hover:scale-[1.02] ${
-                          isPondok
-                            ? "hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10"
-                            : "hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
-                        }`}
-                      >
-                        <div className={`p-3 bg-zinc-50 dark:bg-zinc-800/80 rounded-xl transition-colors ${
-                          isPondok
-                            ? "group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/10"
-                            : "group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10"
-                        }`}>
-                          <ItemIcon className={`w-6 h-6 text-zinc-600 dark:text-zinc-400 transition-colors ${
-                            isPondok ? "group-hover:text-emerald-500" : "group-hover:text-blue-500"
-                          }`} />
-                        </div>
-                        <span className={`text-xs font-extrabold text-zinc-800 dark:text-zinc-200 transition-colors ${
-                          isPondok ? "group-hover:text-emerald-600 dark:group-hover:text-emerald-400" : "group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                        }`}>
-                          {item.label}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>
