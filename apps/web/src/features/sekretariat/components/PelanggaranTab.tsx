@@ -1,378 +1,338 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, ShieldAlert } from "lucide-react";
+import { Plus, X, ShieldAlert, Calendar, Clock, MapPin, AlertCircle, FileText, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
 import { PillBadge } from "@/components/shared/PillBadge";
-import { useViolationMaster, ViolationType } from "@/features/sekretariat/queries/useViolationMaster";
+import { IdentityCell } from "@/components/shared/IdentityCell";
+import { useGlobalViolations, StudentViolation } from "@/features/sekretariat/queries/useGlobalViolations";
+import { useViolationMaster } from "@/features/sekretariat/queries/useViolationMaster";
+import { useSantri, Santri } from "@/features/sekretariat/queries/useSantri";
 import { useToast } from "@/components/shared/ToastContext";
+import { apiRequest } from "@/lib/api";
 
 interface PelanggaranTabProps {
-  onViewDetail: (data: Record<string, unknown>) => void;
+  onViewDetail?: (data: Record<string, unknown>) => void;
   isReadOnly?: boolean;
   selectedYearId?: string;
 }
 
-export function PelanggaranTab({ onViewDetail, isReadOnly = false }: PelanggaranTabProps) {
-  const { types, isLoadingTypes, categories, severities, createViolation, deleteViolation } = useViolationMaster();
-  const [violationsData, setViolationsData] = useState<ViolationType[]>([]);
-  const { toast, confirm } = useToast();
+export function PelanggaranTab({ onViewDetail, isReadOnly = false, selectedYearId }: PelanggaranTabProps) {
+  const { data: violations = [], isLoading, createViolation } = useGlobalViolations(selectedYearId);
+  const { types: violationTypes = [] } = useViolationMaster();
+  const { data: santriResult } = useSantri(selectedYearId, 0, 1000);
+  const santriList = santriResult?.data || [];
 
-  // Sync with TanStack Query data
-  useEffect(() => {
-    if (types) {
-      queueMicrotask(() => {
-        setViolationsData(types);
-      });
-    }
-  }, [types]);
+  const { toast, confirm } = useToast();
 
   // Modal & Form States
   const [showModal, setShowModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<ViolationType | null>(null);
-  const [viewingDetail, setViewingDetail] = useState<ViolationType | null>(null);
-  const [name, setName] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [severityId, setSeverityId] = useState("");
-  const [points, setPoints] = useState<number>(5);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [selectedViolationTypeId, setSelectedViolationTypeId] = useState("");
+  const [incidentDate, setIncidentDate] = useState(new Date().toISOString().split("T")[0]);
+  const [incidentTime, setIncidentTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resetForm = () => {
-    setName("");
-    setCategoryId("");
-    setSeverityId("");
-    setPoints(5);
+    setSelectedStudentId("");
+    setSelectedViolationTypeId("");
+    setIncidentDate(new Date().toISOString().split("T")[0]);
+    setIncidentTime("");
+    setLocation("");
+    setDescription("");
   };
 
   const handleOpenAdd = () => {
-    setEditingItem(null);
     resetForm();
     setShowModal(true);
   };
 
-  const handleOpenEdit = (vio: ViolationType) => {
-    setEditingItem(vio);
-    setName(vio.name);
-    const matchedCat = categories.find(c => c.name === vio.category);
-    const matchedSev = severities.find(s => s.name === vio.severity);
-    setCategoryId(matchedCat?.id || "");
-    setSeverityId(matchedSev?.id || "");
-    setPoints(vio.points);
-    setShowModal(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    const isConfirmed = await confirm({
-      title: "Hapus Jenis Pelanggaran?",
-      message: "Apakah Anda yakin ingin menghapus jenis pelanggaran master ini?",
-      confirmText: "Ya, Hapus Master",
-      cancelText: "Batal",
-      type: "danger",
-    });
-
-    if (isConfirmed) {
-      try {
-        await deleteViolation(id);
-        toast("Master pelanggaran berhasil dihapus!", "success", "Data Dihapus");
-      } catch {
-        toast("Gagal menghapus pelanggaran", "error", "Gagal");
-      }
-    }
-  };
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !categoryId || !severityId) {
-      toast("Harap lengkapi seluruh field bertanda bintang (*)", "warning", "Validasi Gagal");
+    if (!selectedStudentId || !selectedViolationTypeId || !incidentDate) {
+      toast("Harap lengkapi santriwati, jenis pelanggaran, dan tanggal kejadian (*)", "warning");
       return;
     }
+
+    setIsSubmitting(true);
     try {
       await createViolation({
-        categoryId,
-        severityId,
-        name,
-        points
+        studentId: selectedStudentId,
+        violationTypeId: selectedViolationTypeId,
+        academicYearId: selectedYearId || "",
+        incidentDate,
+        incidentTime: incidentTime || undefined,
+        location: location || undefined,
+        description: description || undefined,
       });
-      toast("Berhasil menyimpan data master pelanggaran", "success", "Berhasil");
+      toast("Catatan pelanggaran santriwati berhasil direkam!", "success");
       setShowModal(false);
-    } catch {
-      toast("Gagal menyimpan data", "error", "Gagal");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal merekam pelanggaran santriwati";
+      toast(msg, "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const columns: ColumnDef<ViolationType, unknown>[] = [
+  const columns: ColumnDef<StudentViolation, unknown>[] = [
     {
       accessorKey: "name",
-      header: "Pelanggaran",
-      cell: (info) => <span className="font-bold text-zinc-900 dark:text-white leading-relaxed">{info.getValue() as string}</span>
-    },
-    {
-      accessorKey: "category",
-      header: "Kategori Kedisiplinan",
+      header: "Nama Santriwati & Stambuk",
       cell: (info) => (
-        <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 font-semibold rounded-lg text-xs">
-          {info.getValue() as string}
-        </span>
-      )
+        <IdentityCell
+          name={info.getValue() as string}
+          subInfo={`Stambuk: ${info.row.original.stambuk} • Kelas: ${info.row.original.class || "-"}`}
+          stambuk={info.row.original.stambuk}
+        />
+      ),
     },
     {
-      accessorKey: "severity",
-      header: "Tingkat Keparahan",
-      cell: (info) => {
-        const val = info.getValue() as string;
-        let variant: "info" | "warning" | "danger" | "success" = "info";
-        if (val === "Sedang") variant = "warning";
-        else if (val === "Berat" || val === "Sangat Berat") variant = "danger";
-        return <PillBadge label={val} variant={variant} />;
-      }
-    },
-    {
-      accessorKey: "points",
-      header: "Poin Penalty",
+      accessorKey: "desc",
+      header: "Jenis Pelanggaran & Poin",
       cell: (info) => (
-        <span className="font-mono font-bold text-rose-500 bg-rose-50/50 dark:bg-rose-950/20 px-2 py-0.5 rounded border border-rose-100/50 dark:border-rose-900/30 text-xs">
-          {info.getValue() as number} Poin
-        </span>
-      )
+        <div className="flex flex-col text-left">
+          <span className="font-extrabold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+            {info.getValue() as string}
+          </span>
+          <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
+            Kategori: {info.row.original.category} • Severity: {info.row.original.severity}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "date",
+      header: "Waktu & Lokasi Kejadian",
+      cell: (info) => (
+        <div className="flex flex-col text-left">
+          <span className="font-bold text-zinc-800 dark:text-zinc-200 text-xs flex items-center gap-1">
+            <Calendar className="w-3 h-3 text-zinc-400" />
+            {info.getValue() as string} {info.row.original.time ? `• ${info.row.original.time}` : ""}
+          </span>
+          <span className="text-[11px] text-zinc-400 flex items-center gap-1">
+            <MapPin className="w-3 h-3 text-zinc-400" />
+            {info.row.original.location || "Lingkungan Pondok"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status Takzir",
+      cell: (info) => (
+        <PillBadge
+          label={info.getValue() as string === "APPROVED" ? "TERCATAT TAKZIR" : (info.getValue() as string)}
+          variant={info.getValue() === "APPROVED" ? "danger" : "warning"}
+        />
+      ),
     },
     {
       id: "actions",
-      header: "Aksi",
-      cell: (info) => {
-        const row = info.row.original;
-        return (
-          <TableActions
-            onEdit={() => handleOpenEdit(row)}
-            onDelete={() => handleDelete(row.id)}
-            onDetail={() => onViewDetail(row as unknown as Record<string, unknown>)}
-            isReadOnly={isReadOnly}
-          />
-        );
-      }
-    }
+      header: "Aksi Management",
+      cell: (info) => (
+        <TableActions
+          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
+          isReadOnly={isReadOnly}
+        />
+      ),
+    },
   ];
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header Section - Premium Gradient Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-rose-500/10 via-amber-500/5 to-transparent border border-rose-500/20 dark:border-rose-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-rose-650 dark:text-rose-455 text-xs font-bold uppercase tracking-wider">
-            <ShieldAlert className="w-4 h-4" />
-            <span>Tata Tertib & Kepatuhan</span>
+    <div className="flex flex-col gap-6 animate-fade-in pb-12">
+      {/* Header Banner */}
+      <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-rose-950/40 via-red-900/20 to-zinc-900 border border-rose-500/20 dark:border-rose-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
+        <div className="flex flex-col gap-2 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30 backdrop-blur-md w-fit">
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+            <span>KEDISIPLINAN & TA'ZIR SANTRIWATI</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Master Pelanggaran & Kedisiplinan
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+            Catatan Pelanggaran & Poin Takzir Santri
           </h1>
-          <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Definisikan jenis pelanggaran takzir resmi (7 Kategori Pesantren), poin sanksi, dan tingkat keparahan.
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl">
+            Rekam medis kedisiplinan, catatan pelanggaran, dan akumulasi poin takzir santriwati terintegrasi langsung dengan database PostgreSQL.
           </p>
         </div>
 
         {!isReadOnly && (
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-5 py-3 bg-linear-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 border border-rose-500/20"
+            type="button"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-extrabold shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 bg-rose-600 hover:bg-rose-500 text-white border border-rose-400/30"
           >
-            <Plus className="w-4 h-4" /> Tambah Pelanggaran
+            <Plus className="w-4 h-4" />
+            <span>+ Catat Pelanggaran Santri</span>
           </button>
         )}
       </div>
 
-      {/* Grid Table */}
+      {/* Universal Data Grid */}
       <UniversalDataGrid
         columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={violationsData as unknown as Record<string, unknown>[]}
+        data={violations as unknown as Record<string, unknown>[]}
         pageCount={1}
         pageIndex={0}
-        pageSize={10}
-        loading={isLoadingTypes}
-        tableName="master_pelanggaran"
-        onRowClick={(row) => setViewingDetail(row as unknown as ViolationType)}
-        importExportProps={{
-          disableImport: isReadOnly,
-          title: "Master Data Aturan Pelanggaran dan Takzir",
-          headers: ["Nama Aturan Pelanggaran", "Kategori Kedisiplinan", "Tingkat Keparahan", "Poin Takzir"],
-          onImportSuccess: async (rows) => {
-            let count = 0;
-            for (const r of rows) {
-              const nameVal = r["Nama Aturan Pelanggaran"] || r["name"] || "";
-              if (!nameVal.trim()) continue;
-              const pointsVal = parseInt(r["Poin Takzir"] || r["points"] || "5") || 5;
-              try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                await fetch(`${apiUrl}/api/admin/violations/types`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    name: nameVal,
-                    points: pointsVal,
-                    categoryId: categories[0]?.id || "",
-                    severityId: severities[0]?.id || "",
-                  }),
-                });
-                count++;
-              } catch (err) {
-                console.error("Import row failed:", err);
-              }
-            }
-            if (count > 0) {
-              toast(`Berhasil mengimpor ${count} Aturan Pelanggaran!`, "success", "Import Berhasil");
-            }
-          }
-        }}
+        pageSize={50}
+        onPageChange={() => {}}
+        onPageSizeChange={() => {}}
+        loading={isLoading}
+        tableName="laporan_pelanggaran_santri"
       />
 
-      {/* Add / Edit Modal */}
+      {/* Modal Form Catat Pelanggaran */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-55 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowModal(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/50 backdrop-blur-xs"
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden relative z-10 flex flex-col"
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative z-10 flex flex-col"
             >
-              {/* Modal Header */}
-              <div className="p-5 border-b border-zinc-150 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50 shrink-0">
+              <div className="p-5 border-b flex justify-between items-center bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/50">
                 <div>
-                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
-                    {editingItem ? "Edit Jenis Pelanggaran" : "Tambah Pelanggaran Baru"}
+                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white flex items-center gap-2">
+                    <ShieldAlert className="w-5 h-5 text-rose-500" />
+                    <span>Perekaman Pelanggaran & Poin Takzir</span>
                   </h3>
-                  <p className="text-xs text-zinc-500">
-                    {editingItem ? "Ubah deskripsi aturan atau bobot poin takzir." : "Daftarkan pasal pelanggaran baru."}
-                  </p>
+                  <p className="text-xs text-zinc-500 mt-0.5">Pilih santriwati dan jenis pelanggaran yang dilakukan.</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors text-zinc-500 cursor-pointer"
-                >
+                <button onClick={() => setShowModal(false)} className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-xl transition-colors text-zinc-500 cursor-pointer">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Form Content */}
               <form onSubmit={handleSave} className="p-6 space-y-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Deskripsi Pelanggaran *</label>
+                {/* Select Santriwati */}
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold text-zinc-700 dark:text-zinc-300">
+                    Santriwati Pelanggar (*)
+                  </label>
+                  <select
+                    value={selectedStudentId}
+                    onChange={(e) => setSelectedStudentId(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-rose-500"
+                    required
+                  >
+                    <option value="">-- Pilih Santriwati (Nama / Stambuk) --</option>
+                    {santriList.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} (Stambuk: {s.stambuk} • Kelas: {s.class})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Select Jenis Pelanggaran */}
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold text-zinc-700 dark:text-zinc-300">
+                    Jenis Pelanggaran & Poin (*)
+                  </label>
+                  <select
+                    value={selectedViolationTypeId}
+                    onChange={(e) => setSelectedViolationTypeId(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-rose-500"
+                    required
+                  >
+                    <option value="">-- Pilih Jenis Pelanggaran --</option>
+                    {violationTypes.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.name} ({v.category} • Poin: {v.points})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Tanggal Incident */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-zinc-700 dark:text-zinc-300">
+                      Tanggal Kejadian (*)
+                    </label>
+                    <input
+                      type="date"
+                      value={incidentDate}
+                      onChange={(e) => setIncidentDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-rose-500"
+                      required
+                    />
+                  </div>
+
+                  {/* Jam Incident */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold text-zinc-700 dark:text-zinc-300">
+                      Waktu Kejadian (Opsional)
+                    </label>
+                    <input
+                      type="time"
+                      value={incidentTime}
+                      onChange={(e) => setIncidentTime(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-rose-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Lokasi */}
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold text-zinc-700 dark:text-zinc-300">
+                    Lokasi Kejadian (Opsional)
+                  </label>
                   <input
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Contoh: Menggunakan barang orang lain tanpa izin"
-                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
-                    required
+                    placeholder="Contoh: Asrama Aisyah, Aula Utama, Gerbang Barat"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-900 dark:text-zinc-100 outline-none focus:border-rose-500"
                   />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Kategori Kedisiplinan *</label>
-                  <select
-                    value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
-                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
-                  >
-                    <option value="">Pilih Kategori...</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Tingkat Keparahan *</label>
-                  <select
-                    value={severityId}
-                    onChange={(e) => setSeverityId(e.target.value)}
-                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
-                  >
-                    <option value="">Pilih Tingkat...</option>
-                    {severities.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Bobot Poin Penalty</label>
-                  <input
-                    type="number"
-                    value={points}
-                    onChange={(e) => setPoints(Number(e.target.value))}
-                    min={1}
-                    max={100}
-                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200 font-mono"
+                {/* Deskripsi Kronologi */}
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold text-zinc-700 dark:text-zinc-300">
+                    Kronologi & Keterangan Tambahan
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Tuliskan catatan kejadian atau barang bukti jika ada..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium text-zinc-900 dark:text-zinc-100 outline-none focus:border-rose-500 resize-none"
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-750 dark:text-zinc-200 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl text-xs font-extrabold transition-colors cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-colors cursor-pointer"
+                    disabled={isSubmitting}
+                    className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-50"
                   >
-                    Simpan Perubahan
+                    {isSubmitting ? "Menyimpan..." : "Simpan Catatan Pelanggaran"}
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Detail Modal */}
-      <AnimatePresence>
-        {viewingDetail && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setViewingDetail(null)} />
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden max-h-[85vh]">
-              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-800/30">
-                <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-rose-500" />
-                  Detail Aturan Pelanggaran
-                </h3>
-                <button onClick={() => setViewingDetail(null)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5"/></button>
-              </div>
-              <div className="p-6 overflow-y-auto space-y-4 text-sm font-medium">
-                <table className="w-full border-collapse">
-                  <tbody>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama Pelanggaran</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.name || "-"}</td>
-                    </tr>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Kategori</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-semibold">{viewingDetail.category || "-"}</td>
-                    </tr>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Tingkat Keparahan</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left">
-                        <PillBadge label={viewingDetail.severity || "-"} variant="danger" />
-                      </td>
-                    </tr>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Poin Penalty</td>
-                      <td className="py-2.5 text-rose-600 dark:text-rose-400 text-left font-mono font-bold">{viewingDetail.points ?? 0} Poin</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
             </motion.div>
           </div>
         )}
