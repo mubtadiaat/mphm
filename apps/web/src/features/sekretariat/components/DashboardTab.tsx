@@ -23,7 +23,9 @@ import {
   AlertCircle,
   Layers,
   School,
-  Home
+  Home,
+  Database,
+  Inbox
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
@@ -89,30 +91,31 @@ export function DashboardTab() {
     return "Selamat Malam 🌙";
   };
 
+  // Real Database Metrics for Madrasah
   const madrasahStats = [
     { 
       label: "Total Santri Aktif", 
       value: statsData?.totalStudents ?? 0, 
-      subtext: "Terdaftar di Rombel Diniyyah",
-      badge: "+2.4%",
-      badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      subtext: "Terdaftar di Database Diniyyah",
+      badge: `${statsData?.totalStudents ?? 0} Aktif`,
+      badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
       icon: Users, 
       color: "text-blue-500 bg-blue-500/10 border-blue-500/20" 
     },
     { 
       label: "Rata-Rata GPA Diniyyah", 
-      value: statsData?.averageGpa ? statsData.averageGpa.toFixed(2) : "8.50", 
+      value: statsData?.averageGpa ? statsData.averageGpa.toFixed(2) : "0.00", 
       subtext: "Skala Nilai Kwartal 1-4",
-      badge: "Kategori B-Tamtam",
-      badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+      badge: statsData?.averageGpa ? `IPK ${statsData.averageGpa.toFixed(2)}` : "Belum Ada Nilai",
+      badgeColor: statsData?.averageGpa ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
       icon: GraduationCap, 
       color: "text-amber-500 bg-amber-500/10 border-amber-500/20" 
     },
     { 
       label: "Tingkat Kehadiran", 
-      value: `${statsData?.attendanceRate ?? 98.5}%`, 
+      value: `${statsData?.attendanceRate ?? 0}%`, 
       subtext: "Presensi Harian Santriwati",
-      badge: "Sangat Baik",
+      badge: `${statsData?.attendanceRate ?? 0}% Presensi`,
       badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       icon: Calendar, 
       color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" 
@@ -120,29 +123,30 @@ export function DashboardTab() {
     { 
       label: "Pelanggaran Akademik", 
       value: statsData?.activeViolations ?? 0, 
-      subtext: "Memerlukan Pembinaan Mustahiq",
-      badge: statsData?.activeViolations ? `${statsData.activeViolations} Aktif` : "Terkendali",
+      subtext: "Tercatat di Database Master",
+      badge: `${statsData?.activeViolations ?? 0} Kasus`,
       badgeColor: statsData?.activeViolations ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       icon: ShieldAlert, 
       color: "text-rose-500 bg-rose-500/10 border-rose-500/20" 
     },
   ];
 
+  // Real Database Metrics for Pondok
   const pondokStats = [
     { 
       label: "Total Santri Asrama", 
       value: statsData?.totalStudents ?? 0, 
-      subtext: "Penghuni Kamar Komplek",
-      badge: "+1.8%",
+      subtext: "Penghuni Kamar Asrama",
+      badge: `${statsData?.totalStudents ?? 0} Santriwati`,
       badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       icon: Users, 
       color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" 
     },
     { 
-      label: "Total Kamar / Asrama", 
-      value: statsData?.totalRooms ?? 18, 
-      subtext: "Tersebar di Komplek Desa & Kota",
-      badge: "Kapasitas 95%",
+      label: "Total Kamar Asrama", 
+      value: statsData?.totalRooms ?? 0, 
+      subtext: "Tercatat di Master Gedung",
+      badge: `${statsData?.totalRooms ?? 0} Kamar`,
       badgeColor: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
       icon: Building2, 
       color: "text-teal-500 bg-teal-500/10 border-teal-500/20" 
@@ -150,8 +154,8 @@ export function DashboardTab() {
     { 
       label: "Santri Khidmah Alumni", 
       value: statsData?.totalKhidmah ?? 0, 
-      subtext: "Pengabdian Aktif Lembaga",
-      badge: "Aktif Khidmah",
+      subtext: "Penugasan Khidmah Aktif",
+      badge: `${statsData?.totalKhidmah ?? 0} Khidmah`,
       badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
       icon: Heart, 
       color: "text-purple-500 bg-purple-500/10 border-purple-500/20" 
@@ -159,8 +163,8 @@ export function DashboardTab() {
     { 
       label: "Total Wali Santri", 
       value: statsData?.totalGuardians ?? 0, 
-      subtext: "Terhubung Portal Wali",
-      badge: "Terverifikasi",
+      subtext: "Terdaftar di Profil Wali",
+      badge: `${statsData?.totalGuardians ?? 0} Wali`,
       badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
       icon: UserCheck, 
       color: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20" 
@@ -169,54 +173,22 @@ export function DashboardTab() {
 
   const stats = isPondok ? pondokStats : madrasahStats;
 
-  const madrasahChartData = [
-    { name: "I'dadiyyah", santri: statsData?.performances?.find(p => p.level === "I'dadiyyah")?.active ?? 42 },
-    { name: "Ibtida'iyyah", santri: statsData?.performances?.find(p => p.level === "Ibtida'iyyah")?.active ?? 128 },
-    { name: "Tsanawiyyah", santri: statsData?.performances?.find(p => p.level === "Tsanawiyyah")?.active ?? 96 },
-    { name: "Aliyyah", santri: statsData?.performances?.find(p => p.level === "Aliyyah")?.active ?? 64 },
-  ];
+  // Real Database Chart Data (Strictly from DB, No Fallback Mock Array)
+  const madrasahChartData = (statsData?.performances || []).map(p => ({
+    name: p.level,
+    santri: p.active
+  }));
 
-  const pondokChartData = (statsData?.roomDistributions && statsData.roomDistributions.length > 0)
-    ? statsData.roomDistributions.map(r => ({ name: r.roomName, santri: r.studentCount }))
-    : [
-        { name: "Khadijah 1", santri: 24 },
-        { name: "Khadijah 2", santri: 22 },
-        { name: "Aisyah 1", santri: 26 },
-        { name: "Aisyah 2", santri: 20 },
-        { name: "Fatimah 1", santri: 28 },
-        { name: "Fatimah 2", santri: 25 },
-      ];
+  const pondokChartData = (statsData?.roomDistributions || []).map(r => ({
+    name: r.roomName,
+    santri: r.studentCount
+  }));
 
   const chartData = isPondok ? pondokChartData : madrasahChartData;
   const primaryThemeColor = isPondok ? "#10b981" : "#3b82f6";
 
-  const defaultLogs = [
-    {
-      id: "demo-1",
-      action: "UPDATE",
-      entity: "SANTRI",
-      userId: "sekretaris",
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: "demo-2",
-      action: "LOGIN",
-      entity: "AUTH",
-      userId: "mufattisy",
-      createdAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-    },
-    {
-      id: "demo-3",
-      action: "CREATE",
-      entity: "PERIZINAN",
-      userId: "keamanan",
-      createdAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-    },
-  ];
-
-  const logsToRender = (statsData?.recentAuditLogs && statsData.recentAuditLogs.length > 0)
-    ? statsData.recentAuditLogs
-    : defaultLogs;
+  // Real Database Audit Logs (Strictly from DB, No Fallback Mock Array)
+  const auditLogs = statsData?.recentAuditLogs || [];
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-12">
@@ -228,13 +200,16 @@ export function DashboardTab() {
       }`}>
         <div className="flex flex-col gap-3 z-10">
           <div className="flex flex-wrap items-center gap-2">
-            {/* Live Indicator Badge */}
+            {/* Live Real-time DB Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span>LIVE REAL-TIME SYNC</span>
+              <span className="flex items-center gap-1">
+                <Database className="w-3 h-3" />
+                DATABASE SINKRON (10s)
+              </span>
             </div>
 
             {/* Live Clock Badge */}
@@ -252,8 +227,8 @@ export function DashboardTab() {
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-2xl">
               {isPondok 
-                ? "Pusat kendali operasional Pondok Pesantren Putri (P3HM). Pantau kedisiplinan, kamar asrama, perizinan keluar, dan khidmah alumni."
-                : "Pusat kendali operasional Madrasah Diniyyah (MPHM). Pantau rombel kelas, transkrip nilai kwartal, absensi, dan mufattisy."
+                ? "Pusat kendali operasional Pondok Pesantren Putri (P3HM). Seluruh data diambil secara langsung dari Database Neon PostgreSQL."
+                : "Pusat kendali operasional Madrasah Diniyyah (MPHM). Seluruh data diambil secara langsung dari Database Neon PostgreSQL."
               }
             </p>
           </div>
@@ -293,7 +268,7 @@ export function DashboardTab() {
             onClick={() => refetch()}
             disabled={isRefetching}
             className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-2xl border border-zinc-700 transition-all flex items-center justify-center cursor-pointer shadow-xs"
-            title="Refresh Data Real-time"
+            title="Sembunyikan / Muat Ulang Data Database"
           >
             <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin text-blue-400" : ""}`} />
           </button>
@@ -386,7 +361,7 @@ export function DashboardTab() {
         </div>
       </div>
 
-      {/* KPI Stats Cards Grid */}
+      {/* KPI Stats Cards Grid (Pure Real Database) */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -426,9 +401,9 @@ export function DashboardTab() {
         })}
       </motion.div>
 
-      {/* Charts & Real-time Activity Feed Grid */}
+      {/* Charts & Real-time Database Activity Feed Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Bar Chart */}
+        {/* Main Bar Chart (Pure Database Records) */}
         <div className="lg:col-span-2 p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col gap-4 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
             <div>
@@ -437,17 +412,22 @@ export function DashboardTab() {
                 <span>{isPondok ? "Distribusi Santri per Kamar Asrama" : "Distribusi Santri per Jenjang Diniyyah"}</span>
               </h2>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
-                {isPondok ? "Kapasitas penghuni santriwati di setiap kamar asrama." : "Persebaran santri aktif dari I'dadiyyah hingga Aliyyah."}
+                Data aktual persebaran dari database database PostgreSQL Neon.
               </p>
             </div>
             <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-bold rounded-lg font-mono">
-              {isPondok ? "Komplek Desa & Kota" : "4 Jenjang Active"}
+              Real DB Data
             </span>
           </div>
           
           <div className="flex-1 min-h-[280px] flex items-center justify-center w-full pt-2">
             {isLoading ? (
-              <div className="text-sm text-zinc-400 font-medium">Memuat statistik realtime...</div>
+              <div className="text-sm text-zinc-400 font-medium">Memuat data database...</div>
+            ) : chartData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 text-zinc-400 py-12">
+                <Inbox className="w-8 h-8 stroke-1 text-zinc-500" />
+                <span className="text-xs font-bold">Belum ada data distribusi {isPondok ? "kamar asrama" : "jenjang kelas"} di database</span>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart
@@ -468,12 +448,12 @@ export function DashboardTab() {
           </div>
         </div>
 
-        {/* Real-time Activity Log Panel */}
+        {/* Real-time Activity Log Panel (Pure Database Audit Log) */}
         <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col gap-4 shadow-xs">
           <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
             <h2 className="text-base font-extrabold text-zinc-900 dark:text-white flex items-center gap-2">
               <Activity className="w-4 h-4 text-emerald-500" />
-              <span>Log Aktivitas Real-Time</span>
+              <span>Log Aktivitas Real-Time DB</span>
             </h2>
             <Link
               href="/sekretariat/audit-logs"
@@ -485,27 +465,34 @@ export function DashboardTab() {
           </div>
 
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[290px] pr-1">
-            {logsToRender.map((log) => (
-              <div 
-                key={log.id} 
-                className="p-3 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-1 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      log.action === "LOGIN" ? "bg-emerald-500" : log.action === "CREATE" ? "bg-blue-500" : "bg-amber-500"
-                    }`} />
-                    {log.userId}
-                  </span>
-                  <span className="text-[10px] text-zinc-400 font-semibold">
-                    {getRelativeTimeString(log.createdAt)}
-                  </span>
-                </div>
-                <p className="text-[11px] text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
-                  Aksi <strong className="text-zinc-900 dark:text-zinc-200">{log.action}</strong> pada modul <span className="text-blue-600 dark:text-blue-400 font-bold">{log.entity}</span>
-                </p>
+            {auditLogs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 text-zinc-400 py-12">
+                <Inbox className="w-8 h-8 stroke-1 text-zinc-500" />
+                <span className="text-xs font-bold text-center">Belum ada riwayat aktivitas audit log di database</span>
               </div>
-            ))}
+            ) : (
+              auditLogs.map((log) => (
+                <div 
+                  key={log.id} 
+                  className="p-3 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 rounded-xl space-y-1 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        log.action === "LOGIN" ? "bg-emerald-500" : log.action === "CREATE" ? "bg-blue-500" : "bg-amber-500"
+                      }`} />
+                      {log.userId}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-semibold">
+                      {getRelativeTimeString(log.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
+                    Aksi <strong className="text-zinc-900 dark:text-zinc-200">{log.action}</strong> pada modul <span className="text-blue-600 dark:text-blue-400 font-bold">{log.entity}</span>
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
