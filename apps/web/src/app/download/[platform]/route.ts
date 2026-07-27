@@ -28,28 +28,30 @@ const FALLBACK_CONFIGS: Record<string, { url: string; filename: string; contentT
   },
 };
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const typeParam = searchParams.get("type") || "staff";
-  const type = typeParam.toLowerCase().trim();
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ platform: string }> }
+) {
+  const { platform: rawPlatform } = await params;
+  const platform = (rawPlatform || "").toLowerCase().trim();
 
   let targetUrl: string | undefined;
   let filename: string | undefined;
-  let contentType = type === "windows" || type === "admin"
+  let contentType = platform === "windows" || platform === "admin"
     ? "application/x-msdownload"
     : "application/vnd.android.package-archive";
 
   try {
-    const reqHeaders: Record<string, string> = {
+    const headers: Record<string, string> = {
       Accept: "application/vnd.github+json",
       "User-Agent": "Mubtadiaat-Download-Center",
     };
     if (process.env.GITHUB_TOKEN) {
-      reqHeaders["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+      headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
     }
 
     const res = await fetch("https://api.github.com/repos/mubtadiaat/app_software/releases/latest", {
-      headers: reqHeaders,
+      headers,
       next: { revalidate: 300 },
     });
 
@@ -58,17 +60,17 @@ export async function GET(request: Request) {
       if (Array.isArray(release.assets)) {
         for (const asset of release.assets) {
           const nameLower = (asset.name || "").toLowerCase();
-          if ((type === "admin" || type === "windows") && nameLower.endsWith(".exe")) {
+          if ((platform === "windows" || platform === "admin") && nameLower.endsWith(".exe")) {
             targetUrl = asset.browser_download_url;
             filename = asset.name;
             contentType = "application/x-msdownload";
             break;
-          } else if ((type === "guardian" || type === "wali") && nameLower.startsWith("e-mubtadiaat") && nameLower.endsWith(".apk")) {
+          } else if ((platform === "guardian" || platform === "wali") && nameLower.startsWith("e-mubtadiaat") && nameLower.endsWith(".apk")) {
             targetUrl = asset.browser_download_url;
             filename = asset.name;
             contentType = "application/vnd.android.package-archive";
             break;
-          } else if (type === "staff" && nameLower.startsWith("mubtadiaat") && nameLower.endsWith(".apk")) {
+          } else if (platform === "staff" && nameLower.startsWith("mubtadiaat") && nameLower.endsWith(".apk")) {
             targetUrl = asset.browser_download_url;
             filename = asset.name;
             contentType = "application/vnd.android.package-archive";
@@ -78,10 +80,10 @@ export async function GET(request: Request) {
       }
     }
   } catch (err) {
-    console.warn("Could not fetch latest release dynamically, falling back:", err);
+    console.warn("Error resolving dynamic download URL for platform:", platform, err);
   }
 
-  const fallback = FALLBACK_CONFIGS[type] || FALLBACK_CONFIGS.staff;
+  const fallback = FALLBACK_CONFIGS[platform] || FALLBACK_CONFIGS.staff;
   if (!targetUrl) {
     targetUrl = fallback.url;
     filename = fallback.filename;
@@ -105,7 +107,7 @@ export async function GET(request: Request) {
       responseHeaders.set("Content-Type", contentType);
       responseHeaders.set("Content-Disposition", `attachment; filename="${filename}"`);
       responseHeaders.set("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
-
+      
       const contentLength = fileRes.headers.get("content-length");
       if (contentLength) {
         responseHeaders.set("Content-Length", contentLength);
@@ -120,5 +122,6 @@ export async function GET(request: Request) {
     console.warn("Direct stream failed, falling back to 307 redirect:", streamError);
   }
 
+  // Fallback redirect if binary stream fails
   return NextResponse.redirect(targetUrl, 307);
 }
