@@ -135,7 +135,47 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   // Media Upload States
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Feature: Tarik Data Santriwati Pondok (P3HM) -> Siswi Madrasah (MPHM)
+  const [pondokSantriList, setPondokSantriList] = useState<Santri[]>([]);
+  const [selectedPondokSantriId, setSelectedPondokSantriId] = useState("");
+
+  useEffect(() => {
+    if (showFormModal && !isPondok && !editingSantri) {
+      apiRequest<{ data: Santri[] }>("/api/admin/people?role=student&limit=1000")
+        .then((res) => {
+          if (res.data) setPondokSantriList(res.data);
+        })
+        .catch((err) => console.error("Failed to load Pondok Santriwati list", err));
+    }
+  }, [showFormModal, isPondok, editingSantri]);
+
+  const handleSelectPondokSantri = (id: string) => {
+    setSelectedPondokSantriId(id);
+    const target = pondokSantriList.find((s) => s.id === id);
+    if (target) {
+      setNewName(target.name);
+      setNewNik(target.nik);
+      setNewGender(target.gender || "P");
+      setNewBirthPlace(target.birthPlace || "");
+      setNewBirthDate(target.birthDate || "");
+      setNewPhoneNumber(target.phoneNumber || "");
+      setAvatarUrl(target.avatarUrl || null);
+      setNewStambuk(target.stambuk);
+      setNewNis(target.nis || target.stambuk);
+      setNewNisn(target.nisn || "");
+      setNewAddress(target.address || "");
+      setNewGuardianName(target.guardianName || "");
+      setNewGuardianNik(target.guardianNik || "");
+      setNewGuardianPhone(target.guardianPhone || "");
+      setNewGuardianRelation(target.guardianRelation || "AYAH");
+      setNewFamilyCardNumber(target.familyCardNumber || "");
+      if (target.room) setNewRoom(target.room);
+      toast(`✅ Data ${target.name} (${target.stambuk}) ditarik dari Santriwati Pondok!`, "success");
+    }
+  };
+
   const handleOpenAdd = () => {
+    setSelectedPondokSantriId("");
     setEditingSantri(null);
     setNewName("");
     setNewNik("");
@@ -785,6 +825,39 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               </div>
 
               <form onSubmit={handleSaveForm} className="flex-1 overflow-y-auto p-6 space-y-8">
+                {/* Feature: Tarik Data Santriwati Pondok (P3HM) */}
+                {!isPondok && !editingSantri && (
+                  <div className="p-4 bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-zinc-900 border border-blue-500/30 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                        <Home className="w-4 h-4 text-emerald-400" />
+                        🔍 Tarik Data Siswi dari Santriwati Pondok (P3HM)
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                        Otomatis Isi Biodata & Smart KK
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-400">
+                      Seluruh siswi Madrasah (MPHM) bersumber dari data Santriwati Pondok (P3HM). Pilih nama/stambuk di bawah untuk mengisi identitas pribadi & wali secara otomatis.
+                    </p>
+
+                    <div className="flex items-center gap-3">
+                      <select
+                        value={selectedPondokSantriId}
+                        onChange={(e) => handleSelectPondokSantri(e.target.value)}
+                        className="flex-1 px-3 py-2.5 bg-zinc-900 border border-zinc-700 rounded-xl text-xs font-semibold text-white outline-none focus:border-blue-500 cursor-pointer"
+                      >
+                        <option value="">-- Pilih Santriwati Pondok (Stambuk / NIK / Nama) --</option>
+                        {pondokSantriList.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} (Stambuk: {s.stambuk} • NIK: {s.nik || "-"})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+
                 {/* 1. Pas Foto */}
                 <div className="bg-zinc-50 dark:bg-zinc-800/20 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-6">
                   <div className="relative shrink-0 w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-850 flex items-center justify-center shadow-inner group">

@@ -5,19 +5,16 @@ Modul Manajemen Asrama (`rooms`), Penugasan Alumni Khidmah (`khidmah_assignments
 
 ---
 
-## 1. MANAJEMEN KAMAR & ASRAMA (`rooms`)
+## 1. MANAJEMEN ASRAMA & KAMAR (`rooms`)
 - **Tabel Database**: `rooms` terhubung ke `people` (sebagai Musyrifah / Wali Kamar) dan `student_profiles` (sebagai Penghuni).
-- **Atribut Utama**: Nama Kamar (`name`), Nama Gedung (`building_name`), Kapasitas Maksimal (`capacity`), dan Wali Kamar (`supervisor_id`).
-- **Aturan Mutlak 2 Gedung Utama**:
-  Gedung Asrama HANYA terdiri dari 2 pilihan resmi:
-  1. `Gedung Kota` (Komplek Asrama Kota)
-  2. `Gedung Desa` (Komplek Asrama Desa)
-- **Rumus Pemetaan Abjad Kamar A-Z (`determineBuildingName`)**:
-  - Kamar Kode **A s/d D** (Contoh: `A-01`, `A-02`, `B-05`, `C-10`, `D-02`) $\rightarrow$ Otomatis dialokasikan ke **`Gedung Kota`** (Contoh: `A-02` di Gedung Kota).
-  - Kamar Kode **E s/d Z** (Contoh: `E-01`, `F-02`, `G-10`, `Z-01`) $\rightarrow$ Otomatis dialokasikan ke **`Gedung Desa`** (Contoh: `E-01` di Gedung Desa).
-  - Override Kata Kunci: Jika nama kamar mengandung kata `"Kota"` atau `"Desa"`, gedung disesuaikan otomatis dengan kata kunci tersebut.
+- **Atribut Utama**: Nama Kamar (`name`), Nama Blok / Komplek (`building_name`), Kapasitas Maksimal (`capacity`), dan Wali Kamar (`supervisor_id`).
+- **Aturan Nama Blok (Komplek) Dinamis**:
+  Gedung/Blok Asrama menggunakan istilah resmi **`Nama Blok (Komplek)`** yang bebas dikelola secara dinamis oleh Sekretariat (contoh: `Blok A`, `Blok B`, `Komplek Al-Mahrusiyah`, `Komplek Utama`).
+- **2 Sub-Menu Navigasi Data Asrama (`/sekretariat/rooms`)**:
+  1. **Sub-Menu 1: Blok / Komplek**: Grid visual kartu blok berisi daftar kamar di dalamnya, kapasitas total, penghuni aktif, persentase keterisian, dan statistik hunian.
+  2. **Sub-Menu 2: Data Kamar**: Form input dan tabel kamar yang disesuaikan secara presisi dengan pilihan Nama Blok (Komplek) terkait.
 - **Otomatisasi Pembuatan Kamar saat Impor Santri**:
-  Jika saat **Impor Data Santri (Excel/CSV)** atau registrasi baru terdapat kamar yang belum terdaftar di database, sistem **secara otomatis membuat kamar baru** di tabel `rooms` dengan `buildingName` yang dihitung otomatis dari rumus abjad A-Z dan `supervisorId: null` (siap diedit oleh Sekretariat).
+  Jika saat **Impor Data Santri (Excel/CSV)** atau registrasi baru terdapat kamar yang belum terdaftar di database, sistem **secara otomatis membuat kamar baru** di tabel `rooms` dengan `buildingName` yang terhitung otomatis dan `supervisorId: null` (siap diedit oleh Sekretariat).
 - **Integrasi Dashboard Pondok**: Sekretariat Pondok (`sek.pondok`) dapat memantau keterisian kamar, memindahkan santri antar kamar, dan menugaskan Musyrifah secara dinamis.
 
 ---

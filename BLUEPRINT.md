@@ -5,63 +5,60 @@ Dokumen ini merupakan acuan resmi (*single source of truth*) mengenai seluruh ar
 
 ---
 
-## 1. STRUKTUR KEASRAMAAN & GEDUNG (BLUEPRINT #07 - KEASRAMAAN)
+## 1. INTEGRASI DATA SANTRIWATI (PONDOK) & SISWI (MADRASAH)
 
-### 1.1. Aturan Gedung & Komplek Asrama
-* **Jumlah Gedung Resmi**: Hanya ada **2 Gedung Utama**:
-  1. `Gedung Kota` (Komplek Asrama Kota)
-  2. `Gedung Desa` (Komplek Asrama Desa)
-* **Aturan Penamaan Kamar & Pemetaan Gedung Otomatis**:
-  Kamar dinamai dengan format abjad **A-Z** + Nomor (Contoh: `A-02`, `E-01`, `B-05`, `G-12`).
-  - **Kamar Kode A s/d D** (`A-*`, `B-*`, `C-*`, `D-*`) $\rightarrow$ Otomatis dialokasikan ke **`Gedung Kota`** (Contoh: `A-02` berada di Gedung Kota).
-  - **Kamar Kode E s/d Z** (`E-*`, `F-*`, `G-*`, dst.) $\rightarrow$ Otomatis dialokasikan ke **`Gedung Desa`** (Contoh: `E-01` berada di Gedung Desa).
-  - **Override Kata Kunci**: Jika nama kamar/asrama secara eksplisit mengandung kata `"Kota"` atau `"Desa"`, gedung disesuaikan secara otomatis.
-
-### 1.2. Pembuatan Kamar Otomatis saat Impor Santri
-* Jika saat **Impor Data Santri (Excel/CSV)** atau registrasi baru terdapat data kamar yang belum terdaftar di database (misal `A-02` atau `E-01`), sistem akan **secara otomatis membuat kamar baru tersebut** di tabel `rooms` dengan `buildingName` yang terhitung dari rumus abjad A-Z.
-* Penanggung jawab / Musyrifah Kamar (`supervisorId`) dikosongkan (`null`) terlebih dahulu agar Sekretariat dapat mengedit dan menetapkannya di menu Data Kamar.
+### 1.1. Single Source of Truth Identitas Santriwati
+* Entire master identity data reside in **Pondok Pesantren (P3HM)** database (`student_profiles`).
+* **Data Siswi Madrasah (MPHM) Ditarik dari Data Santriwati Pondok (P3HM)**:
+  Santriwati yang didaftarkan di Pondok P3HM adalah induk utama. Saat mendaftarkan Siswi Diniyyah Baru di Madrasah MPHM, Sekretariat Madrasah tidak perlu mengetik ulang biodata.
+* **Fitur Auto-Fill Registrasi Siswi**:
+  Pada modal registrasi Siswi Baru, Sekretariat MPHM memilih Santriwati Pondok via menu **`🔍 Tarik Data dari Santriwati Pondok (P3HM)`**. Pilihan ini mengisi Nama, NIK, Tempat/Tgl Lahir, Alamat, No KK, Wali, Telepon, Foto Avatar, dan Kamar secara otomatis.
 
 ---
 
-## 2. ATURAN HAK AKSES & PERAN PENGGUNA (BLUEPRINT #08 - PRIVILEGES & SCOPING)
+## 2. STRUKTUR KEASRAMAAN & DATA ASRAMA (BLOK & KAMAR)
 
-### 2.1. Peran View-Only / Read-Only (Mufattisy & Mundzir)
+### 2.1. Aturan Nama Blok (Komplek) & Sub-Menu Asrama
+* **Nama Blok (Komplek) Dinamis**:
+  Gedung/Blok Asrama menggunakan istilah resmi **`Nama Blok (Komplek)`** yang dikelola bebas oleh Sekretariat (contoh: `Blok A`, `Blok B`, `Komplek Al-Mahrusiyah`).
+* **2 Sub-Menu Navigasi Data Asrama (`/sekretariat/rooms`)**:
+  1. **Sub-Menu 1: Blok / Komplek**: Grid visual kartu blok berisi daftar kamar di dalamnya, kapasitas total, dan penghuni aktif.
+  2. **Sub-Menu 2: Data Kamar**: Form input dan tabel kamar yang disesuaikan secara dinamis dengan pilihan Nama Blok (Komplek).
+
+### 2.2. Pembuatan Kamar Otomatis saat Impor Santri
+* Jika saat **Impor Data Santri (Excel/CSV)** atau registrasi baru terdapat data kamar yang belum terdaftar di database, sistem secara otomatis membuat kamar baru di tabel `rooms` dengan `buildingName` terhitung otomatis.
+
+---
+
+## 3. ATURAN HAK AKSES & PERAN PENGGUNA (PRIVILEGES & SCOPING)
+
+### 3.1. Peran View-Only / Read-Only (Mufattisy & Mundzir)
 * Peran **Mufattisy** (Inspektur Pengawas) dan **Mundzir / Pimpinan** bersifat **100% Read-Only (Inspeksi)**.
-* **Pembatasan Fitur**:
-  - Tombol Tambah/Registrasi (`+ Registrasi Siswi Baru`, `+ Tambah Pelanggaran`, `+ Buat Perizinan Baru`) **100% disembunyikan**.
-  - Tombol **Import Excel/CSV** disembunyikan.
-  - Aksi per baris tabel (**Edit**, **Hapus**, **Setujui/Tolak**, **Mutasi**) terkunci rapat.
+* **Pembatasan Fitur**: Tombol Tambah, Edit, Hapus, Import, dan Mutasi disembunyikan.
 
-### 2.2. Automatic Supervised Level Scoping & UI Locking (`supervisedLevel`)
-* Pengguna dengan peran Mufattisy dan Mundzir terikat secara mutlak pada 1 Jenjang Pengawasan (`supervisedLevel`) masing-masing:
-  - *Ali Imran* $\rightarrow$ `Ibtida'iyyah`
-  - *Nur Hidayat* $\rightarrow$ `I'dadiyyah`
-  - *Hasan Basri* $\rightarrow$ `Tsanawiyyah`
-  - *Yusuf Maulana* $\rightarrow$ `Aliyyah`
-* **Aturan Kunci Tampilan (Strict Single-Level UI Locking)**:
-  - **Filter Jenjang Bar**: HANYA boleh menampilkan 1 badge terkunci sesuai `supervisedLevel` akun aktif. Tombol-tombol jenjang lain ("Semua", "Ibtida'iyyah", "Tsanawiyyah", "Aliyyah", "I'dadiyyah") **DILARANG TAMPIL** di layar Mufattisy/Mundzir.
-  - **Filter Kelas Dropdown**: HANYA boleh memuat dan mengisikan kelas-kelas yang berada di bawah `supervisedLevel` akun Mufattisy aktif (misal jika Mufattisy I'dadiyyah, dropdown kelas hanya berisi rombel I'dadiyyah, tidak boleh menampilkan rombel dari jenjang lain).
-  - **Backend API Scoping**: Endpoint `/api/admin/people`, `/api/admin/classes`, dan `/api/mufattisy/dashboard/stats` secara otomatis menyaring query database hanya untuk `supervisedLevel` akun yang sedang login.
+### 3.2. Automatic Supervised Level Scoping & UI Locking (`supervisedLevel`)
+* Pengguna Mufattisy dan Mundzir terikat pada `supervisedLevel` (*Ibtida'iyyah*, *I'dadiyyah*, *Tsanawiyyah*, *Aliyyah*).
+* **Strict Single-Level UI Locking**: Filter Jenjang Bar HANYA menampilkan 1 badge terkunci sesuai `supervisedLevel` akun aktif.
+
+### 3.3. Portal Pos Keamanan (`keamanan`)
+* User Keamanan memiliki akses langsung ke menu **Perizinan Santri** (`/keamanan/perizinan`).
+* Mendukung 3 jenis perizinan: `KELUAR` (Izin Keluar Komplek), `PULANG` (Izin Pulang Ke Rumah), dan `SAMBANGAN` (Kunjungan Wali Santri di Gerbang).
 
 ---
 
-## 3. ATURAN PEMBERSIHAN OTOMATIS WALI SANTRI (BLUEPRINT #09 - SMART GUARDIAN)
+## 4. ATURAN PEMBERSIHAN OTOMATIS WALI SANTRI (SMART GUARDIAN)
 
-### 3.1. Relasi KK & Wali Santri
-* Santriwati dan Wali Santri dihubungkan melalui Nomor Kartu Keluarga (`familyCardNumber`).
-* Sistem mendukung *Smart KK Mapping*, yaitu wali dapat terhubung dengan lebih dari satu santri jika memiliki Nomor KK yang sama.
-
-### 3.2. Automatic Orphaned Guardians Cleanup (`cleanOrphanedGuardians`)
-* Jika seorang santri dihapus atau dipurge dari sistem, sistem akan memeriksa apakah Wali Santri dari santri tersebut masih memiliki anak/santri aktif lain yang terdaftar.
-* **Jika Wali tidak lagi memiliki santri aktif**, sistem secara otomatis membersihkan (*soft-delete*) profil `GuardianProfile`, `UserAccount`, dan `Person` milik Wali tersebut sehingga tidak menyisakan data sampah di database.
+### 4.1. Automatic Orphaned Guardians Cleanup (`cleanOrphanedGuardians`)
+* Jika seorang santri dihapus atau dipurge dari sistem dan walinya tidak lagi memiliki santri aktif lain, sistem secara otomatis membersihkan (*soft-delete*) profil `GuardianProfile`, `UserAccount`, dan `Person` milik Wali tersebut.
 
 ---
 
-## 4. SKEMA DATABASE & CORE API (BLUEPRINT RECAP)
+## 5. SYSTEM SETTINGS COCKPIT & DASHBOARD REAL-TIME
 
-### 4.1. Tabel Utama Prisma
-* `persons`: Data individu fisik (Santri, Wali, Guru, Pengurus).
-* `student_profiles`: Profil santriwati (Stambuk, NIS, NISN, status, `roomId`).
-* `rooms`: Data kamar asrama (`name`, `buildingName` ["Gedung Kota" | "Gedung Desa"], `capacity`, `supervisorId`).
-* `guardian_profiles`: Profil wali santri (`familyCardNumber`, `relation`).
-* `organization_memberships`: Peran pengurus/mufattisy/mundzir & `supervisedLevel`.
+### 5.1. User-Friendly System Settings Cockpit
+* Terbagi dalam 4 Kategori (Modul & Otorisasi, Peran & Hirarki, Aturan & Integrasi, Pemeliharaan Data) dengan 10 Sub-Tab.
+* Dilengkapi **`FriendlyGuideCard`** (💡 Petunjuk Penggunaan) dan **`FriendlySwitch`** (`[ AKTIF ]` / `[ NON-AKTIF ]`).
+
+### 5.2. Dashboard Real-Time 100% Database Murni
+* Zero mock/demo data. Polling otomatis 10 detik.
+* Akses Cepat (Quick Action Shortcuts) disesuaikan khusus per instansi (Madrasah vs Pondok).
