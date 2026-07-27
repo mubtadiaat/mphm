@@ -11,6 +11,7 @@ export interface DashboardStats {
   totalMundzir?: number;
   totalMufattisy?: number;
   totalMustahiq?: number;
+  totalMusyrifah?: number;
   totalSubjects?: number;
   totalViolationTypes?: number;
   performances: {

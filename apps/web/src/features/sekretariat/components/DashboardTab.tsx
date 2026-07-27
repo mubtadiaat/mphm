@@ -215,6 +215,7 @@ export function DashboardTab() {
   const hasMundzir = (statsData?.totalMundzir ?? 0) > 0;
   const hasMufattisy = (statsData?.totalMufattisy ?? 0) > 0;
   const hasMustahiq = (statsData?.totalMustahiq ?? 0) > 0;
+  const hasMusyrifah = (statsData?.totalMusyrifah ?? 0) > 0;
   const hasClasses = (statsData?.totalClasses ?? 0) > 0;
   const hasSubjects = (statsData?.totalSubjects ?? 0) > 0;
   const hasStudents = (statsData?.totalStudents ?? 0) > 0;
@@ -224,10 +225,10 @@ export function DashboardTab() {
   const pondokSteps = [
     { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
     { label: "Data Mundzir (Pimpinan)", ready: hasMundzir, href: "/sekretariat/mundzir" },
+    { label: "Data Musyrifah (Pembina)", ready: hasMusyrifah, href: "/sekretariat/pengurus" },
     { label: "Data Asrama (Blok & Kamar)", ready: hasRooms, href: "/sekretariat/rooms" },
     { label: "Master Pelanggaran", ready: hasViolationTypes, href: "/sekretariat/pelanggaran" },
     { label: "Data Induk Santriwati", ready: hasStudents, href: "/sekretariat/santri" },
-    { label: "Perizinan & Khidmah", ready: (statsData?.activePermits ?? 0) > 0 || hasStudents, href: "/sekretariat/perizinan" },
   ];
 
   const madrasahSteps = [

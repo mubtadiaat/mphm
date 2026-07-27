@@ -27,10 +27,12 @@ interface OnboardingStatus {
   hasMundzir: boolean;
   hasMufattisy: boolean;
   hasMustahiq: boolean;
+  hasMusyrifah: boolean;
   hasClasses: boolean;
   hasSubjects: boolean;
   hasSantri: boolean;
   hasRooms: boolean;
+  hasViolationTypes: boolean;
 }
 
 export function Sidebar({ role }: { role: RoleTypes }) {
@@ -44,10 +46,12 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     hasMundzir: true,
     hasMufattisy: true,
     hasMustahiq: true,
+    hasMusyrifah: true,
     hasClasses: true,
     hasSubjects: true,
     hasSantri: true,
     hasRooms: true,
+    hasViolationTypes: true,
   });
   const isSekretariatRole = role === "sek.pondok" || role === "sek.madrasah";
 
@@ -132,9 +136,11 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     if (!isSekretariatRole) return false;
 
     if (isPondokWorkspace) {
-      if (href === "/sekretariat/rooms" && !onboardingStatus.hasMundzir) return true;
-      if (href === "/sekretariat/santri" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasRooms)) return true;
-      if ((href === "/sekretariat/perizinan" || href === "/sekretariat/pelanggaran") && !onboardingStatus.hasSantri) return true;
+      if (href === "/sekretariat/pengurus" && !onboardingStatus.hasMundzir) return true;
+      if (href === "/sekretariat/rooms" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMusyrifah)) return true;
+      if (href === "/sekretariat/pelanggaran" && !onboardingStatus.hasRooms) return true;
+      if (href === "/sekretariat/santri" && (!onboardingStatus.hasRooms || !onboardingStatus.hasViolationTypes)) return true;
+      if ((href === "/sekretariat/perizinan" || href === "/sekretariat/khidmah") && !onboardingStatus.hasSantri) return true;
     } else {
       if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) return true;
       if (href === "/sekretariat/mustahiq" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMufattisy)) return true;
@@ -150,17 +156,27 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     if (!isSekretariatRole || loadingStatus) return;
 
     if (isPondokWorkspace) {
-      if (href === "/sekretariat/rooms" && !onboardingStatus.hasMundzir) {
+      if (href === "/sekretariat/pengurus" && !onboardingStatus.hasMundzir) {
         e.preventDefault();
         toast("Harap daftarkan Data Mundzir (Pimpinan) terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
         return;
       }
-      if (href === "/sekretariat/santri" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasRooms)) {
+      if (href === "/sekretariat/rooms" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMusyrifah)) {
         e.preventDefault();
-        toast("Harap daftarkan Data Kamar Asrama terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
+        toast("Harap daftarkan Data Musyrifah (Pembina Kamar) terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
         return;
       }
-      if ((href === "/sekretariat/perizinan" || href === "/sekretariat/pelanggaran") && !onboardingStatus.hasSantri) {
+      if (href === "/sekretariat/pelanggaran" && !onboardingStatus.hasRooms) {
+        e.preventDefault();
+        toast("Harap buat Data Kamar Asrama terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
+        return;
+      }
+      if (href === "/sekretariat/santri" && (!onboardingStatus.hasRooms || !onboardingStatus.hasViolationTypes)) {
+        e.preventDefault();
+        toast("Harap buat Data Kamar & Master Pelanggaran terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
+        return;
+      }
+      if ((href === "/sekretariat/perizinan" || href === "/sekretariat/khidmah") && !onboardingStatus.hasSantri) {
         e.preventDefault();
         toast("Harap daftarkan Santriwati Asrama terlebih dahulu!", "warning", "Prasyarat Belum Lengkap");
         return;

@@ -48,7 +48,33 @@ export async function GET() {
       }),
     ]);
 
+    const [musyrifahOrgCount, musyrifahUserCount] = await Promise.all([
+      prisma.organizationMembership.count({
+        where: {
+          OR: [
+            { role: { contains: "Musyrifah", mode: "insensitive" } },
+            { role: { contains: "Pembina", mode: "insensitive" } },
+            { role: { contains: "Pengurus", mode: "insensitive" } },
+          ],
+          deletedAt: null,
+        },
+      }),
+      prisma.userAccount.count({
+        where: {
+          OR: [
+            { role: { contains: "Musyrifah", mode: "insensitive" } },
+            { role: { contains: "Pembina", mode: "insensitive" } },
+          ],
+          deletedAt: null,
+        },
+      }),
+    ]);
+
     const classesCount = await prisma.academicClass.count({
+      where: { deletedAt: null },
+    });
+
+    const subjectsCount = await prisma.subject.count({
       where: { deletedAt: null },
     });
 
@@ -60,9 +86,14 @@ export async function GET() {
       where: { deletedAt: null },
     });
 
+    const violationTypesCount = await prisma.violationType.count({
+      where: { deletedAt: null },
+    });
+
     const mundzirCount = mundzirOrgCount + mundzirUserCount;
     const mufattisyCount = mufattisyOrgCount + mufattisyUserCount;
     const mustahiqCount = mustahiqTeacherCount + mustahiqUserCount;
+    const musyrifahCount = musyrifahOrgCount + musyrifahUserCount;
 
     return NextResponse.json({
       status: "Success",
@@ -70,9 +101,12 @@ export async function GET() {
         hasMundzir: mundzirCount > 0,
         hasMufattisy: mufattisyCount > 0,
         hasMustahiq: mustahiqCount > 0,
+        hasMusyrifah: musyrifahCount > 0,
         hasClasses: classesCount > 0,
+        hasSubjects: subjectsCount > 0,
         hasSantri: santriCount > 0,
         hasRooms: roomsCount > 0,
+        hasViolationTypes: violationTypesCount > 0,
       },
     });
   } catch (err: any) {

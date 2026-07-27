@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
       totalMustahiq,
       totalSubjects,
       totalViolationTypes,
+      totalMusyrifah,
     ] = await Promise.all([
       prisma.studentProfile.count({
         where: { status: "ACTIVE", deletedAt: null },
@@ -128,6 +129,16 @@ export async function GET(req: NextRequest) {
       prisma.violationType.count({
         where: { deletedAt: null },
       }),
+      prisma.organizationMembership.count({
+        where: {
+          OR: [
+            { role: { contains: "Musyrifah", mode: "insensitive" } },
+            { role: { contains: "Pembina", mode: "insensitive" } },
+            { role: { contains: "Pengurus", mode: "insensitive" } },
+          ],
+          deletedAt: null,
+        },
+      }),
     ]);
 
     const averageGpa = Math.round((scoreAgg._avg.score || 0) * 100) / 100;
@@ -182,6 +193,7 @@ export async function GET(req: NextRequest) {
       totalMustahiq,
       totalSubjects,
       totalViolationTypes,
+      totalMusyrifah,
       recentAuditLogs: recentAuditLogs.map((l) => ({
         id: l.id,
         action: l.action,
