@@ -37,6 +37,8 @@ export async function GET(req: NextRequest) {
     const prismaKhidmah = (prisma as any).khidmahAssignment || (prisma as any).khidmah_assignment;
     const prismaRoom = (prisma as any).room;
 
+    const prismaPermit = (prisma as any).studentPermit;
+
     // 2. Execute all queries concurrently in parallel
     const [
       totalStudents,
@@ -48,6 +50,8 @@ export async function GET(req: NextRequest) {
       totalGuardians,
       totalRooms,
       dbRooms,
+      recentAuditLogs,
+      activePermits,
     ] = await Promise.all([
       prisma.studentProfile.count({
         where: { status: "ACTIVE", deletedAt: null },
@@ -92,6 +96,18 @@ export async function GET(req: NextRequest) {
             },
           })
         : Promise.resolve([]),
+      prisma.auditLog.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 6,
+        select: {
+          id: true,
+          action: true,
+          entity: true,
+          userId: true,
+          createdAt: true,
+        },
+      }),
+      prismaPermit ? prismaPermit.count({ where: { status: "APPROVED", deletedAt: null } }) : Promise.resolve(0),
     ]);
 
     const averageGpa = Math.round((scoreAgg._avg.score || 0) * 100) / 100;
@@ -139,6 +155,15 @@ export async function GET(req: NextRequest) {
       totalGuardians,
       totalRooms,
       roomDistributions,
+      totalClasses: classes.length,
+      activePermits,
+      recentAuditLogs: recentAuditLogs.map((l) => ({
+        id: l.id,
+        action: l.action,
+        entity: l.entity,
+        userId: l.userId || "Sistem",
+        createdAt: l.createdAt.toISOString(),
+      })),
     };
 
     return NextResponse.json({

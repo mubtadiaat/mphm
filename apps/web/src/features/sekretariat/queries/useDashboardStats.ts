@@ -6,6 +6,8 @@ export interface DashboardStats {
   averageGpa: number;
   attendanceRate: number;
   activeViolations: number;
+  totalClasses?: number;
+  activePermits?: number;
   performances: {
     level: string;
     score: number;
@@ -19,6 +21,13 @@ export interface DashboardStats {
     roomName: string;
     buildingName?: string;
     studentCount: number;
+  }[];
+  recentAuditLogs?: {
+    id: string;
+    action: string;
+    entity: string;
+    userId: string;
+    createdAt: string;
   }[];
 }
 
@@ -34,5 +43,7 @@ export function useDashboardStats(academicYearId?: string, workspace: "madrasah"
       const res = await apiRequest<{ data: DashboardStats }>(url);
       return res.data;
     },
+    refetchInterval: 10000, // Sync real-time setiap 10 detik
+    staleTime: 5000,
   });
 }
