@@ -146,6 +146,7 @@ export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
     { label: "Dashboard", href: "/keamanan", icon: LayoutGrid },
     { label: "Jurnal", href: "/keamanan/jurnal", icon: ShieldAlert },
     { label: "Cari Santri", href: "/keamanan/santri", icon: Users },
+    { label: "Perizinan", href: "/keamanan/perizinan", icon: Ticket },
   ],
   wali_santri: [
     { label: "Dashboard", href: "/guardian", icon: LayoutGrid },
