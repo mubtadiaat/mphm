@@ -321,7 +321,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     },
     {
       accessorKey: "class",
-      header: "Kamar & Gedung Asrama",
+      header: "Kamar & Blok Komplek",
       cell: (info) => (
         <div className="flex flex-col gap-0.5 text-left">
           <span className="font-bold text-emerald-700 dark:text-emerald-400">

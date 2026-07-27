@@ -125,7 +125,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
     },
     {
       accessorKey: "buildingName",
-      header: "Gedung",
+      header: "Blok (Komplek)",
       meta: { align: "left" },
       cell: (info) => <span className="font-medium text-zinc-700 dark:text-zinc-350">{info.getValue() as string}</span>
     },
@@ -245,7 +245,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
         onRowClick={(row) => setViewingDetail(row as unknown as Room)}
         importExportProps={{
           title: "Data Kamar dan Asrama Santriwati",
-          headers: ["Nama Kamar Asrama", "Nama Gedung Blok", "Kapasitas Kamar", "Nama Pembina Kamar / Wali Asrama"],
+          headers: ["Nama Kamar Asrama", "Nama Blok Komplek", "Kapasitas Kamar", "Nama Pembina Kamar / Wali Asrama"],
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
@@ -327,15 +327,15 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Nama Gedung (Komplek) *</label>
+                  <label className="text-xs font-bold text-zinc-500 uppercase">Nama Blok (Komplek) *</label>
                   <select
                     required
-                    value={buildingName || "Gedung Kota"}
+                    value={buildingName || "Komplek Kota"}
                     onChange={(e) => setBuildingName(e.target.value)}
                     className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-zinc-900 dark:text-white font-semibold cursor-pointer"
                   >
-                    <option value="Gedung Kota">Gedung Kota (Kamar A - D)</option>
-                    <option value="Gedung Desa">Gedung Desa (Kamar E - Z)</option>
+                    <option value="Komplek Kota">Komplek Kota (Kamar A - D)</option>
+                    <option value="Komplek Desa">Komplek Desa (Kamar E - Z)</option>
                   </select>
                 </div>
 
@@ -416,7 +416,7 @@ export function RoomsTab({ isReadOnly = false }: RoomsTabProps) {
                       <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.name || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Gedung</td>
+                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Blok (Komplek)</td>
                       <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left">{viewingDetail.buildingName || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
