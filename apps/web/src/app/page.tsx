@@ -29,6 +29,7 @@ import {
   Info
 } from "lucide-react";
 import type { DownloadReleasesResponse } from "./api/download/releases/route";
+import { filterHighestVersionPerDate } from "@/lib/releaseUtils";
 
 const ROLE_REDIRECT_MAP: Record<string, string> = {
   "sek.pondok": "/sekretariat",
@@ -152,7 +153,7 @@ export default function Page() {
                 guardian: guardianAsset,
               };
 
-              const processedHistory = validReleases.slice(1).map((rel: any) => {
+              const rawHistory = validReleases.slice(1).map((rel: any) => {
                 let winA: any, stfA: any, trdA: any;
                 let relDownloads = 0;
                 if (Array.isArray(rel.assets)) {
@@ -186,6 +187,8 @@ export default function Page() {
                   guardian: trdA,
                 };
               });
+
+              const processedHistory = filterHighestVersionPerDate(rawHistory);
 
               setReleaseData({
                 latest: processedLatest,
@@ -260,8 +263,8 @@ export default function Page() {
 
   const totalDownloadsSum = releaseData?.stats?.totalDownloads ?? (adminCount + staffCount + guardianCount);
 
-  // Filter history based on search query
-  const filteredHistory = (releaseData?.history || []).filter((rel) => {
+  // Filter history based on search query (ensuring 1 highest version per date)
+  const filteredHistory = filterHighestVersionPerDate(releaseData?.history || []).filter((rel) => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     return (

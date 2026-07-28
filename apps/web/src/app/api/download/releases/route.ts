@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { filterHighestVersionPerDate } from "@/lib/releaseUtils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -229,7 +230,8 @@ export async function GET() {
     });
 
     const latest = processedReleases.length > 0 ? processedReleases[0] : null;
-    const history = processedReleases.length > 1 ? processedReleases.slice(1) : [];
+    const rawHistory = processedReleases.length > 1 ? processedReleases.slice(1) : [];
+    const history = filterHighestVersionPerDate(rawHistory);
 
     const responsePayload: DownloadReleasesResponse = {
       latest,
