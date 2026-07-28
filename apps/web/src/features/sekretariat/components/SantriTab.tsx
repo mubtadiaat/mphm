@@ -297,6 +297,11 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const handleSaveForm = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!isPondok && !editingSantri && !selectedPondokSantriId) {
+      toast("Harap pilih Santriwati Pondok (P3HM) terlebih dahulu untuk ditarik datanya!", "warning");
+      return;
+    }
+
     if (!newName.trim() || !newNik.trim() || !newStambuk.trim() || !newFamilyCardNumber.trim()) {
       toast("Harap lengkapi semua bidang wajib (*)", "warning");
       return;
@@ -343,6 +348,13 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     } catch (_err) {
       toast("Gagal menyimpan data.", "error");
     }
+  };
+
+  const handleOpenMutasi = (student: Santri) => {
+    if (onViewDetail) {
+      onViewDetail(student as unknown as Record<string, unknown>);
+    }
+    setSelectedSantriForDetail(student);
   };
 
   // Grid Columns for PONDOK (P3HM)
@@ -412,7 +424,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         <TableActions
           onEdit={() => handleOpenEdit(info.row.original)}
           onDelete={() => handleDeleteSantri(info.row.original.id)}
-          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
+          onMutasi={() => handleOpenMutasi(info.row.original)}
           isReadOnly={isReadOnly}
         />
       ),
@@ -473,7 +485,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         <TableActions
           onEdit={() => handleOpenEdit(info.row.original)}
           onDelete={() => handleDeleteSantri(info.row.original.id)}
-          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
+          onMutasi={() => handleOpenMutasi(info.row.original)}
           isReadOnly={isReadOnly}
         />
       ),
@@ -555,7 +567,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               }`}
           >
             <Plus className="w-4 h-4" />
-            <span>{isPondok ? "+ Registrasi Santriwati Baru" : "+ Registrasi Siswi Baru"}</span>
+            <span>{isPondok ? "+ Registrasi Santriwati Baru" : "+ Tarik Data Siswi dari Pondok (P3HM)"}</span>
           </button>
         )}
       </div>
@@ -814,7 +826,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
                     {editingSantri
                       ? `Edit Data: ${editingSantri.name}`
-                      : (isPondok ? "Registrasi Santriwati Asrama Baru (P3HM)" : "Registrasi Siswi Diniyyah Baru (MPHM)")
+                      : (isPondok ? "Registrasi Santriwati Asrama Baru (P3HM)" : "Tarik & Daftarkan Siswi Diniyyah (MPHM) dari Pondok")
                     }
                   </h3>
                   <p className="text-xs text-zinc-500">Lengkapi data 6-bagian: identitas pribadi, akademis/kamar, alamat (dropdown wilayah), wali (Smart KK), dan khidmah.</p>
@@ -917,50 +929,96 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   </div>
                 </div>
 
-                {/* Form Fields - II. Akademis / Keasramaan (Dropdown Pemanggilan Database) */}
+                {/* Form Fields - II. Akademis / Keasramaan (Tarik Data > Isi Jenjang > Isi Kelas) */}
                 <div className="space-y-4">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">II. Informasi Akademik & Asrama (Dropdown Pemanggilan Database)</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                      II. Informasi Akademik & Asrama (Alur: Tarik Data ➔ Isi Jenjang ➔ Isi Kelas)
+                    </span>
+                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 w-fit">
+                      {isPondok ? "Sistem Keasramaan (P3HM)" : "1. Tarik Data ➔ 2. Isi Jenjang ➔ 3. Isi Kelas"}
+                    </span>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-zinc-500">Nomor Stambuk *</label>
                       <input type="text" required value={newStambuk} onChange={(e) => setNewStambuk(e.target.value)} className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono" />
                     </div>
 
-                    {/* DROPDOWN KELAS DINIYYAH DARI MENU/DATABASE */}
+                    {/* STEPS 2: ISI JENJANG DINIYYAH */}
+                    {!isPondok ? (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-zinc-500 flex items-center justify-between">
+                          <span>Jenjang Diniyyah *</span>
+                          <span className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400">Langkah 2</span>
+                        </label>
+                        <select
+                          value={newJenjang}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setNewJenjang(val);
+                            const avail = dbClasses.filter((c) => (c.institutionLevel || c.name || "").toLowerCase().includes(val.toLowerCase()));
+                            if (avail.length > 0) {
+                              setNewClass(avail[0].name);
+                            }
+                          }}
+                          className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-indigo-600 dark:text-indigo-400"
+                        >
+                          <option value="Ibtida'iyyah">Ibtida'iyyah</option>
+                          <option value="Tsanawiyyah">Tsanawiyyah</option>
+                          <option value="Aliyyah">Aliyyah</option>
+                          <option value="I'dadiyyah">I'dadiyyah</option>
+                        </select>
+                      </div>
+                    ) : null}
+
+                    {/* STEPS 3: ISI KELAS DINIYYAH (Filtered by Jenjang) */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500">Kelas Diniyyah (Database) *</label>
+                      <label className="text-xs font-bold text-zinc-500 flex items-center justify-between">
+                        <span>{isPondok ? "Kelas Diniyyah (Database) *" : "Kelas Diniyyah (Filtered) *"}</span>
+                        {!isPondok && <span className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400">Langkah 3</span>}
+                      </label>
                       <select
                         value={newClass}
                         onChange={(e) => setNewClass(e.target.value)}
                         className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400"
                       >
-                        {dbClasses.length > 0 ? (
-                          dbClasses.map((c) => (
-                            <option key={c.id} value={c.name}>{c.name} ({c.mustahiq || "Wali Kelas"})</option>
-                          ))
-                        ) : (
-                          <option value="">-- Pilih Kelas Diniyyah --</option>
-                        )}
+                        {(() => {
+                          const filtered = (!isPondok && newJenjang)
+                            ? dbClasses.filter((c) => (c.institutionLevel || c.name || "").toLowerCase().includes(newJenjang.toLowerCase()))
+                            : dbClasses;
+
+                          return filtered.length > 0 ? (
+                            filtered.map((c) => (
+                              <option key={c.id} value={c.name}>{c.name} ({c.mustahiq || "Wali Kelas"})</option>
+                            ))
+                          ) : (
+                            <option value="">{dbClasses.length > 0 ? `-- Tidak Ada Kelas ${newJenjang} --` : "-- Pilih Kelas Diniyyah --"}</option>
+                          );
+                        })()}
                       </select>
                     </div>
 
                     {/* DROPDOWN KAMAR ASRAMA DARI MENU/DATABASE */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500">Kamar Asrama (Database) *</label>
-                      <select
-                        value={newRoom}
-                        onChange={(e) => setNewRoom(e.target.value)}
-                        className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-emerald-600 dark:text-emerald-400"
-                      >
-                        {dbRooms.length > 0 ? (
-                          dbRooms.map((r) => (
-                            <option key={r.id} value={r.name}>{r.name} ({r.buildingName})</option>
-                          ))
-                        ) : (
-                          <option value="">-- Pilih Kamar Asrama --</option>
-                        )}
-                      </select>
-                    </div>
+                    {isPondok && (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-zinc-500">Kamar Asrama (Database) *</label>
+                        <select
+                          value={newRoom}
+                          onChange={(e) => setNewRoom(e.target.value)}
+                          className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-emerald-600 dark:text-emerald-400"
+                        >
+                          {dbRooms.length > 0 ? (
+                            dbRooms.map((r) => (
+                              <option key={r.id} value={r.name}>{r.name} ({r.buildingName})</option>
+                            ))
+                          ) : (
+                            <option value="">-- Pilih Kamar Asrama --</option>
+                          )}
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1001,7 +1059,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <button type="button" onClick={() => setShowFormModal(false)} className="px-4 py-2 text-sm font-bold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 rounded-xl">Batal</button>
                   <button type="submit" className={`px-6 py-2 text-sm font-bold text-white rounded-xl shadow-md ${isPondok ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"}`}>
-                    {editingSantri ? "Simpan Perubahan" : "Daftarkan"}
+                    {editingSantri ? "Simpan Perubahan" : (isPondok ? "Daftarkan Santriwati" : "Tarik & Daftarkan Siswi")}
                   </button>
                 </div>
               </form>

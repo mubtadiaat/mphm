@@ -36,8 +36,8 @@ export interface NavGroup {
 
 export type NavMenu = NavItem | NavGroup;
 
-// Peran Resmi Sistem (#08)
-export type RoleTypes = "sek.pondok" | "sek.madrasah" | "mufattisy" | "mundzir" | "mustahiq" | "keamanan" | "wali_santri";
+import { RoleTypes } from "@/lib/rbac";
+export type { RoleTypes };
 
 // WORKSPACE PONDOK PESANTREN PUTRI [P3HM Lirboyo]
 export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
@@ -141,6 +141,8 @@ export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
     { label: "Nilai Raport", href: "/mustahiq/penilaian", icon: ClipboardList },
     { label: "Presensi", href: "/mustahiq/absensi", icon: CheckSquare },
     { label: "Data Kelas", href: "/mustahiq/kelas", icon: Users },
+    { label: "Catatan Akhlaq", href: "/mustahiq/akhlaq", icon: ShieldAlert },
+    { label: "Kenaikan Kelas", href: "/mustahiq/kenaikan-kelas", icon: Award },
   ],
   keamanan: [
     { label: "Dashboard", href: "/keamanan", icon: LayoutGrid },

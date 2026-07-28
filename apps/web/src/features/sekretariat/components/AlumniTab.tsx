@@ -285,7 +285,9 @@ export function AlumniTab({ onViewDetail, isReadOnly = false, selectedYearId }: 
         <TableActions 
           onEdit={() => handleOpenEdit(info.row.original)} 
           onDelete={() => handleDeleteSantri(info.row.original.id)} 
-          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
+          onMutasi={() => {
+            if (onViewDetail) onViewDetail(info.row.original as unknown as Record<string, unknown>);
+          }}
           isReadOnly={isReadOnly}
         />
       ),

@@ -138,7 +138,9 @@ export function PelanggaranTab({ onViewDetail, isReadOnly = false, selectedYearI
       header: "Aksi Management",
       cell: (info) => (
         <TableActions
-          onMutasi={onViewDetail ? () => onViewDetail(info.row.original as unknown as Record<string, unknown>) : undefined}
+          onMutasi={() => {
+            if (onViewDetail) onViewDetail(info.row.original as unknown as Record<string, unknown>);
+          }}
           isReadOnly={isReadOnly}
         />
       ),

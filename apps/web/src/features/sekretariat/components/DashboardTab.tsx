@@ -32,6 +32,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useDashboardStats } from "@/features/sekretariat/queries/useDashboardStats";
 import { useAcademicYear } from "@/components/shared/AcademicYearContext";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
+import { useToast } from "@/components/shared/ToastContext";
+import { getWorkspaceReadinessSteps, getPrerequisiteWarning, OnboardingStatus } from "@/lib/rbac";
 import Link from "next/link";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 
@@ -68,6 +70,7 @@ export function DashboardTab() {
   const { activeWorkspace } = useWorkspace();
   const { selectedYearId } = useAcademicYear();
   const { data: statsData, isLoading, refetch, isRefetching } = useDashboardStats(selectedYearId, activeWorkspace);
+  const { toast } = useToast();
 
   const [currentTime, setCurrentTime] = useState<string>("");
 
@@ -212,40 +215,31 @@ export function DashboardTab() {
   const auditLogs = statsData?.recentAuditLogs || [];
 
   // System Readiness Wizard Calculation (100% Real DB Queries)
-  const hasMundzir = (statsData?.totalMundzir ?? 0) > 0;
-  const hasMufattisy = (statsData?.totalMufattisy ?? 0) > 0;
-  const hasMustahiq = (statsData?.totalMustahiq ?? 0) > 0;
-  const hasMusyrifah = (statsData?.totalMusyrifah ?? 0) > 0;
-  const hasClasses = (statsData?.totalClasses ?? 0) > 0;
-  const hasSubjects = (statsData?.totalSubjects ?? 0) > 0;
-  const hasStudents = (statsData?.totalStudents ?? 0) > 0;
-  const hasRooms = (statsData?.totalRooms ?? 0) > 0;
-  const hasViolationTypes = (statsData?.totalViolationTypes ?? 0) > 0;
+  const onboardingStatus: OnboardingStatus = {
+    hasMundzir: (statsData?.totalMundzir ?? 0) > 0,
+    hasMufattisy: (statsData?.totalMufattisy ?? 0) > 0,
+    hasMustahiq: (statsData?.totalMustahiq ?? 0) > 0,
+    hasMusyrifah: (statsData?.totalMusyrifah ?? 0) > 0,
+    hasClasses: (statsData?.totalClasses ?? 0) > 0,
+    hasSubjects: (statsData?.totalSubjects ?? 0) > 0,
+    hasSantri: (statsData?.totalStudents ?? 0) > 0,
+    hasRooms: (statsData?.totalRooms ?? 0) > 0,
+    hasViolationTypes: (statsData?.totalViolationTypes ?? 0) > 0,
+  };
 
-  const pondokSteps = [
-    { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
-    { label: "Data Mundzir (Pimpinan)", ready: hasMundzir, href: "/sekretariat/mundzir" },
-    { label: "Data Musyrifah (Pembina)", ready: hasMusyrifah, href: "/sekretariat/pengurus" },
-    { label: "Data Asrama (Blok & Kamar)", ready: hasRooms, href: "/sekretariat/rooms" },
-    { label: "Master Pelanggaran", ready: hasViolationTypes, href: "/sekretariat/pelanggaran" },
-    { label: "Data Induk Santriwati", ready: hasStudents, href: "/sekretariat/santri" },
-  ];
-
-  const madrasahSteps = [
-    { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
-    { label: "Data Mundzir (Pimpinan)", ready: hasMundzir, href: "/sekretariat/mundzir" },
-    { label: "Data Mufattisy (Pengawas)", ready: hasMufattisy, href: "/sekretariat/mufattisy" },
-    { label: "Data Mustahiq (Wali Kelas)", ready: hasMustahiq, href: "/sekretariat/mustahiq" },
-    { label: "Rombel Kelas Diniyyah", ready: hasClasses, href: "/sekretariat/kelas" },
-    { label: "Kurikulum & Mapel", ready: hasSubjects, href: "/sekretariat/kurikulum" },
-    { label: "Data Siswi Diniyyah", ready: hasStudents, href: "/sekretariat/santri" },
-  ];
-
-  const currentSteps = isPondok ? pondokSteps : madrasahSteps;
+  const currentSteps = getWorkspaceReadinessSteps(isPondok ? "pondok" : "madrasah", onboardingStatus);
   const completedCount = currentSteps.filter(s => s.ready).length;
   const totalStepCount = currentSteps.length;
   const readinessPercent = Math.round((completedCount / totalStepCount) * 100);
   const nextMissingStep = currentSteps.find(s => !s.ready);
+
+  const handleStepClick = (e: React.MouseEvent, href: string) => {
+    const warning = getPrerequisiteWarning(href, isPondok ? "sek.pondok" : "sek.madrasah", isPondok ? "pondok" : "madrasah", onboardingStatus);
+    if (warning) {
+      e.preventDefault();
+      toast(warning, "warning", "Prasyarat Belum Lengkap");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-12">
@@ -340,6 +334,7 @@ export function DashboardTab() {
           {nextMissingStep && (
             <Link
               href={nextMissingStep.href}
+              onClick={(e) => handleStepClick(e, nextMissingStep.href)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer"
             >
               <span>+ Isi {nextMissingStep.label} Now</span>
@@ -387,6 +382,7 @@ export function DashboardTab() {
               <Link
                 key={idx}
                 href={action.href}
+                onClick={(e) => handleStepClick(e, action.href)}
                 className={`p-3 bg-zinc-50 dark:bg-zinc-800/50 ${action.hoverBg} border border-zinc-200 dark:border-zinc-700 rounded-xl flex items-center gap-2.5 transition-all group`}
               >
                 <div className={`p-2 ${action.iconBg} rounded-lg group-hover:scale-110 transition-transform`}>
@@ -499,7 +495,7 @@ export function DashboardTab() {
               <span>Log Aktivitas Real-Time DB</span>
             </h2>
             <Link
-              href="/sekretariat/audit-logs"
+              href="/sekretariat/audit-log"
               className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
             >
               <span>Semua Log</span>

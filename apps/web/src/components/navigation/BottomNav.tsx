@@ -5,18 +5,9 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { NAVIGATION_CONFIG, SEKRETARIAT_MADRASAH_NAV, SEKRETARIAT_PONDOK_NAV, RoleTypes, NavItem } from "../../config/navigation.config";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
-import { Database, Lock } from "lucide-react";
+import { Database } from "lucide-react";
 import { useToast } from "@/components/shared/ToastContext";
-import { apiRequest } from "@/lib/api";
 import { useRoleUIConfig } from "@/lib/useRoleUIConfig";
-
-export interface OnboardingStatus {
-  hasMundzir: boolean;
-  hasMufattisy: boolean;
-  hasMustahiq: boolean;
-  hasClasses: boolean;
-  hasSantri: boolean;
-}
 
 interface CustomNavItem {
   label: string;
@@ -37,70 +28,12 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
   const { toast } = useToast();
   const isSekretariatRole = role === "sek.pondok" || role === "sek.madrasah";
 
-  const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({
-    hasMundzir: true,
-    hasMufattisy: true,
-    hasMustahiq: true,
-    hasClasses: true,
-    hasSantri: true,
-  });
-  const [loadingStatus, setLoadingStatus] = useState(!isSekretariatRole ? false : true);
+  // sek.pondok dan sek.madrasah DILARANG dibuka di layar kecil (mobile).
+  // Hanya sidebar desktop yang diperbolehkan untuk role sekretariat.
+  if (isSekretariatRole) return null;
 
-  useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const res = await apiRequest<{ data: OnboardingStatus }>("/api/admin/onboarding/status");
-        if (res?.data) {
-          setOnboardingStatus(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to load onboarding status", err);
-      } finally {
-        setLoadingStatus(false);
-      }
-    };
-    if (isSekretariatRole) {
-      fetchStatus();
-    }
-
-    if (typeof window !== "undefined") {
-      window.addEventListener("onboarding_status_changed", fetchStatus);
-      return () => window.removeEventListener("onboarding_status_changed", fetchStatus);
-    }
-  }, [isSekretariatRole, pathname]);
-
-  const isMenuLocked = (href: string): boolean => {
-    if (!isSekretariatRole) return false;
-    if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) return true;
-    if (href === "/sekretariat/mustahiq" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMufattisy)) return true;
-    if (href === "/sekretariat/kelas" && !onboardingStatus.hasMustahiq) return true;
-    if (href === "/sekretariat/santri" && !onboardingStatus.hasClasses) return true;
-    return false;
-  };
-
-  const checkAccess = (e: React.MouseEvent, href: string) => {
-    if (!isSekretariatRole || loadingStatus) return;
-
-    if (href === "/sekretariat/mufattisy" && !onboardingStatus.hasMundzir) {
-      e.preventDefault();
-      toast("Harap isi Data Mundzir terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
-    }
-    if (href === "/sekretariat/mustahiq" && (!onboardingStatus.hasMundzir || !onboardingStatus.hasMufattisy)) {
-      e.preventDefault();
-      toast("Harap isi Data Mufattisy terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
-    }
-    if (href === "/sekretariat/kelas" && !onboardingStatus.hasMustahiq) {
-      e.preventDefault();
-      toast("Harap isi Data Mustahiq terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
-    }
-    if (href === "/sekretariat/santri" && !onboardingStatus.hasClasses) {
-      e.preventDefault();
-      toast("Harap isi Data Kelas terlebih dahulu!", "warning", "Data Belum Lengkap");
-      return;
-    }
+  const checkAccess = (_e: React.MouseEvent, _href: string) => {
+    // Non-sekretariat roles don't have onboarding locks
   };
 
   useEffect(() => {
@@ -189,9 +122,6 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
                     strokeWidth={isActive ? 2.5 : 1.8}
                     className="w-5 h-5 transition-transform duration-200 group-hover:scale-110 shrink-0"
                   />
-                  {isSekretariatRole && !loadingStatus && isMenuLocked(item.href) && (
-                    <Lock className="absolute -top-1 -right-2 w-3 h-3 text-rose-500" />
-                  )}
                 </div>
                 <span className="text-[10px] sm:text-[11px] leading-[1.15] text-center max-w-full line-clamp-2 mt-0.5 tracking-tight break-words px-0.5">
                   {item.label}
