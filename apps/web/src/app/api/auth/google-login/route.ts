@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           status: "Error",
-          message: `Akun Google (${email}) belum ditautkan ke akun MPHM Anda. Silakan masuk dengan Username & Password terlebih dahulu, lalu tautkan akun Gmail Anda di menu Pengaturan Akun.`,
+          isUnregistered: true,
+          message: `Akun Google (${email}) belum terdaftar sebagai Wali Santri. Silakan lengkapi Nomor KK & Kata Sandi.`,
         },
         { status: 404 }
       );
