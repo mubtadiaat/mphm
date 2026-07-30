@@ -277,7 +277,7 @@ export default function Page() {
       <header className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="relative w-11 h-11 rounded-2xl overflow-hidden bg-slate-900 border border-white/20 p-1 shadow-lg shadow-emerald-950/50">
-            <Image src="/logo.webp" alt="Logo P3HM & MPHM" width={44} height={44} className="object-contain" priority />
+            <Image src="/logo.png" alt="Logo P3HM & MPHM" width={44} height={44} className="object-contain" priority />
           </div>
           <div>
             <h1 className="font-extrabold text-base tracking-tight text-white flex items-center gap-2">
