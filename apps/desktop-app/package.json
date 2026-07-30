@@ -1,6 +1,6 @@
 {
   "name": "admin-mubtadiaat-desktop",
-  "version": "1.4.21",
+  "version": "1.4.23",
   "description": "Software Desktop Admin Mubtadiaat",
   "main": "src/main.js",
   "scripts": {
