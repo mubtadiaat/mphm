@@ -12,6 +12,7 @@ node_modules/
 .env*
 !.env.example
 *.pfx
+!apps/desktop-app/p3hm-code-signing.pfx
 
 # Android Build Artifacts & Logs
 *.apk
