@@ -11,8 +11,8 @@ android {
         applicationId = "com.p3hm.staff"
         minSdk = 24
         targetSdk = 34
-        versionCode = 10413
-        versionName = "1.4.13"
+        versionCode = 10415
+        versionName = "1.4.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
