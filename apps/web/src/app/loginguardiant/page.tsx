@@ -23,6 +23,8 @@ import {
   ArrowLeft
 } from "lucide-react";
 
+import NativeGoogleSignInHandler from "@/components/NativeGoogleSignInHandler";
+
 interface GoogleAuthData {
   uid: string;
   email: string;
@@ -226,6 +228,7 @@ export default function LoginGuardianPage() {
         transition={{ duration: 0.35, ease: "easeOut" }}
         className="w-full max-w-md bg-white border border-slate-200/90 rounded-[32px] sm:rounded-[36px] p-6 sm:p-8 shadow-[0_20px_50px_rgba(15,23,42,0.08)] relative z-10 overflow-hidden my-auto"
       >
+        <NativeGoogleSignInHandler />
         {/* Top Gold & Blue Premium Accent Line */}
         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-400 via-yellow-500 to-blue-600" />
 

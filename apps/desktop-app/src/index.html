@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Mubtadiaat Bootstrap Installer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="window-container">
+    <!-- Titlebar Macbook Mini Style -->
+    <div class="titlebar">
+      <div class="mac-controls">
+        <button class="mac-btn mac-close" id="btnClose" title="Tutup"></button>
+        <button class="mac-btn mac-minimize" id="btnMinimize" title="Minimize"></button>
+        <button class="mac-btn mac-expand" id="btnExpand" title="Maximize"></button>
+      </div>
+
+      <div class="titlebar-brand">
+        <img src="logo.webp" alt="Logo" class="titlebar-logo" />
+        <span id="titleVersion">Admin Mubtadiaat Setup</span>
+        <span class="mac-badge">MacBook Mini Edition</span>
+      </div>
+
+      <div class="titlebar-right">
+        <span class="online-indicator"></span>
+        <span class="online-text">P3HM Online</span>
+      </div>
+    </div>
+
+    <!-- Installer Container -->
+    <div class="installer-body">
+      
+      <!-- 0. SPLASH SCREEN -->
+      <div id="splashScreen" class="view-screen active">
+        <div class="splash-content">
+          <div class="splash-logo-wrapper">
+            <img src="logo.webp" alt="Admin Mubtadiaat Logo" class="splash-logo" />
+            <div class="splash-pulse"></div>
+          </div>
+          <h1 class="splash-title">Admin Mubtadiaat</h1>
+          <p class="splash-subtitle">Bootstrap Installer & Installation Manager — P3HM Ecosystem</p>
+          <div class="splash-loader">
+            <div class="spinner"></div>
+            <span id="splashStatus">Mendeteksi status instalasi & integritas sistem...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXISTING INSTALLATION SCREEN (MAINTENANCE MANAGER) -->
+      <div id="existingScreen" class="view-screen">
+        <div class="existing-container">
+          <div class="existing-header">
+            <img src="logo.webp" alt="Logo" class="existing-logo" />
+            <div>
+              <h2 class="existing-title">Maintenance & Pengelola Instalasi</h2>
+              <p class="existing-subtitle">Admin Mubtadiaat telah terpasang dan terkonfigurasi di komputer ini.</p>
+            </div>
+          </div>
+
+          <div class="existing-info-card">
+            <div class="info-row">
+              <span class="info-label">Status Instalasi:</span>
+              <span class="status-badge-active">Installed</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Akun Terdaftar:</span>
+              <span class="info-value" id="exUserEmail">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Versi Terinstal:</span>
+              <span class="info-value" id="exVersion">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Versi Terbaru:</span>
+              <span class="version-badge-latest" id="exLatestVersion">Memeriksa...</span>
+            </div>
+            <div class="info-row full-width-row">
+              <span class="info-label">Folder Instalasi:</span>
+              <div class="folder-path-display">
+                <span class="info-value path-text" id="exFolderPath">C:\Program Files\Admin Mubtadiaat</span>
+                <button class="btn-sm" id="btnExChangeFolder">📁 Ubah Folder</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="existing-options-grid">
+            <button class="option-card primary-card" id="btnExLaunch">
+              <div class="option-icon">🚀</div>
+              <div class="option-text">
+                <div class="option-title">Buka Aplikasi</div>
+                <div class="option-desc">Langsung jalankan workspace Admin Mubtadiaat</div>
+              </div>
+            </button>
+
+            <button class="option-card" id="btnExUpgrade">
+              <div class="option-icon">🔄</div>
+              <div class="option-text">
+                <div class="option-title">Perbarui Aplikasi</div>
+                <div class="option-desc">Perbarui file & komponen ke rilis terbaru</div>
+              </div>
+            </button>
+
+            <button class="option-card" id="btnExRepair">
+              <div class="option-icon">🛠️</div>
+              <div class="option-text">
+                <div class="option-title">Perbaiki Instalasi</div>
+                <div class="option-desc">Verifikasi file, perbaiki shortcut & reset cache</div>
+              </div>
+            </button>
+
+            <button class="option-card" id="btnExSwitch">
+              <div class="option-icon">🔑</div>
+              <div class="option-text">
+                <div class="option-title">Login Akun Lain</div>
+                <div class="option-desc">Autentikasi ulang dengan akun Sekretariat berbeda</div>
+              </div>
+            </button>
+
+            <button class="option-card danger-card" id="btnExClear">
+              <div class="option-icon">🧹</div>
+              <div class="option-text">
+                <div class="option-title">Hapus Data Login</div>
+                <div class="option-desc">Bersihkan session & cookie autentikasi lokal</div>
+              </div>
+            </button>
+
+            <button class="option-card danger-card" id="btnExUninstallModal">
+              <div class="option-icon">❌</div>
+              <div class="option-text">
+                <div class="option-title">Uninstall Aplikasi</div>
+                <div class="option-desc">Hapus software dengan opsi simpan/hapus data</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- UNINSTALL CONFIRMATION MODAL -->
+      <div id="uninstallModal" class="modal-overlay">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3>❌ Konfirmasi Uninstall Aplikasi</h3>
+            <button class="modal-close" id="btnCloseUninstallModal">✕</button>
+          </div>
+          <div class="modal-body">
+            <p>Pilih bagaimana Anda ingin menghapus **Admin Mubtadiaat** dari komputer ini:</p>
+
+            <div class="uninstall-option-box selected" id="optKeepData">
+              <input type="radio" name="uninstallDataOpt" id="radKeep" checked />
+              <label for="radKeep">
+                <strong>📦 Simpan Data Pengguna (Keep User Data)</strong>
+                <p>Session login, preferensi, dan data cache lokal tetap disimpan untuk instalasi berikutnya.</p>
+              </label>
+            </div>
+
+            <div class="uninstall-option-box" id="optRemoveData">
+              <input type="radio" name="uninstallDataOpt" id="radRemove" />
+              <label for="radRemove">
+                <strong>🧹 Hapus Seluruh Data (Remove User Data)</strong>
+                <p>Hapus seluruh file konfigurasi lokal, session login, dan cache tanpa sisa.</p>
+              </label>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" id="btnCancelUninstall">Batal</button>
+            <button class="btn-danger" id="btnConfirmUninstallExec">Proses Uninstall</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHANGE FOLDER MODAL -->
+      <div id="changeFolderModal" class="modal-overlay">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3>📁 Ubah Lokasi Folder Instalasi</h3>
+            <button class="modal-close" id="btnCloseFolderModal">✕</button>
+          </div>
+          <div class="modal-body">
+            <p>Pilih direktori baru tempat aplikasi Admin Mubtadiaat disimpan:</p>
+            <div class="folder-picker-group">
+              <input type="text" id="changeFolderInput" class="input-field" readonly />
+              <button class="btn-secondary" id="btnBrowseNewFolder">Browse...</button>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" id="btnCancelFolderChange">Batal</button>
+            <button class="btn-primary" id="btnSaveNewFolder">Simpan Lokasi</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MULTI-STEP BOOTSTRAP INSTALLER WIZARD -->
+      <div id="wizardScreen" class="view-screen">
+        <!-- Sidebar Navigation & Stepper -->
+        <div class="wizard-sidebar">
+          <div class="sidebar-brand">
+            <img src="logo.webp" alt="Logo" class="sidebar-logo" />
+            <div>
+              <h3>Admin Mubtadiaat</h3>
+              <p>Setup Wizard</p>
+            </div>
+          </div>
+
+          <div class="stepper-list">
+            <div class="step-item active" id="stepItem1">
+              <div class="step-num">1</div>
+              <div class="step-label">
+                <span class="step-title">Welcome</span>
+                <span class="step-desc">Info Software</span>
+              </div>
+            </div>
+            <div class="step-item" id="stepItem2">
+              <div class="step-num">2</div>
+              <div class="step-label">
+                <span class="step-title">Lokasi Folder</span>
+                <span class="step-desc">Pilih Direktori</span>
+              </div>
+            </div>
+            <div class="step-item" id="stepItem3">
+              <div class="step-num">3</div>
+              <div class="step-label">
+                <span class="step-title">Autentikasi</span>
+                <span class="step-desc">Login Akun</span>
+              </div>
+            </div>
+            <div class="step-item" id="stepItem4">
+              <div class="step-num">4</div>
+              <div class="step-label">
+                <span class="step-title">Instalasi</span>
+                <span class="step-desc">Proses Silent</span>
+              </div>
+            </div>
+            <div class="step-item" id="stepItem5">
+              <div class="step-num">5</div>
+              <div class="step-label">
+                <span class="step-title">Selesai</span>
+                <span class="step-desc">Siap Digunakan</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-footer">
+            &copy; 2026 P3HM Ecosystem<br>All rights reserved.
+          </div>
+        </div>
+
+        <!-- Wizard Main Content Area -->
+        <div class="wizard-content">
+          
+          <!-- STEP 1: WELCOME -->
+          <div id="step1Welcome" class="wizard-step active">
+            <h2 class="wizard-title">Selamat Datang di Admin Mubtadiaat</h2>
+            <p class="wizard-subtitle">Software Workspace Desktop Sekretariat & Manajemen Data P3HM Ecosystem.</p>
+
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feat-icon">⚡</div>
+                <h4>High Performance Runtime</h4>
+                <p>Didukung Electron 31 & V8 Engine untuk pengoperasian yang responsif.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feat-icon">🔒</div>
+                <h4>Autentikasi Terenkripsi</h4>
+                <p>Koneksi langsung ke API portal P3HM dengan manajemen sesi terenkripsi.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feat-icon">🌐</div>
+                <h4>Sinkronisasi Real-Time</h4>
+                <p>Data sekretariat dan santri terhubung otomatis secara tersinkronkan.</p>
+              </div>
+            </div>
+
+            <div class="sys-req-box">
+              <strong>Persyaratan Sistem:</strong> Windows 10/11 x64, RAM minimal 2GB, Koneksi Internet Terhubung.
+            </div>
+
+            <div class="wizard-actions">
+              <button class="btn-primary" id="btnStartInstall">Mulai Instalasi &rarr;</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: CHOOSE FOLDER -->
+          <div id="step2Folder" class="wizard-step">
+            <h2 class="wizard-title">Pilih Folder Tujuan Instalasi</h2>
+            <p class="wizard-subtitle">Tentukan direktori tempat file aplikasi Admin Mubtadiaat dipasang.</p>
+
+            <div class="folder-selection-card">
+              <label class="form-label" for="wizardFolderInput">Lokasi Direktori Instalasi:</label>
+              <div class="folder-picker-group">
+                <input type="text" id="wizardFolderInput" class="input-field" value="C:\Program Files\Admin Mubtadiaat" readonly />
+                <button type="button" class="btn-secondary" id="btnWizardBrowse">Browse...</button>
+              </div>
+              <p class="field-hint">Ruang penyimpanan dibutuhkan: ~180 MB</p>
+            </div>
+
+            <div class="wizard-actions">
+              <button type="button" class="btn-secondary" id="btnBackToStep1">&larr; Kembali</button>
+              <button type="button" class="btn-primary" id="btnConfirmFolder">Lanjut ke Autentikasi &rarr;</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: LOGIN AUTHENTICATION -->
+          <div id="step3Login" class="wizard-step">
+            <h2 class="wizard-title">Autentikasi Akun Sekretariat</h2>
+            <p class="wizard-subtitle">Masukkan akun Admin Mubtadiaat terdaftar untuk memverifikasi lisensi perangkat.</p>
+
+            <div id="alertBox" class="alert-message"></div>
+
+            <form id="loginForm">
+              <div class="form-group">
+                <label class="form-label" for="email">Email Sekretariat / Super Admin</label>
+                <input type="email" id="email" class="input-field" placeholder="contoh: sekretariat@p3hm.my.id" required />
+              </div>
+
+              <div class="form-group">
+                <div class="label-row">
+                  <label class="form-label" for="password">Kata Sandi</label>
+                  <a href="#" id="linkForgotPassword" class="form-link">Lupa Kata Sandi?</a>
+                </div>
+                <div class="password-input-wrapper">
+                  <input type="password" id="password" class="input-field" placeholder="••••••••••••" required />
+                  <button type="button" id="btnTogglePassword" class="btn-toggle-pw">👁️</button>
+                </div>
+              </div>
+
+              <div class="wizard-actions">
+                <button type="button" class="btn-secondary" id="btnBackToStep2">&larr; Kembali</button>
+                <button type="submit" id="btnLogin" class="btn-primary">Masuk & Verifikasi Akun</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- STEP 4: INSTALLATION & EXTRACTION -->
+          <div id="step4Install" class="wizard-step">
+            <h2 class="wizard-title">Proses Instalasi Workspace</h2>
+            <p class="wizard-subtitle">Menyiapkan konfigurasi runtime, menyalin modul, dan membuat pintasan aplikasi.</p>
+
+            <div class="install-options-box" id="installOptionsBox">
+              <div class="option-check">
+                <input type="checkbox" id="chkDesktop" checked />
+                <label for="chkDesktop">Buat Pintasan di Desktop (Desktop Shortcut)</label>
+              </div>
+              <div class="option-check">
+                <input type="checkbox" id="chkStartMenu" checked />
+                <label for="chkStartMenu">Buat Pintasan di Start Menu</label>
+              </div>
+              <button class="btn-primary" id="btnConfirmInstall" style="margin-top: 15px;">Pasang Sekarang</button>
+            </div>
+
+            <div id="installProgressWrapper" style="display: none; width: 100%;">
+              <div class="progress-bar-container">
+                <div id="progressFill" class="progress-bar-fill"></div>
+              </div>
+
+              <div class="progress-status">
+                <span id="statusLabel">Menyiapkan paket instalasi...</span>
+                <span id="percentLabel">0%</span>
+              </div>
+
+              <div id="extractionLogs" class="extraction-log-box">
+                <div class="log-line">> Memulai Bootstrap Installer engine...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 5: FINISH -->
+          <div id="step5Finish" class="wizard-step">
+            <div class="finish-container">
+              <div class="finish-icon">✅</div>
+              <h2 class="wizard-title">Instalasi Berhasil Diselesaikan!</h2>
+              <p class="wizard-subtitle">Admin Mubtadiaat telah siap digunakan pada perangkat ini.</p>
+
+              <div class="finish-info-box">
+                <div class="info-row">
+                  <span>Akun Terverifikasi:</span>
+                  <strong id="finishEmail">-</strong>
+                </div>
+                <div class="info-row">
+                  <span>Hak Akses:</span>
+                  <span class="role-badge" id="finishRole">Sekretariat P3HM</span>
+                </div>
+                <div class="info-row">
+                  <span>Folder Instalasi:</span>
+                  <strong id="finishFolder">C:\Program Files\Admin Mubtadiaat</strong>
+                </div>
+                <div class="info-row">
+                  <span>Versi Workspace:</span>
+                  <strong id="finishVersion">v1.4.17</strong>
+                </div>
+              </div>
+
+              <div class="wizard-actions">
+                <button class="btn-primary btn-large" id="btnLaunchApp">🚀 Jalankan Admin Mubtadiaat</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="installer.js"></script>
+</body>
+</html>

@@ -65,10 +65,14 @@ export async function POST(req: NextRequest) {
       familyCardNumber: null,
     };
 
+    const { signJWT, setSessionCookie } = await import("@/lib/jwt");
+    const token = await signJWT(sessionPayload);
+
     const response = NextResponse.json({
       status: "Success",
       message: "Login Google berhasil",
       data: sessionPayload,
+      token,
     });
 
     await setSessionCookie(response, sessionPayload);

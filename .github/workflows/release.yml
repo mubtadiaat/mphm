@@ -1,0 +1,127 @@
+name: Build & Publish Release Automatically
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Auto-Bump Version & Build All Platforms
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Auto-Bump package.json & Sync Android Versions
+        id: auto_bump
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          NEW_VER=$(node -e "const fs=require('fs');const p='./apps/desktop-app/package.json';const d=JSON.parse(fs.readFileSync(p));const v=d.version.split('.').map(Number);if(v[2]>=35){v[1]+=1;v[2]=1;}else{v[2]=(v[2]%2===1)?v[2]+2:v[2]+1;if(v[2]>35){v[1]+=1;v[2]=1;}}d.version=v[0]+'.'+v[1]+'.'+String(v[2]).padStart(2,'0');fs.writeFileSync(p,JSON.stringify(d,null,2)+'\n');console.log(d.version);")
+
+          echo "APP_VERSION=$NEW_VER" >> $GITHUB_ENV
+          echo "TAG_NAME=v$NEW_VER" >> $GITHUB_ENV
+          echo "Auto-bumped Version: $NEW_VER (Tag: v$NEW_VER)"
+
+          BUILD_CODE=$(echo $NEW_VER | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')
+
+          sed -i "s/versionName = .*/versionName = \"$NEW_VER\"/" apps/android-staff/app/build.gradle.kts
+          sed -i "s/versionCode = .*/versionCode = $BUILD_CODE/" apps/android-staff/app/build.gradle.kts
+
+          sed -i "s/versionName = .*/versionName = \"$NEW_VER\"/" apps/android-guardian/app/build.gradle.kts
+          sed -i "s/versionCode = .*/versionCode = $BUILD_CODE/" apps/android-guardian/app/build.gradle.kts
+
+          git add apps/desktop-app/package.json apps/desktop-app/package-lock.json apps/android-staff/app/build.gradle.kts apps/android-guardian/app/build.gradle.kts
+          git commit -m "chore(release): auto-bump version to $NEW_VER [skip ci]" || true
+          git push origin main || true
+
+      - name: Install & Build Windows Desktop App
+        env:
+          CSC_KEY_PASSWORD: "${{ secrets.CSC_KEY_PASSWORD || 'P3HMSecretKey2026!' }}"
+          GH_TOKEN: ${{ secrets.PUBLIC_REPO_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          cd apps/desktop-app
+          npm ci || npm install
+          npm run build
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle 8.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
+
+      - name: Build Android Staff App (APK & AAB)
+        run: |
+          cd apps/android-staff
+          gradle assembleDebug bundleDebug
+
+      - name: Build Android Guardian App (APK & AAB)
+        run: |
+          cd apps/android-guardian
+          gradle assembleDebug bundleDebug
+
+      - name: Organize Release Artifacts
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          cp apps/desktop-app/dist/*.exe release-artifacts/ 2>/dev/null || true
+          cp apps/desktop-app/dist/latest.yml release-artifacts/ 2>/dev/null || true
+          cp apps/desktop-app/dist/*.blockmap release-artifacts/ 2>/dev/null || true
+          
+          find apps/android-staff/app/build/outputs/apk/ -name "*.apk" -exec cp {} release-artifacts/Mubtadiaat-${{ env.TAG_NAME }}.apk \;
+          find apps/android-staff/app/build/outputs/bundle/ -name "*.aab" -exec cp {} release-artifacts/Mubtadiaat-${{ env.TAG_NAME }}.aab \;
+          find apps/android-guardian/app/build/outputs/apk/ -name "*.apk" -exec cp {} release-artifacts/e-Mubtadiaat-${{ env.TAG_NAME }}.apk \;
+          find apps/android-guardian/app/build/outputs/bundle/ -name "*.aab" -exec cp {} release-artifacts/e-Mubtadiaat-${{ env.TAG_NAME }}.aab \;
+          
+          ls -la release-artifacts/
+
+      - name: Upload Artifacts to Actions Storage
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle-${{ env.TAG_NAME }}
+          path: release-artifacts/*
+
+      - name: Automatically Create / Update GitHub Release to Public Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: mubtadiaat/app_software
+          token: ${{ secrets.PUBLIC_REPO_PAT || secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.TAG_NAME }}
+          name: "Admin Mubtadiaat ${{ env.TAG_NAME }}"
+          body: |
+            ## 🚀 Automatic Release ${{ env.TAG_NAME }}
+            
+            Pembaruan otomatis versi ${{ env.APP_VERSION }} untuk seluruh ekosistem Admin Mubtadiaat.
+            
+            ### Artifacts Termasuk:
+            - 💻 **Desktop Windows**: Setup Installer `.exe` & `latest.yml`
+            - 📱 **Android Staff**: `Mubtadiaat-${{ env.TAG_NAME }}.apk` & `.aab`
+            - 🛡️ **Android Guardian**: `e-Mubtadiaat-${{ env.TAG_NAME }}.apk` & `.aab`
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            release-artifacts/*

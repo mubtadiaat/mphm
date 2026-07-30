@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.P3HMGuardian" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#10b981</item>
+        <item name="colorPrimaryVariant">#059669</item>
+        <item name="colorOnPrimary">#ffffff</item>
+        <item name="android:statusBarColor">#0b0f17</item>
+        <item name="android:navigationBarColor">#0b0f17</item>
+        <item name="android:windowBackground">#0b0f17</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

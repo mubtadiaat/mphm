@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Mubtadiaat Desktop</title>
+  <style>
+    :root {
+      --bg-color: #0b0f17;
+      --titlebar-bg: #141b27;
+      --border-color: #2e3a50;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-color: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.35);
+      --success-color: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Custom Titlebar */
+    .titlebar {
+      height: 42px;
+      background-color: var(--titlebar-bg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      -webkit-app-region: drag;
+      border-bottom: 1px solid var(--border-color);
+      z-index: 9999;
+    }
+
+    .titlebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    .titlebar-logo {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    .role-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      background-color: rgba(59, 130, 246, 0.2);
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .titlebar-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      -webkit-app-region: no-drag;
+    }
+
+    .control-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.2s;
+    }
+
+    .control-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-close:hover {
+      background-color: #ef4444;
+      color: #ffffff;
+    }
+
+    /* Webview Container */
+    .app-frame {
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 42px);
+      border: none;
+      background-color: var(--bg-color);
+    }
+
+    /* Floating Update Banner Modal */
+    .update-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 380px;
+      background: rgba(20, 27, 39, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
+      z-index: 99999;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .toast-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toast-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .toast-version {
+      font-size: 12px;
+      padding: 2px 8px;
+      background: var(--accent-color);
+      color: #fff;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .toast-close:hover {
+      color: var(--text-main);
+    }
+
+    .toast-notes {
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+      background: rgba(11, 15, 23, 0.6);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .toast-progress {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background-color: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+      transition: width 0.2s ease;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .toast-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-update {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-update:hover {
+      opacity: 0.9;
+    }
+
+    .btn-later {
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-later:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Titlebar -->
+  <div class="titlebar">
+    <div class="titlebar-brand">
+      <img src="logo.webp" alt="Admin Mubtadiaat Logo" class="titlebar-logo" />
+      <span>Admin Mubtadiaat</span>
+      <span id="roleTag" class="role-tag">Sekretariat</span>
+    </div>
+    <div class="titlebar-controls">
+      <button class="control-btn" id="btnMin" title="Minimize">&#x2212;</button>
+      <button class="control-btn" id="btnMax" title="Maximize">&#x25A2;</button>
+      <button class="control-btn btn-close" id="btnClose" title="Tutup">&#x2715;</button>
+    </div>
+  </div>
+
+  <!-- Web App View -->
+  <webview id="webFrame" class="app-frame" src="https://m.p3hm.my.id/sekretariat" allowpopups></webview>
+
+      <!-- In-App Floating Update Toast -->
+  <div id="updateToast" class="update-toast">
+    <div class="toast-header">
+      <div class="toast-title">
+        <span>🚀 Versi Baru Tersedia</span>
+        <span id="toastVersion" class="toast-version">v1.4.17</span>
+      </div>
+      <button class="toast-close" id="btnDismissToast">✕</button>
+    </div>
+
+    <div class="toast-notes" id="toastNotes">
+      • Perbaikan autentikasi login<br>
+      • Optimasi performa WebView & dashboard<br>
+      • Peningkatan stabilitas sinkronisasi data
+    </div>
+
+    <div class="toast-progress" id="toastProgressBox">
+      <div class="progress-track">
+        <div class="progress-fill" id="toastProgressFill"></div>
+      </div>
+      <div class="progress-text">
+        <span id="toastProgressStatus">Mengunduh di latar belakang...</span>
+        <span id="toastProgressPercent">0%</span>
+      </div>
+    </div>
+
+    <div class="toast-actions">
+      <button class="btn-later" id="btnUpdateLater">Nanti</button>
+      <button class="btn-update" id="btnUpdateNow">Update Sekarang</button>
+    </div>
+  </div>
+
+  <script>
+    function isAuthUrl(url) {
+      if (!url) return false;
+      const lower = url.toLowerCase();
+      return lower.includes('accounts.google.com') ||
+             lower.includes('google.com/o/oauth2') ||
+             lower.includes('google.com/gsi/') ||
+             lower.includes('firebaseapp.com') ||
+             lower.includes('/__/auth/') ||
+             lower.includes('auth/google') ||
+             lower.includes('login/google');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const btnMin = document.getElementById('btnMin');
+      const btnMax = document.getElementById('btnMax');
+      const btnClose = document.getElementById('btnClose');
+      const roleTag = document.getElementById('roleTag');
+      const webFrame = document.getElementById('webFrame');
+
+      // Update Toast Elements
+      const updateToast = document.getElementById('updateToast');
+      const toastVersion = document.getElementById('toastVersion');
+      const toastNotes = document.getElementById('toastNotes');
+      const toastProgressBox = document.getElementById('toastProgressBox');
+      const toastProgressFill = document.getElementById('toastProgressFill');
+      const toastProgressStatus = document.getElementById('toastProgressStatus');
+      const toastProgressPercent = document.getElementById('toastProgressPercent');
+      const btnUpdateNow = document.getElementById('btnUpdateNow');
+      const btnUpdateLater = document.getElementById('btnUpdateLater');
+      const btnDismissToast = document.getElementById('btnDismissToast');
+
+      if (window.electronAPI) {
+        const config = await window.electronAPI.getConfig();
+        if (config && config.role) {
+          roleTag.textContent = config.role;
+        }
+        if (config && config.targetUrl) {
+          webFrame.src = config.targetUrl;
+        }
+
+        btnMin.addEventListener('click', () => window.electronAPI.minimizeWindow());
+        btnMax.addEventListener('click', () => window.electronAPI.maximizeWindow());
+        btnClose.addEventListener('click', () => window.electronAPI.closeWindow());
+
+        // External Link Interceptor
+        webFrame.addEventListener('dom-ready', () => {
+          const handleExternal = (e) => {
+            const targetUrl = e.url;
+            if (targetUrl) {
+              if (isAuthUrl(targetUrl)) {
+                e.preventDefault();
+                window.electronAPI.openExternal(targetUrl);
+                return;
+              }
+
+              const lowerUrl = targetUrl.toLowerCase();
+              const isInternal = lowerUrl.includes('p3hm.my.id') || lowerUrl.includes('localhost');
+              if (!isInternal) {
+                e.preventDefault();
+                window.electronAPI.openExternal(targetUrl);
+              }
+            }
+          };
+
+          webFrame.addEventListener('will-navigate', handleExternal);
+        });
+
+        // Deep Link Auth Listener
+        if (window.electronAPI.onDeepLinkAuth) {
+          window.electronAPI.onDeepLinkAuth((data) => {
+            console.log('Deep link auth callback received:', data);
+            if (data && data.role && roleTag) {
+              roleTag.textContent = data.role;
+            }
+            if (webFrame) {
+              if (data && data.targetUrl) {
+                webFrame.src = data.targetUrl;
+              } else {
+                webFrame.reload();
+              }
+            }
+          });
+        }
+
+        // Background AutoUpdater Listeners
+        if (window.electronAPI.onUpdateAvailable) {
+          window.electronAPI.onUpdateAvailable((info) => {
+            if (info && info.version) {
+              toastVersion.textContent = `v${info.version}`;
+            }
+            if (info && info.releaseNotes) {
+              toastNotes.innerHTML = typeof info.releaseNotes === 'string' 
+                ? info.releaseNotes 
+                : (Array.isArray(info.releaseNotes) ? info.releaseNotes.join('<br>') : toastNotes.innerHTML);
+            }
+            updateToast.style.display = 'flex';
+          });
+        }
+
+        if (window.electronAPI.onUpdateProgress) {
+          window.electronAPI.onUpdateProgress((progressObj) => {
+            toastProgressBox.style.display = 'flex';
+            const percent = Math.round(progressObj.percent || 0);
+            toastProgressFill.style.width = `${percent}%`;
+            toastProgressPercent.textContent = `${percent}%`;
+            toastProgressStatus.textContent = `Mengunduh (${(progressObj.bytesPerSecond / 1024 / 1024).toFixed(1)} MB/s)...`;
+          });
+        }
+
+        if (window.electronAPI.onUpdateDownloaded) {
+          window.electronAPI.onUpdateDownloaded((info) => {
+            toastProgressBox.style.display = 'none';
+            document.querySelector('.toast-title span').textContent = '✅ Update Siap Digunakan';
+            btnUpdateNow.textContent = 'Restart & Install';
+            btnUpdateNow.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            btnUpdateNow.onclick = () => {
+              window.electronAPI.quitAndInstallUpdate();
+            };
+            updateToast.style.display = 'flex';
+          });
+        }
+
+        btnUpdateNow.addEventListener('click', () => {
+          if (btnUpdateNow.textContent.includes('Restart')) {
+            window.electronAPI.quitAndInstallUpdate();
+          } else {
+            btnUpdateNow.disabled = true;
+            btnUpdateNow.textContent = 'Mengunduh...';
+            toastProgressBox.style.display = 'flex';
+            window.electronAPI.startUpdateDownload();
+          }
+        });
+
+        btnUpdateLater.addEventListener('click', () => {
+          updateToast.style.display = 'none';
+        });
+
+        btnDismissToast.addEventListener('click', () => {
+          updateToast.style.display = 'none';
+        });
+      }
+    });
+  </script>
+</body>
+</html>

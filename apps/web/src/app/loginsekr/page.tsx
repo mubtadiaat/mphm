@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -25,8 +25,11 @@ import {
 
 export default function LoginSekretariatPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { data: user } = useAuth();
+  const isDesktop = searchParams.get("target") === "desktop" || searchParams.get("isDesktop") === "true";
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,10 +50,10 @@ export default function LoginSekretariatPage() {
   }, []);
 
   useEffect(() => {
-    if (user) {
+    if (user && !isDesktop) {
       router.replace("/sekretariat");
     }
-  }, [user, router]);
+  }, [user, isDesktop, router]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +75,12 @@ export default function LoginSekretariatPage() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
-      router.push("/sekretariat");
+
+      if (isDesktop && resData.token) {
+        router.push(`/auth/success-desktop?token=${encodeURIComponent(resData.token)}&role=${encodeURIComponent(resData.data?.role || "Sekretariat")}&redirect=/sekretariat`);
+      } else {
+        router.push("/sekretariat");
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Gagal masuk ke Portal Sekretariat.");
     } finally {
@@ -105,7 +113,12 @@ export default function LoginSekretariatPage() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
-      router.push("/sekretariat");
+
+      if (isDesktop || resData.token) {
+        router.push(`/auth/success-desktop?token=${encodeURIComponent(resData.token)}&role=${encodeURIComponent(resData.data?.role || "Sekretariat")}&redirect=/sekretariat`);
+      } else {
+        router.push("/sekretariat");
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login Google gagal.");
     } finally {

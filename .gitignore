@@ -1,12 +1,21 @@
+# Dependencies & Build Outputs
 node_modules/
+**/node_modules/
 .next/
-dist/
-.turbo/
-coverage/
+**/dist/
+**/.turbo/
+**/build/
+.gradle/
+**/.gradle/
+
+# Environment & Credentials
 .env*
 !.env.example
+*.pfx
+
+# Android Build Artifacts & Logs
+*.apk
+*.aab
 *.log
 .DS_Store
-
 .vercel
-.env*
