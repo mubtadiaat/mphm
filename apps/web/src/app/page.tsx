@@ -25,7 +25,12 @@ import {
   Lock,
   UserCheck,
   Zap,
-  HelpCircle
+  HelpCircle,
+  Bot,
+  Send,
+  X,
+  MessageSquare,
+  Loader2
 } from "lucide-react";
 import type { DownloadReleasesResponse } from "./api/download/releases/route";
 import { filterHighestVersionPerDate } from "@/lib/releaseUtils";
@@ -33,25 +38,39 @@ import { filterHighestVersionPerDate } from "@/lib/releaseUtils";
 const ROLE_REDIRECT_MAP: Record<string, string> = {
   "sek.pondok": "/sekretariat",
   "sek.madrasah": "/sekretariat",
-  sekretariat: "/sekretariat",
-  mufattisy: "/mufattisy",
-  mundzir: "/pimpinan",
-  pimpinan: "/pimpinan",
-  mustahiq: "/mustahiq",
-  keamanan: "/keamanan",
-  "petugas keamanan": "/keamanan",
-  "wali santri": "/guardian",
-  wali_santri: "/guardian",
+  "mustahiq": "/mustahiq",
+  "mufattisy": "/mufattisy",
+  "mundzir": "/mufattisy",
+  "musyrifah": "/mufattisy",
+  "pengurus": "/mustahiq",
+  "pimpinan": "/pimpinan",
+  "keamanan": "/keamanan",
+  "wali_santri": "/guardian",
+  "wali": "/guardian",
+  "guardian": "/guardian",
 };
 
-function getRedirectUrlByRole(role: string): string {
-  return ROLE_REDIRECT_MAP[role.trim().toLowerCase()] || "/mustahiq";
+export function getRedirectUrlByRole(role?: string): string {
+  if (!role) return "/auth/loginsekr";
+  const r = role.toLowerCase().trim();
+  return ROLE_REDIRECT_MAP[r] || "/sekretariat";
 }
 
 export default function Page() {
   const router = useRouter();
   const { data: user } = useAuth();
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  // AI Assistant Chat Help Drawer State
+  const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
+  const [inputPrompt, setInputPrompt] = useState<string>("");
+  const [isChatStreaming, setIsChatStreaming] = useState<boolean>(false);
+  const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([
+    {
+      role: "assistant",
+      content: "Assalamu'alaikum Wr. Wb. Saya Asisten Virtual Resmi P3HM & MPHM Lirboyo Kediri. Ada yang bisa saya bantu terkait informasi pesantren, madrasah, atau unduhan aplikasi?",
+    },
+  ]);
 
   // Dynamic Releases State from GitHub API Internal Endpoint
   const [releaseData, setReleaseData] = useState<DownloadReleasesResponse | null>(null);
@@ -290,6 +309,53 @@ export default function Page() {
     setTimeout(() => {
       setActiveDownloadNotice(null);
     }, 4000);
+  };
+
+  const handleSendAiMessage = async (customText?: string) => {
+    const text = (customText || inputPrompt).trim();
+    if (!text || isChatStreaming) return;
+
+    const newMessages = [...chatMessages, { role: "user" as const, content: text }];
+    setChatMessages(newMessages);
+    if (!customText) setInputPrompt("");
+    setIsChatStreaming(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Gagal terhubung ke AI Bantuan P3HM.");
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("Stream tidak tersedia.");
+
+      let assistantText = "";
+      setChatMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        assistantText += decoder.decode(value, { stream: true });
+        setChatMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: "assistant", content: assistantText };
+          return updated;
+        });
+      }
+    } catch (err: any) {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Mohon maaf, layanan AI Bantuan P3HM sedang mengalami gangguan sementara. Silakan coba kembali." },
+      ]);
+    } finally {
+      setIsChatStreaming(false);
+    }
   };
 
   const faqItems = [
@@ -709,6 +775,126 @@ export default function Page() {
         </section>
 
       </main>
+
+      {/* FLOATING AI HELP WIDGET */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <AnimatePresence>
+          {isAiOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="w-[92vw] sm:w-[420px] h-[540px] max-h-[80vh] mb-4 bg-slate-900/95 border border-emerald-500/30 rounded-3xl shadow-2xl backdrop-blur-2xl flex flex-col overflow-hidden ring-1 ring-emerald-500/20"
+            >
+              {/* Header */}
+              <div className="p-4 bg-gradient-to-r from-emerald-950/80 to-slate-900 border-b border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                      P3HM AI Bantuan
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    </h4>
+                    <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Online • Asisten Lirboyo
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsAiOpen(false)}
+                  className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Chat Messages */}
+              <div className="flex-1 p-4 overflow-y-auto space-y-3.5 font-sans text-xs">
+                {chatMessages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    {msg.role === "assistant" && (
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+                        <Bot className="w-4 h-4" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
+                        msg.role === "user"
+                          ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-medium rounded-br-none shadow-md shadow-emerald-950/40"
+                          : "bg-slate-950/80 border border-white/10 text-slate-200 rounded-bl-none font-mono"
+                      }`}
+                    >
+                      {msg.content || (isChatStreaming && index === chatMessages.length - 1 ? "Sedang mengetik..." : "")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Questions Suggestions */}
+              <div className="px-3 py-2 bg-slate-950/60 border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                <button
+                  onClick={() => handleSendAiMessage("Bagaimana cara mengunduh software desktop Windows?")}
+                  className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 border border-white/10 whitespace-nowrap cursor-pointer transition-colors"
+                >
+                  💻 Cara Unduh Desktop?
+                </button>
+                <button
+                  onClick={() => handleSendAiMessage("Siapa saja yang boleh login ke aplikasi?")}
+                  className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 border border-white/10 whitespace-nowrap cursor-pointer transition-colors"
+                >
+                  🔑 Siapa yang Boleh Login?
+                </button>
+                <button
+                  onClick={() => handleSendAiMessage("Apa fungsi aplikasi Wali Santri?")}
+                  className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 border border-white/10 whitespace-nowrap cursor-pointer transition-colors"
+                >
+                  📱 App Wali Santri?
+                </button>
+              </div>
+
+              {/* Input Form */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendAiMessage();
+                }}
+                className="p-3 bg-slate-950 border-t border-white/10 flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  placeholder="Tanyakan sesuatu tentang P3HM/MPHM..."
+                  value={inputPrompt}
+                  onChange={(e) => setInputPrompt(e.target.value)}
+                  disabled={isChatStreaming}
+                  className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition-colors font-mono disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={!inputPrompt.trim() || isChatStreaming}
+                  className="w-9 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-lg shadow-emerald-950/50"
+                >
+                  {isChatStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <button
+          onClick={() => setIsAiOpen(!isAiOpen)}
+          className="px-4 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs flex items-center gap-2.5 shadow-2xl shadow-emerald-950/80 cursor-pointer ring-2 ring-emerald-400/40 hover:scale-105 transition-all"
+        >
+          <Bot className="w-5 h-5" />
+          <span>Tanya AI Bantuan</span>
+          <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping" />
+        </button>
+      </div>
 
       {/* FOOTER */}
       <footer className="relative z-10 w-full border-t border-white/10 bg-slate-950/80 py-8 text-center text-xs text-slate-500 font-mono space-y-2">

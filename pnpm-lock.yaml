@@ -142,6 +142,9 @@ importers:
       framer-motion:
         specifier: ^12.42.2
         version: 12.42.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      groq-sdk:
+        specifier: ^1.4.1
+        version: 1.4.1
       hono:
         specifier: ^4.12.30
         version: 4.12.30
@@ -4040,6 +4043,10 @@ packages:
 
   graphmatch@1.1.1:
     resolution: {integrity: sha512-5ykVn/EXM1hF0XCaWh05VbYvEiOL2lY1kBxZtaYsyvjp7cmWOU1XsAdfQBwClraEofXDT197lFbXOEVMHpvQOg==}
+
+  groq-sdk@1.4.1:
+    resolution: {integrity: sha512-M/SmQdHy+nI4ZWyDgXK57p+jQHi9ojjzJVv3mlkDAL/vvxduUYoyAzib70dNvxsWmwsyZTSERMrXgaXR3B3KUA==}
+    hasBin: true
 
   gtoken@7.1.0:
     resolution: {integrity: sha512-pCcEwRi+TKpMlxAQObHDQ56KawURgyAf6jtIY046fJ5tIv3zDe/LEIubckAO8fj6JnAxLdmWkUfNyulQ2iKdEw==}
@@ -10200,6 +10207,8 @@ snapshots:
   grammex@3.1.13: {}
 
   graphmatch@1.1.1: {}
+
+  groq-sdk@1.4.1: {}
 
   gtoken@7.1.0:
     dependencies:
