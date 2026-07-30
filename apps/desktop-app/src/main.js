@@ -729,7 +729,11 @@ ipcMain.handle('system:open-external', async (event, url) => {
 });
 
 ipcMain.handle('installer:get-config', async () => {
-  return loadConfig();
+  const config = loadConfig() || {};
+  return {
+    ...config,
+    currentVersion: app.getVersion()
+  };
 });
 
 ipcMain.handle('installer:close', () => {
