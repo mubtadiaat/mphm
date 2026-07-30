@@ -21,7 +21,7 @@ console.log("=================================================");
 try {
   // 1. Compile Electron app into unpacked raw directory
   console.log("📦 1. Mem-build biner mentah Electron (Target: DIR)...");
-  execSync("npm run build", { cwd: DESKTOP_DIR, stdio: "inherit" });
+  execSync("npm run build:dir", { cwd: DESKTOP_DIR, stdio: "inherit" });
 
   if (!fs.existsSync(UNPACKED_DIR)) {
     throw new Error(`Folder mentah ${UNPACKED_DIR} tidak ditemukan setelah build!`);
