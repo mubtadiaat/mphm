@@ -19,8 +19,7 @@
   ],
   "win": {
     "target": [
-      "nsis",
-      "portable"
+      "dir"
     ],
     "icon": "src/assets/logo.png",
     "certificateFile": "p3hm-code-signing.pfx",
