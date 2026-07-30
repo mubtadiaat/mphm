@@ -139,6 +139,67 @@ export default function Page() {
                 });
               }
 
+              // Smart fallbacks across recent releases if latest release assets are still being uploaded by CI
+              if (!windowsAsset) {
+                for (const rel of validReleases) {
+                  if (Array.isArray(rel.assets)) {
+                    const found = rel.assets.find((a: any) => (a.name || "").toLowerCase().endsWith(".exe"));
+                    if (found) {
+                      windowsAsset = {
+                        name: found.name,
+                        size: found.size || 0,
+                        formattedSize: `${(found.size / (1024 * 1024)).toFixed(1)} MB`,
+                        downloadCount: Number(found.download_count || 0),
+                        downloadUrl: found.browser_download_url || "",
+                      };
+                      break;
+                    }
+                  }
+                }
+              }
+
+              if (!staffAsset) {
+                for (const rel of validReleases) {
+                  if (Array.isArray(rel.assets)) {
+                    const found = rel.assets.find((a: any) => {
+                      const n = (a.name || "").toLowerCase();
+                      return n.startsWith("mubtadiaat") && n.endsWith(".apk");
+                    });
+                    if (found) {
+                      staffAsset = {
+                        name: found.name,
+                        size: found.size || 0,
+                        formattedSize: `${(found.size / (1024 * 1024)).toFixed(1)} MB`,
+                        downloadCount: Number(found.download_count || 0),
+                        downloadUrl: found.browser_download_url || "",
+                      };
+                      break;
+                    }
+                  }
+                }
+              }
+
+              if (!guardianAsset) {
+                for (const rel of validReleases) {
+                  if (Array.isArray(rel.assets)) {
+                    const found = rel.assets.find((a: any) => {
+                      const n = (a.name || "").toLowerCase();
+                      return n.startsWith("e-mubtadiaat") && n.endsWith(".apk");
+                    });
+                    if (found) {
+                      guardianAsset = {
+                        name: found.name,
+                        size: found.size || 0,
+                        formattedSize: `${(found.size / (1024 * 1024)).toFixed(1)} MB`,
+                        downloadCount: Number(found.download_count || 0),
+                        downloadUrl: found.browser_download_url || "",
+                      };
+                      break;
+                    }
+                  }
+                }
+              }
+
               const processedLatest = {
                 version,
                 tagName: latestObj.tag_name || `v${version}`,
@@ -223,9 +284,9 @@ export default function Page() {
   });
 
   const handleTriggerDownload = (title: string, url?: string) => {
-    if (!url) return;
+    const targetUrl = url || "https://github.com/mubtadiaat/app_software/releases/latest";
     setActiveDownloadNotice(`Unduhan ${title} sedang dimulai...`);
-    window.location.href = url;
+    window.location.href = targetUrl;
     setTimeout(() => {
       setActiveDownloadNotice(null);
     }, 4000);
@@ -397,8 +458,7 @@ export default function Page() {
             <div className="pt-6">
               <button
                 onClick={() => handleTriggerDownload("Software Admin Windows (.exe)", latestRelease?.windows?.downloadUrl)}
-                disabled={!latestRelease?.windows?.downloadUrl}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh Windows (v{latestRelease?.version || "1.4.17"})</span>
@@ -443,8 +503,7 @@ export default function Page() {
             <div className="pt-6">
               <button
                 onClick={() => handleTriggerDownload("App Staff Android (.apk)", latestRelease?.staff?.downloadUrl)}
-                disabled={!latestRelease?.staff?.downloadUrl}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-950/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh APK Staff (v{latestRelease?.version || "1.4.17"})</span>
@@ -499,8 +558,7 @@ export default function Page() {
             <div className="pt-6">
               <button
                 onClick={() => handleTriggerDownload("App Wali Santri (.apk)", latestRelease?.guardian?.downloadUrl)}
-                disabled={!latestRelease?.guardian?.downloadUrl}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-400 hover:to-sky-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-950/50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-400 hover:to-sky-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh APK Wali (v{latestRelease?.version || "1.4.17"})</span>
