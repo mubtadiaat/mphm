@@ -1,4 +1,4 @@
-name: Auto Cleanup GitHub Deployments (Max 25 Successful Only)
+name: Auto Cleanup GitHub Actions & Deployments (Max 9 Successful Only)
 
 on:
   push:
@@ -7,75 +7,124 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   deployments: write
+  contents: write
 
 jobs:
-  cleanup-deployments:
-    name: Prune Deployments (Keep max 25 successful, delete all failed)
+  cleanup-actions-and-deployments:
+    name: Prune Workflow Runs & Deployments (Keep Max 9 Successful)
     runs-on: ubuntu-latest
     steps:
-      - name: Delete Failed & Old Deployment Records
+      - name: Delete Old Actions Workflow Runs (Keep Max 9)
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
-            const deployments = await github.paginate(github.rest.repos.listDeployments, {
-              owner,
-              repo,
-              per_page: 100,
-            });
 
-            console.log(`Total deployment records found: ${deployments.length}`);
+            try {
+              const workflows = await github.rest.actions.listRepoWorkflows({ owner, repo });
+              console.log(`Found ${workflows.data.workflows.length} workflows to audit...`);
 
-            const successfulDeployments = [];
-            const failedDeploymentsToDelete = [];
-
-            for (const dep of deployments) {
-              try {
-                const statuses = await github.rest.repos.listDeploymentStatuses({
+              for (const wf of workflows.data.workflows) {
+                const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
                   owner,
                   repo,
-                  deployment_id: dep.id,
-                  per_page: 1,
+                  workflow_id: wf.id,
+                  per_page: 100,
                 });
 
-                const latestState = statuses.data.length > 0 ? statuses.data[0].state : 'unknown';
+                console.log(`Workflow '${wf.name}': total ${runs.length} runs.`);
 
-                if (latestState === 'success') {
-                  successfulDeployments.push(dep);
-                } else {
+                const successful = runs.filter(r => r.status === 'completed' && r.conclusion === 'success');
+                const nonSuccessful = runs.filter(r => r.status !== 'in_progress' && r.conclusion !== 'success');
+
+                const overflowSuccessful = successful.slice(9);
+                const toDelete = [...nonSuccessful, ...overflowSuccessful];
+
+                console.log(`Workflow '${wf.name}': deleting ${toDelete.length} runs (keeping max 9 successful)...`);
+
+                for (const run of toDelete) {
+                  try {
+                    await github.rest.actions.deleteWorkflowRun({
+                      owner,
+                      repo,
+                      run_id: run.id,
+                    });
+                  } catch (err) {
+                    console.warn(`Could not delete run ${run.id}:`, err.message);
+                  }
+                }
+              }
+            } catch (err) {
+              console.error("Workflow runs cleanup error:", err.message);
+            }
+
+      - name: Delete Old GitHub Deployment Records (Keep Max 9)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+
+            try {
+              const deployments = await github.paginate(github.rest.repos.listDeployments, {
+                owner,
+                repo,
+                per_page: 100,
+              });
+
+              console.log(`Total deployment records found: ${deployments.length}`);
+
+              const successfulDeployments = [];
+              const failedDeploymentsToDelete = [];
+
+              for (const dep of deployments) {
+                try {
+                  const statuses = await github.rest.repos.listDeploymentStatuses({
+                    owner,
+                    repo,
+                    deployment_id: dep.id,
+                    per_page: 1,
+                  });
+
+                  const latestState = statuses.data.length > 0 ? statuses.data[0].state : 'unknown';
+
+                  if (latestState === 'success') {
+                    successfulDeployments.push(dep);
+                  } else {
+                    failedDeploymentsToDelete.push(dep);
+                  }
+                } catch (err) {
                   failedDeploymentsToDelete.push(dep);
                 }
-              } catch (err) {
-                failedDeploymentsToDelete.push(dep);
               }
-            }
 
-            console.log(`Successful deployments: ${successfulDeployments.length}, Failed/Errored deployments: ${failedDeploymentsToDelete.length}`);
+              const overflowSuccessful = successfulDeployments.slice(9);
+              const allToDelete = [...failedDeploymentsToDelete, ...overflowSuccessful];
 
-            // Keep max 25 latest successful deployments, delete overflow + all failed ones
-            const overflowSuccessful = successfulDeployments.slice(25);
-            const allToDelete = [...failedDeploymentsToDelete, ...overflowSuccessful];
+              console.log(`Deleting ${allToDelete.length} deployment records (keeping max 9 successful)...`);
 
-            console.log(`Deleting ${allToDelete.length} deployment records (${failedDeploymentsToDelete.length} failed/errored + ${overflowSuccessful.length} old successful)...`);
-
-            for (const dep of allToDelete) {
-              try {
-                await github.rest.repos.createDeploymentStatus({
-                  owner,
-                  repo,
-                  deployment_id: dep.id,
-                  state: 'inactive',
-                });
-                await github.rest.repos.deleteDeployment({
-                  owner,
-                  repo,
-                  deployment_id: dep.id,
-                });
-              } catch (err) {
-                console.warn(`Could not delete deployment ${dep.id}:`, err.message);
+              for (const dep of allToDelete) {
+                try {
+                  await github.rest.repos.createDeploymentStatus({
+                    owner,
+                    repo,
+                    deployment_id: dep.id,
+                    state: 'inactive',
+                  });
+                  await github.rest.repos.deleteDeployment({
+                    owner,
+                    repo,
+                    deployment_id: dep.id,
+                  });
+                } catch (err) {
+                  console.warn(`Could not delete deployment ${dep.id}:`, err.message);
+                }
               }
-            }
 
-            console.log(`Cleanup completed! Remaining successful deployments: ${Math.min(successfulDeployments.length, 25)}`);
+              console.log(`Cleanup completed!`);
+            } catch (err) {
+              console.error("Deployments cleanup error:", err.message);
+            }
