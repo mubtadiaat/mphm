@@ -51,6 +51,10 @@ jobs:
 
           echo "Version sync completed in runner environment."
 
+      - name: Install Advanced Installer CLI on GitHub Runner
+        run: |
+          choco install advanced-installer -y --no-progress
+
       - name: Install & Build Windows Desktop App
         env:
           CSC_KEY_PASSWORD: "${{ secrets.CSC_KEY_PASSWORD || 'P3HMSecretKey2026!' }}"
