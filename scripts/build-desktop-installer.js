@@ -30,23 +30,49 @@ try {
   console.log("✅ Build Electron DIR selesai!");
   console.log(`📁 Lokasi biner: ${UNPACKED_DIR}`);
 
-  // 2. Check Advanced Installer CLI
+  // 2. Check Advanced Installer CLI dynamically
   console.log("\n🛠️ 2. Menyiapkan Pengemasan Advanced Installer...");
 
-  const advInstallerPaths = [
-    "C:\\Program Files (x86)\\Caphyon\\Advanced Installer 21.0\\bin\\x86\\AdvancedInstaller.com",
-    "C:\\Program Files (x86)\\Caphyon\\Advanced Installer 20.0\\bin\\x86\\AdvancedInstaller.com",
-    "C:\\Program Files (x86)\\Caphyon\\Advanced Installer 19.0\\bin\\x86\\AdvancedInstaller.com",
-    "AdvancedInstaller.com",
-  ];
-
-  let advCmd = null;
-  for (const p of advInstallerPaths) {
-    if (fs.existsSync(p)) {
-      advCmd = `"${p}"`;
-      break;
+  function findAdvancedInstaller() {
+    if (process.env.ADVANCED_INSTALLER_PATH && fs.existsSync(process.env.ADVANCED_INSTALLER_PATH)) {
+      return `"${process.env.ADVANCED_INSTALLER_PATH}"`;
     }
+
+    const candidateRoots = [
+      "C:\\Program Files (x86)\\Caphyon",
+      "C:\\Program Files\\Caphyon",
+      "D:\\Program Files\\Caphyon",
+      "E:\\Program Files\\Caphyon",
+    ];
+
+    for (const root of candidateRoots) {
+      if (fs.existsSync(root)) {
+        try {
+          const subdirs = fs.readdirSync(root);
+          for (const dir of subdirs) {
+            const p86 = path.join(root, dir, "bin", "x86", "AdvancedInstaller.com");
+            if (fs.existsSync(p86)) return `"${p86}"`;
+            const p64 = path.join(root, dir, "bin", "x64", "AdvancedInstaller.com");
+            if (fs.existsSync(p64)) return `"${p64}"`;
+            const pDirect = path.join(root, dir, "AdvancedInstaller.com");
+            if (fs.existsSync(pDirect)) return `"${pDirect}"`;
+          }
+        } catch (e) {}
+      }
+    }
+
+    try {
+      const whereResult = execSync("where AdvancedInstaller.com", { encoding: "utf8" }).trim();
+      if (whereResult) {
+        const firstLine = whereResult.split("\n")[0].trim();
+        if (fs.existsSync(firstLine)) return `"${firstLine}"`;
+      }
+    } catch (e) {}
+
+    return null;
   }
+
+  const advCmd = findAdvancedInstaller();
 
   if (advCmd && fs.existsSync(INSTALLER_CONFIG)) {
     console.log(`⚡ Menggunakan Advanced Installer CLI: ${advCmd}`);
@@ -55,9 +81,13 @@ try {
     execSync(`${advCmd} /build "${INSTALLER_CONFIG}"`, { stdio: "inherit" });
     console.log("\n🎉 BERHASIL! Berkas Setup.exe bergaya macOS berhasil diterbitkan.");
   } else {
-    console.log("⚠️ Advanced Installer CLI belum terdeteksi di lingkungan sistem lokal.");
-    console.log("ℹ️ Folder biner mentah 'win-unpacked' sudah siap untuk diimpor ke proyek Advanced Installer GUI.");
+    console.log("ℹ️ Folder biner mentah 'win-unpacked' telah selesai dikompilasi.");
+    console.log(`📂 Lokasi folder: ${UNPACKED_DIR}`);
     console.log(`📄 Template Proyek AIP: ${INSTALLER_CONFIG}`);
+    console.log("\n💡 Catatan:");
+    console.log("   • Jika Advanced Installer terpasang di lokasi kustom, Anda dapat menentukan jalurnya melalui:");
+    console.log("     set ADVANCED_INSTALLER_PATH=\"C:\\Jalur\\Ke\\AdvancedInstaller.com\"");
+    console.log("   • Atau buka file proyek 'mphm-installer.aip' langsung menggunakan Advanced Installer GUI.");
   }
 } catch (error) {
   console.error("❌ Gagal memproses build installer:", error.message);
