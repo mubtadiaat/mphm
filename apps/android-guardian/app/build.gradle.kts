@@ -11,8 +11,8 @@ android {
         applicationId = "com.p3hm.guardian"
         minSdk = 24
         targetSdk = 34
-        versionCode = 10419
-        versionName = "1.4.19"
+        versionCode = 10421
+        versionName = "1.4.21"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
