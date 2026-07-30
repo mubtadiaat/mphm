@@ -50,7 +50,7 @@ jobs:
           sed -i "s/versionCode = .*/versionCode = $BUILD_CODE/" apps/android-guardian/app/build.gradle.kts
 
           git add apps/desktop-app/package.json apps/desktop-app/package-lock.json apps/android-staff/app/build.gradle.kts apps/android-guardian/app/build.gradle.kts
-          git commit -m "chore(release): auto-bump version to $NEW_VER [skip ci]" || true
+          git commit -m "chore(release): auto-bump version to $NEW_VER [skip ci] [skip vercel]" || true
           git push origin main || true
 
       - name: Install & Build Windows Desktop App
