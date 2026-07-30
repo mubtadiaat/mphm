@@ -28,14 +28,53 @@ jobs:
         with:
           node-version: 22
 
-      - name: Auto-Bump package.json & Sync Android Versions
+      - name: Auto-Bump Version via GitHub Releases API & Sync
         id: auto_bump
         shell: bash
         run: |
-          git config user.name "mubtadiaat"
-          git config user.email "mubtadiaat@users.noreply.github.com"
+          NEW_VER=$(node -e "
+            const fs = require('fs');
+            const https = require('https');
+            
+            function getLatestTag() {
+              return new Promise((resolve) => {
+                const req = https.get('https://api.github.com/repos/mubtadiaat/app_software/releases/latest', { headers: { 'User-Agent': 'GitHub-Actions' } }, (res) => {
+                  let data = '';
+                  res.on('data', chunk => data += chunk);
+                  res.on('end', () => {
+                    try {
+                      const json = JSON.parse(data);
+                      if (json && json.tag_name) {
+                        return resolve(json.tag_name.replace(/^v/, ''));
+                      }
+                    } catch(e) {}
+                    resolve(null);
+                  });
+                });
+                req.on('error', () => resolve(null));
+              });
+            }
 
-          NEW_VER=$(node -e "const fs=require('fs');const p='./apps/desktop-app/package.json';const d=JSON.parse(fs.readFileSync(p));const v=d.version.split('.').map(Number);if(v[2]>=35){v[1]+=1;v[2]=1;}else{v[2]=(v[2]%2===1)?v[2]+2:v[2]+1;if(v[2]>35){v[1]+=1;v[2]=1;}}d.version=v[0]+'.'+v[1]+'.'+String(v[2]).padStart(2,'0');fs.writeFileSync(p,JSON.stringify(d,null,2)+'\n');console.log(d.version);")
+            async function run() {
+              let currentVer = await getLatestTag();
+              if (!currentVer) {
+                const p = './apps/desktop-app/package.json';
+                currentVer = JSON.parse(fs.readFileSync(p)).version || '1.4.27';
+              }
+              const parts = currentVer.split('.').map(Number);
+              let minor = parts[1] || 4;
+              let patch = (parts[2] || 27) + 2;
+              if (patch > 99) { minor += 1; patch = 1; }
+              const newVer = \`\${parts[0] || 1}.\${minor}.\${String(patch).padStart(2, '0')}\`;
+
+              const pkgPath = './apps/desktop-app/package.json';
+              const pkgData = JSON.parse(fs.readFileSync(pkgPath));
+              pkgData.version = newVer;
+              fs.writeFileSync(pkgPath, JSON.stringify(pkgData, null, 2) + '\n');
+              console.log(newVer);
+            }
+            run();
+          ")
 
           echo "APP_VERSION=$NEW_VER" >> $GITHUB_ENV
           echo "TAG_NAME=v$NEW_VER" >> $GITHUB_ENV
