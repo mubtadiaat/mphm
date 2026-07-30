@@ -2,7 +2,7 @@
 <DOCUMENT type="Advanced Installer" CreateVersion="18.0" Format="18.0" >
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
     <ROW Property="ProductName" Value="Admin Mubtadiaat" Type="1"/>
-    <ROW Property="ProductVersion" Value="1.4.17" Type="1"/>
+    <ROW Property="ProductVersion" Value="1.4.31" Type="1"/>
     <ROW Property="Manufacturer" Value="P3HM &amp; MPHM Lirboyo Kediri" Type="1"/>
     <ROW Property="ARPCOMMENTS" Value="Sistem Manajemen Sekretariat Pondok &amp; Madrasah Putri Hidayatul Mubtadi'aat Lirboyo" Type="1"/>
     <ROW Property="SecureCustomProperties" Value="INSTALLER_USERNAME;INSTALLER_PASSWORD;LOGIN_STATUS" Type="1"/>

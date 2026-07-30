@@ -351,7 +351,7 @@ export default function Page() {
         <div className="flex items-center gap-2">
           <span className="hidden sm:inline-flex text-xs font-mono px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-emerald-400 items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            Ecosystem v{latestRelease?.version || "1.4.17"} Live
+            {latestRelease?.version ? `Ecosystem v${latestRelease.version} Live` : "Memuat versi..."}
           </span>
         </div>
       </header>
@@ -461,7 +461,7 @@ export default function Page() {
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
-                <span>Unduh Windows (v{latestRelease?.version || "1.4.17"})</span>
+                <span>Unduh Windows {latestRelease?.version ? `(v${latestRelease.version})` : ''}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -506,7 +506,7 @@ export default function Page() {
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
-                <span>Unduh APK Staff (v{latestRelease?.version || "1.4.17"})</span>
+                <span>Unduh APK Staff {latestRelease?.version ? `(v${latestRelease.version})` : ''}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -561,7 +561,7 @@ export default function Page() {
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-400 hover:to-sky-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
-                <span>Unduh APK Wali (v{latestRelease?.version || "1.4.17"})</span>
+                <span>Unduh APK Wali {latestRelease?.version ? `(v${latestRelease.version})` : ''}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

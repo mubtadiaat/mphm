@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (finishRole) finishRole.textContent = verifiedUserData?.role || 'Sekretariat P3HM';
           if (finishFolder) finishFolder.textContent = selectedInstallDir;
           const finishVersion = document.getElementById('finishVersion');
-          if (finishVersion) finishVersion.textContent = `v${verifiedUserData?.config?.version || '1.4.17'}`;
+          if (finishVersion) finishVersion.textContent = verifiedUserData?.config?.version ? `v${verifiedUserData.config.version}` : '-';
           setWizardStep(5);
         }, 600);
       }

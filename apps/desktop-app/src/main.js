@@ -460,7 +460,7 @@ ipcMain.handle('installer:login', async (event, credentials) => {
       const configData = {
         installedAt: new Date().toISOString(),
         verified: true,
-        version: app.getVersion() || '1.4.17',
+        version: app.getVersion(),
         email: credentials.email,
         username: userData.username || credentials.email,
         role: userRole,
@@ -496,7 +496,7 @@ ipcMain.handle('installer:clear-session', async () => {
 
 // Dynamic Latest Release Check from GitHub API / Server
 ipcMain.handle('installer:get-latest-release', async () => {
-  const currentVer = app.getVersion() || '1.4.17';
+  const currentVer = app.getVersion();
   try {
     const res = await axios.get('https://api.github.com/repos/mubtadiaat/app_software/releases/latest', {
       headers: { 'User-Agent': 'Admin-Mubtadiaat-Desktop' },
@@ -542,7 +542,7 @@ ipcMain.handle('installer:install', async (event, options) => {
   const newConfig = {
     ...existing,
     installedAt: new Date().toISOString(),
-    version: app.getVersion() || '1.4.17',
+    version: app.getVersion(),
     installDirectory: options?.installDir || app.getPath('userData'),
     createDesktopShortcut: options?.desktopShortcut ?? true,
     createStartMenuShortcut: options?.startMenuShortcut ?? true
@@ -594,7 +594,7 @@ ipcMain.handle('installer:repair', async () => {
 // Upgrade Installation (Direct Background Download & Execute)
 ipcMain.handle('installer:upgrade', async () => {
   try {
-    const currentVer = app.getVersion() || '1.4.17';
+    const currentVer = app.getVersion();
     let latestVer = currentVer;
     let downloadUrl = '';
 
