@@ -695,20 +695,16 @@ ipcMain.handle('installer:upgrade', async () => {
 });
 
 // Uninstall Application (Keep vs Remove User Data)
-ipcMain.handle('installer:uninstall', async (event, options) => {
-  const removeData = options?.removeUserData ?? false;
-  if (removeData) {
-    await clearExistingData();
-  } else {
-    const config = loadConfig();
-    if (config) {
-      config.uninstalledAt = new Date().toISOString();
-      saveConfig(config);
+ipcMain.handle('installer:uninstall', async () => {
+  await clearExistingData();
+  try {
+    const userDataPath = app.getPath('userData');
+    if (fs.existsSync(userDataPath)) {
+      fs.rmSync(userDataPath, { recursive: true, force: true });
     }
-  }
-  if (installerWindow) {
-    installerWindow.close();
-  }
+  } catch (e) {}
+  if (installerWindow && !installerWindow.isDestroyed()) installerWindow.close();
+  if (mainContainerWindow && !mainContainerWindow.isDestroyed()) mainContainerWindow.close();
   app.quit();
   return { success: true };
 });
