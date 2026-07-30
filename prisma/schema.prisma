@@ -49,16 +49,24 @@ model UserAccount {
   @@map("user_accounts")
 }
 
+enum ResidenceType {
+  PONDOK_MUBTADIAAT
+  UNIT_LAIN
+  NON_MUKIM
+}
+
 model StudentProfile {
-  id             String    @id @default(uuid())
-  personId       String    @unique @map("person_id")
-  stambukNumber  String    @map("stambuk_number")
-  nis            String    @unique
-  nisn           String?
-  enrollmentYear Int       @map("enrollment_year")
-  status         String    @default("ACTIVE")
-  roomId         String?   @map("room_id")
-  deletedAt      DateTime? @map("deleted_at")
+  id                    String        @id @default(uuid())
+  personId              String        @unique @map("person_id")
+  stambukNumber         String        @map("stambuk_number")
+  nis                   String        @unique
+  nisn                  String?
+  enrollmentYear        Int           @map("enrollment_year")
+  status                String        @default("ACTIVE")
+  residenceType         ResidenceType @default(PONDOK_MUBTADIAAT) @map("residence_type")
+  externalResidenceName String?       @map("external_residence_name")
+  roomId                String?       @map("room_id")
+  deletedAt             DateTime?     @map("deleted_at")
 
   person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
   room   Room?   @relation(fields: [roomId], references: [id], onDelete: SetNull)

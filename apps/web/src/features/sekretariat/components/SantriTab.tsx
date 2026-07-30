@@ -59,7 +59,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     searchQuery,
     activeSubTab,
     selectedClassFilter !== "ALL" ? selectedClassFilter : undefined,
-    selectedJenjangFilter !== "ALL" ? selectedJenjangFilter : undefined
+    selectedJenjangFilter !== "ALL" ? selectedJenjangFilter : undefined,
+    isPondok ? "pondok" : "madrasah"
   );
   const { data: dbClasses = [] } = useClasses(selectedYearId);
 
@@ -138,10 +139,12 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   // Feature: Tarik Data Santriwati Pondok (P3HM) -> Siswi Madrasah (MPHM)
   const [pondokSantriList, setPondokSantriList] = useState<Santri[]>([]);
   const [selectedPondokSantriId, setSelectedPondokSantriId] = useState("");
+  const [newResidenceType, setNewResidenceType] = useState<"PONDOK_MUBTADIAAT" | "UNIT_LAIN" | "NON_MUKIM">("PONDOK_MUBTADIAAT");
+  const [newExternalResidenceName, setNewExternalResidenceName] = useState("");
 
   useEffect(() => {
     if (showFormModal && !isPondok && !editingSantri) {
-      apiRequest<{ data: Santri[] }>("/api/admin/people?role=student&limit=1000")
+      apiRequest<{ data: Santri[] }>("/api/admin/people?role=student&scope=pondok&limit=1000")
         .then((res) => {
           if (res.data) setPondokSantriList(res.data);
         })
@@ -297,8 +300,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const handleSaveForm = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isPondok && !editingSantri && !selectedPondokSantriId) {
-      toast("Harap pilih Santriwati Pondok (P3HM) terlebih dahulu untuk ditarik datanya!", "warning");
+    if (!isPondok && !editingSantri && newResidenceType === "PONDOK_MUBTADIAAT" && !selectedPondokSantriId) {
+      toast("Harap pilih Santriwati Pondok (P3HM) terlebih dahulu atau ubah Status Asrama ke 'Unit Asrama Lain'!", "warning");
       return;
     }
 
@@ -320,7 +323,9 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         nis: newNis || newStambuk,
         nisn: newNisn,
         class: newClass,
-        room: newRoom,
+        room: isPondok || newResidenceType === "PONDOK_MUBTADIAAT" ? newRoom : undefined,
+        residenceType: isPondok ? "PONDOK_MUBTADIAAT" : newResidenceType,
+        externalResidenceName: newResidenceType === "UNIT_LAIN" ? newExternalResidenceName : null,
         enrollmentYear: Number(newEnrollmentYear),
         graduationYear: newGraduationYear ? Number(newGraduationYear) : undefined,
         status: newStatus,
@@ -837,36 +842,99 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               </div>
 
               <form onSubmit={handleSaveForm} className="flex-1 overflow-y-auto p-6 space-y-8">
-                {/* Feature: Tarik Data Santriwati Pondok (P3HM) */}
+                {/* Feature: Tarik Data Santriwati Pondok (P3HM) & Input Unit Lain */}
                 {!isPondok && !editingSantri && (
-                  <div className="p-4 bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-zinc-900 border border-blue-500/30 rounded-2xl space-y-3">
+                  <div className="p-4 bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-zinc-900 border border-blue-500/30 rounded-2xl space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
                         <Home className="w-4 h-4 text-emerald-400" />
-                        🔍 Tarik Data Siswi dari Santriwati Pondok (P3HM)
-                      </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                        Otomatis Isi Biodata & Smart KK
+                        Kategori Asrama Siswi Madrasah (MPHM)
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400">
-                      Seluruh siswi Madrasah (MPHM) bersumber dari data Santriwati Pondok (P3HM). Pilih nama/stambuk di bawah untuk mengisi identitas pribadi & wali secara otomatis.
-                    </p>
 
-                    <div className="flex items-center gap-3">
-                      <select
-                        value={selectedPondokSantriId}
-                        onChange={(e) => handleSelectPondokSantri(e.target.value)}
-                        className="flex-1 px-3 py-2.5 bg-zinc-900 border border-zinc-700 rounded-xl text-xs font-semibold text-white outline-none focus:border-blue-500 cursor-pointer"
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setNewResidenceType("PONDOK_MUBTADIAAT")}
+                        className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border text-left flex flex-col gap-0.5 cursor-pointer ${
+                          newResidenceType === "PONDOK_MUBTADIAAT"
+                            ? "bg-emerald-600/30 border-emerald-500 text-emerald-200"
+                            : "bg-zinc-800/60 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                        }`}
                       >
-                        <option value="">-- Pilih Santriwati Pondok (Stambuk / NIK / Nama) --</option>
-                        {pondokSantriList.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name} (Stambuk: {s.stambuk} • NIK: {s.nik || "-"})
-                          </option>
-                        ))}
-                      </select>
+                        <span>🏛️ Santri Pondok Mubtadi-aat</span>
+                        <span className="text-[10px] font-normal opacity-80">Tarik dari P3HM Lirboyo</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewResidenceType("UNIT_LAIN");
+                          setSelectedPondokSantriId("");
+                        }}
+                        className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border text-left flex flex-col gap-0.5 cursor-pointer ${
+                          newResidenceType === "UNIT_LAIN"
+                            ? "bg-purple-600/30 border-purple-500 text-purple-200"
+                            : "bg-zinc-800/60 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span>🏡 Unit Asrama Lain</span>
+                        <span className="text-[10px] font-normal opacity-80">Darussa'adah, Ar-Risalah, dll</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewResidenceType("NON_MUKIM");
+                          setSelectedPondokSantriId("");
+                        }}
+                        className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border text-left flex flex-col gap-0.5 cursor-pointer ${
+                          newResidenceType === "NON_MUKIM"
+                            ? "bg-amber-600/30 border-amber-500 text-amber-200"
+                            : "bg-zinc-800/60 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span>🚲 Non-Mukim / Kalong</span>
+                        <span className="text-[10px] font-normal opacity-80">Luar Pondok</span>
+                      </button>
                     </div>
+
+                    {newResidenceType === "PONDOK_MUBTADIAAT" && (
+                      <div className="space-y-2 pt-2 border-t border-zinc-800">
+                        <label className="text-xs font-bold text-blue-300">🔍 Pilih &amp; Tarik Data Santriwati Pondok (P3HM)</label>
+                        <select
+                          value={selectedPondokSantriId}
+                          onChange={(e) => handleSelectPondokSantri(e.target.value)}
+                          className="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-700 rounded-xl text-xs font-semibold text-white outline-none focus:border-blue-500 cursor-pointer"
+                        >
+                          <option value="">-- Pilih Santriwati Pondok (Stambuk / NIK / Nama) --</option>
+                          {pondokSantriList.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name} (Stambuk: {s.stambuk} • NIK: {s.nik || "-"})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {newResidenceType === "UNIT_LAIN" && (
+                      <div className="space-y-2 pt-2 border-t border-zinc-800">
+                        <label className="text-xs font-bold text-purple-300">Nama Unit Asrama Asal</label>
+                        <select
+                          value={newExternalResidenceName}
+                          onChange={(e) => setNewExternalResidenceName(e.target.value)}
+                          className="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-700 rounded-xl text-xs font-semibold text-white outline-none focus:border-purple-500 cursor-pointer"
+                        >
+                          <option value="">-- Pilih Nama Unit Asrama --</option>
+                          <option value="Darussa'adah">Pondok Pesantren Darussa'adah</option>
+                          <option value="Ar-Risalah">Pondok Pesantren Ar-Risalah</option>
+                          <option value="Dalem Gus Ya'lu">Dalem Gus Ya'lu</option>
+                          <option value="Dalem Yai Atho">Dalem Yai Atho'</option>
+                          <option value="Al-Mahrusiyah">Pondok Pesantren Al-Mahrusiyah</option>
+                          <option value="Lainnya">Asrama Unit Lainnya</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
                 )}
 

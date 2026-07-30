@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get("q") || undefined;
     const role = searchParams.get("role") || undefined;
     const statusTab = searchParams.get("status") || undefined;
+    const scope = searchParams.get("scope") || undefined;
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = parseInt(searchParams.get("offset") || "0");
 
@@ -56,6 +57,18 @@ export async function GET(req: NextRequest) {
             }
           : {}),
       };
+
+      if (scope === "pondok") {
+        whereCondition.AND = [
+          ...(whereCondition.AND || []),
+          {
+            OR: [
+              { residenceType: "PONDOK_MUBTADIAAT" },
+              { roomId: { not: null } }
+            ]
+          }
+        ];
+      }
 
       if (jenjangParam && jenjangParam !== "all" && jenjangParam !== "ALL") {
         whereCondition.enrollments = {
