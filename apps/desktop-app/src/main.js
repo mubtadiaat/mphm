@@ -459,6 +459,7 @@ ipcMain.handle('installer:login', async (event, credentials) => {
 
       const configData = {
         installedAt: new Date().toISOString(),
+        verified: true,
         version: app.getVersion() || '1.4.17',
         email: credentials.email,
         username: userData.username || credentials.email,
@@ -786,10 +787,10 @@ app.whenReady().then(() => {
     handleDeepLinkUrl(initialDeepLinkUrl);
   }
 
-  const forceInstaller = process.argv.includes('--installer');
+  const forceInstaller = process.argv.includes('--installer') || process.argv.includes('--setup');
   const existingConfig = loadConfig();
 
-  if (existingConfig && existingConfig.role && existingConfig.installedAt && !forceInstaller) {
+  if (existingConfig && existingConfig.installedAt && existingConfig.verified && existingConfig.role && !forceInstaller) {
     createMainAppWindow(existingConfig);
   } else {
     createInstallerWindow();
@@ -798,7 +799,7 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       const cfg = loadConfig();
-      if (cfg && cfg.role && cfg.installedAt) {
+      if (cfg && cfg.installedAt && cfg.verified && cfg.role) {
         createMainAppWindow(cfg);
       } else {
         createInstallerWindow();
