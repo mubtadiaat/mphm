@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'apps/desktop-app/**'
+      - 'apps/android-staff/**'
+      - 'apps/android-guardian/**'
+      - '.github/workflows/release.yml'
     tags:
       - 'v*'
   workflow_dispatch:
