@@ -794,7 +794,7 @@ export default function Page() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                      P3HM AI Bantuan
+                      Ada Pertanyaan?
                       <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                     </h4>
                     <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
@@ -836,8 +836,8 @@ export default function Page() {
                 ))}
               </div>
 
-              {/* Quick Questions Suggestions */}
-              <div className="px-3 py-2 bg-slate-950/60 border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              {/* Quick Questions Suggestions - Clean Hidden Scrollbar */}
+              <div className="px-3 py-2 bg-slate-950/60 border-t border-white/5 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 <button
                   onClick={() => handleSendAiMessage("Bagaimana cara mengunduh software desktop Windows?")}
                   className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 border border-white/10 whitespace-nowrap cursor-pointer transition-colors"
@@ -891,7 +891,7 @@ export default function Page() {
           className="px-4 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs flex items-center gap-2.5 shadow-2xl shadow-emerald-950/80 cursor-pointer ring-2 ring-emerald-400/40 hover:scale-105 transition-all"
         >
           <Bot className="w-5 h-5" />
-          <span>Tanya AI Bantuan</span>
+          <span>Ada Pertanyaan?</span>
           <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping" />
         </button>
       </div>
