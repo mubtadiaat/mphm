@@ -32,8 +32,8 @@ jobs:
         id: auto_bump
         shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "mubtadiaat"
+          git config user.email "mubtadiaat@users.noreply.github.com"
 
           NEW_VER=$(node -e "const fs=require('fs');const p='./apps/desktop-app/package.json';const d=JSON.parse(fs.readFileSync(p));const v=d.version.split('.').map(Number);if(v[2]>=35){v[1]+=1;v[2]=1;}else{v[2]=(v[2]%2===1)?v[2]+2:v[2]+1;if(v[2]>35){v[1]+=1;v[2]=1;}}d.version=v[0]+'.'+v[1]+'.'+String(v[2]).padStart(2,'0');fs.writeFileSync(p,JSON.stringify(d,null,2)+'\n');console.log(d.version);")
 
