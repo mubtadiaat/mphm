@@ -1,5 +1,5 @@
 /**
- * Automasi Build Desktop App (Standalone Zero-Dependency + Advanced Installer Support)
+ * Automasi Build Desktop App (Advanced Installer + Standalone Fallback)
  * Menghasilkan berkas installer .exe tunggal bertema macOS Dark Glassmorphism
  * dengan Gerbang Otentikasi Online khusus Sekretariat.
  */
@@ -18,61 +18,69 @@ console.log("=================================================");
 console.log("🚀 PILOT BUILD DESKTOP APPLICATION INSTALLER");
 console.log("=================================================");
 
-try {
-  // 1. Check Advanced Installer CLI dynamically
-  function findAdvancedInstaller() {
-    if (process.env.ADVANCED_INSTALLER_PATH && fs.existsSync(process.env.ADVANCED_INSTALLER_PATH)) {
-      return `"${process.env.ADVANCED_INSTALLER_PATH}"`;
-    }
-
-    const candidateRoots = [
-      "C:\\Program Files (x86)\\Caphyon",
-      "C:\\Program Files\\Caphyon",
-      "D:\\Program Files\\Caphyon",
-      "E:\\Program Files\\Caphyon",
-    ];
-
-    for (const root of candidateRoots) {
-      if (fs.existsSync(root)) {
-        try {
-          const subdirs = fs.readdirSync(root);
-          for (const dir of subdirs) {
-            const p86 = path.join(root, dir, "bin", "x86", "AdvancedInstaller.com");
-            if (fs.existsSync(p86)) return `"${p86}"`;
-            const p64 = path.join(root, dir, "bin", "x64", "AdvancedInstaller.com");
-            if (fs.existsSync(p64)) return `"${p64}"`;
-            const pDirect = path.join(root, dir, "AdvancedInstaller.com");
-            if (fs.existsSync(pDirect)) return `"${pDirect}"`;
-          }
-        } catch (e) {}
-      }
-    }
-
-    try {
-      const whereResult = execSync("where AdvancedInstaller.com", { encoding: "utf8" }).trim();
-      if (whereResult) {
-        const firstLine = whereResult.split("\n")[0].trim();
-        if (fs.existsSync(firstLine)) return `"${firstLine}"`;
-      }
-    } catch (e) {}
-
-    return null;
+function findAdvancedInstaller() {
+  if (process.env.ADVANCED_INSTALLER_PATH && fs.existsSync(process.env.ADVANCED_INSTALLER_PATH)) {
+    return `"${process.env.ADVANCED_INSTALLER_PATH}"`;
   }
 
+  const candidateRoots = [
+    "C:\\Program Files (x86)\\Caphyon",
+    "C:\\Program Files\\Caphyon",
+    "D:\\Program Files\\Caphyon",
+    "E:\\Program Files\\Caphyon",
+  ];
+
+  for (const root of candidateRoots) {
+    if (fs.existsSync(root)) {
+      try {
+        const subdirs = fs.readdirSync(root);
+        for (const dir of subdirs) {
+          const p86 = path.join(root, dir, "bin", "x86", "AdvancedInstaller.com");
+          if (fs.existsSync(p86)) return `"${p86}"`;
+          const p64 = path.join(root, dir, "bin", "x64", "AdvancedInstaller.com");
+          if (fs.existsSync(p64)) return `"${p64}"`;
+          const pDirect = path.join(root, dir, "AdvancedInstaller.com");
+          if (fs.existsSync(pDirect)) return `"${pDirect}"`;
+        }
+      } catch (e) {}
+    }
+  }
+
+  try {
+    const whereResult = execSync("where AdvancedInstaller.com", { encoding: "utf8" }).trim();
+    if (whereResult) {
+      const firstLine = whereResult.split("\n")[0].trim();
+      if (fs.existsSync(firstLine)) return `"${firstLine}"`;
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+try {
   const advCmd = findAdvancedInstaller();
+  let builtWithAdv = false;
 
   if (advCmd && fs.existsSync(INSTALLER_CONFIG)) {
-    console.log("📦 1. Mem-build biner mentah Electron (Target: DIR)...");
-    execSync("npm run build:dir", { cwd: DESKTOP_DIR, stdio: "inherit" });
+    try {
+      console.log("📦 1. Mem-build biner mentah Electron (Target: DIR)...");
+      execSync("npm run build:dir", { cwd: DESKTOP_DIR, stdio: "inherit" });
 
-    console.log(`\n⚡ Menggunakan Advanced Installer CLI: ${advCmd}`);
-    console.log(`📄 Menggunakan Konfigurasi Proyek: ${INSTALLER_CONFIG}`);
-    execSync(`${advCmd} /build "${INSTALLER_CONFIG}"`, { stdio: "inherit" });
-    console.log("\n🎉 BERHASIL! Berkas Setup.exe (Advanced Installer) berhasil diterbitkan.");
-  } else {
+      console.log(`\n⚡ Menggunakan Advanced Installer CLI: ${advCmd}`);
+      console.log(`📄 Menggunakan Konfigurasi Proyek: ${INSTALLER_CONFIG}`);
+      execSync(`${advCmd} /build "${INSTALLER_CONFIG}"`, { stdio: "inherit" });
+      console.log("\n🎉 BERHASIL! Berkas Setup.exe (Advanced Installer) berhasil diterbitkan.");
+      builtWithAdv = true;
+    } catch (advErr) {
+      console.warn("⚠️ Advanced Installer CLI mengalami kendala:", advErr.message);
+      console.log("🔄 Mengalihkan otomatis ke Standalone Build Pipeline (Electron Builder)...");
+    }
+  }
+
+  if (!builtWithAdv) {
     console.log("📦 Standalone Zero-Dependency Build (Electron Builder + Custom MacBook UI)...");
     execSync("npx electron-builder --win nsis --publish never", { cwd: DESKTOP_DIR, stdio: "inherit" });
-    console.log("\n🎉 BERHASIL! Berkas Admin.Mubtadiaat.Setup.exe berhasil diterbitkan tanpa lisensi pihak ketiga.");
+    console.log("\n🎉 BERHASIL! Berkas Admin.Mubtadiaat.Setup.exe berhasil diterbitkan.");
   }
 } catch (error) {
   console.error("❌ Gagal memproses build installer:", error.message);
