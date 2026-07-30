@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,7 +23,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-export default function LoginSekretariatPage() {
+function LoginSekretariatContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -340,5 +340,17 @@ export default function LoginSekretariatPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function LoginSekretariatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh w-full bg-slate-950 text-white flex items-center justify-center font-bold font-mono">
+        Memuat Portal Sekretariat...
+      </div>
+    }>
+      <LoginSekretariatContent />
+    </Suspense>
   );
 }
