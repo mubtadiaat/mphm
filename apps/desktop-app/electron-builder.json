@@ -35,8 +35,8 @@
   },
   "nsis": {
     "include": "installer/uninstaller.nsh",
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
+    "oneClick": true,
+    "allowToChangeInstallationDirectory": false,
     "allowElevation": true,
     "displayLanguageSelector": false,
     "perMachine": false,

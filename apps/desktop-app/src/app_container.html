@@ -470,8 +470,7 @@
             const targetUrl = e.url;
             if (targetUrl) {
               if (isAuthUrl(targetUrl)) {
-                e.preventDefault();
-                window.electronAPI.openExternal(targetUrl);
+                // Allow Google OAuth popups natively inside Electron child window
                 return;
               }
 
@@ -485,6 +484,7 @@
           };
 
           webFrame.addEventListener('will-navigate', handleExternal);
+          webFrame.addEventListener('new-window', handleExternal);
         });
 
         // Deep Link Auth Listener

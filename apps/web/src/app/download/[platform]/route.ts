@@ -38,8 +38,12 @@ export async function GET(
   const { platform: rawPlatform } = await params;
   const platform = (rawPlatform || "").toLowerCase().trim();
 
+  const { searchParams } = new URL(request.url);
+  const versionParam = searchParams.get("version");
+
   let targetUrl: string | undefined;
   let filename: string | undefined;
+  let assetId: number | undefined;
   let contentType = platform === "windows" || platform === "admin"
     ? "application/x-msdownload"
     : "application/vnd.android.package-archive";
@@ -53,7 +57,11 @@ export async function GET(
       headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
     }
 
-    const res = await fetch("https://api.github.com/repos/mubtadiaat/app_software/releases/latest", {
+    const ghApiUrl = versionParam
+      ? `https://api.github.com/repos/mubtadiaat/app_software/releases/tags/v${versionParam.replace(/^v/i, "")}`
+      : "https://api.github.com/repos/mubtadiaat/app_software/releases/latest";
+
+    const res = await fetch(ghApiUrl, {
       headers,
       cache: "no-store",
     });
@@ -66,16 +74,19 @@ export async function GET(
           if ((platform === "windows" || platform === "admin") && nameLower.endsWith(".exe")) {
             targetUrl = asset.browser_download_url;
             filename = asset.name;
+            assetId = asset.id;
             contentType = "application/x-msdownload";
             break;
           } else if ((platform === "guardian" || platform === "wali") && nameLower.startsWith("e-mubtadiaat") && nameLower.endsWith(".apk")) {
             targetUrl = asset.browser_download_url;
             filename = asset.name;
+            assetId = asset.id;
             contentType = "application/vnd.android.package-archive";
             break;
           } else if (platform === "staff" && nameLower.startsWith("mubtadiaat") && nameLower.endsWith(".apk")) {
             targetUrl = asset.browser_download_url;
             filename = asset.name;
+            assetId = asset.id;
             contentType = "application/vnd.android.package-archive";
             break;
           }
@@ -96,7 +107,39 @@ export async function GET(
     filename = fallback.filename;
   }
 
-  // Stream binary file directly from GitHub release asset to browser
+  // 1. First try streaming binary directly via GitHub API asset endpoint if token is present
+  if (assetId && process.env.GITHUB_TOKEN) {
+    try {
+      const assetRes = await fetch(`https://api.github.com/repos/mubtadiaat/app_software/releases/assets/${assetId}`, {
+        headers: {
+          Accept: "application/octet-stream",
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          "User-Agent": "Mubtadiaat-Download-Center",
+        },
+      });
+
+      if (assetRes.ok && assetRes.body) {
+        const responseHeaders = new Headers();
+        responseHeaders.set("Content-Type", contentType);
+        responseHeaders.set("Content-Disposition", `attachment; filename="${filename}"`);
+        responseHeaders.set("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=120");
+
+        const contentLength = assetRes.headers.get("content-length");
+        if (contentLength) {
+          responseHeaders.set("Content-Length", contentLength);
+        }
+
+        return new Response(assetRes.body as any, {
+          status: 200,
+          headers: responseHeaders,
+        });
+      }
+    } catch (apiStreamErr) {
+      console.warn("GitHub API asset stream failed:", apiStreamErr);
+    }
+  }
+
+  // 2. Stream binary file directly from browser_download_url to browser
   try {
     const fileRes = await fetch(targetUrl, {
       redirect: "follow",
@@ -105,7 +148,9 @@ export async function GET(
       },
     });
 
-    if (fileRes.ok && fileRes.body) {
+    const respContentType = fileRes.headers.get("content-type") || "";
+
+    if (fileRes.ok && fileRes.body && !respContentType.includes("text/html")) {
       const responseHeaders = new Headers();
       responseHeaders.set("Content-Type", contentType);
       responseHeaders.set("Content-Disposition", `attachment; filename="${filename}"`);
@@ -122,7 +167,7 @@ export async function GET(
       });
     }
   } catch (streamError) {
-    console.warn("Direct stream failed, falling back to 307 redirect:", streamError);
+    console.warn("Direct stream failed:", streamError);
   }
 
   return NextResponse.redirect(targetUrl, 307);

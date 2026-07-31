@@ -109,6 +109,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Display SHA-1 Fingerprint for Firebase Console
+        shell: bash
+        run: |
+          echo "================================================="
+          echo "🔑 ANDROID SHA-1 FINGERPRINT FOR FIREBASE CONSOLE"
+          echo "================================================="
+          keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep -i "SHA" || true
+          echo "================================================="
+
       - name: Setup Gradle 8.2
         uses: gradle/actions/setup-gradle@v4
         with:

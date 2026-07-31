@@ -68,7 +68,7 @@ export default function Page() {
   const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([
     {
       role: "assistant",
-      content: "Assalamu'alaikum Wr. Wb. Saya Asisten Virtual Resmi P3HM & MPHM Lirboyo Kediri. Ada yang bisa saya bantu terkait informasi pesantren, madrasah, atau unduhan aplikasi?",
+      content: "Assalamu'alaikum Wr. Wb. Saya Asisten Mubtadi'aat, AI Bantuan Resmi Pondok Pesantren & Madrasah Putri Hidayatul Mubtadi'aat (P3HM & MPHM) Lirboyo Kediri. Ada yang bisa saya bantu terkait informasi pesantren, madrasah, maupun aplikasi?",
     },
   ]);
 
@@ -302,10 +302,19 @@ export default function Page() {
     return item.version.toLowerCase().includes(q) || item.tagName.toLowerCase().includes(q);
   });
 
-  const handleTriggerDownload = (title: string, url?: string) => {
-    const targetUrl = url || "https://github.com/mubtadiaat/app_software/releases/latest";
+  const handleTriggerDownload = (title: string, platform: string, version?: string) => {
     setActiveDownloadNotice(`Unduhan ${title} sedang dimulai...`);
-    window.location.href = targetUrl;
+    const downloadEndpoint = version
+      ? `/download/${platform}?version=${encodeURIComponent(version)}`
+      : `/download/${platform}`;
+
+    const link = document.createElement("a");
+    link.href = downloadEndpoint;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
     setTimeout(() => {
       setActiveDownloadNotice(null);
     }, 4000);
@@ -389,13 +398,17 @@ export default function Page() {
       <AnimatePresence>
         {activeDownloadNotice && (
           <motion.div
-            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            initial={{ opacity: 0, y: -40, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -50, scale: 0.9 }}
-            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-slate-950 font-bold px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-emerald-300"
+            exit={{ opacity: 0, y: -40, scale: 0.9 }}
+            className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-50 w-[90vw] max-w-md sm:w-auto px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl sm:rounded-full bg-slate-900/95 border border-emerald-400/40 text-white font-medium text-xs sm:text-sm shadow-2xl shadow-emerald-950/80 backdrop-blur-xl flex items-center justify-center gap-2.5 ring-1 ring-emerald-500/30"
           >
-            <Download className="w-5 h-5 animate-bounce" />
-            <span>{activeDownloadNotice}</span>
+            <div className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+              <Download className="w-4 h-4 animate-bounce" />
+            </div>
+            <span className="truncate max-w-[240px] sm:max-w-none font-sans tracking-wide text-slate-200">
+              {activeDownloadNotice}
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -523,7 +536,7 @@ export default function Page() {
 
             <div className="pt-6">
               <button
-                onClick={() => handleTriggerDownload("Software Admin Windows (.exe)", latestRelease?.windows?.downloadUrl)}
+                onClick={() => handleTriggerDownload("Software Admin Windows (.exe)", "windows")}
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
@@ -568,7 +581,7 @@ export default function Page() {
 
             <div className="pt-6">
               <button
-                onClick={() => handleTriggerDownload("App Staff Android (.apk)", latestRelease?.staff?.downloadUrl)}
+                onClick={() => handleTriggerDownload("App Staff Android (.apk)", "staff")}
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
@@ -623,7 +636,7 @@ export default function Page() {
 
             <div className="pt-6">
               <button
-                onClick={() => handleTriggerDownload("App Wali Santri (.apk)", latestRelease?.guardian?.downloadUrl)}
+                onClick={() => handleTriggerDownload("App Wali Santri (.apk)", "guardian")}
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-400 hover:to-sky-500 text-white font-extrabold text-xs tracking-wide flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-950/50 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
@@ -707,7 +720,7 @@ export default function Page() {
                     <div className="flex flex-wrap items-center gap-2">
                       {item.windows && (
                         <button
-                          onClick={() => handleTriggerDownload(`Windows v${item.version}`, item.windows?.downloadUrl)}
+                          onClick={() => handleTriggerDownload(`Windows v${item.version}`, "windows", item.version)}
                           className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-semibold transition-colors cursor-pointer"
                         >
                           Windows ({item.windows.formattedSize})
@@ -715,7 +728,7 @@ export default function Page() {
                       )}
                       {item.staff && (
                         <button
-                          onClick={() => handleTriggerDownload(`APK Staff v${item.version}`, item.staff?.downloadUrl)}
+                          onClick={() => handleTriggerDownload(`APK Staff v${item.version}`, "staff", item.version)}
                           className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-semibold transition-colors cursor-pointer"
                         >
                           APK Staff ({item.staff.formattedSize})
@@ -723,7 +736,7 @@ export default function Page() {
                       )}
                       {item.guardian && (
                         <button
-                          onClick={() => handleTriggerDownload(`APK Wali v${item.version}`, item.guardian?.downloadUrl)}
+                          onClick={() => handleTriggerDownload(`APK Wali v${item.version}`, "guardian", item.version)}
                           className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-mono font-semibold transition-colors cursor-pointer"
                         >
                           APK Wali ({item.guardian.formattedSize})
@@ -794,11 +807,11 @@ export default function Page() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                      Ada Pertanyaan?
+                      Asisten Mubtadi'aat
                       <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                     </h4>
                     <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Online • Asisten Lirboyo
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Online • AI Resmi P3HM &amp; MPHM
                     </span>
                   </div>
                 </div>
@@ -839,22 +852,22 @@ export default function Page() {
               {/* Quick Questions Suggestions - Clean Hidden Scrollbar */}
               <div className="px-3 py-2 bg-slate-950/60 border-t border-white/5 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 <button
-                  onClick={() => handleSendAiMessage("Bagaimana cara mengunduh software desktop Windows?")}
+                  onClick={() => handleSendAiMessage("Apa saja jenjang pendidikan diniyyah di Madrasah Perguruan Hidayatul Mubtadi'aat (MPHM)?")}
                   className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 border border-white/10 whitespace-nowrap cursor-pointer transition-colors"
                 >
-                  💻 Cara Unduh Desktop?
+                  📖 Jenjang MPHM?
                 </button>
                 <button
-                  onClick={() => handleSendAiMessage("Siapa saja yang boleh login ke aplikasi?")}
+                  onClick={() => handleSendAiMessage("Bagaimana kegiatan harian santri putri di Pondok Pesantren P3HM Lirboyo?")}
                   className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 border border-white/10 whitespace-nowrap cursor-pointer transition-colors"
                 >
-                  🔑 Siapa yang Boleh Login?
+                  🕌 Kegiatan P3HM?
                 </button>
                 <button
-                  onClick={() => handleSendAiMessage("Apa fungsi aplikasi Wali Santri?")}
+                  onClick={() => handleSendAiMessage("Bagaimana cara mengunduh dan menginstal aplikasi resmi P3HM & MPHM?")}
                   className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] text-slate-300 border border-white/10 whitespace-nowrap cursor-pointer transition-colors"
                 >
-                  📱 App Wali Santri?
+                  💻 Cara Unduh Aplikasi?
                 </button>
               </div>
 

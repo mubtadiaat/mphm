@@ -205,8 +205,22 @@ const DESKTOP_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 
 function getWindowOpenOptions(url) {
   if (isAuthUrl(url)) {
-    shell.openExternal(url);
-    return { action: 'deny' };
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        width: 560,
+        height: 680,
+        center: true,
+        autoHideMenuBar: true,
+        menuBarVisible: false,
+        title: 'Masuk dengan Google - P3HM Ecosystem',
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+          userAgent: DESKTOP_USER_AGENT
+        }
+      }
+    };
   }
 
   const isInternal = url.startsWith(BASE_URL) || url.includes('p3hm.my.id') || url.includes('localhost');

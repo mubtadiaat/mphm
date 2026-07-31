@@ -3,6 +3,7 @@ import {
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
+  signInWithRedirect,
   signOut as firebaseSignOut
 } from "firebase/auth";
 
@@ -29,8 +30,21 @@ export async function signInWithGoogle() {
       await firebaseSignOut(auth);
     } catch (_) {}
 
-    const result = await signInWithPopup(auth, provider);
-    return { user: result.user, error: null };
+    try {
+      const result = await signInWithPopup(auth, provider);
+      return { user: result.user, error: null };
+    } catch (popupErr: any) {
+      if (
+        popupErr?.code === "auth/popup-blocked" ||
+        popupErr?.code === "auth/popup-closed-by-user" ||
+        popupErr?.message?.includes("popup-blocked")
+      ) {
+        console.warn("Popup blocked, falling back to signInWithRedirect:", popupErr);
+        await signInWithRedirect(auth, provider);
+        return { user: null, error: null };
+      }
+      throw popupErr;
+    }
   } catch (error: any) {
     return { user: null, error: error.message };
   }
