@@ -112,6 +112,10 @@ jobs:
       - name: Display SHA-1 Fingerprint for Firebase Console
         shell: bash
         run: |
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkeypair -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -keystore ~/.android/debug.keystore -storepass android -keypass android -noprompt
+          fi
           echo "================================================="
           echo "🔑 ANDROID SHA-1 FINGERPRINT FOR FIREBASE CONSOLE"
           echo "================================================="
