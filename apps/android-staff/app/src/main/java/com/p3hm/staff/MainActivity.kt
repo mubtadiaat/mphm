@@ -1,5 +1,6 @@
 package com.p3hm.staff
 
+import com.mubtadiaat.staff.R
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
