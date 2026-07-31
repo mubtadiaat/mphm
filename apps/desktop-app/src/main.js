@@ -812,7 +812,11 @@ app.whenReady().then(() => {
     contents.setWindowOpenHandler(({ url }) => getWindowOpenOptions(url));
 
     contents.on('will-navigate', (event, navigationUrl) => {
-      const isInternal = navigationUrl.startsWith(BASE_URL) || navigationUrl.includes('p3hm.my.id') || navigationUrl.includes('localhost') || isAuthUrl(navigationUrl);
+      if (isAuthUrl(navigationUrl)) {
+        event.preventDefault();
+        return;
+      }
+      const isInternal = navigationUrl.startsWith(BASE_URL) || navigationUrl.includes('p3hm.my.id') || navigationUrl.includes('localhost');
       if (!isInternal && contents.getType() !== 'window') {
         event.preventDefault();
         shell.openExternal(navigationUrl);

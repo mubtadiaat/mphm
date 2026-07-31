@@ -30,10 +30,19 @@ export async function signInWithGoogle() {
       await firebaseSignOut(auth);
     } catch (_) {}
 
+    const isElectronEnv = typeof window !== "undefined" && (
+      window.navigator.userAgent.includes("Electron") || 
+      !!(window as any).electronAPI
+    );
+
     try {
       const result = await signInWithPopup(auth, provider);
       return { user: result.user, error: null };
     } catch (popupErr: any) {
+      if (isElectronEnv) {
+        console.warn("Electron Google Popup notice:", popupErr?.message);
+        return { user: null, error: "Otentikasi Google ditutup atau terhalang. Silakan coba kembali." };
+      }
       if (
         popupErr?.code === "auth/popup-blocked" ||
         popupErr?.code === "auth/popup-closed-by-user" ||
