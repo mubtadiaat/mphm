@@ -774,6 +774,34 @@ ipcMain.handle('window:close', () => {
   app.quit();
 });
 
+// AutoUpdater IPC Handlers
+ipcMain.handle('update:check', async () => {
+  try {
+    return await autoUpdater.checkForUpdates();
+  } catch (err) {
+    console.warn('IPC update:check error:', err.message);
+    return null;
+  }
+});
+
+ipcMain.handle('update:start-download', async () => {
+  try {
+    return await autoUpdater.downloadUpdate();
+  } catch (err) {
+    console.warn('IPC update:start-download error:', err.message);
+    return null;
+  }
+});
+
+ipcMain.handle('update:quit-and-install', () => {
+  try {
+    autoUpdater.quitAndInstall(false, true);
+  } catch (err) {
+    console.error('IPC update:quit-and-install error:', err.message);
+    app.quit();
+  }
+});
+
 // App Lifecycle
 app.whenReady().then(() => {
   session.defaultSession.allowNTLMCredentialsForDomains('m.p3hm.my.id');

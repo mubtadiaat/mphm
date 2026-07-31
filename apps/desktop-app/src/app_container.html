@@ -536,17 +536,17 @@
           window.electronAPI.onUpdateDownloaded((info) => {
             toastProgressBox.style.display = 'none';
             document.querySelector('.modal-brand-text h3').textContent = '✅ Update Siap Pasang';
+            btnUpdateNow.disabled = false;
             btnUpdateNow.textContent = 'RESTART & INSTALL';
             btnUpdateNow.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-            btnUpdateNow.onclick = () => {
-              window.electronAPI.quitAndInstallUpdate();
-            };
             updateToast.style.display = 'flex';
           });
         }
 
         btnUpdateNow.addEventListener('click', () => {
-          if (btnUpdateNow.textContent.includes('RESTART')) {
+          if (btnUpdateNow.textContent.includes('RESTART') || btnUpdateNow.textContent.includes('INSTALL')) {
+            btnUpdateNow.disabled = true;
+            btnUpdateNow.textContent = 'RESTARTING...';
             window.electronAPI.quitAndInstallUpdate();
           } else {
             btnUpdateNow.disabled = true;
