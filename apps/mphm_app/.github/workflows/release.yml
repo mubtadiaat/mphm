@@ -87,8 +87,11 @@ jobs:
       - name: Enable Windows Desktop Support
         run: flutter config --enable-windows-desktop
 
-      - name: Configure Windows Desktop Project Runner
-        run: flutter create --platforms=windows .
+      - name: Purge Stale CMake & Configure Fresh Windows Runner
+        run: |
+          Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force windows -ErrorAction SilentlyContinue
+          flutter create --platforms=windows .
 
       - name: Install Dependencies
         run: flutter pub get
