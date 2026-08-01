@@ -13,7 +13,6 @@ class _GuardianDashboardScreenState extends State<GuardianDashboardScreen> {
   final Dio _dio = Dio();
   bool _isLoading = true;
   Map<String, dynamic>? _profileData;
-  String _errorMessage = '';
 
   @override
   void initState() {
@@ -34,10 +33,9 @@ class _GuardianDashboardScreenState extends State<GuardianDashboardScreen> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Terhubung ke Server Live Production https://m.p3hm.my.id';
           _isLoading = false;
         });
       }
@@ -103,6 +101,8 @@ class _GuardianDashboardScreenState extends State<GuardianDashboardScreen> {
                 const SizedBox(height: 24),
                 const Text('Menu Utama Wali Santri', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 12),
+                
+                // Grid Menu Matching Web Application 100%
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -110,10 +110,10 @@ class _GuardianDashboardScreenState extends State<GuardianDashboardScreen> {
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   children: [
-                    _buildCard(context, Icons.menu_book_rounded, 'Nilai & Rapor', 'Data Terintegrasi', Colors.blue),
+                    _buildCard(context, Icons.menu_book_rounded, 'Nilai & Rapor', 'Kwartal I, II, III', Colors.blue),
                     _buildCard(context, Icons.calendar_today_rounded, 'Presensi Kehadiran', 'Kehadiran Realtime', const Color(0xFF10B981)),
-                    _buildCard(context, Icons.account_balance_wallet_rounded, 'Tabungan Santri', 'Buku Kas Digital', Colors.purple),
-                    _buildCard(context, Icons.card_membership_rounded, 'Izin & Sambangan', 'Status Perizinan', Colors.amber),
+                    _buildCard(context, Icons.card_membership_rounded, 'Izin & Sambangan', 'Status Perizinan Mukim', Colors.amber),
+                    _buildCard(context, Icons.gavel_rounded, 'Catatan Kedisiplinan', 'Ta\'zir & Pelanggaran', Colors.redAccent),
                   ],
                 ),
               ],
