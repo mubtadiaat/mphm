@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/services/auto_update_service.dart';
 import '../../auth/presentation/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -39,6 +40,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     );
 
     _startSimulatedLoading();
+    // Memeriksa pembaruan otomatis secara realtime di latar belakang
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AutoUpdateService.checkForUpdates(context);
+    });
   }
 
   void _startSimulatedLoading() {

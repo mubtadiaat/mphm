@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/auth/google_auth_service.dart';
 import '../../../core/auth/biometric_auth_service.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/services/auto_update_service.dart';
 import '../../../shared/widgets/premium_loader_widget.dart';
 import '../../guardian/presentation/guardian_dashboard_screen.dart';
 import '../../sekretariat/presentation/sekretariat_desktop_screen.dart';
@@ -65,6 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _checkBiometricsSupport();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AutoUpdateService.checkForUpdates(context);
+    });
   }
 
   Future<void> _checkBiometricsSupport() async {
