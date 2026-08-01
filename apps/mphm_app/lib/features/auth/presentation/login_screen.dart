@@ -168,14 +168,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ── Konten header berbeda per platform ──
+    // ── Platform accent color per jenis platform ──
     final bool isWindows = _isWindowsPlatform();
-    final String platformLabel = isWindows
-        ? 'Software Desktop Sekretariat'
-        : 'Aplikasi Wali Santri & Mustahiq';
-    final String platformSubLabel = isWindows
-        ? 'Khusus Sekretariat Pondok & Madrasah'
-        : 'Wali Santri · Staff Mustahiq · Pengurus';
     final Color platformAccentColor =
         isWindows ? const Color(0xFF10B981) : const Color(0xFF38BDF8);
 
@@ -250,30 +244,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 6),
 
-                    // ── Platform Badge ───────────────────────────────────
+                    // ── Platform Badge (Seragam semua platform) ──────────
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: platformAccentColor.withAlpha(26),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: platformAccentColor.withAlpha(77)),
                       ),
                       child: Text(
-                        platformLabel,
+                        'P3HM – MPHM',
                         style: TextStyle(
                           color: platformAccentColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 5),
                     Text(
-                      platformSubLabel,
+                      'Lirboyo · Kediri',
                       style: TextStyle(
-                        color: const Color(0xFFFFFFFF).withAlpha(102),
+                        color: const Color(0xFFFFFFFF).withAlpha(128),
                         fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
