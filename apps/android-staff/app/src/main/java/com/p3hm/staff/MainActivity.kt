@@ -33,7 +33,7 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBar: View
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var googleSignInClient: GoogleSignInClient
 

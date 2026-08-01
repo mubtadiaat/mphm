@@ -16,15 +16,40 @@
             android:layout_height="match_parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <ProgressBar
+    <!-- Modern Centered Loading Card with Spinner & Text "Memuat MPHM..." -->
+    <LinearLayout
         android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:indeterminate="false"
-        android:max="100"
-        android:progressDrawable="@drawable/custom_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/bg_loading_box"
+        android:paddingLeft="32dp"
+        android:paddingRight="32dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="24dp"
+        android:elevation="8dp"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_bottomToBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ProgressBar
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:indeterminate="true"
+            android:indeterminateTint="#F59E0B" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Memuat MPHM..."
+            android:textColor="#F8FAFC"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
