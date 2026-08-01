@@ -236,7 +236,11 @@ export function DashboardTab() {
     const warning = getPrerequisiteWarning(href, isPondok ? "sek.pondok" : "sek.madrasah", isPondok ? "pondok" : "madrasah", onboardingStatus);
     if (warning) {
       e.preventDefault();
-      toast(warning, "warning", "Prasyarat Belum Lengkap");
+      // Cari step yang belum selesai untuk dapatkan href tujuan
+      const missingStep = currentSteps.find(s => !s.ready);
+      toast(warning, "warning", "Prasyarat Belum Lengkap", 10000,
+        missingStep?.href ? { label: `Buka ${missingStep.label}`, href: missingStep.href } : undefined
+      );
     }
   };
 

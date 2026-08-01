@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/auth/google_auth_service.dart';
 import '../../../core/auth/biometric_auth_service.dart';
 import '../../../core/config/app_config.dart';
@@ -6,6 +7,45 @@ import '../../../shared/widgets/premium_loader_widget.dart';
 import '../../guardian/presentation/guardian_dashboard_screen.dart';
 import '../../sekretariat/presentation/sekretariat_desktop_screen.dart';
 import '../../staff/presentation/staff_dashboard_screen.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ROLE-PLATFORM ENFORCEMENT POLICY
+//  • Windows Desktop → KHUSUS role Sekretariat (sek.pondok / sek.madrasah)
+//  • Android / iOS  → SEMUA role KECUALI Sekretariat (Wali, Staff, Pengurus)
+// ─────────────────────────────────────────────────────────────────────────────
+
+bool _isSekretariatRole(String role) {
+  final r = role.toLowerCase().trim();
+  return r == 'sek.pondok' || r == 'sek.madrasah' || r.startsWith('sek.');
+}
+
+bool _isWindowsPlatform() =>
+    defaultTargetPlatform == TargetPlatform.windows;
+
+bool _isMobilePlatform() =>
+    defaultTargetPlatform == TargetPlatform.android ||
+    defaultTargetPlatform == TargetPlatform.iOS;
+
+/// Validasi apakah role diizinkan di platform ini.
+/// Returns null jika diizinkan, returns pesan error jika ditolak.
+String? _validateRoleForPlatform(String role) {
+  if (_isWindowsPlatform() && !_isSekretariatRole(role)) {
+    return 'Akun Anda (${role.toUpperCase()}) tidak memiliki akses ke Software Desktop ini.\n\n'
+        'Software ini KHUSUS untuk:\n'
+        '• Sekretariat Pondok (sek.pondok)\n'
+        '• Sekretariat Madrasah (sek.madrasah)\n\n'
+        'Gunakan Aplikasi Mobile untuk Wali Santri & Staff Mustahiq.';
+  }
+
+  if (_isMobilePlatform() && _isSekretariatRole(role)) {
+    return 'Akun Sekretariat tidak dapat mengakses Aplikasi Mobile ini.\n\n'
+        'Sekretariat hanya dapat menggunakan:\n'
+        '• Software Desktop Windows → m.p3hm.my.id/download\n\n'
+        'Aplikasi ini diperuntukkan untuk Wali Santri, Staff Mustahiq & Pengurus Kamar.';
+  }
+
+  return null; // Diizinkan
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,7 +56,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final GoogleAuthService _googleAuthService = GoogleAuthService();
-  
+
   bool _isLoading = false;
   String _errorMessage = '';
   bool _canUseBiometrics = false;
@@ -28,6 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _checkBiometricsSupport() async {
+    // Biometrik hanya tersedia di mobile
+    if (!_isMobilePlatform()) return;
     final available = await BiometricAuthService.isBiometricAvailable();
     if (mounted) {
       setState(() {
@@ -75,10 +117,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final result = await _googleAuthService.signInWithGoogle();
-      if (result != null) {
-        final String role = result['user']['role'] ?? 'wali_santri';
-        _navigateToRoleDashboard(role);
+      if (result == null) {
+        // User cancelled
+        setState(() => _isLoading = false);
+        return;
       }
+
+      final String role = result['user']['role'] ?? 'wali_santri';
+
+      // ── VALIDASI ROLE × PLATFORM ──────────────────────────────────────────
+      final String? platformError = _validateRoleForPlatform(role);
+      if (platformError != null) {
+        // Sign out langsung — akun tidak boleh login di platform ini
+        await _googleAuthService.signOut();
+        setState(() {
+          _errorMessage = platformError;
+        });
+        return;
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
+      _navigateToRoleDashboard(role);
     } catch (e) {
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -94,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _navigateToRoleDashboard(String role) {
     Widget targetScreen;
-    if (role.contains('sek')) {
+    if (_isSekretariatRole(role)) {
       targetScreen = const SekretariatDesktopScreen();
     } else if (role == 'staff' || role == 'mustahiq') {
       targetScreen = const StaffDashboardScreen();
@@ -109,6 +168,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ── Konten header berbeda per platform ──
+    final bool isWindows = _isWindowsPlatform();
+    final String platformLabel = isWindows
+        ? 'Software Desktop Sekretariat'
+        : 'Aplikasi Wali Santri & Mustahiq';
+    final String platformSubLabel = isWindows
+        ? 'Khusus Sekretariat Pondok & Madrasah'
+        : 'Wali Santri · Staff Mustahiq · Pengurus';
+    final Color platformAccentColor =
+        isWindows ? const Color(0xFF10B981) : const Color(0xFF38BDF8);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: Stack(
@@ -117,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 420),
+                constraints: const BoxConstraints(maxWidth: 440),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(24),
@@ -134,100 +204,176 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Official Institution Logo Header
+                    // ── Logo Resmi Instansi ──────────────────────────────
                     Container(
-                      width: 84,
-                      height: 84,
+                      width: 90,
+                      height: 90,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: const Color(0xFF0F172A),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF10B981).withAlpha(128), width: 2),
+                        border: Border.all(
+                          color: platformAccentColor.withAlpha(128),
+                          width: 2,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF059669).withAlpha(102),
-                            blurRadius: 20,
+                            color: platformAccentColor.withAlpha(77),
+                            blurRadius: 24,
                             offset: const Offset(0, 8),
                           ),
                         ],
                       ),
                       child: Image.asset(
                         'assets/logo.png',
-                        width: 64,
-                        height: 64,
+                        width: 70,
+                        height: 70,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, __, ___) => Icon(
                           Icons.school,
-                          color: Colors.white,
-                          size: 40,
+                          color: platformAccentColor,
+                          size: 44,
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
 
-                    const Text(
+                    Text(
                       AppConfig.appName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        letterSpacing: -0.3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 6),
+
+                    // ── Platform Badge ───────────────────────────────────
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: platformAccentColor.withAlpha(26),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: platformAccentColor.withAlpha(77)),
+                      ),
+                      child: Text(
+                        platformLabel,
+                        style: TextStyle(
+                          color: platformAccentColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Portal Wali Santri & Staff Mustahiq (v${AppConfig.appVersion})',
+                      platformSubLabel,
                       style: TextStyle(
-                        color: const Color(0xFFFFFFFF).withAlpha(153),
-                        fontSize: 13,
+                        color: const Color(0xFFFFFFFF).withAlpha(102),
+                        fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 28),
 
+                    // ── Error Message ────────────────────────────────────
                     if (_errorMessage.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(14),
                         margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
-                          color: Colors.red.withAlpha(38),
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.red.withAlpha(26),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: Colors.red.withAlpha(77)),
                         ),
-                        child: Text(
-                          _errorMessage,
-                          style: const TextStyle(color: Colors.redAccent, fontSize: 13),
-                          textAlign: TextAlign.center,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.block_rounded, color: Colors.redAccent, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _errorMessage,
+                                style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 12,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
-                    // Google Enterprise Sign In Button
+                    // ── Google Sign-In Button ─────────────────────────────
                     ElevatedButton(
                       onPressed: _isLoading ? null : _handleGoogleSignIn,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: const Color(0xFF0F172A),
-                        minimumSize: const Size(double.infinity, 50),
+                        minimumSize: const Size(double.infinity, 52),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                         elevation: 0,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.g_mobiledata_rounded, color: Color(0xFFEA4335), size: 28),
-                          SizedBox(width: 8),
+                          const Icon(Icons.g_mobiledata_rounded,
+                              color: Color(0xFFEA4335), size: 28),
+                          const SizedBox(width: 8),
                           Text(
-                            'Masuk via Google Account',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            isWindows ? 'Masuk via Browser Google' : 'Masuk via Google Account',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                         ],
                       ),
                     ),
 
-                    // Biometric Authentication (Fingerprint / Face ID) Button
-                    if (_canUseBiometrics) ...[
-                      const SizedBox(height: 16),
+                    // ── Info Platform Enforcement ─────────────────────────
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: platformAccentColor.withAlpha(15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: platformAccentColor.withAlpha(51)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            isWindows ? Icons.computer_rounded : Icons.smartphone_rounded,
+                            color: platformAccentColor,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isWindows
+                                  ? 'Software ini HANYA untuk Sekretariat Pondok & Madrasah.\nAkun selain Sekretariat akan ditolak otomatis.'
+                                  : 'Aplikasi ini untuk Wali Santri, Staff Mustahiq & Pengurus.\nAkun Sekretariat harus menggunakan Software Desktop.',
+                              style: TextStyle(
+                                color: platformAccentColor.withAlpha(204),
+                                fontSize: 11,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // ── Biometric Auth (Mobile Only) ─────────────────────
+                    if (_canUseBiometrics && _isMobilePlatform()) ...[
+                      const SizedBox(height: 14),
                       OutlinedButton(
                         onPressed: _isLoading ? null : _handleBiometricLogin,
                         style: OutlinedButton.styleFrom(
@@ -257,7 +403,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // Loading Overlay
+          // ── Loading Overlay ──────────────────────────────────────────────
           if (_isLoading)
             Container(
               color: const Color(0xFF000000).withAlpha(179),

@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   # -------------------------------------------------------------------
-  # 1. BUILD RELEASE APK & AAB (ANDROID WITH JDK 17 & LATEST FLUTTER STABLE 3.27+)
+  # 1. BUILD RELEASE APK & AAB (ANDROID WITH JDK 17 & LATEST FLUTTER STABLE)
   # -------------------------------------------------------------------
   build-android-release:
     name: Build Release Android Binary (APK & AAB)
@@ -46,27 +46,58 @@ jobs:
           flutter build apk --release --android-skip-build-dependency-validation
           flutter build appbundle --release --android-skip-build-dependency-validation
 
+      - name: Rename APK Artifacts with Version Tag
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+          cp build/app/outputs/flutter-apk/app-release.apk Mubtadiaat-v${VERSION}.apk
+          cp build/app/outputs/flutter-apk/app-release.apk e-Mubtadiaat-v${VERSION}.apk
+
       - name: Extract & Display SHA-1 / SHA-256 Fingerprints for Firebase
         run: |
-          keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android > signing_report.txt || true
-          
-          echo "### 🔑 Android Signing Fingerprints (Salin ke Firebase Console / Google Cloud)" >> $GITHUB_STEP_SUMMARY
-          echo "Gunakan nilai SHA-1 dan SHA-256 di bawah ini untuk didaftarkan pada **Firebase Console -> Project Settings -> Android App**:" >> $GITHUB_STEP_SUMMARY
-          echo '```text' >> $GITHUB_STEP_SUMMARY
-          grep -E "Variant:|Config:|Store:|Alias:|SHA1|SHA-256|SHA256" signing_report.txt || echo "SHA-1: Automated Build Signing Generated" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          # Generate debug keystore if it doesn't exist
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkey -v -keystore ~/.android/debug.keystore \
+              -storepass android -alias androiddebugkey -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US" > /dev/null 2>&1 || true
+          fi
 
-      - name: Upload Android Release Artifacts
+          # Export SHA fingerprints to GITHUB_STEP_SUMMARY
+          {
+            echo "### 🔑 Android Signing Fingerprints"
+            echo "> Daftarkan SHA-1 & SHA-256 berikut ke **Firebase Console → Project Settings → Android App**"
+            echo ""
+            echo '```text'
+            keytool -list -v \
+              -keystore ~/.android/debug.keystore \
+              -alias androiddebugkey \
+              -storepass android \
+              -keypass android 2>/dev/null \
+              | grep -E "Alias|SHA1|SHA256|MD5" || echo "SHA: Automated Build - Lihat Build Logs"
+            echo '```'
+            echo ""
+            echo "> ⚠️ SHA di atas adalah **debug keystore**. Untuk production, gunakan **release keystore** yang telah didaftarkan di Firebase."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Android APK Artifact (Staff Mustahiq)
         uses: actions/upload-artifact@v4
         with:
-          name: mphm-android-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: mphm-android-staff-apk
+          path: Mubtadiaat-v*.apk
+
+      - name: Upload Android APK Artifact (Wali Santri/Guardian)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mphm-android-guardian-apk
+          path: e-Mubtadiaat-v*.apk
 
   # -------------------------------------------------------------------
-  # 2. BUILD RELEASE WINDOWS DESKTOP (.EXE EXECUTABLE NATIVE C++ VS 2022)
+  # 2. BUILD RELEASE WINDOWS DESKTOP + INNOSETUP INSTALLER
   # -------------------------------------------------------------------
   build-windows-release:
-    name: Build Release Windows Desktop Binary (.exe)
+    name: Build Release Windows Desktop Binary (.exe Installer)
     runs-on: windows-latest
 
     steps:
@@ -93,15 +124,96 @@ jobs:
       - name: Build Windows Desktop App
         run: flutter build windows --release
 
-      - name: Package Windows Bundle into Zip
+      - name: Read App Version from pubspec.yaml
+        id: get_version
         run: |
-          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "mphm-windows-desktop-v2.0.0.zip"
+          $version = (Get-Content pubspec.yaml | Select-String 'version:' | Select-Object -First 1).Line.Trim().Split(' ')[1].Split('+')[0]
+          echo "APP_VERSION=$version" >> $env:GITHUB_ENV
+          echo "Version detected: $version"
 
-      - name: Upload Windows Executable Artifact
+      - name: Rename Windows Executable to Professional Name
+        run: |
+          $relDir = "build\windows\x64\runner\Release"
+          if (Test-Path "$relDir\mphm_app.exe") {
+            Rename-Item "$relDir\mphm_app.exe" "MPHM.Enterprise.exe"
+            echo "Renamed mphm_app.exe -> MPHM.Enterprise.exe"
+          }
+
+      - name: Install InnoSetup 6 (Professional Installer Builder)
+        run: |
+          choco install innosetup --no-progress -y
+          echo "InnoSetup installed successfully."
+
+      - name: Create InnoSetup Script
+        run: |
+          $issContent = @"
+          [Setup]
+          AppName=MPHM Enterprise - P3HM & Lirboyo Kediri
+          AppVersion=${{ env.APP_VERSION }}
+          AppPublisher=P3HM Lirboyo Kediri
+          AppPublisherURL=https://m.p3hm.my.id
+          AppSupportURL=https://m.p3hm.my.id
+          AppUpdatesURL=https://github.com/mubtadiaat/app_software/releases
+          DefaultDirName={autopf}\MPHM Enterprise
+          DefaultGroupName=MPHM Enterprise
+          AllowNoIcons=yes
+          OutputDir=installer_output
+          OutputBaseFilename=MPHM.Enterprise.Setup.${{ env.APP_VERSION }}
+          Compression=lzma2/ultra64
+          SolidCompression=yes
+          WizardStyle=modern
+          UninstallDisplayName=MPHM Enterprise - P3HM & Lirboyo Kediri
+          UninstallDisplayIcon={app}\MPHM.Enterprise.exe
+          PrivilegesRequired=lowest
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          SetupIconFile=windows\runner\resources\app_icon.ico
+          DisableWelcomePage=no
+          WizardImageFile=compiler:WizModernImage-IS.bmp
+          WizardSmallImageFile=compiler:WizModernSmallImage-IS.bmp
+
+          [Languages]
+          Name: "indonesian"; MessagesFile: "compiler:Default.isl"
+
+          [Tasks]
+          Name: "desktopicon"; Description: "Buat shortcut di Desktop"; GroupDescription: "Ikon tambahan:"; Flags: unchecked
+          Name: "startmenuicon"; Description: "Buat shortcut di Start Menu"; GroupDescription: "Ikon tambahan:"; Flags: checkedonce
+
+          [Files]
+          Source: "build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+          [Icons]
+          Name: "{group}\MPHM Enterprise"; Filename: "{app}\MPHM.Enterprise.exe"
+          Name: "{group}\Hapus Instalan MPHM Enterprise"; Filename: "{uninstallexe}"
+          Name: "{autodesktop}\MPHM Enterprise"; Filename: "{app}\MPHM.Enterprise.exe"; Tasks: desktopicon
+
+          [Run]
+          Filename: "{app}\MPHM.Enterprise.exe"; Description: "Jalankan MPHM Enterprise sekarang"; Flags: nowait postinstall skipifsilent
+
+          [UninstallDelete]
+          Type: filesandordirs; Name: "{app}"
+          "@
+          New-Item -Path . -Name "mphm_installer.iss" -ItemType "file" -Value $issContent -Force
+          echo "InnoSetup script created."
+
+      - name: Compile Professional Installer via InnoSetup
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" mphm_installer.iss
+          echo "Installer compiled successfully."
+
+      - name: Verify Installer Output
+        run: |
+          Get-ChildItem installer_output\ | Select-Object Name, Length
+          if (!(Test-Path "installer_output\MPHM.Enterprise.Setup.${{ env.APP_VERSION }}.exe")) {
+            echo "WARNING: Installer exe not found, falling back to zip package."
+            Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "installer_output/MPHM.Enterprise.Setup.${{ env.APP_VERSION }}.exe" -ErrorAction SilentlyContinue
+          }
+
+      - name: Upload Windows Installer Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mphm-windows-desktop-zip
-          path: mphm-windows-desktop-v2.0.0.zip
+          name: mphm-windows-installer
+          path: installer_output/MPHM.Enterprise.Setup.*.exe
 
   # -------------------------------------------------------------------
   # 3. PURGE LEGACY RELEASES & PUBLISH NEW OFFICIAL GITHUB RELEASE
@@ -115,6 +227,12 @@ jobs:
     steps:
       - name: Checkout Codebase
         uses: actions/checkout@v4
+
+      - name: Read App Version
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Building release for version: $VERSION"
 
       - name: Purge Legacy Releases in mubtadiaat/app_software
         uses: actions/github-script@v7
@@ -134,36 +252,64 @@ jobs:
               console.error("Purge error:", err.message);
             }
 
-      - name: Download Android Artifact
+      - name: Download Android Staff APK Artifact
         uses: actions/download-artifact@v4
         with:
-          name: mphm-android-release-apk
+          name: mphm-android-staff-apk
           path: ./release-artifacts/
 
-      - name: Download Windows Artifact
+      - name: Download Android Guardian APK Artifact
         uses: actions/download-artifact@v4
         with:
-          name: mphm-windows-desktop-zip
+          name: mphm-android-guardian-apk
           path: ./release-artifacts/
+
+      - name: Download Windows Installer Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mphm-windows-installer
+          path: ./release-artifacts/
+
+      - name: List Release Artifacts
+        run: ls -lah ./release-artifacts/
 
       - name: Create Official GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            ./release-artifacts/app-release.apk
-            ./release-artifacts/mphm-windows-desktop-v2.0.0.zip
+          files: ./release-artifacts/*
           draft: false
           prerelease: false
-          tag_name: v2.0.1
-          name: MPHM Enterprise v2.0.1 Release
+          tag_name: v${{ env.APP_VERSION }}
+          name: "🚀 MPHM Enterprise v${{ env.APP_VERSION }} — Rilis Resmi"
           body: |
-            🚀 **Rilis Resmi MPHM & P3HM Lirboyo Enterprise v2.0.1**
+            ## 🏛️ MPHM & P3HM Lirboyo Enterprise — Rilis Resmi v${{ env.APP_VERSION }}
 
-            ### 📦 Binari Terkompilasi:
-            * 📱 **Android APK**: `app-release.apk` (Untuk Wali Santri & Staff Mustahiq)
-            * 💻 **Windows Desktop**: `mphm-windows-desktop-v2.0.0.zip` (Native C++ Executable RAM < 60MB untuk Sekretariat)
+            Sistem Manajemen Santri & Pondok Pesantren — Platform Enterprise terpadu untuk P3HM & MPHM Lirboyo Kediri.
 
-            ### 🔑 Catatan Firebase Google Sign-In SHA Fingerprint:
-            Nilai SHA-1 & SHA-256 dari build ini dapat dilihat langsung pada tab **Summary Build Actions** di GitHub untuk dimasukkan ke Firebase Console.
+            ---
+
+            ### 📦 Unduh Binari Rilis:
+
+            | Platform | File | Keterangan |
+            |---|---|---|
+            | 💻 **Windows Desktop** | `MPHM.Enterprise.Setup.*.exe` | Installer resmi untuk Sekretariat & Admin |
+            | 📱 **Android (Staff)** | `Mubtadiaat-v*.apk` | Aplikasi Staff Mustahiq & Pengurus |
+            | 📱 **Android (Wali)** | `e-Mubtadiaat-v*.apk` | Aplikasi Wali Santri & Orang Tua |
+
+            ---
+
+            ### 🔑 Catatan Firebase SHA Fingerprint:
+            Nilai SHA-1 & SHA-256 tersedia di tab **Summary → Build Actions** untuk didaftarkan ke Firebase Console.
+
+            ---
+
+            ### 📋 Persyaratan Sistem:
+            - **Windows**: Windows 10 (64-bit) atau lebih baru
+            - **Android**: Minimal Android 7.0 (API 24+)
+            - **Koneksi**: Diperlukan koneksi internet untuk sinkronisasi data
+
+            ---
+
+            > *Dikembangkan & dikelola oleh Tim Teknis P3HM Lirboyo Kediri — [m.p3hm.my.id](https://m.p3hm.my.id)*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

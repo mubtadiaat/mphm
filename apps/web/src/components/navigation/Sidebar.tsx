@@ -14,6 +14,7 @@ import { useOnlineStatus } from "@/lib/useOnlineStatus";
 import {
   isMenuLocked as checkRbacMenuLocked,
   getPrerequisiteWarning,
+  getWorkspaceReadinessSteps,
   OnboardingStatus,
 } from "@/lib/rbac";
 
@@ -133,7 +134,12 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     const warning = getPrerequisiteWarning(href, role, isPondokWorkspace ? "pondok" : "madrasah", onboardingStatus);
     if (warning) {
       e.preventDefault();
-      toast(warning, "warning", "Prasyarat Belum Lengkap");
+      // Ekstrak rute prasyarat dari warning message untuk action button
+      const steps = getWorkspaceReadinessSteps(isPondokWorkspace ? "pondok" : "madrasah", onboardingStatus ?? {});
+      const missingStep = steps?.find((s: any) => !s.ready);
+      toast(warning, "warning", "Prasyarat Belum Lengkap", 10000,
+        missingStep?.href ? { label: `Buka ${missingStep.label}`, href: missingStep.href } : undefined
+      );
     }
   };
 

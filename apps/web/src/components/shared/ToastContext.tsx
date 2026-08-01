@@ -2,10 +2,15 @@
 
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, AlertTriangle, Info, X, AlertCircle, Trash2, HelpCircle } from "lucide-react";
-import { createPortal } from "react-dom";
+import { CheckCircle2, AlertTriangle, Info, X, AlertCircle, Trash2, HelpCircle, ArrowRight } from "lucide-react";
 
 export type ToastType = "success" | "error" | "info" | "warning";
+
+export interface ToastAction {
+  label: string;
+  href?: string;
+  onClick?: () => void;
+}
 
 export interface ToastItem {
   id: string;
@@ -13,6 +18,7 @@ export interface ToastItem {
   message: string;
   type: ToastType;
   duration?: number;
+  action?: ToastAction;
 }
 
 export interface ConfirmOptions {
@@ -24,7 +30,7 @@ export interface ConfirmOptions {
 }
 
 interface ToastContextType {
-  toast: (message: string, type: ToastType, title?: string, duration?: number) => void;
+  toast: (message: string, type: ToastType, title?: string, duration?: number, action?: ToastAction) => void;
   confirm: (options: ConfirmOptions) => Promise<boolean>;
 }
 
@@ -41,16 +47,19 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const toast = useCallback((message: string, type: ToastType, title?: string, duration = 4000) => {
-    const id = `${Date.now()}-${Math.random()}`;
-    const newToast: ToastItem = { id, title, message, type, duration };
-    
-    setToasts((prev) => [...prev, newToast]);
+  const toast = useCallback(
+    (message: string, type: ToastType, title?: string, duration = 10000, action?: ToastAction) => {
+      const id = `${Date.now()}-${Math.random()}`;
+      const newToast: ToastItem = { id, title, message, type, duration, action };
 
-    setTimeout(() => {
-      removeToast(id);
-    }, duration);
-  }, [removeToast]);
+      setToasts((prev) => [...prev, newToast]);
+
+      setTimeout(() => {
+        removeToast(id);
+      }, duration);
+    },
+    [removeToast]
+  );
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -68,7 +77,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast, confirm }}>
       {children}
-      
+
       {/* Toast Portal Container */}
       <div className="fixed top-5 right-5 z-[10000] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
         <AnimatePresence>
@@ -77,6 +86,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             let borderColor = "border-blue-500/20 dark:border-blue-500/10";
             let glowColor = "shadow-blue-500/10";
             let indicatorBg = "bg-blue-500";
+            let actionBg = "bg-blue-500 hover:bg-blue-600";
             let defaultTitle = "Info";
 
             if (t.type === "success") {
@@ -84,20 +94,32 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               borderColor = "border-emerald-500/20 dark:border-emerald-500/10";
               glowColor = "shadow-emerald-500/10";
               indicatorBg = "bg-emerald-500";
+              actionBg = "bg-emerald-600 hover:bg-emerald-500";
               defaultTitle = "Berhasil";
             } else if (t.type === "error") {
               icon = <AlertCircle className="w-5 h-5 text-rose-500" />;
               borderColor = "border-rose-500/20 dark:border-rose-500/10";
               glowColor = "shadow-rose-500/10";
               indicatorBg = "bg-rose-500";
+              actionBg = "bg-rose-600 hover:bg-rose-500";
               defaultTitle = "Kesalahan";
             } else if (t.type === "warning") {
               icon = <AlertTriangle className="w-5 h-5 text-amber-500" />;
               borderColor = "border-amber-500/20 dark:border-amber-500/10";
               glowColor = "shadow-amber-500/10";
               indicatorBg = "bg-amber-500";
+              actionBg = "bg-amber-600 hover:bg-amber-500";
               defaultTitle = "Peringatan";
             }
+
+            const handleAction = () => {
+              if (t.action?.onClick) {
+                t.action.onClick();
+              } else if (t.action?.href) {
+                window.location.href = t.action.href;
+              }
+              removeToast(t.id);
+            };
 
             return (
               <motion.div
@@ -106,33 +128,49 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 initial={{ opacity: 0, x: 50, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 50, scale: 0.95 }}
-                className={`pointer-events-auto relative overflow-hidden bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border ${borderColor} rounded-2xl p-4 shadow-xl ${glowColor} flex gap-3.5 items-start`}
+                className={`pointer-events-auto relative overflow-hidden bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border ${borderColor} rounded-2xl shadow-xl ${glowColor} flex flex-col`}
               >
                 {/* Visual Accent Bar */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${indicatorBg}`} />
-                
-                <div className="shrink-0 pt-0.5">{icon}</div>
-                <div className="flex-1 flex flex-col gap-0.5">
-                  <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">
-                    {t.title || defaultTitle}
-                  </span>
-                  <span className="text-xs text-zinc-600 dark:text-zinc-300 font-semibold leading-relaxed">
-                    {t.message}
-                  </span>
-                </div>
-                <button
-                  onClick={() => removeToast(t.id)}
-                  className="shrink-0 p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
 
-                {/* Animated progress bar */}
-                <motion.div 
+                {/* Main Content */}
+                <div className="flex gap-3.5 items-start p-4 pb-3">
+                  <div className="shrink-0 pt-0.5">{icon}</div>
+                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                    <span className="text-sm font-black text-zinc-900 dark:text-white tracking-tight">
+                      {t.title || defaultTitle}
+                    </span>
+                    <span className="text-xs text-zinc-600 dark:text-zinc-300 font-semibold leading-relaxed">
+                      {t.message}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => removeToast(t.id)}
+                    className="shrink-0 p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Action Button (if provided) */}
+                {t.action && (
+                  <div className="px-4 pb-3 pl-[3.25rem]">
+                    <button
+                      onClick={handleAction}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-bold transition-all active:scale-95 ${actionBg}`}
+                    >
+                      {t.action.label}
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Animated Progress Bar — 10 seconds countdown */}
+                <motion.div
                   initial={{ width: "100%" }}
                   animate={{ width: 0 }}
-                  transition={{ duration: (t.duration || 4000) / 1000, ease: "linear" }}
-                  className={`absolute bottom-0 left-0 right-0 h-0.5 ${indicatorBg}/30`}
+                  transition={{ duration: (t.duration || 10000) / 1000, ease: "linear" }}
+                  className={`h-0.5 ${indicatorBg}/30`}
                 />
               </motion.div>
             );

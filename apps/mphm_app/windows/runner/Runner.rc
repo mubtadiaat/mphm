@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "my.id.p3hm" "\0"
-            VALUE "FileDescription", "mphm_app" "\0"
+            VALUE "CompanyName", "P3HM Lirboyo Kediri" "\0"
+            VALUE "FileDescription", "MPHM Enterprise - P3HM Lirboyo Kediri" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mphm_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 my.id.p3hm. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mphm_app.exe" "\0"
-            VALUE "ProductName", "mphm_app" "\0"
+            VALUE "InternalName", "mphm_enterprise" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 P3HM Lirboyo Kediri. Hak Cipta Dilindungi." "\0"
+            VALUE "OriginalFilename", "MPHM.Enterprise.exe" "\0"
+            VALUE "ProductName", "MPHM Enterprise - P3HM & Lirboyo Kediri" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
