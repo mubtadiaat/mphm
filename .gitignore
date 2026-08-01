@@ -7,6 +7,8 @@ node_modules/
 **/build/
 .gradle/
 **/.gradle/
+.dart_tool/
+**/.dart_tool/
 
 # Environment & Credentials
 .env*
