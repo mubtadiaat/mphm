@@ -61,7 +61,7 @@ class AutoUpdateService {
         if (latest == null) return;
 
         final String latestVersion = (latest['version'] ?? '').toString();
-        final String currentVersion = AppConfig.appVersion;
+        const String currentVersion = AppConfig.appVersion;
 
         debugPrint(
             'AUTO_UPDATE: Current=$currentVersion, Latest=$latestVersion');
