@@ -43,8 +43,8 @@ jobs:
 
       - name: Build Android Release APK & AAB
         run: |
-          flutter build apk --release
-          flutter build appbundle --release
+          flutter build apk --release --android-skip-build-dependency-validation
+          flutter build appbundle --release --android-skip-build-dependency-validation
 
       - name: Extract & Display SHA-1 / SHA-256 Fingerprints for Firebase
         run: |
@@ -85,11 +85,9 @@ jobs:
       - name: Enable Windows Desktop Support
         run: flutter config --enable-windows-desktop
 
-      - name: Generate Fresh Windows Runner Configuration
+      - name: Prepare Windows Build Environment
         run: |
           Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force windows -ErrorAction SilentlyContinue
-          flutter create --platforms=windows .
           flutter pub get
 
       - name: Build Windows Desktop App
