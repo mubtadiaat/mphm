@@ -169,8 +169,6 @@ jobs:
           ArchitecturesInstallIn64BitMode=x64compatible
           SetupIconFile=windows\runner\resources\app_icon.ico
           DisableWelcomePage=no
-          WizardImageFile=compiler:WizModernImage-IS.bmp
-          WizardSmallImageFile=compiler:WizModernSmallImage-IS.bmp
 
           [Languages]
           Name: "indonesian"; MessagesFile: "compiler:Default.isl"
