@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:dio/dio.dart';
 import '../config/app_config.dart';
@@ -67,7 +68,7 @@ class GoogleAuthService {
         throw Exception(response.data['message'] ?? 'Verifikasi Google Sign-In Gagal di Server.');
       }
     } catch (e) {
-      print('ENTERPRISE_GOOGLE_AUTH_ERROR: $e');
+      debugPrint('ENTERPRISE_GOOGLE_AUTH_ERROR: $e');
       rethrow;
     }
   }

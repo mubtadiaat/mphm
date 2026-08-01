@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
 import '../config/app_config.dart';
 import 'package:dio/dio.dart';
 
@@ -33,16 +32,11 @@ class BiometricAuthService {
     try {
       final bool didAuthenticate = await _localAuth.authenticate(
         localizedReason: reason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
       );
       return didAuthenticate;
     } on PlatformException catch (e) {
-      if (e.code == auth_error.notAvailable || e.code == auth_error.notEnrolled) {
-        return false;
-      }
       return false;
     } catch (e) {
       return false;
