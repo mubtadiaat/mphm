@@ -12,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   late AnimationController _rotationController;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -96,210 +97,226 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF070B14),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Ambient Background Glowing Orbs
-          Positioned(
-            top: -80,
-            left: -80,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF059669).withAlpha(46),
-                    blurRadius: 110,
-                    spreadRadius: 50,
-                  ),
-                ],
+      body: SizedBox.expand(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Ambient Background Glowing Orbs (Top Left & Bottom Right)
+            Positioned(
+              top: -100,
+              left: -100,
+              child: Container(
+                width: 400,
+                height: 400,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF059669).withAlpha(50),
+                      blurRadius: 140,
+                      spreadRadius: 60,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: -80,
-            right: -80,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF0284C7).withAlpha(46),
-                    blurRadius: 110,
-                    spreadRadius: 50,
-                  ),
-                ],
+            Positioned(
+              bottom: -100,
+              right: -100,
+              child: Container(
+                width: 400,
+                height: 400,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0284C7).withAlpha(50),
+                      blurRadius: 140,
+                      spreadRadius: 60,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Central Content Container
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
+            // 100% Center Content Alignment Across Whole Screen
+            Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0, vertical: 48.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Animated Dual Orbiting Rings + Logo
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Outer Rotating Ring
+                          AnimatedBuilder(
+                            animation: _rotationController,
+                            builder: (_, __) {
+                              return Transform.rotate(
+                                angle: _rotationController.value * 2 * math.pi,
+                                child: Container(
+                                  width: 180,
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color:
+                                          const Color(0xFF10B981).withAlpha(100),
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
 
-                // Animated Logo with Dual Orbiting Rings
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Outer Rotating Ring
-                    AnimatedBuilder(
-                      animation: _rotationController,
-                      builder: (_, __) {
-                        return Transform.rotate(
-                          angle: _rotationController.value * 2 * math.pi,
-                          child: Container(
-                            width: 175,
-                            height: 175,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF10B981).withAlpha(89),
-                                width: 2,
+                          // Counter-Rotating Inner Ring
+                          AnimatedBuilder(
+                            animation: _rotationController,
+                            builder: (_, __) {
+                              return Transform.rotate(
+                                angle: -_rotationController.value * 2 * math.pi,
+                                child: Container(
+                                  width: 148,
+                                  height: 148,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color:
+                                          const Color(0xFF38BDF8).withAlpha(128),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          // Central Pulsing OFFICIAL INSTITUTION LOGO
+                          ScaleTransition(
+                            scale: _pulseAnimation,
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF0F172A),
+                                border: Border.all(
+                                    color:
+                                        const Color(0xFF10B981).withAlpha(140),
+                                    width: 2.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        const Color(0xFF10B981).withAlpha(120),
+                                    blurRadius: 32,
+                                    spreadRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Image.asset(
+                                'assets/logo.png',
+                                width: 85,
+                                height: 85,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.school_rounded,
+                                  size: 60,
+                                  color: Color(0xFF10B981),
+                                ),
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ],
+                      ),
+                      const SizedBox(height: 36),
 
-                    // Counter-Rotating Inner Ring
-                    AnimatedBuilder(
-                      animation: _rotationController,
-                      builder: (_, __) {
-                        return Transform.rotate(
-                          angle: -_rotationController.value * 2 * math.pi,
-                          child: Container(
-                            width: 145,
-                            height: 145,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF38BDF8).withAlpha(115),
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    // Central Pulsing OFFICIAL INSTITUTION LOGO
-                    ScaleTransition(
-                      scale: _pulseAnimation,
-                      child: Container(
-                        width: 115,
-                        height: 115,
-                        padding: const EdgeInsets.all(12),
+                      // Official Institution Titles
+                      const Text(
+                        AppConfig.instansiPondok,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppConfig.instansiMadrasah,
+                        style: TextStyle(
+                          color: const Color(0xFF38BDF8).withAlpha(240),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF0F172A),
-                          border: Border.all(color: const Color(0xFF10B981).withAlpha(128), width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withAlpha(102),
-                              blurRadius: 28,
-                              spreadRadius: 2,
-                            ),
-                          ],
+                          color: const Color(0xFFFFFFFF).withAlpha(18),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: const Color(0xFFFFFFFF).withAlpha(30)),
                         ),
-                        child: Image.asset(
-                          'assets/logo.png',
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.school_rounded,
-                            size: 56,
-                            color: Color(0xFF10B981),
+                        child: Text(
+                          'Pusat Data Abadi Enterprise v${AppConfig.appVersion}',
+                          style: TextStyle(
+                            color: const Color(0xFFFFFFFF).withAlpha(170),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 36),
+                      const SizedBox(height: 48),
 
-                // Official Institution Titles
-                const Text(
-                  AppConfig.instansiPondok,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  AppConfig.instansiMadrasah,
-                  style: TextStyle(
-                    color: const Color(0xFF38BDF8).withAlpha(230),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.4,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFFFF).withAlpha(15),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFFFFFFF).withAlpha(26)),
-                  ),
-                  child: Text(
-                    'Pusat Data Abadi Enterprise v${AppConfig.appVersion}',
-                    style: TextStyle(
-                      color: const Color(0xFFFFFFFF).withAlpha(153),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Progress Bar & Dynamic Loading Status
-                Column(
-                  children: [
-                    Text(
-                      _statusText,
-                      style: TextStyle(
-                        color: const Color(0xFFFFFFFF).withAlpha(179),
-                        fontSize: 12,
+                      // Progress Bar & Dynamic Loading Status
+                      Column(
+                        children: [
+                          Text(
+                            _statusText,
+                            style: TextStyle(
+                              color: const Color(0xFFFFFFFF).withAlpha(190),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 14),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: SizedBox(
+                              height: 5,
+                              width: 260,
+                              child: LinearProgressIndicator(
+                                value: _progress,
+                                backgroundColor:
+                                    const Color(0xFFFFFFFF).withAlpha(30),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF10B981)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: SizedBox(
-                        height: 4,
-                        width: 220,
-                        child: LinearProgressIndicator(
-                          value: _progress,
-                          backgroundColor: const Color(0xFFFFFFFF).withAlpha(26),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 40),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
