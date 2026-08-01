@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/config/app_config.dart';
 
 class GuardianDashboardScreen extends StatefulWidget {
-  const GuardianDashboardScreen({Key? key}) : super(key: key);
+  const GuardianDashboardScreen({super.key});
 
   @override
   State<GuardianDashboardScreen> createState() => _GuardianDashboardScreenState();

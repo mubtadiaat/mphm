@@ -8,7 +8,7 @@ void main() {
 }
 
 class MPHMEnterpriseApp extends StatelessWidget {
-  const MPHMEnterpriseApp({Key? key}) : super(key: key);
+  const MPHMEnterpriseApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -5,9 +5,9 @@ class WindowsInstallerScreen extends StatefulWidget {
   final VoidCallback onInstallationComplete;
 
   const WindowsInstallerScreen({
-    Key? key,
+    super.key,
     required this.onInstallationComplete,
-  }) : super(key: key);
+  });
 
   @override
   State<WindowsInstallerScreen> createState() => _WindowsInstallerScreenState();

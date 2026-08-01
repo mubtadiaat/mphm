@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SekretariatDesktopScreen extends StatefulWidget {
-  const SekretariatDesktopScreen({Key? key}) : super(key: key);
+  const SekretariatDesktopScreen({super.key});
 
   @override
   State<SekretariatDesktopScreen> createState() => _SekretariatDesktopScreenState();

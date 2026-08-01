@@ -36,7 +36,7 @@ class BiometricAuthService {
         persistAcrossBackgrounding: true,
       );
       return didAuthenticate;
-    } on PlatformException catch (e) {
+    } on PlatformException {
       return false;
     } catch (e) {
       return false;

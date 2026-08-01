@@ -5,10 +5,10 @@ class PremiumLoaderWidget extends StatelessWidget {
   final String subtext;
 
   const PremiumLoaderWidget({
-    Key? key,
+    super.key,
     this.message = 'Memuat Sistem Enterprise...',
     this.subtext = 'Menyinkronkan data instansi dengan server pusat...',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
