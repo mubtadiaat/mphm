@@ -35,31 +35,45 @@ export function SystemSettingsProvider({ children }: { children: React.ReactNode
       const json = await res.json();
       return json.data || {};
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 1000, // 5 seconds cache for fast reactivity
+    refetchInterval: 15 * 1000, // Background poll every 15s
   });
 
-  // 2. Use canonical User Session to check if Admin or Developer
+  // 2. Use canonical User Session to check if Admin or Developer or Sekretariat
   const { data: authSession } = useAuth();
 
   const settings = settingsData || {};
-  const isMaintenanceMode = settings.systemMaintenance === "true" || settings.systemMaintenance === true;
+  
+  // Calculate Maintenance Mode accurately
+  const isServerMaintenanceOn = settings.systemMaintenance === "true" || settings.systemMaintenance === true;
+  const isLocalMaintenanceOff = typeof window !== "undefined" && (
+    localStorage.getItem("systemMaintenance") === "false" || 
+    localStorage.getItem("dev_maintenance") === "false"
+  );
+  
+  // Maintenance mode is ON only if server says true AND local override hasn't disabled it
+  const isMaintenanceMode = isServerMaintenanceOn && !isLocalMaintenanceOff;
   
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   
   const isDeveloperRoute = pathname.startsWith("/developer");
+  const userRole = (authSession?.role || "").toLowerCase();
+  
   const isDeveloperUser =
-    authSession?.role === "developer" ||
-    authSession?.role === "develzy" ||
-    authSession?.role === "superadmin" ||
+    userRole === "developer" ||
+    userRole === "develzy" ||
+    userRole === "superadmin" ||
     authSession?.username === "develzy";
 
   const isSekretariat =
-    authSession?.role === "sek.pondok" ||
-    authSession?.role === "sek.madrasah" ||
+    userRole.includes("sek") ||
+    userRole.includes("admin") ||
+    userRole === "mustahiq" ||
+    userRole === "pengurus" ||
     isDeveloperUser;
 
   // Enforce Maintenance Mode:
-  // DEVELOPER ROUTES (/developer) & DEVELOPER ACCOUNTS (develzy) ARE 100% EXEMPT FROM MAINTENANCE MODE!
+  // DEVELOPER ROUTES (/developer), DEVELOPER USERS, AND ALL SEKRETARIAT/ADMIN ROLES ARE EXEMPT FROM MAINTENANCE MODE!
   if (isMaintenanceMode && !isSekretariat && !isDeveloperRoute && pathname !== "/") {
     return <MaintenanceScreen />;
   }
