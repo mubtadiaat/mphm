@@ -71,7 +71,7 @@ jobs:
   # -------------------------------------------------------------------
   build-windows-release:
     name: Build Release Windows Desktop Binary (.exe)
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     steps:
       - name: Checkout Codebase
@@ -89,8 +89,6 @@ jobs:
 
       - name: Generate Fresh Windows Runner Configuration
         run: |
-          Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
-          Remove-Item -Recurse -Force windows -ErrorAction SilentlyContinue
           flutter create --platforms=windows .
           flutter pub get
 
