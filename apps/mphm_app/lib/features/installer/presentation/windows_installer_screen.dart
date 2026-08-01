@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 class WindowsInstallerScreen extends StatefulWidget {
   final VoidCallback onInstallationComplete;
 
-  const WindowsInstallerScreen({Key? key, required onInstallationComplete})
-      : _onInstallationComplete = onInstallationComplete,
-        super(key: key);
-
-  final VoidCallback _onInstallationComplete;
+  const WindowsInstallerScreen({
+    Key? key,
+    required this.onInstallationComplete,
+  }) : super(key: key);
 
   @override
   State<WindowsInstallerScreen> createState() => _WindowsInstallerScreenState();
@@ -16,7 +15,7 @@ class WindowsInstallerScreen extends StatefulWidget {
 
 class _WindowsInstallerScreenState extends State<WindowsInstallerScreen> {
   int _currentStep = 0;
-  String _installPath = 'C:\\Program Files\\MPHM Enterprise Lirboyo';
+  final String _installPath = 'C:\\Program Files\\MPHM Enterprise Lirboyo';
   bool _agreedToTerms = true;
   bool _launchOnFinish = true;
 
@@ -315,7 +314,7 @@ class _WindowsInstallerScreenState extends State<WindowsInstallerScreen> {
       setState(() => _currentStep = 2);
       _startExtraction();
     } else if (_currentStep == 3) {
-      widget._onInstallationComplete();
+      widget.onInstallationComplete();
     }
   }
 }

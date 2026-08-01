@@ -12,6 +12,7 @@ class AutoUpdateService {
 
   static bool get isUpdateReady => _isUpdateReady;
   static String get latestVersion => _latestVersion;
+  static String get downloadedFilePath => _downloadedFilePath;
 
   /// Check background update silently from live server API gateway
   static Future<void> checkForBackgroundUpdates({
