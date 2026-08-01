@@ -214,7 +214,7 @@ jobs:
           path: installer_output/MPHM.Enterprise.Setup.*.exe
 
   # -------------------------------------------------------------------
-  # 3. PURGE LEGACY RELEASES & PUBLISH NEW OFFICIAL GITHUB RELEASE
+  # 3. PURGE LEGACY RELEASES/TAGS & PUBLISH NEW OFFICIAL GITHUB RELEASE
   # -------------------------------------------------------------------
   create-github-release:
     name: Publish GitHub Release Binaries
@@ -232,12 +232,15 @@ jobs:
           echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
           echo "Building release for version: $VERSION"
 
-      - name: Purge Legacy Releases in mubtadiaat/app_software
+      - name: Purge Legacy Releases & Legacy Tags in mubtadiaat/app_software
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
+            const currentTag = `v${process.env.APP_VERSION}`;
+
+            // 1. Purge all legacy Releases
             try {
               const releases = await github.rest.repos.listReleases({ owner, repo, per_page: 100 });
               console.log(`Found ${releases.data.length} releases in repository.`);
@@ -247,7 +250,39 @@ jobs:
               }
               console.log("Legacy releases purged successfully!");
             } catch (err) {
-              console.error("Purge error:", err.message);
+              console.error("Purge releases error:", err.message);
+            }
+
+            // 2. Purge all legacy Tags except current release tag
+            try {
+              const tags = await github.rest.repos.listTags({ owner, repo, per_page: 100 });
+              console.log(`Found ${tags.data.length} tags in repository.`);
+              for (const tag of tags.data) {
+                if (tag.name !== currentTag && tag.name.startsWith('v1.')) {
+                  console.log(`Purging legacy tag: ${tag.name}...`);
+                  await github.rest.git.deleteRef({ owner, repo, ref: `tags/${tag.name}` });
+                }
+              }
+              console.log("Legacy tags purged successfully!");
+            } catch (err) {
+              console.error("Purge tags error:", err.message);
+            }
+
+            // 3. Keep Max 3 Latest Workflow Runs (Purge older ones)
+            try {
+              const runs = await github.rest.actions.listWorkflowRunsForRepo({ owner, repo, per_page: 100 });
+              const workflowRuns = runs.data.workflow_runs;
+              console.log(`Total workflow runs found: ${workflowRuns.length}`);
+              if (workflowRuns.length > 3) {
+                const runsToDelete = workflowRuns.slice(3);
+                for (const r of runsToDelete) {
+                  console.log(`Purging old workflow run #${r.run_number} (ID: ${r.id})...`);
+                  await github.rest.actions.deleteWorkflowRun({ owner, repo, run_id: r.id });
+                }
+                console.log("Old workflow runs purged. Max 3 runs preserved!");
+              }
+            } catch (err) {
+              console.error("Purge workflow runs error:", err.message);
             }
 
       - name: Download Android Staff APK Artifact
@@ -271,13 +306,14 @@ jobs:
       - name: List Release Artifacts
         run: ls -lah ./release-artifacts/
 
-      - name: Create Official GitHub Release
+      - name: Create Official GitHub Release (v${{ env.APP_VERSION }})
         uses: softprops/action-gh-release@v1
         with:
           files: ./release-artifacts/*
           draft: false
           prerelease: false
           tag_name: v${{ env.APP_VERSION }}
+          target_commitish: ${{ github.sha }}
           name: "🚀 MPHM Enterprise v${{ env.APP_VERSION }} — Rilis Resmi"
           body: |
             ## 🏛️ MPHM & P3HM Lirboyo Enterprise — Rilis Resmi v${{ env.APP_VERSION }}

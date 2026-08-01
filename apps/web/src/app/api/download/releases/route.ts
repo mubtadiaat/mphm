@@ -50,10 +50,10 @@ function formatBytes(bytes: number, decimals = 1): string {
 
 const FALLBACK_DATA: DownloadReleasesResponse = {
   latest: {
-    version: "1.4.11",
-    tagName: "v1.4.11",
-    publishedAt: "2026-07-27T16:38:02Z",
-    htmlUrl: "https://github.com/mubtadiaat/app_software/releases/tag/v2.0.1",
+    version: "2.0.2",
+    tagName: "v2.0.2",
+    publishedAt: new Date().toISOString(),
+    htmlUrl: "https://github.com/mubtadiaat/app_software/releases/tag/v2.0.2",
     isLatest: true,
     isStable: true,
     totalDownloads: 0,
