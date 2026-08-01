@@ -239,7 +239,7 @@
     },
     {
       "name": "local_auth",
-      "version": "2.3.0",
+      "version": "3.0.2",
       "dependencies": [
         "flutter",
         "local_auth_android",
@@ -976,7 +976,7 @@
     },
     {
       "name": "local_auth_windows",
-      "version": "1.0.11",
+      "version": "2.0.1",
       "dependencies": [
         "flutter",
         "local_auth_platform_interface"
@@ -992,7 +992,7 @@
     },
     {
       "name": "local_auth_darwin",
-      "version": "1.6.1",
+      "version": "2.0.3",
       "dependencies": [
         "flutter",
         "intl",
@@ -1001,12 +1001,13 @@
     },
     {
       "name": "local_auth_android",
-      "version": "1.0.56",
+      "version": "2.0.9",
       "dependencies": [
         "flutter",
         "flutter_plugin_android_lifecycle",
         "intl",
-        "local_auth_platform_interface"
+        "local_auth_platform_interface",
+        "meta"
       ]
     },
     {

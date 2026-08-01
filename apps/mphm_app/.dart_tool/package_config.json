@@ -465,21 +465,21 @@
     },
     {
       "name": "local_auth",
-      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth-2.3.0",
+      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth-3.0.2",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.10"
     },
     {
       "name": "local_auth_android",
-      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_android-1.0.56",
+      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_android-2.0.9",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.12"
     },
     {
       "name": "local_auth_darwin",
-      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_darwin-1.6.1",
+      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_darwin-2.0.3",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.10"
     },
     {
       "name": "local_auth_platform_interface",
@@ -489,9 +489,9 @@
     },
     {
       "name": "local_auth_windows",
-      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_windows-1.0.11",
+      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/local_auth_windows-2.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.8"
     },
     {
       "name": "logging",
