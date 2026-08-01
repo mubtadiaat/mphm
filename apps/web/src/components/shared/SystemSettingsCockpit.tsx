@@ -1496,14 +1496,24 @@ export function SystemSettingsCockpit() {
           {settingsTab === "job_titles" && (
             <div className="space-y-6">
               <FriendlyGuideCard 
-                title="Jabatan Struktural Pengurus"
-                description="Kelola susunan hirarki Jabatan dan Posisi Pengurus untuk Madrasah (MPHM) dan Pondok (P3HM)."
+                title="Jabatan Struktural Pengurus (Telah Dipindahkan)"
+                description="📌 PENTING: Pengaturan Jabatan & Posisi Pengurus kini dapat dikelola LANGSUNG di dalam Menu Data Pengurus (/sekretariat/pengurus) melalui tombol '+ Kelola Jabatan' di banner atas agar lebih cepat dan praktis."
                 steps={[
-                  "Pilih filter lembaga (Madrasah atau Pondok).",
-                  "Ketik nama Jabatan baru (misal: Dewan Harian, Mundzir, Mustahiq) lalu klik '+ Tambah Jabatan'.",
-                  "Ketik posisi di bawah jabatan tersebut (misal: Ketua, Sekretaris, Bendahara) lalu tekan Enter."
+                  "Anda dapat terus menggunakan formulir di bawah ini untuk pengaturan hirarki dasar.",
+                  "Atau klik tombol 'Buka Menu Data Pengurus' untuk mengelola Jabatan langsung di halaman Pengurus."
                 ]}
               />
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-2xl flex items-center justify-between gap-4">
+                <div className="text-xs font-bold text-blue-900 dark:text-blue-200">
+                  Akses Cepat: Pengaturan Jabatan Pengurus kini aktif di Menu Data Pengurus.
+                </div>
+                <a
+                  href="/sekretariat/pengurus"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition-all shrink-0"
+                >
+                  Buka Menu Data Pengurus &rarr;
+                </a>
+              </div>
 
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
@@ -1648,9 +1658,24 @@ export function SystemSettingsCockpit() {
           {settingsTab === "master_pelanggaran" && (
             <div className="space-y-6">
               <FriendlyGuideCard 
-                title="Master Pelanggaran & Takzir"
-                description="Kelola 7 kategori jenis pelanggaran pesantren, bobot poin sanksi, dan tingkat keparahan yang berlaku untuk seluruh santriwati."
+                title="Master Pelanggaran & Poin Takzir (Telah Dipindahkan)"
+                description="📌 PENTING: Pengaturan Kategori & Poin Pelanggaran kini dapat dikelola LANGSUNG di dalam Menu Pelanggaran (/sekretariat/pelanggaran) melalui tombol 'Kelola Poin Pelanggaran' di banner atas."
+                steps={[
+                  "Anda dapat terus menggunakan tabel di bawah ini untuk melihat daftar master pelanggaran.",
+                  "Atau klik tombol 'Buka Menu Catatan Pelanggaran' di bawah ini untuk mengelola poin secara fleksibel."
+                ]}
               />
+              <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-2xl flex items-center justify-between gap-4">
+                <div className="text-xs font-bold text-rose-900 dark:text-rose-200">
+                  Akses Cepat: Konfigurasi Poin Pelanggaran kini aktif di Menu Catatan Pelanggaran.
+                </div>
+                <a
+                  href="/sekretariat/pelanggaran"
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-extrabold transition-all shrink-0"
+                >
+                  Buka Menu Catatan Pelanggaran &rarr;
+                </a>
+              </div>
               <MasterPelanggaranTab />
             </div>
           )}
