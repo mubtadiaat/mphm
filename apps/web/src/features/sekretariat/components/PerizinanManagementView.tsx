@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   FileText, Search, Filter, Plus, CheckCircle2, XCircle, 
-  Clock, CheckCheck, Trash2, Calendar, User, AlertCircle, X, Loader2 
+  Clock, CheckCheck, Trash2, Calendar, AlertCircle, X, Loader2, Settings2, ShieldAlert 
 } from "lucide-react";
 import { PillBadge } from "@/components/shared/PillBadge";
 import { useToast } from "@/components/shared/ToastContext";
@@ -25,6 +25,12 @@ export interface StudentPermitData {
   createdAt: string;
 }
 
+interface PermitLimitRules {
+  PULANG: number;
+  SAMBANGAN: number;
+  KELUAR: number;
+}
+
 interface PerizinanManagementViewProps {
   isReadOnly?: boolean;
 }
@@ -38,6 +44,16 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+
+  // Dynamic Permit Day Limits
+  const [limitRules, setLimitRules] = useState<PermitLimitRules>(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("mphm_permit_limit_rules") : null;
+    if (saved) {
+      try { return JSON.parse(saved); } catch {}
+    }
+    return { PULANG: 3, SAMBANGAN: 1, KELUAR: 1 };
+  });
 
   // Form states
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -47,8 +63,29 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
   const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
   const [notes, setNotes] = useState("");
 
+  // Calculate Days Duration
+  const calculateDays = (startStr: string, endStr: string) => {
+    if (!startStr || !endStr) return 0;
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const requestedDays = calculateDays(startDate, endDate);
+  const maxAllowedDays = limitRules[permitType] || 3;
+  const isExceedingLimit = requestedDays > maxAllowedDays;
+
+  const handleSaveLimits = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem("mphm_permit_limit_rules", JSON.stringify(limitRules));
+    setIsLimitModalOpen(false);
+    toast("Batas Maksimal Hari Perizinan berhasil diperbarui!", "success");
+  };
+
   // Fetch Permits List
-  const { data: permitsResponse, isLoading, refetch } = useQuery({
+  const { data: permitsResponse, isLoading } = useQuery({
     queryKey: ["permits", statusFilter, typeFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -100,7 +137,7 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
     },
   });
 
-  // Update Status Mutation (Approve / Reject / Complete)
+  // Update Status Mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
       const res = await fetch(`/api/disciplinary/permits/${id}`, {
@@ -168,7 +205,6 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
     });
   };
 
-  // Filtered List based on client search
   const filteredPermits = permits.filter((p) => {
     const query = (searchQuery || "").toLowerCase();
     if (!query) return true;
@@ -178,38 +214,43 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
     return nameStr.includes(query) || stambukStr.includes(query) || reasonStr.includes(query);
   });
 
-  // Stats calculation
   const totalCount = permits.length;
   const pendingCount = permits.filter((p) => p.status === "PENDING").length;
   const approvedCount = permits.filter((p) => p.status === "APPROVED").length;
   const completedCount = permits.filter((p) => p.status === "COMPLETED").length;
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header Section */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 dark:border-blue-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xs">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="flex flex-col gap-6 pb-12">
+      {/* Header Banner */}
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl text-white">
         <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
             <FileText className="w-4 h-4" />
-            <span>Manajemen Kedisiplinan</span>
+            <span>Manajemen Kedisiplinan & Perizinan</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Sistem Perizinan Santri
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            Sistem Perizinan & Batas Hari Izin
           </h1>
-          <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Kelola pengajuan surat izin pulang, sambangan wali santri, dan perizinan keluar komplek secara terintegrasi.
+          <p className="text-blue-100/90 text-sm max-w-xl">
+            Kelola permohonan surat izin pulang, sambangan wali, dan aturan batas maksimal hari perizinan secara otomatis.
           </p>
         </div>
 
         {!isReadOnly && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="z-10 inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Buat Perizinan Baru</span>
-          </button>
+          <div className="flex items-center gap-3 z-10 shrink-0">
+            <button
+              onClick={() => setIsLimitModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold border border-white/20 transition-all cursor-pointer backdrop-blur-md"
+            >
+              <Settings2 className="w-4 h-4" /> Batas Hari Izin
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Buat Perizinan
+            </button>
+          </div>
         )}
       </div>
 
@@ -265,44 +306,42 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
             placeholder="Cari santri, stambuk, alasan..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-900 dark:text-white focus:outline-none"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Status Filter */}
           <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500">
             <Filter className="w-3.5 h-3.5" />
-            <span>Status:</span>
+            <span>Filter:</span>
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 focus:outline-none"
+            className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer"
           >
             <option value="ALL">Semua Status</option>
-            <option value="PENDING">PENDING (Menunggu)</option>
-            <option value="APPROVED">APPROVED (Disetujui)</option>
-            <option value="REJECTED">REJECTED (Ditolak)</option>
-            <option value="COMPLETED">COMPLETED (Selesai)</option>
+            <option value="PENDING">PENDING</option>
+            <option value="APPROVED">APPROVED</option>
+            <option value="REJECTED">REJECTED</option>
+            <option value="COMPLETED">COMPLETED</option>
           </select>
 
-          {/* Type Filter */}
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 focus:outline-none"
+            className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer"
           >
             <option value="ALL">Semua Jenis</option>
-            <option value="PULANG">Izin Pulang</option>
-            <option value="SAMBANGAN">Sambangan</option>
-            <option value="KELUAR">Izin Keluar</option>
+            <option value="PULANG">Izin Pulang (Max {limitRules.PULANG} Hari)</option>
+            <option value="SAMBANGAN">Sambangan (Max {limitRules.SAMBANGAN} Hari)</option>
+            <option value="KELUAR">Izin Keluar (Max {limitRules.KELUAR} Hari)</option>
           </select>
         </div>
       </div>
 
       {/* Main Table Content */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-xs">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-xs">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center p-12 text-zinc-400 gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -315,7 +354,7 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
             </div>
             <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-200">Tidak ada data perizinan</h3>
             <p className="text-xs text-zinc-400 max-w-sm">
-              Belum ada permohonan izin yang sesuai dengan kriteria pencarian atau filter yang dipilih.
+              Belum ada permohonan izin yang sesuai dengan kriteria pencarian.
             </p>
           </div>
         ) : (
@@ -333,91 +372,86 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-sm">
-                {filteredPermits.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
-                          {item.studentName.charAt(0)}
+                {filteredPermits.map((item) => {
+                  const days = calculateDays(item.startDate, item.endDate);
+                  const maxLimit = limitRules[item.permitType] || 3;
+                  const isOver = days > maxLimit;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition-colors">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                            {item.studentName.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-zinc-900 dark:text-white leading-tight">{item.studentName}</p>
+                            <p className="text-xs text-zinc-400">Stambuk: {item.stambuk}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-zinc-900 dark:text-white leading-tight">{item.studentName}</p>
-                          <p className="text-xs text-zinc-400">Stambuk: {item.stambuk}</p>
+                      </td>
+
+                      <td className="py-4 px-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wide ${
+                          item.permitType === "PULANG" 
+                            ? "bg-purple-500/10 text-purple-600 border border-purple-500/20"
+                            : item.permitType === "SAMBANGAN"
+                            ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                            : "bg-blue-500/10 text-blue-600 border border-blue-500/20"
+                        }`}>
+                          {item.permitType}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-6 max-w-xs">
+                        <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium line-clamp-2">{item.reason}</p>
+                      </td>
+
+                      <td className="py-4 px-4 text-xs font-semibold text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                            <span>{item.startDate} s/d {item.endDate}</span>
+                          </div>
+                          <span className={`text-[10px] font-bold ${isOver ? "text-rose-500" : "text-emerald-500"}`}>
+                            {days} Hari {isOver ? `(Melebihi batas max ${maxLimit} Hari)` : ""}
+                          </span>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="py-4 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wide ${
-                        item.permitType === "PULANG" 
-                          ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
-                          : item.permitType === "SAMBANGAN"
-                          ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                          : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                      }`}>
-                        {item.permitType}
-                      </span>
-                    </td>
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        {item.status === "APPROVED" && <PillBadge label="DISETUJUI" variant="success" />}
+                        {item.status === "PENDING" && <PillBadge label="MENUNGGU" variant="warning" />}
+                        {item.status === "REJECTED" && <PillBadge label="DITOLAK" variant="danger" />}
+                        {item.status === "COMPLETED" && <PillBadge label="SELESAI" variant="info" />}
+                      </td>
 
-                    <td className="py-4 px-6 max-w-xs">
-                      <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium line-clamp-2">{item.reason}</p>
-                    </td>
+                      <td className="py-4 px-4 text-xs text-zinc-500">
+                        <p className="font-semibold text-zinc-700 dark:text-zinc-300">{item.approvedByName}</p>
+                        {item.notes && <p className="text-zinc-400 italic line-clamp-1">{item.notes}</p>}
+                      </td>
 
-                    <td className="py-4 px-4 text-xs font-semibold text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-zinc-400" />
-                        <span>{item.startDate} s/d {item.endDate}</span>
-                      </div>
-                    </td>
+                      <td className="py-4 px-6 text-right whitespace-nowrap">
+                        {!isReadOnly && (
+                          <div className="flex items-center justify-end gap-1.5">
+                            {item.status === "PENDING" && (
+                              <>
+                                <button title="Setujui Perizinan" onClick={() => updateStatusMutation.mutate({ id: item.id, status: "APPROVED" })} className="p-1.5 text-emerald-600 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </button>
+                                <button title="Tolak Perizinan" onClick={() => updateStatusMutation.mutate({ id: item.id, status: "REJECTED" })} className="p-1.5 text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer">
+                                  <XCircle className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
 
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      {item.status === "APPROVED" && <PillBadge label="DISETUJUI" variant="success" />}
-                      {item.status === "PENDING" && <PillBadge label="MENUNGGU" variant="warning" />}
-                      {item.status === "REJECTED" && <PillBadge label="DITOLAK" variant="danger" />}
-                      {item.status === "COMPLETED" && <PillBadge label="SELESAI" variant="info" />}
-                    </td>
-
-                    <td className="py-4 px-4 text-xs text-zinc-500">
-                      <p className="font-semibold text-zinc-700 dark:text-zinc-300">{item.approvedByName}</p>
-                      {item.notes && <p className="text-zinc-400 italic line-clamp-1">{item.notes}</p>}
-                    </td>
-
-                    <td className="py-4 px-6 text-right whitespace-nowrap">
-                      {!isReadOnly && (
-                        <div className="flex items-center justify-end gap-1.5">
-                          {item.status === "PENDING" && (
-                            <>
-                              <button
-                                title="Setujui Perizinan"
-                                onClick={() => updateStatusMutation.mutate({ id: item.id, status: "APPROVED" })}
-                                className="p-1.5 text-emerald-600 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <CheckCircle2 className="w-4 h-4" />
+                            {item.status === "APPROVED" && (
+                              <button title="Tandai Santri Kembali (Selesai)" onClick={() => updateStatusMutation.mutate({ id: item.id, status: "COMPLETED" })} className="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1">
+                                <CheckCheck className="w-3.5 h-3.5" /> <span>Kembali</span>
                               </button>
-                              <button
-                                title="Tolak Perizinan"
-                                onClick={() => updateStatusMutation.mutate({ id: item.id, status: "REJECTED" })}
-                                className="p-1.5 text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
+                            )}
 
-                          {item.status === "APPROVED" && (
-                            <button
-                              title="Tandai Santri Kembali (Selesai)"
-                              onClick={() => updateStatusMutation.mutate({ id: item.id, status: "COMPLETED" })}
-                              className="px-2.5 py-1 text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                            >
-                              <CheckCheck className="w-3.5 h-3.5" />
-                              <span>Kembali</span>
-                            </button>
-                          )}
-
-                          <button
-                            title="Hapus Record"
-                            onClick={async () => {
+                            <button title="Hapus Record" onClick={async () => {
                               const isConfirmed = await confirm({
                                 title: "Hapus Data Perizinan?",
                                 message: "Apakah Anda yakin ingin menghapus data perizinan ini?",
@@ -425,54 +459,78 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
                                 cancelText: "Batal",
                                 type: "danger",
                               });
-                              if (isConfirmed) {
-                                deletePermitMutation.mutate(item.id);
-                              }
-                            }}
-                            className="p-1.5 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                              if (isConfirmed) deletePermitMutation.mutate(item.id);
+                            }} className="p-1.5 text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
 
-      {/* Modal Buat Perizinan Baru */}
-      {isModalOpen && (
+      {/* Modal Setting Batas Hari Perizinan */}
+      {isLimitModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-150">
-            <div className="flex items-center justify-between p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
-              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-sm">
-                <FileText className="w-4 h-4" />
-                <span>Pengajuan Perizinan Baru</span>
+          <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-extrabold text-sm">
+                <Settings2 className="w-5 h-5" />
+                <span>Aturan Batas Maksimal Hari Izin</span>
               </div>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-white rounded-lg transition-colors cursor-pointer"
-              >
+              <button onClick={() => setIsLimitModalOpen(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
+            <form onSubmit={handleSaveLimits} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-500 uppercase">Max Hari Izin Pulang (Ke Rumah)</label>
+                <input type="number" min={1} required value={limitRules.PULANG} onChange={(e) => setLimitRules({ ...limitRules, PULANG: parseInt(e.target.value) || 1 })} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-500 uppercase">Max Hari Sambangan Wali Santri</label>
+                <input type="number" min={1} required value={limitRules.SAMBANGAN} onChange={(e) => setLimitRules({ ...limitRules, SAMBANGAN: parseInt(e.target.value) || 1 })} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-500 uppercase">Max Hari Izin Keluar Komplek</label>
+                <input type="number" min={1} required value={limitRules.KELUAR} onChange={(e) => setLimitRules({ ...limitRules, KELUAR: parseInt(e.target.value) || 1 })} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
+              </div>
+
+              <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 flex justify-end gap-2">
+                <button type="button" onClick={() => setIsLimitModalOpen(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl cursor-pointer">Batal</button>
+                <button type="submit" className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer">Simpan Konfigurasi</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Buat Perizinan Baru */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-extrabold text-sm">
+                <FileText className="w-4 h-4" />
+                <span>Pengajuan Perizinan Baru</span>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-white cursor-pointer"><X className="w-5 h-5" /></button>
+            </div>
+
             <form onSubmit={handleCreateSubmit} className="p-6 space-y-4 text-sm">
               <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                  Pilih Santriwati <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
-                  required
-                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                >
-                  <option value="">-- Pilih Santri --</option>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Pilih Santriwati *</label>
+                <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} required className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-bold">
+                  <option value="">-- Pilih Santriwati --</option>
                   {studentsList.map((st: any) => (
                     <option key={st.id} value={st.id}>
                       {st.person?.fullName} ({st.stambukNumber})
@@ -482,88 +540,39 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                  Jenis Perizinan <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={permitType}
-                  onChange={(e) => setPermitType(e.target.value as any)}
-                  required
-                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                >
-                  <option value="PULANG">Izin Pulang (Ke Rumah)</option>
-                  <option value="SAMBANGAN">Sambangan Wali Santri</option>
-                  <option value="KELUAR">Izin Keluar Komplek Pesantren</option>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Jenis Perizinan *</label>
+                <select value={permitType} onChange={(e) => setPermitType(e.target.value as any)} required className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-bold">
+                  <option value="PULANG">Izin Pulang (Batas Max: {limitRules.PULANG} Hari)</option>
+                  <option value="SAMBANGAN">Sambangan Wali (Batas Max: {limitRules.SAMBANGAN} Hari)</option>
+                  <option value="KELUAR">Izin Keluar Komplek (Batas Max: {limitRules.KELUAR} Hari)</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Tanggal Mulai <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-medium"
-                  />
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Tanggal Mulai *</label>
+                  <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-bold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Tanggal Selesai <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
-                    className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-medium"
-                  />
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Tanggal Selesai *</label>
+                  <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-bold" />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                  Alasan Permohonan <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Tuliskan alasan lengkap pengajuan izin..."
-                  rows={3}
-                  required
-                  className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-medium focus:outline-none"
-                />
+              {/* Realtime Limit Alert */}
+              <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${isExceedingLimit ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900" : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900"}`}>
+                {isExceedingLimit ? <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
+                <span>Durasi: <strong>{requestedDays} Hari</strong> (Max Diizinkan: {maxAllowedDays} Hari)</span>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                  Catatan Tambahan (Opsional)
-                </label>
-                <input
-                  type="text"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Nama pendamping / instruksi khusus..."
-                  className="w-full px-3.5 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-medium"
-                />
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Alasan Permohonan *</label>
+                <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Tuliskan alasan lengkap pengajuan izin..." rows={3} required className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-medium focus:outline-none" />
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={createPermitMutation.isPending}
-                  className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                >
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl cursor-pointer">Batal</button>
+                <button type="submit" disabled={createPermitMutation.isPending} className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md cursor-pointer flex items-center gap-2">
                   {createPermitMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
                   <span>Simpan & Ajukan</span>
                 </button>

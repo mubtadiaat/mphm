@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, Users } from "lucide-react";
+import { Plus, X, Users, Briefcase, Trash2, Edit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
-import { getStoredStructuralJabatan, addPosisiToJabatan, getPositionsForJabatan } from "@/config/jobPositions.config";
+import { getPositionsForJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { apiRequest } from "@/lib/api";
 
@@ -31,15 +31,22 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const { toast, confirm } = useToast();
   
   const [showModal, setShowModal] = useState(false);
+  const [showJabatanModal, setShowJabatanModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Pengurus | null>(null);
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("");
+  const [newJabatanName, setNewJabatanName] = useState("");
 
   const [pengurusTitles, setPengurusTitles] = useState<string[]>(() => {
-    return getPositionsForJabatan("Pengurus Harian", "PONDOK");
+    const saved = typeof window !== "undefined" ? localStorage.getItem("mphm_custom_pengurus_jabatan") : null;
+    if (saved) {
+      try { return JSON.parse(saved); } catch {}
+    }
+    const defaults = getPositionsForJabatan("Pengurus Harian", "PONDOK");
+    return defaults.length > 0 ? defaults : ["Ketua Pengurus", "Penasehat", "Pembina Kamar (Musyrifah)", "Sekretaris", "Bendahara", "Keamanan", "Pendidikan"];
   });
 
   useEffect(() => {
@@ -49,17 +56,34 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
     }
   }, [remoteData.data, remoteData.total]);
 
-  useEffect(() => {
-    const handleJobTitlesChanged = () => {
-      setPengurusTitles(getPositionsForJabatan("Pengurus Harian", "PONDOK"));
-    };
-    window.addEventListener("structural_job_positions_changed", handleJobTitlesChanged);
-    window.addEventListener("job_titles_changed", handleJobTitlesChanged);
-    return () => {
-      window.removeEventListener("structural_job_positions_changed", handleJobTitlesChanged);
-      window.removeEventListener("job_titles_changed", handleJobTitlesChanged);
-    };
-  }, []);
+  // Add Custom Jabatan
+  const handleAddCustomJabatan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newJabatanName.trim()) {
+      toast("Nama Jabatan tidak boleh kosong!", "warning");
+      return;
+    }
+    const title = newJabatanName.trim();
+    if (pengurusTitles.includes(title)) {
+      toast("Jabatan ini sudah ada dalam daftar!", "warning");
+      return;
+    }
+
+    const updated = [...pengurusTitles, title];
+    setPengurusTitles(updated);
+    localStorage.setItem("mphm_custom_pengurus_jabatan", JSON.stringify(updated));
+    await addPosisiToJabatan("Pengurus Harian", title, "PONDOK");
+    setNewJabatanName("");
+    toast(`Jabatan "${title}" berhasil ditambahkan!`, "success");
+  };
+
+  // Delete Custom Jabatan
+  const handleDeleteJabatan = (titleToDelete: string) => {
+    const updated = pengurusTitles.filter(t => t !== titleToDelete);
+    setPengurusTitles(updated);
+    localStorage.setItem("mphm_custom_pengurus_jabatan", JSON.stringify(updated));
+    toast(`Jabatan "${titleToDelete}" dihapus dari opsi.`, "info");
+  };
 
   const resetForm = () => {
     setName(""); setPhone(""); setRole("");
@@ -87,9 +111,9 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
     if (isConfirmed) {
       try {
         await deletePengurus(id);
-        toast("Data Pengurus berhasil dihapus", "success", "Sukses");
+        toast("Data Pengurus berhasil dihapus", "success");
       } catch (_err) {
-        toast("Gagal menghapus data Pengurus", "error", "Gagal");
+        toast("Gagal menghapus data Pengurus", "error");
       }
     }
   };
@@ -97,14 +121,14 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const formatFullRole = (pos: string, defaultJabatan: string) => {
     if (!pos || !pos.trim()) return defaultJabatan;
     const p = pos.trim();
-    if (p.toLowerCase().includes("pengurus") || p.toLowerCase().includes("harian") || p.toLowerCase().includes("pleno") || p.toLowerCase().includes("penasihat")) return p;
+    if (p.toLowerCase().includes("pengurus") || p.toLowerCase().includes("harian") || p.toLowerCase().includes("pleno") || p.toLowerCase().includes("penasihat") || p.toLowerCase().includes("musyrifah")) return p;
     return `${defaultJabatan} ${p}`;
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return toast("Nama Lengkap wajib diisi", "warning", "Peringatan");
-    if (!phone.trim()) return toast("Nomor WhatsApp Aktif wajib diisi untuk penerbitan & pengiriman akun", "warning", "Peringatan");
+    if (!name.trim()) return toast("Nama Lengkap wajib diisi", "warning");
+    if (!phone.trim()) return toast("Nomor WhatsApp Aktif wajib diisi", "warning");
 
     const fullRole = formatFullRole(role, "Pengurus");
 
@@ -114,15 +138,20 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
           throw new Error("ID orang tidak ditemukan pada data ini.");
         }
         await updatePengurus({ personId: editingData.personId, name, phone, roleName: fullRole });
-        toast("Data Pengurus berhasil diperbarui!", "success", "Sukses");
+        toast("Data Pengurus berhasil diperbarui!", "success");
       } else {
         await createPengurus({ name, phone, roleName: fullRole });
-        await addPosisiToJabatan("Pengurus Harian", role, "PONDOK");
-        toast("Pengurus baru berhasil didaftarkan!", "success", "Sukses");
+        if (role && !pengurusTitles.includes(role)) {
+          const updated = [...pengurusTitles, role];
+          setPengurusTitles(updated);
+          localStorage.setItem("mphm_custom_pengurus_jabatan", JSON.stringify(updated));
+          await addPosisiToJabatan("Pengurus Harian", role, "PONDOK");
+        }
+        toast("Pengurus baru berhasil didaftarkan!", "success");
       }
       setShowModal(false);
     } catch (err: any) {
-      toast(err.message || "Gagal menyimpan data", "error", "Gagal");
+      toast(err.message || "Gagal menyimpan data", "error");
     }
   };
 
@@ -133,10 +162,14 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
         <span className="font-bold">{info.getValue() as string}</span>
       </div>
     ) },
-    { accessorKey: "role", header: "Jabatan & Divisi", cell: info => <span className="text-sm font-medium">{info.getValue() as string}</span> },
-    { accessorKey: "phone", header: "No. Telepon", cell: info => <span className="font-mono text-xs">{info.getValue() as string}</span> },
+    { accessorKey: "role", header: "Jabatan & Divisi", cell: info => (
+      <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 font-extrabold text-xs border border-blue-500/20">
+        {info.getValue() as string}
+      </span>
+    ) },
+    { accessorKey: "phone", header: "No. Telepon / WA", cell: info => <span className="font-mono text-xs font-semibold">{info.getValue() as string}</span> },
     { accessorKey: "status", header: "Status", cell: info => (
-      <span className={`px-2 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+      <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${info.getValue() === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border border-rose-500/20'}`}>
         {info.getValue() as string}
       </span>
     )},
@@ -147,25 +180,38 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   ];
 
   return (
-    <div className="flex flex-col gap-6 mt-4">
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent border border-blue-500/20 dark:border-blue-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+    <div className="flex flex-col gap-6 mt-4 pb-12">
+      {/* Top Banner */}
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl text-white">
         <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-blue-650 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
             <Users className="w-4 h-4" />
-            <span>Manajemen SDM</span>
+            <span>Manajemen SDM Pengurus</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Data Pengurus
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            Data Pengurus & Manajemen Jabatan
           </h1>
-          <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Single Source of Truth Data Pengurus Induk (P3HM Lirboyo).
+          <p className="text-blue-100/90 text-sm max-w-xl">
+            Single Source of Truth Data Pengurus Induk (P3HM Lirboyo) serta pembuatan struktur Jabatan Instansi secara dinamis.
           </p>
         </div>
-        <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95">
-          <Plus className="w-4 h-4" /> Tambah Pengurus
-        </button>
+
+        {!isReadOnly && (
+          <div className="flex items-center gap-3 z-10 shrink-0">
+            <button 
+              onClick={() => setShowJabatanModal(true)} 
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold border border-white/20 transition-all cursor-pointer backdrop-blur-md"
+            >
+              <Briefcase className="w-4 h-4" /> Kelola Jabatan ({pengurusTitles.length})
+            </button>
+            <button 
+              onClick={handleOpenAdd} 
+              className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-sm font-black shadow-lg transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Tambah Pengurus
+            </button>
+          </div>
+        )}
       </div>
 
       <UniversalDataGrid
@@ -210,46 +256,98 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
               }
             }
             if (count > 0) {
-              toast(`Berhasil mengimpor ${count} data Pengurus!`, "success", "Import Berhasil");
+              toast(`Berhasil mengimpor ${count} data Pengurus!`, "success");
             }
           }
         }}
       />
 
+      {/* Modal Kelola Daftar Jabatan */}
+      <AnimatePresence>
+        {showJabatanModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-extrabold text-sm">
+                  <Briefcase className="w-5 h-5" />
+                  <span>Manajemen Daftar Jabatan Pengurus</span>
+                </div>
+                <button onClick={() => setShowJabatanModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddCustomJabatan} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Tambah Jabatan Baru (e.g. Penasehat, Musyrifah...)"
+                  value={newJabatanName}
+                  onChange={(e) => setNewJabatanName(e.target.value)}
+                  className="flex-1 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white focus:outline-none"
+                />
+                <button type="submit" className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer shrink-0">
+                  + Tambah
+                </button>
+              </form>
+
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Jabatan Terdaftar Saat Ini:</span>
+                <div className="flex flex-wrap gap-2">
+                  {pengurusTitles.map((t) => (
+                    <div key={t} className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                      <span>{t}</span>
+                      <button type="button" onClick={() => handleDeleteJabatan(t)} className="text-zinc-400 hover:text-rose-500 cursor-pointer">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800 flex justify-end">
+                <button type="button" onClick={() => setShowJabatanModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl cursor-pointer">
+                  Selesai
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Add/Edit Pengurus */}
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setShowModal(false)} />
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden">
-              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between">
-                <h3 className="font-bold">{editingData ? "Edit Data Pengurus" : "Tambah Pengurus Baru"}</h3>
-                <button onClick={() => setShowModal(false)} className="text-zinc-500 hover:bg-zinc-100 p-1 rounded-md"><X className="w-5 h-5"/></button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-xs" onClick={() => setShowModal(false)} />
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+              <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950">
+                <h3 className="font-extrabold text-base text-zinc-900 dark:text-white">{editingData ? "Edit Data Pengurus" : "Pendaftaran Pengurus Baru"}</h3>
+                <button onClick={() => setShowModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-md cursor-pointer"><X className="w-5 h-5"/></button>
               </div>
-              <form onSubmit={handleSave} className="p-4 space-y-4">
+              <form onSubmit={handleSave} className="p-6 space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Nama Lengkap</label>
-                  <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
+                  <label className="text-xs font-bold text-zinc-500 uppercase">Nama Lengkap Pengurus *</label>
+                  <input required value={name} onChange={e => setName(e.target.value)} placeholder="Nama Lengkap beserta Gelar" className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white outline-none" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">No. HP</label>
-                  <input value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
+                  <label className="text-xs font-bold text-zinc-500 uppercase">No. WhatsApp Aktif *</label>
+                  <input required value={phone} onChange={e => setPhone(e.target.value)} placeholder="+6281234567890" className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Jabatan / Posisi</label>
-                  {pengurusTitles.length > 0 ? (
-                    <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700">
-                      <option value="" disabled>Pilih Posisi Pengurus</option>
-                      {pengurusTitles.map((title) => (
-                        <option key={title} value={title}>{title}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input required value={role} onChange={e => setRole(e.target.value)} placeholder="Contoh: Ketua Harian, Sekretaris..." className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:border-zinc-700" />
-                  )}
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-zinc-500 uppercase">Jabatan / Posisi Pengurus *</label>
+                    <button type="button" onClick={() => setShowJabatanModal(true)} className="text-[10px] font-bold text-blue-500 hover:underline cursor-pointer">+ Tambah Jabatan Baru</button>
+                  </div>
+                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white outline-none cursor-pointer">
+                    <option value="">-- Pilih Jabatan Pengurus --</option>
+                    {pengurusTitles.map((title) => (
+                      <option key={title} value={title}>{title}</option>
+                    ))}
+                  </select>
                 </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-sm font-semibold">Batal</button>
-                  <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">Simpan</button>
+                <div className="flex justify-end gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                  <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl cursor-pointer">Batal</button>
+                  <button type="submit" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer">Simpan Data Pengurus</button>
                 </div>
               </form>
             </motion.div>
@@ -262,36 +360,28 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
         {viewingDetail && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setViewingDetail(null)} />
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden max-h-[85vh]">
-              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-800/30">
-                <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-xl z-10 flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+              <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-950">
+                <h3 className="font-extrabold text-base text-zinc-900 dark:text-white flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-500" />
-                  Detail Rinci Pengurus
+                  Detail Pengurus
                 </h3>
-                <button onClick={() => setViewingDetail(null)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5"/></button>
+                <button onClick={() => setViewingDetail(null)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-md cursor-pointer"><X className="w-5 h-5"/></button>
               </div>
-              <div className="p-6 overflow-y-auto space-y-4 text-sm font-medium">
+              <div className="p-6 space-y-4 text-sm font-medium">
                 <table className="w-full border-collapse">
                   <tbody>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.name || "-"}</td>
+                      <td className="py-2.5 font-bold text-zinc-400 w-1/3">Nama Lengkap</td>
+                      <td className="py-2.5 font-bold text-zinc-900 dark:text-white">{viewingDetail.name || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Jabatan / Peran</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-semibold">{viewingDetail.role || "Staf"}</td>
+                      <td className="py-2.5 font-bold text-zinc-400 w-1/3">Jabatan</td>
+                      <td className="py-2.5 font-extrabold text-blue-600 dark:text-blue-400">{viewingDetail.role || "Staf"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">No. HP / WhatsApp</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-mono">{viewingDetail.phone || "-"}</td>
-                    </tr>
-                    <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Status</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${viewingDetail.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                          {viewingDetail.status || "ACTIVE"}
-                        </span>
-                      </td>
+                      <td className="py-2.5 font-bold text-zinc-400 w-1/3">No. HP / WA</td>
+                      <td className="py-2.5 font-mono font-bold text-zinc-800 dark:text-zinc-200">{viewingDetail.phone || "-"}</td>
                     </tr>
                   </tbody>
                 </table>
