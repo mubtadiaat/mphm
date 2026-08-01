@@ -122,7 +122,7 @@ export function RecycleBinTab() {
           colorClasses = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50";
         } else if (val.includes("MUSTAHIQ")) {
           colorClasses = "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900/50";
-        } else if (val.includes("MUFATISH") || val.includes("MUNDZIR")) {
+        } else if (val.includes("MUNAWWIB")) {
           colorClasses = "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50";
         } else if (val.includes("PENGURUS")) {
           colorClasses = "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900/50";

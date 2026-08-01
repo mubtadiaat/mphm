@@ -62,9 +62,7 @@ function resolveValue(item: any, h: string): string {
   if (lowerH.includes("mustahiq") || lowerH.includes("guru") || lowerH.includes("wali kamar") || lowerH.includes("ust")) {
     return String(item.mustahiq || item.teacherCode || item.supervisorName || "");
   }
-  if (lowerH.includes("mufattisy")) {
-    return String(item.mufattisy || "");
-  }
+
   if (lowerH.includes("status")) {
     if (item.isActive !== undefined) return item.isActive ? "AKTIF" : "NON-AKTIF";
     return String(item.status || "");
@@ -216,8 +214,7 @@ export function ImportExportToolbar({
         commentText = "Format tahun ajaran / akademik (Contoh: 2026/2027 atau 2026).";
       } else if (lowerH.includes("mustahiq") || lowerH.includes("guru") || lowerH.includes("pengajar")) {
         commentText = "Nama pengajar / Mustahiq penanggung jawab kelas.";
-      } else if (lowerH.includes("mufattisy") || lowerH.includes("pengawas")) {
-        commentText = "Nama pengawas / Mufattisy pembina.";
+
       } else if (lowerH.includes("alasan") || lowerH.includes("catatan") || lowerH.includes("keterangan")) {
         commentText = "Uraian penjelasan atau catatan penting pendukung data.";
       }
@@ -342,8 +339,7 @@ export function ImportExportToolbar({
         commentText = "Format tahun ajaran / akademik (Contoh: 2026/2027 atau 2026).";
       } else if (lowerH.includes("mustahiq") || lowerH.includes("guru") || lowerH.includes("pengajar")) {
         commentText = "Nama pengajar / Mustahiq penanggung jawab kelas.";
-      } else if (lowerH.includes("mufattisy") || lowerH.includes("pengawas")) {
-        commentText = "Nama pengawas / Mufattisy pembina.";
+
       } else if (lowerH.includes("alasan") || lowerH.includes("catatan") || lowerH.includes("keterangan")) {
         commentText = "Uraian penjelasan atau catatan penting pendukung data.";
       }

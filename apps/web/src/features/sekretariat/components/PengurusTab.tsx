@@ -160,7 +160,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
             Data Pengurus
           </h1>
           <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Kelola master data Pengurus Keamanan, IT, dan Divisi Lainnya.
+            Single Source of Truth Data Pengurus Induk (P3HM Lirboyo).
           </p>
         </div>
         <button onClick={handleOpenAdd} className="z-10 flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-blue-500/20 active:scale-95">

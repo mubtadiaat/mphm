@@ -8,8 +8,7 @@ export interface DashboardStats {
   activeViolations: number;
   totalClasses?: number;
   activePermits?: number;
-  totalMundzir?: number;
-  totalMufattisy?: number;
+  totalMunawwib?: number;
   totalMustahiq?: number;
   totalMusyrifah?: number;
   totalSubjects?: number;

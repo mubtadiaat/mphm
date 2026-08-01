@@ -1,7 +1,7 @@
 import { 
   LayoutGrid, 
   Users, 
-  BookOpen, 
+  BookOpen,
   ClipboardList, 
   ShieldAlert, 
   FileText, 
@@ -9,7 +9,6 @@ import {
   Settings,
   Award,
   History,
-  Clock,
   CheckSquare,
   Archive,
   Trash2,
@@ -48,12 +47,12 @@ export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
       { label: "Santriwati (P3HM)", href: "/sekretariat/santri", icon: Users },
       { label: "Wali Santri (Smart KK)", href: "/sekretariat/wali-santri", icon: UserCircle },
       { label: "Data Asrama (Blok & Kamar)", href: "/sekretariat/rooms", icon: Home },
-      { label: "Pengurus (Penasihat, Harian, Pleno)", href: "/sekretariat/pengurus", icon: Users },
+      { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
       { label: "Alumni Pondok", href: "/sekretariat/alumni", icon: Archive },
     ]
   },
   {
-    group: "B. KEAMANAN & PENGASUHAN",
+    group: "B. PERIZINAN & KEDISIPLINAN",
     items: [
       { label: "Perizinan Santri", href: "/sekretariat/perizinan", icon: Ticket },
       { label: "Pelanggaran & Takzir", href: "/sekretariat/pelanggaran", icon: ShieldAlert },
@@ -83,11 +82,9 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
   {
     group: "B. TENAGA PENGAJAR & PENGURUS",
     items: [
-      { label: "Dewan Harian", href: "/sekretariat/pengurus-madrasah", icon: Users },
-      { label: "Mundzir", href: "/sekretariat/mundzir", icon: Users },
-      { label: "Mufattisy", href: "/sekretariat/mufattisy", icon: Users },
+      { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
       { label: "Mustahiq", href: "/sekretariat/mustahiq", icon: Users },
-      { label: "Dewan Pleno", href: "/sekretariat/dewan-pleno", icon: Users },
+      { label: "Munawwib", href: "/sekretariat/munawwib", icon: Users },
     ]
   },
   {
@@ -121,21 +118,6 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
 export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
   "sek.pondok": SEKRETARIAT_PONDOK_NAV,
   "sek.madrasah": SEKRETARIAT_MADRASAH_NAV,
-  mufattisy: [
-    { label: "Dashboard", href: "/mufattisy", icon: LayoutGrid },
-    { label: "Inspeksi Santri", href: "/mufattisy/santri", icon: Users },
-    { label: "Akademik", href: "/mufattisy/akademik", icon: BookOpen },
-    { label: "Kedisiplinan", href: "/mufattisy/kedisiplinan", icon: ShieldAlert },
-    { label: "Kenaikan Kelas", href: "/mufattisy/kenaikan-kelas", icon: ClipboardList },
-    { label: "Perizinan", href: "/mufattisy/perizinan", icon: Ticket },
-  ],
-  mundzir: [
-    { label: "Dashboard", href: "/pimpinan", icon: LayoutGrid },
-    { label: "Data Santri", href: "/pimpinan/santri", icon: Users },
-    { label: "Kehadiran", href: "/pimpinan/kehadiran", icon: Clock },
-    { label: "Kedisiplinan", href: "/pimpinan/kedisiplinan", icon: ShieldAlert },
-    { label: "Perizinan", href: "/pimpinan/perizinan", icon: Ticket },
-  ],
   mustahiq: [
     { label: "Dashboard", href: "/mustahiq", icon: LayoutGrid },
     { label: "Nilai Raport", href: "/mustahiq/penilaian", icon: ClipboardList },
@@ -144,12 +126,7 @@ export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
     { label: "Catatan Akhlaq", href: "/mustahiq/akhlaq", icon: ShieldAlert },
     { label: "Kenaikan Kelas", href: "/mustahiq/kenaikan-kelas", icon: Award },
   ],
-  keamanan: [
-    { label: "Dashboard", href: "/keamanan", icon: LayoutGrid },
-    { label: "Jurnal", href: "/keamanan/jurnal", icon: ShieldAlert },
-    { label: "Cari Santri", href: "/keamanan/santri", icon: Users },
-    { label: "Perizinan", href: "/keamanan/perizinan", icon: Ticket },
-  ],
+
   wali_santri: [
     { label: "Dashboard", href: "/guardian", icon: LayoutGrid },
     { label: "Data Anak", href: "/guardian/children", icon: Users },
@@ -158,3 +135,4 @@ export const NAVIGATION_CONFIG: Record<RoleTypes, NavMenu[]> = {
     { label: "Kedisiplinan", href: "/guardian/kedisiplinan", icon: ShieldAlert },
   ],
 };
+

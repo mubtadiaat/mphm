@@ -6,21 +6,35 @@
 export type RoleTypes =
   | "sek.pondok"
   | "sek.madrasah"
-  | "mufattisy"
-  | "mundzir"
   | "mustahiq"
-  | "keamanan"
   | "wali_santri";
 
 export type WorkspaceType = "pondok" | "madrasah";
 
+export type CapabilityPermission = "CRUD" | "READ_ONLY" | "SEARCH_VIEW" | "NO_ACCESS";
+
 export interface MenuCapabilities {
+  permissionType?: CapabilityPermission; // "CRUD" | "READ_ONLY" | "SEARCH_VIEW" | "NO_ACCESS"
   view: boolean;
   input: boolean;
   edit: boolean;
   delete: boolean;
   export: boolean;
   import: boolean;
+}
+
+export interface CustomRoleDefinition {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  institution: "PONDOK" | "MADRASAH" | "ALL";
+  navigationStyle?: "sidebar" | "bottom_nav";
+  accentColor?: "blue" | "emerald" | "rose" | "violet" | "orange";
+  welcomeBanner?: string;
+  enabledMenus: string[];
+  capabilities: Record<string, MenuCapabilities>;
+  createdAt?: string;
 }
 
 export interface RoleUIConfig {
@@ -34,9 +48,8 @@ export interface RoleUIConfig {
 }
 
 export interface OnboardingStatus {
-  hasMundzir: boolean;
-  hasMufattisy: boolean;
   hasMustahiq: boolean;
+  hasMunawwib: boolean;
   hasMusyrifah: boolean;
   hasClasses: boolean;
   hasSubjects: boolean;
@@ -93,11 +106,9 @@ export const DEFAULT_ROLE_CONFIGS: Record<RoleTypes, RoleUIConfig> = {
       "/sekretariat",
       "/sekretariat/santri",
       "/sekretariat/kelas",
-      "/sekretariat/pengurus-madrasah",
-      "/sekretariat/mundzir",
-      "/sekretariat/mufattisy",
+      "/sekretariat/pengurus",
       "/sekretariat/mustahiq",
-      "/sekretariat/dewan-pleno",
+      "/sekretariat/munawwib",
       "/sekretariat/kurikulum",
       "/sekretariat/penilaian",
       "/sekretariat/kenaikan-kelas",
@@ -112,37 +123,7 @@ export const DEFAULT_ROLE_CONFIGS: Record<RoleTypes, RoleUIConfig> = {
     ],
     capabilities: {},
   },
-  mufattisy: {
-    role: "mufattisy",
-    navigationStyle: "bottom_nav",
-    gridLayout: "2-2",
-    accentColor: "blue",
-    welcomeBanner: "Selamat datang di Portal Pengawasan Mufattisy",
-    enabledMenus: [
-      "/mufattisy",
-      "/mufattisy/santri",
-      "/mufattisy/akademik",
-      "/mufattisy/kedisiplinan",
-      "/mufattisy/kenaikan-kelas",
-      "/mufattisy/perizinan",
-    ],
-    capabilities: {},
-  },
-  mundzir: {
-    role: "mundzir",
-    navigationStyle: "bottom_nav",
-    gridLayout: "2-2",
-    accentColor: "emerald",
-    welcomeBanner: "Selamat datang di Portal Pimpinan/Mundzir",
-    enabledMenus: [
-      "/pimpinan",
-      "/pimpinan/santri",
-      "/pimpinan/kehadiran",
-      "/pimpinan/kedisiplinan",
-      "/pimpinan/perizinan",
-    ],
-    capabilities: {},
-  },
+
   mustahiq: {
     role: "mustahiq",
     navigationStyle: "bottom_nav",
@@ -159,20 +140,7 @@ export const DEFAULT_ROLE_CONFIGS: Record<RoleTypes, RoleUIConfig> = {
     ],
     capabilities: {},
   },
-  keamanan: {
-    role: "keamanan",
-    navigationStyle: "bottom_nav",
-    gridLayout: "1-1",
-    accentColor: "rose",
-    welcomeBanner: "Selamat datang di Portal Ketertiban Keamanan",
-    enabledMenus: [
-      "/keamanan",
-      "/keamanan/jurnal",
-      "/keamanan/santri",
-      "/keamanan/perizinan",
-    ],
-    capabilities: {},
-  },
+
   wali_santri: {
     role: "wali_santri",
     navigationStyle: "bottom_nav",
@@ -210,8 +178,7 @@ export function isMenuLocked(
     if (href === "/sekretariat/santri" && (!status.hasRooms || !status.hasViolationTypes)) return true;
     if ((href === "/sekretariat/perizinan" || href === "/sekretariat/khidmah") && !status.hasSantri) return true;
   } else {
-    if (href === "/sekretariat/mufattisy" && !status.hasMundzir) return true;
-    if (href === "/sekretariat/mustahiq" && (!status.hasMundzir || !status.hasMufattisy)) return true;
+    if (href === "/sekretariat/mustahiq" && !status.hasMunawwib) return true;
     if (href === "/sekretariat/kelas" && !status.hasMustahiq) return true;
     if (href === "/sekretariat/kurikulum" && !status.hasClasses) return true;
     if (href === "/sekretariat/santri" && !status.hasSubjects) return true;
@@ -245,11 +212,8 @@ export function getPrerequisiteWarning(
       return "Harap daftarkan Santriwati Asrama terlebih dahulu!";
     }
   } else {
-    if (href === "/sekretariat/mufattisy" && !status.hasMundzir) {
-      return "Harap daftarkan Data Mundzir (Pimpinan) terlebih dahulu!";
-    }
-    if (href === "/sekretariat/mustahiq" && (!status.hasMundzir || !status.hasMufattisy)) {
-      return "Harap daftarkan Data Mufattisy (Pengawas) terlebih dahulu!";
+    if (href === "/sekretariat/mustahiq" && !status.hasMunawwib) {
+      return "Harap daftarkan Data Munawwib (Guru Mapel) terlebih dahulu!";
     }
     if (href === "/sekretariat/kelas" && !status.hasMustahiq) {
       return "Harap daftarkan Data Mustahiq (Wali Kelas) terlebih dahulu!";
@@ -285,8 +249,8 @@ export function getWorkspaceReadinessSteps(
   } else {
     return [
       { label: "Tahun Ajaran Aktif", ready: true, href: "/sekretariat/settings" },
-      { label: "Data Mundzir (Pimpinan)", ready: status.hasMundzir, href: "/sekretariat/mundzir" },
-      { label: "Data Mufattisy (Pengawas)", ready: status.hasMufattisy, href: "/sekretariat/mufattisy" },
+      { label: "Data Pengurus Madrasah", ready: status.hasMunawwib, href: "/sekretariat/pengurus" },
+      { label: "Data Munawwib (Guru Mapel)", ready: status.hasMunawwib, href: "/sekretariat/munawwib" },
       { label: "Data Mustahiq (Wali Kelas)", ready: status.hasMustahiq, href: "/sekretariat/mustahiq" },
       { label: "Rombel Kelas Diniyyah", ready: status.hasClasses, href: "/sekretariat/kelas" },
       { label: "Kurikulum & Mapel", ready: status.hasSubjects, href: "/sekretariat/kurikulum" },
@@ -308,9 +272,9 @@ export function isRouteAllowedForRole(
   // Restricted routes per workspace
   if (isPondok) {
     const madrasahOnlyRoutes = [
-      "/sekretariat/mundzir",
-      "/sekretariat/mufattisy",
+      "/sekretariat/pengurus",
       "/sekretariat/mustahiq",
+      "/sekretariat/munawwib",
       "/sekretariat/kelas",
       "/sekretariat/kurikulum",
       "/sekretariat/penilaian",
@@ -318,8 +282,6 @@ export function isRouteAllowedForRole(
       "/sekretariat/raport",
       "/sekretariat/ijazah",
       "/sekretariat/sertifikat",
-      "/sekretariat/pengurus-madrasah",
-      "/sekretariat/dewan-pleno",
     ];
     if (madrasahOnlyRoutes.includes(href)) return false;
   } else {

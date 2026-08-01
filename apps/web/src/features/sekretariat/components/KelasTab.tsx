@@ -47,7 +47,7 @@ export function KelasTab({ isReadOnly = false, selectedYearId }: KelasTabProps) 
                   {detailData?.class?.name}
                 </h1>
                 <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xl mt-1">
-                  Mustahiq (Wali Kelas): <span className="font-bold text-zinc-900 dark:text-white">{detailData?.class?.mustahiq}</span> | Pengawas (Mufattisy): <span className="font-bold text-zinc-900 dark:text-white">{detailData?.class?.mufattisy}</span>
+                  Mustahiq (Wali Kelas): <span className="font-bold text-zinc-900 dark:text-white">{detailData?.class?.mustahiq}</span>
                 </p>
               </>
             )}

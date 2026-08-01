@@ -21,8 +21,6 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
   
   const { data: mustahiqListRemote = { data: [], total: 0 } } = useGuru("", 0, 100);
   const mustahiqList = mustahiqListRemote.data;
-  const { data: mufattisyListRemote = { data: [], total: 0 } } = usePengurus("Mufattisy", 0, 100);
-  const mufattisyList = mufattisyListRemote.data;
   const [jenjang, setJenjang] = useState<string>("Semua");
   
   // State for Create Form
@@ -31,7 +29,6 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
   const [newTingkat, setNewTingkat] = useState("I");
   const [newRuang, setNewRuang] = useState("A");
   const [newMustahiq, setNewMustahiq] = useState("");
-  const [newMufattisy, setNewMufattisy] = useState("");
   const [newCapacity, setNewCapacity] = useState(40);
 
   const [editingClass, setEditingClass] = useState<any | null>(null);
@@ -59,16 +56,7 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
     return a.name.localeCompare(b.name);
   });
 
-  const jenjangTarget = newJenjang.toLowerCase();
-  const sortedMufattisyList = [...mufattisyList].sort((a, b) => {
-    const aLevel = (a.supervisedLevel || a.role || "").toLowerCase();
-    const bLevel = (b.supervisedLevel || b.role || "").toLowerCase();
-    const aMatch = aLevel.includes(jenjangTarget);
-    const bMatch = bLevel.includes(jenjangTarget);
-    if (aMatch && !bMatch) return -1;
-    if (!aMatch && bMatch) return 1;
-    return a.name.localeCompare(b.name);
-  });
+
 
   useEffect(() => {
     if (mustahiqList.length > 0) {
@@ -82,17 +70,7 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
     }
   }, [newJenjang, newTingkat, newRuang, mustahiqList.length]);
 
-  useEffect(() => {
-    if (mufattisyList.length > 0) {
-      const match = sortedMufattisyList.find(m => {
-        const lvl = (m.supervisedLevel || m.role || "").toLowerCase();
-        return lvl.includes(jenjangTarget);
-      });
-      if (match) {
-        setNewMufattisy(match.name);
-      }
-    }
-  }, [newJenjang, mufattisyList.length]);
+
 
   return (
     <div className="flex flex-col gap-6 mt-4">
@@ -192,27 +170,7 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                 })}
               </select>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-zinc-500">Pengawas (Mufattisy)</label>
-              <select 
-                value={newMufattisy}
-                onChange={(e) => setNewMufattisy(e.target.value)}
-                className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none"
-              >
-                <option value="">Pilih Mufattisy...</option>
-                {sortedMufattisyList.map((muf) => {
-                  const lvl = (muf.supervisedLevel || muf.role || "").toLowerCase();
-                  const isMatch = lvl.includes(jenjangTarget);
-                  const displayRole = muf.role || "Mufattisy";
-                  const displayLevel = muf.supervisedLevel ? ` | Jenjang: ${muf.supervisedLevel}` : "";
-                  return (
-                    <option key={muf.id} value={muf.name}>
-                      {isMatch ? `⭐ ${muf.name} — (${displayRole}${displayLevel}) [Pengawas ${newJenjang}]` : `${muf.name} — (${displayRole}${displayLevel})`}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
+
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-zinc-500">Kapasitas (Siswa)</label>
               <input 
@@ -238,7 +196,6 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                 setShowForm(false);
                 setNewRuang("");
                 setNewMustahiq("");
-                setNewMufattisy("");
               }}
               className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center gap-2"
             >
@@ -323,10 +280,7 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                     <span className="text-zinc-500">Mustahiq (Wali)</span>
                     <span className="font-bold text-zinc-900 dark:text-zinc-100 text-right">{cls.mustahiq}</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-zinc-500">Mufattisy (Pengawas)</span>
-                    <span className="font-bold text-zinc-900 dark:text-zinc-100 text-right">{cls.mufattisy}</span>
-                  </div>
+
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-zinc-500">Kapasitas</span>
                     <span className="font-mono bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-xs font-semibold border border-zinc-200 dark:border-zinc-700">

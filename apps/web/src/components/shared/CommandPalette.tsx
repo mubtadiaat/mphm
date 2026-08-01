@@ -80,11 +80,7 @@ export default function CommandPalette() {
     setOpen(false);
     setSearch("");
     // Redirect to profile 360 view
-    if (role === "sek.pondok" || role === "sek.madrasah") {
-      router.push(`/sekretariat/people/${personId}`);
-    } else {
-      router.push(`/mufattisy/santri/${personId}`);
-    }
+    router.push(`/sekretariat/santri`);
   };
 
   return (

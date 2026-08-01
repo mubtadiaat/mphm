@@ -1,69 +1,66 @@
-🌟 THE ULTIMATE MASTER BLUEPRINT MPHM v4.5
+🌟 THE ULTIMATE MASTER BLUEPRINT MPHM v5.0 (FINAL ENTERPRISE EDITION 2026)
 "Sistem Informasi Akademik & Pusat Data Abadi Enterprise SaaS"
-Status: FINAL & APPROVED FOR PRODUCTION
+Status: 100% FINAL, APPROVED, & LIVE PRODUCTION IN EXCLUSIVE DEPLOYMENT
 
 ---
 
-### BAB I: VISI, ARSITEKTUR INFRASTRUKTUR & DEPLOYMENT MUTLAK
-MPHM bukan sekadar web pendataan nilai, melainkan Pusat Data Abadi dengan standar Enterprise SaaS. Sistem WAJIB dipisah 100% (Strictly Decoupled) untuk menjamin performa tanpa batas di ekosistem Vercel.
+### BAB I: VISI, ARSITEKTUR INFRASTRUKTUR & DUAL GITHUB STRATEGY
+MPHM & P3HM Lirboyo merupakan Pusat Data Abadi dengan standar Enterprise SaaS. Sistem terpisah secara presisi (Strictly Decoupled) dengan Strategi Dual Repository GitHub:
 
-1. **Tech Stack (The New Stack):**
-   - **Frontend Layer:** Next.js 16+ (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion.
-   - **Backend Layer (API Gateway):** Next.js Native Route Handlers (`apps/web/src/app/api/.../route.ts`).
-   - **Database & ORM:** PostgreSQL Terenkripsi dikelola dengan Prisma ORM 7 (`@prisma/client`, `prisma/schema.prisma`).
-   - **Media Storage:** Cloud Storage via Direct Signed Upload.
-
-2. **Aturan Deployment & Log-Out Redirection:**
-   - Domain mutlak HANYA di `https://m.p3hm.my.id`. API berjalan di `https://m.p3hm.my.id/api/*`.
-   - Log-Out mengarahkan pengguna secara presisi ke halaman login masing-masing peran (`/login`, `/login/mufattisy`, `/login/wali`, `/login/mustahiq`).
-
----
-
-### BAB II: STANDAR UI/UX, ANIMASI, & DATA GRID ENTERPRISE
-1. **Policy #UI-08 (Tanpa Hardcoded Fallback String):** Cell renderer dilarang keras menampilkan string fallback palsu (`|| "Tsanawiyyah"`, `|| "Gedung Utama"`). Semua tampilan murni dari baris database PostgreSQL atau fallback ke dash (`"-"`).
-2. **Universal Data Grid:** Server-Side Pagination, Debounced Realtime Search (300ms), Column Manager, dan Identity Cell Pattern (Avatar + Nama Tebal + Sub-teks).
-3. **Dual-Workspace Architecture:** Segregasi fokus antara Workspace Pondok Pesantren dan Workspace Madrasah Diniyyah.
+1. **Dual GitHub Repository Strategy:**
+   - **`mubtadiaat/mphm`**: Khusus Deploy Aplikasi Web Next.js 15 ke **Vercel Production** (`https://m.p3hm.my.id`). Dilarang keras menjalankan Flutter build action di repo ini.
+   - **`mubtadiaat/app_software`**: Khusus Build Actions CI/CD dan rilis binari Software / Aplikasi Flutter (`app-release.apk` & `mphm-windows-desktop-v2.0.0.zip`).
+2. **The Unified Monorepo Stack:**
+   - **Web Layer:** Next.js 15 (App Router), React 19, TypeScript, Vanilla CSS + Tailwind v4, Framer Motion (`apps/web`).
+   - **Flutter Multi-Platform Layer:** Flutter Engine v3.22.x, Dart 3.0+ (`apps/mphm_app` untuk Android APK & Windows Desktop Native C++ RAM < 60MB).
+   - **API Gateway Layer:** Next.js Native Route Handlers (`apps/web/src/app/api/.../route.ts`).
+   - **Database Layer:** PostgreSQL Terenkripsi dikelola dengan Prisma ORM 7 (`@prisma/client`, `prisma/schema.prisma`) disinkronkan ke Cloud Neon PostgreSQL.
+   - **Production Gateway:** 100% Terkoneksi ke Live Production `https://m.p3hm.my.id/api` (Bebas total dari localhost / fallback lokal).
 
 ---
 
-### BAB III: ENTERPRISE DATA ARCHITECTURE (PERSON-CENTRIC)
-1. **Single Source of Truth (`people`):** Menyimpan identitas fisik abadi (Nama, NIK, TTL, Alamat, Avatar URL). Dilarang keras dihapus jika memiliki relasi profil (`ON DELETE RESTRICT`).
-2. **Matriks Profil Polimorfik:** Entitas `people` mengenakan profil `student_profiles`, `teacher_profiles`, `guardian_profiles`, `organization_memberships`, dan `alumni_records`.
-3. **Automatic Orphaned Guardians Cleanup (`cleanOrphanedGuardians`):** Saat data santri dihapus, sistem memeriksa apakah Wali Santri masih memiliki anak aktif. Jika tidak ada lagi anak aktif, profil Wali (`GuardianProfile`), akun login (`UserAccount`), dan data fisik (`Person`) dibersihkan (*soft-delete*) otomatis.
+### BAB II: SAAS DEVELOPER MASTER COCKPIT & DYNAMIC ROLE MATRIX
+1. **Developer Master Control (`m.p3hm.my.id/developer` -> `/developer`):**
+   - **Kredensial:** `develzy` / `develzy25`.
+   - **Kontrol Penuh:** Real-time System Metrics (CPU, V8 Heap, DB Latency), Master Killswitches (Maintenance Mode, DB Write Lock, Registration Lock, API Rate Limiter, Mobile API Switch), Live Raw DB Inspector, dan Backup JSON Exporter.
+2. **Engine Dynamic Role & Granular Matrix Engine:**
+   - Instansi mengendalikan sistem 100%, bukan instansi yang dikendalikan oleh sistem.
+   - Pembuatan Role Kustom Dinamis tanpa batas.
+   - Otorisasi Granular Per Menu: **Full CRUD**, **View Only**, **Cari-View**, dan **No Access**, serta Toggle **Export/Import**.
+   - **Gaya Navigasi Dinamis Per Akun/Role**: Penentuan tampilan per akun antara **Sidebar Utama** (Desktop/Tablet) atau **Bottom Navigation** (Mobile/Tablet) dieksekusi secara otomatis oleh `DashboardShell.tsx`.
 
 ---
 
-### BAB IV: ACADEMIC WORKSPACE, MUSTAHIQ MODEL & ENGINE ROMBEL
-1. **Hierarki Mutlak:** Tahun Ajaran ➔ Semester ➔ Jenjang ➔ Tingkat ➔ Kelas.
-2. **Data Model Mustahiq (Tanpa Kode Guru):** Menyajikan `Nama Lengkap Mustahiq`, `Jenjang` (Badge Ungu), `Tingkat | Lokal` (Teks Biru Cetak Tebal), `No. HP / WA`, `Status`, `Aksi`. `Kode Guru` dihapus.
-3. **Auto-Generate Classes:** Server Backend secara otomatis membuat entitas `AcademicClass` di database dari posisi Mustahiq yang didaftarkan/diimpor via Excel, sekaligus memasangkan Mustahiq sebagai Wali Kelas resmi.
-4. **Mufattisy Auto-Match & Strict Single-Level UI Locking:**
-   - Hak akses Mufattisy & Mundzir 100% Read-Only (tombol CRUD, Impor, Edit, Hapus disembunyikan).
-   - Filter Jenjang Bar HANYA menampilkan 1 badge terkunci sesuai `supervisedLevel` (*Ibtida'iyyah*, *I'dadiyyah*, *Tsanawiyyah*, *Aliyyah*). Tombol jenjang lain **DILARANG TAMPIL**.
-   - Dropdown kelas HANYA memuat rombel di bawah `supervisedLevel` pengawasannya.
-5. **Kartu Kelas Action Controls:** Tombol Edit (`Edit3`) & Modal Edit Rombel untuk memperbarui Mustahiq dan Kapasitas Rombel.
+### BAB III: RESTRUKTURISASI PENGURUS & SANTRIWATI 100% MUKIM
+1. **Single Source of Truth Pengurus:** Seluruh data Pengurus berawal dan ditarik dari Pondok Pesantren P3HM Lirboyo. Peran statis lama (*Mufattisy*, *Mundzir*, *Keamanan*, *Dewan Harian*, *Dewan Pleno*) telah dieliminasi total dari codebase.
+2. **Aturan Mutlak Santriwati Mukim:**
+   - Eliminasi total opsi Santri Non-Mukim / Kalong.
+   - Kategori Asrama Siswi Madrasah (MPHM) hanya: **🏛️ Santri Pondok Mubtadi-aat** (Tarik dari P3HM Lirboyo) & **🏡 Unit Asrama Lain** (Darussa'adah, Ar-Risalah, Dalem Gus Ya'lu, Dalem Yai Atho', dan Isian Manual Kustom Lainnya).
+3. **Form Auto-Locking Data Pondok pada Madrasah:**
+   Saat mendaftarkan Siswi Pondok di Madrasah, identitas pribadi & alamat otomatis **TERKUNCI** (`disabled`) dengan banner `🔒 FORM IDENTITAS & ALAMAT TERKUNCI RESMI DARI PONDOK P3HM`. HANYA field Jenjang & Kelas Diniyyah serta NISN yang terbuka untuk diisi oleh Madrasah.
 
 ---
 
-### BAB V: ISOLASI SDM & PUSAT PENGELOLAAN AKUN (USERS)
-1. **Strict SDM Menu Isolation:** API Route (`/api/admin/people?role=pengurus`) secara mutlak mengeksklusi Mundzir, Mufattisy, dan Mustahiq agar tabel Dewan Harian & Dewan Pleno 100% bersih dan berdiri sendiri-sendiri.
-2. **Pusat Pengelolaan Akun (`/sekretariat/users`) 4 Sub-Menu Utama:**
-   - **Daftar Akun (Monitoring)**
-   - **Generate Akun Instansi** *(dengan Deteksi Role Otomatis `⭐ Otomatis` & Layout Tabel: Nama | Jabatan | Role Otomatis | WA)*
-   - **Keranjang Sampah Dorman (>6 Bulan)**
-   - **Wali Santri (Yang Sudah Mendaftar)**
+### BAB IV: ENTERPRISE GOOGLE OAUTH 2.0 & VERSIONING RETENTION POLICY
+1. **Enterprise Google Sign-In (OAuth 2.0):**
+   - Diintegrasikan di Flutter App via `google_sign_in` dan diverifikasi langsung ke API Gateway Next.js (`/api/auth/google`).
+   - Ekstraksi otomatis SHA-1 & SHA-256 Fingerprint ke GitHub Actions Summary untuk didaftarkan ke Firebase Console.
+2. **Pemberian Versi Ganjil (Maksimal `.39`):**
+   - Format versi wajib berakhiran **angka ganjil** (contoh: `2.0.1`, `2.0.3`, ..., `2.0.39`). Jika melebih `.39`, rollover ke minor versi berikutnya (`2.1.1`).
+3. **Kebijakan Retensi Build Harian (*Daily Build Retention*):**
+   - Pada tanggal yang sama, hanya build rilis **TERBARU** yang disimpan di database, build lama di hari yang sama dibersihkan otomatis.
+   - Build rilis terbaru pada tanggal-tanggal sebelumnya tetap disimpan secara rapi sebagai histori rilis resmi.
 
 ---
 
-### BAB VI: MANAJEMEN ASRAMA & SANTRI KHIDMAH
-1. **2 Gedung Utama & Pemetaan Abjad A-Z**:
-   Gedung asrama HANYA terdiri dari **`Gedung Kota`** (Kamar Kode A s/d D, misal `A-02`) dan **`Gedung Desa`** (Kamar Kode E s/d Z, misal `E-01`).
-2. **Pembuatan Kamar Otomatis saat Impor**:
-   Saat data santri diimpor dari Excel/CSV, jika kamar belum terdaftar di database, sistem **secara otomatis membuat kamar baru** di tabel `rooms` dengan gedung yang terhitung otomatis dari rumus A-Z dan `supervisorId: null`.
+### BAB V: ANIMASI LOADING NYATA ULTRA-PREMIUM
+1. **PremiumLoader Component (`PremiumLoader.tsx`):**
+   - Glassmorphism backdrop dengan dual glowing background orbs (`emerald` & `blue`).
+   - Multi-Ring Rotating Spinner & Framer Motion Shimmer Progress Line.
+   - Terintegrasi penuh ke `SkeletonLoader.tsx`, transisi rute, dan pemuatan tabel data.
 
 ---
 
-### BAB VII: ENGINE PENILAIAN & BUKU RAPOR
-1. **Pelajaran MAPEL vs NON-MAPEL:** Mapel batas nilai 10, Non-Mapel batas nilai 8.
-2. **Eliminasi Ranking:** Pelajaran NON-MAPEL dieliminasi dari perhitungan agregat total nilai ranking kelas.
-3. **Anti-Singkatan UI:** Menampilkan nama kwartal utuh ("Kwartal 1", "Kwartal 2", dst.).
+<div align="center">
+**BLUEPRINT MPHM v5.0 HAS BEEN FULLY EXECUTED & APPROVED FOR LIVE PRODUCTION**
+</div>

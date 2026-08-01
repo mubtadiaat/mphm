@@ -67,13 +67,8 @@ export function useLogout() {
           targetLogin = "/loginguardiant";
         } else if (
           role.includes("mustahiq") ||
-          role.includes("mufat") ||
-          role.includes("mundzir") ||
-          role.includes("pimpinan") ||
           role.includes("keamanan") ||
           path.startsWith("/mustahiq") ||
-          path.startsWith("/mufattisy") ||
-          path.startsWith("/pimpinan") ||
           path.startsWith("/keamanan")
         ) {
           targetLogin = "/loginStaff";

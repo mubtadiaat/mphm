@@ -66,6 +66,27 @@ export function useRoleUIConfig(role: RoleTypes) {
     const loadConfig = () => {
       const fallback = DEFAULT_ROLE_CONFIGS[role] || DEFAULT_ROLE_CONFIGS["sek.madrasah"];
       if (typeof window !== "undefined") {
+        // First check custom roles created dynamically
+        const customRolesSaved = localStorage.getItem("mphm_custom_roles");
+        if (customRolesSaved) {
+          try {
+            const parsedCustom = JSON.parse(customRolesSaved);
+            const foundCustom = parsedCustom.find((c: any) => c.id === role || c.code === role);
+            if (foundCustom) {
+              setConfig({
+                role: role,
+                navigationStyle: foundCustom.navigationStyle || "sidebar",
+                gridLayout: "2-2",
+                accentColor: foundCustom.accentColor || "emerald",
+                welcomeBanner: foundCustom.welcomeBanner || `Selamat datang di Portal ${foundCustom.name}`,
+                enabledMenus: foundCustom.enabledMenus || [],
+                capabilities: foundCustom.capabilities || {}
+              });
+              return;
+            }
+          } catch {}
+        }
+
         const saved = localStorage.getItem("system_role_ui_configs");
         if (saved) {
           try {

@@ -225,7 +225,7 @@ export function SertifikatTab() {
                   {/* Signature Section */}
                   <div className="z-10 w-full flex justify-between px-16 pt-8 border-t border-amber-800/20 mt-4">
                     <div className="flex flex-col items-center">
-                      <p className="text-xs text-zinc-600 mb-16">Kediri, 9 Safar 1448 H / 23 Juli 2026<br />Mundzir / Kepala Tingkat,</p>
+                      <p className="text-xs text-zinc-600 mb-16">Kediri, 9 Safar 1448 H / 23 Juli 2026<br />Ketua Madrasah,</p>
                       <p className="font-bold border-b border-black text-sm px-6 pb-1">Ustadzah Musyrifah</p>
                       <span className="text-[11px] text-zinc-500 mt-0.5">NIP. 19880412202601</span>
                     </div>

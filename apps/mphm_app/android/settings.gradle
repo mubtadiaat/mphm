@@ -1,0 +1,12 @@
+include ':app'
+
+localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+def plugins = new Properties()
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader -> plugins.load(reader) }
+}
+
+def flutterSdkPath = plugins.getProperty('flutter.sdk')
+if (flutterSdkPath != null) {
+    apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+}

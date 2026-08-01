@@ -38,21 +38,19 @@ export function UsersManagementTab() {
   }, []);
 
   // Available Roles
-  const AVAILABLE_ROLES = [
-    "Pengurus Pondok (Penasihat)",
-    "Pengurus Pondok (Dewan Harian)",
-    "Pengurus Pondok (Dewan Pleno)",
-    "Pengurus Madrasah (Penasihat)",
-    "Pengurus Madrasah (Dewan Harian)",
-    "Pengurus Madrasah (Dewan Pleno)",
+  const DEFAULT_AVAILABLE_ROLES = [
+    "Pengurus Pondok",
+    "Pengurus Madrasah",
     "Mustahiq",
-    "Mufattisy",
-    "Mundzir",
-    "Keamanan",
+    "Munawwib",
     "sek.pondok",
     "sek.madrasah",
     "Wali Santri",
   ];
+
+  const customRolesSaved = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("mphm_custom_roles") || "[]") : [];
+  const customRoleNames = customRolesSaved.map((r: { name: string }) => r.name);
+  const AVAILABLE_ROLES = Array.from(new Set([...DEFAULT_AVAILABLE_ROLES, ...customRoleNames]));
 
   // Users from API
   const {
@@ -280,7 +278,7 @@ export function UsersManagementTab() {
             Pusat Pengelolaan Akun (Users)
           </h1>
           <p className="text-blue-100/90 text-sm max-w-xl leading-relaxed">
-            Atur kredensial akun Pengurus (Penasihat, Harian, Pleno), Mustahiq, Mufattisy, Mundzir, dan Wali Santri. Akun yang tidak digunakan {`>`} 6 Bulan akan otomatis dinonaktifkan.
+            Atur kredensial akun Pengurus, Mustahiq, Munawwib, dan Wali Santri. Akun yang tidak digunakan {`>`} 6 Bulan akan otomatis dinonaktifkan.
           </p>
         </div>
 
@@ -518,7 +516,7 @@ export function UsersManagementTab() {
               <div>
                 <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Generator Kredensial Akun Instansi & Pengurus</h3>
                 <p className="text-sm text-zinc-500 mt-1">
-                  Pilih Pengurus (Penasihat, Harian, Pleno), Mustahiq, atau Mufattisy yang belum memiliki akun untuk diterbitkan login massal.
+                  Pilih Pengurus, Mustahiq, atau Munawwib yang belum memiliki akun untuk diterbitkan login massal.
                 </p>
               </div>
               <button

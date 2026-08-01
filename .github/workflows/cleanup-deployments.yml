@@ -1,9 +1,10 @@
-name: Auto Cleanup GitHub Actions & Deployments (Max 9 Successful Only)
+name: Auto Cleanup GitHub Releases & Old Workflows
 
 on:
   push:
     branches:
       - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -12,11 +13,11 @@ permissions:
   contents: write
 
 jobs:
-  cleanup-actions-and-deployments:
-    name: Prune Workflow Runs & Deployments (Keep Max 9 Successful)
+  purge-old-releases-and-runs:
+    name: Purge Legacy Builds & Workflows Before Flutter Build
     runs-on: ubuntu-latest
     steps:
-      - name: Delete Old Actions Workflow Runs (Keep Max 9)
+      - name: Purge Old Workflow Runs
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -37,15 +38,10 @@ jobs:
 
                 console.log(`Workflow '${wf.name}': total ${runs.length} runs.`);
 
-                const successful = runs.filter(r => r.status === 'completed' && r.conclusion === 'success');
-                const nonSuccessful = runs.filter(r => r.status !== 'in_progress' && r.conclusion !== 'success');
+                const nonSuccessful = runs.filter(r => r.status !== 'in_progress');
+                console.log(`Workflow '${wf.name}': deleting ${nonSuccessful.length} old runs...`);
 
-                const overflowSuccessful = successful.slice(9);
-                const toDelete = [...nonSuccessful, ...overflowSuccessful];
-
-                console.log(`Workflow '${wf.name}': deleting ${toDelete.length} runs (keeping max 9 successful)...`);
-
-                for (const run of toDelete) {
+                for (const run of nonSuccessful) {
                   try {
                     await github.rest.actions.deleteWorkflowRun({
                       owner,
@@ -61,7 +57,7 @@ jobs:
               console.error("Workflow runs cleanup error:", err.message);
             }
 
-      - name: Delete Old GitHub Deployment Records (Keep Max 9)
+      - name: Purge Old GitHub Releases & Legacy Binaries
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -69,62 +65,27 @@ jobs:
             const { owner, repo } = context.repo;
 
             try {
-              const deployments = await github.paginate(github.rest.repos.listDeployments, {
+              const releases = await github.rest.repos.listReleases({
                 owner,
                 repo,
                 per_page: 100,
               });
 
-              console.log(`Total deployment records found: ${deployments.length}`);
+              console.log(`Found ${releases.data.length} releases in GitHub.`);
 
-              const successfulDeployments = [];
-              const failedDeploymentsToDelete = [];
-
-              for (const dep of deployments) {
+              for (const rel of releases.data) {
+                console.log(`Deleting legacy release ID: ${rel.id} (${rel.tag_name})...`);
                 try {
-                  const statuses = await github.rest.repos.listDeploymentStatuses({
+                  await github.rest.repos.deleteRelease({
                     owner,
                     repo,
-                    deployment_id: dep.id,
-                    per_page: 1,
+                    release_id: rel.id,
                   });
-
-                  const latestState = statuses.data.length > 0 ? statuses.data[0].state : 'unknown';
-
-                  if (latestState === 'success') {
-                    successfulDeployments.push(dep);
-                  } else {
-                    failedDeploymentsToDelete.push(dep);
-                  }
-                } catch (err) {
-                  failedDeploymentsToDelete.push(dep);
+                } catch (e) {
+                  console.warn(`Failed to delete release ${rel.id}:`, e.message);
                 }
               }
-
-              const overflowSuccessful = successfulDeployments.slice(9);
-              const allToDelete = [...failedDeploymentsToDelete, ...overflowSuccessful];
-
-              console.log(`Deleting ${allToDelete.length} deployment records (keeping max 9 successful)...`);
-
-              for (const dep of allToDelete) {
-                try {
-                  await github.rest.repos.createDeploymentStatus({
-                    owner,
-                    repo,
-                    deployment_id: dep.id,
-                    state: 'inactive',
-                  });
-                  await github.rest.repos.deleteDeployment({
-                    owner,
-                    repo,
-                    deployment_id: dep.id,
-                  });
-                } catch (err) {
-                  console.warn(`Could not delete deployment ${dep.id}:`, err.message);
-                }
-              }
-
-              console.log(`Cleanup completed!`);
+              console.log("Legacy releases purged successfully!");
             } catch (err) {
-              console.error("Deployments cleanup error:", err.message);
+              console.error("Release purge error:", err.message);
             }

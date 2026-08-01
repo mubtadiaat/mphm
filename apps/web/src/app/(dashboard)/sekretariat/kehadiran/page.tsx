@@ -1,7 +1,5 @@
-"use client";
-
-import PimpinanKehadiranPage from "../../pimpinan/kehadiran/page";
+import { redirect } from "next/navigation";
 
 export default function SekretariatKehadiranPage() {
-  return <PimpinanKehadiranPage />;
+  redirect("/sekretariat/santri");
 }

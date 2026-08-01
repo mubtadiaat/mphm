@@ -79,7 +79,7 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
   });
 
   const filteredStaticItems = flatStaticItems.filter((item) => {
-    const isRoot = ["/sekretariat", "/mufattisy", "/pimpinan", "/mustahiq", "/keamanan", "/guardian"].includes(item.href);
+    const isRoot = ["/sekretariat", "/mustahiq", "/guardian"].includes(item.href);
     if (isRoot) return true;
     return config.enabledMenus.includes(item.href);
   });
@@ -98,7 +98,7 @@ export function BottomNav({ role, forceShow = false }: { role: RoleTypes; forceS
     <nav className={`fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 pb-safe ${displayClass} shadow-lg`}>
       <div className="flex items-center justify-between w-full h-16 px-1 max-w-lg mx-auto">
         {navItems.map((item) => {
-          const isRoleBase = ["/sekretariat", "/mufattisy", "/pimpinan", "/mustahiq", "/keamanan", "/guardian"].includes(item.href);
+          const isRoleBase = ["/sekretariat", "/mustahiq", "/guardian"].includes(item.href);
           const isActive = isRoleBase
             ? pathname === item.href
             : pathname === item.href || pathname.startsWith(item.href + "/");

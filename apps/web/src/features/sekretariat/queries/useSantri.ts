@@ -8,7 +8,6 @@ export interface Santri {
   nik: string;
   class: string;
   mustahiq?: string;
-  mufattisy?: string;
   address: string;
   status: string; // ACTIVE, GRADUATED, DROPPED, BOYONG, KHIDMAH
   gender: "L" | "P";
@@ -30,7 +29,7 @@ export interface Santri {
   roomName?: string;
   buildingName?: string;
   roomSupervisor?: string;
-  residenceType?: "PONDOK_MUBTADIAAT" | "UNIT_LAIN" | "NON_MUKIM";
+  residenceType?: "PONDOK_MUBTADIAAT" | "UNIT_LAIN";
   externalResidenceName?: string | null;
 }
 

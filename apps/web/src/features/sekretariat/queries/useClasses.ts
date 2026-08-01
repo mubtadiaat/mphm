@@ -5,7 +5,6 @@ export interface AcademicClass {
   id: string;
   name: string;
   mustahiq: string;
-  mufattisy?: string;
   capacity: number;
   institutionLevel?: string;
   classLevel?: string;

@@ -7,16 +7,19 @@ Dokumen ini merupakan acuan resmi (*single source of truth*) mengenai seluruh ar
 
 ## 1. INTEGRASI DATA SANTRIWATI (PONDOK) & SISWI (MADRASAH)
 
-### 1.1. Single Source of Truth Identitas Santriwati
-* Entire master identity data reside in **Pondok Pesantren (P3HM)** database (`student_profiles`).
-* **Data Siswi Madrasah (MPHM) Ditarik dari Data Santriwati Pondok (P3HM)**:
-  Santriwati yang didaftarkan di Pondok P3HM adalah induk utama. Saat mendaftarkan Siswi Diniyyah Baru di Madrasah MPHM, Sekretariat Madrasah tidak perlu mengetik ulang biodata.
-* **Fitur Auto-Fill Registrasi Siswi**:
-  Pada modal registrasi Siswi Baru, Sekretariat MPHM memilih Santriwati Pondok via menu **`🔍 Tarik Data dari Santriwati Pondok (P3HM)`**. Pilihan ini mengisi Nama, NIK, Tempat/Tgl Lahir, Alamat, No KK, Wali, Telepon, Foto Avatar, dan Kamar secara otomatis.
+### 1.1. Single Source of Truth & Aturan Penarikan Data Pondok
+* **Prinsip Utama (Mandatori Tarik Data)**: Seluruh data entitas di Madrasah (MPHM) bersumber melalui Penarikan Data dari Pondok Pesantren (P3HM) (misalnya: Data Santriwati Pondok Mubtadi-aat & Data Pengurus Madrasah).
+* **Dua Pengecualian (Bisa Input Langsung / Manual di Madrasah)**:
+  1. **Tenaga Pengajar (`Mustahiq` & `Munawwib`)**: Guru Diniyyah / Wali Kelas & Guru Mapel dapat diinput/didaftarkan langsung di Madrasah.
+  2. **Siswi Unit Asrama Lain (`🏡 Unit Asrama Lain`)**: Siswi Madrasah yang bertempat tinggal di unit asrama luar P3HM (Darussa'adah, Ar-Risalah, Al-Mahrusiyah, Dalem Gus/Yai, dll.) dapat didaftarkan langsung di Madrasah.
 
 ### 1.2. Transisi Tahun Ajaran Baru (Automatic Roll-over)
 * Identitas santriwati **100% ABADI (0% ketik ulang saat ganti Tahun Ajaran Baru)**.
 * Saat berganti Tahun Ajaran Baru, data biodata, kamar, mapel, dan poin takzir diwariskan otomatis. Yang diubah HANYA penempatan rombel baru via **Proses Kenaikan Kelas 1-Klik** (`PROMOTED`, `RETAINED`, `GRADUATED`).
+
+### 1.3. Aturan Status Mukim Mutlak (100% Mukim / No Kalung)
+* **100% Santriwati Berstatus MUKIM**: Seluruh Santriwati P3HM & Siswi MPHM secara mutlak berstatus **MUKIM** (tinggal di Asrama Pondok Pesantren Putri Hidayatul Mubtadi'aat).
+* **Tidak Ada Kategori Non-Mukim / Kalung / Siswa Luar**: Sistem tidak menyediakan opsi, pilihan, atau filter status "Non-Mukim / Kalung". Setiap santriwati secara wajib memiliki alokasi penempatan **Nama Blok (Komplek) & Kamar Asrama** yang aktif.
 
 ---
 

@@ -36,9 +36,8 @@ export function Sidebar({ role }: { role: RoleTypes }) {
   const { toast } = useToast();
   const { isOnline, pendingSyncCount } = useOnlineStatus();
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({
-    hasMundzir: true,
-    hasMufattisy: true,
     hasMustahiq: true,
+    hasMunawwib: true,
     hasMusyrifah: true,
     hasClasses: true,
     hasSubjects: true,
@@ -197,7 +196,7 @@ export function Sidebar({ role }: { role: RoleTypes }) {
           }
 
           // This is a flat NavItem
-          const isRoleBase = ["/sekretariat", "/mufattisy", "/pimpinan", "/mustahiq", "/keamanan", "/guardian"].includes(item.href);
+          const isRoleBase = ["/sekretariat", "/mustahiq", "/guardian"].includes(item.href);
           const isActive = isRoleBase 
             ? pathname === item.href 
             : pathname === item.href || pathname.startsWith(item.href + "/");

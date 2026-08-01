@@ -216,8 +216,7 @@ export function DashboardTab() {
 
   // System Readiness Wizard Calculation (100% Real DB Queries)
   const onboardingStatus: OnboardingStatus = {
-    hasMundzir: (statsData?.totalMundzir ?? 0) > 0,
-    hasMufattisy: (statsData?.totalMufattisy ?? 0) > 0,
+    hasMunawwib: (statsData?.totalMunawwib ?? 0) > 0,
     hasMustahiq: (statsData?.totalMustahiq ?? 0) > 0,
     hasMusyrifah: (statsData?.totalMusyrifah ?? 0) > 0,
     hasClasses: (statsData?.totalClasses ?? 0) > 0,

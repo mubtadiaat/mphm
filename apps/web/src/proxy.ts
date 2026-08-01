@@ -8,9 +8,7 @@ export async function proxy(req: NextRequest) {
 
   const dashboardPrefixes = [
     "/sekretariat",
-    "/mufattisy",
     "/mustahiq",
-    "/pimpinan",
     "/keamanan",
     "/guardian",
   ];
@@ -26,9 +24,7 @@ export async function proxy(req: NextRequest) {
     } else if (pathname.startsWith("/guardian")) {
       targetLogin = "/loginguardiant";
     } else if (
-      pathname.startsWith("/mufattisy") ||
       pathname.startsWith("/mustahiq") ||
-      pathname.startsWith("/pimpinan") ||
       pathname.startsWith("/keamanan")
     ) {
       targetLogin = "/loginStaff";
@@ -46,8 +42,6 @@ export async function proxy(req: NextRequest) {
     const roleStr = String(session.role || "").trim().toLowerCase();
     let target = "/sekretariat";
     if (roleStr === "sek.pondok" || roleStr === "sek.madrasah" || roleStr === "admin" || roleStr === "superadmin" || roleStr === "sekretariat") target = "/sekretariat";
-    else if (roleStr === "mufattisy") target = "/mufattisy";
-    else if (roleStr === "mundzir" || roleStr === "pimpinan") target = "/pimpinan";
     else if (roleStr === "mustahiq") target = "/mustahiq";
     else if (roleStr === "keamanan" || roleStr === "petugas keamanan") target = "/keamanan";
     else if (roleStr === "wali santri" || roleStr === "wali.santri" || roleStr === "guardian") target = "/guardian";

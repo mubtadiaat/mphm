@@ -254,7 +254,7 @@ export function RaportTab({ selectedYearId }: { selectedYearId?: string }) {
                       <p className="font-bold underline">_________________</p>
                     </div>
                     <div>
-                      <p>Mundzir Madrasah,</p>
+                      <p>Ketua Madrasah / Kepala Tingkat,</p>
                       <br /><br /><br />
                       <p className="font-bold underline">_________________</p>
                     </div>
