@@ -38,11 +38,8 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Configure local.properties for Flutter & Android SDK
-        run: |
-          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-          echo "sdk.dir=$ANDROID_HOME" >> android/local.properties
-          flutter pub get
+      - name: Install Dependencies
+        run: flutter pub get
 
       - name: Build Android Release APK & AAB
         run: |
