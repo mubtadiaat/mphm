@@ -38,20 +38,29 @@ export function SystemSettingsProvider({ children }: { children: React.ReactNode
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  // 2. Use canonical User Session to check if Admin
+  // 2. Use canonical User Session to check if Admin or Developer
   const { data: authSession } = useAuth();
 
   const settings = settingsData || {};
   const isMaintenanceMode = settings.systemMaintenance === "true" || settings.systemMaintenance === true;
   
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  
+  const isDeveloperRoute = pathname.startsWith("/developer");
+  const isDeveloperUser =
+    authSession?.role === "developer" ||
+    authSession?.role === "develzy" ||
+    authSession?.role === "superadmin" ||
+    authSession?.username === "develzy";
+
   const isSekretariat =
     authSession?.role === "sek.pondok" ||
-    authSession?.role === "sek.madrasah";
+    authSession?.role === "sek.madrasah" ||
+    isDeveloperUser;
 
-  // Enforce Maintenance Mode: allow login page `/` to always show login form.
-  // Block non-sekretariat users when maintenance mode is active and they are accessing dashboard/other pages.
-  if (isMaintenanceMode && !isSekretariat && pathname !== "/") {
+  // Enforce Maintenance Mode:
+  // DEVELOPER ROUTES (/developer) & DEVELOPER ACCOUNTS (develzy) ARE 100% EXEMPT FROM MAINTENANCE MODE!
+  if (isMaintenanceMode && !isSekretariat && !isDeveloperRoute && pathname !== "/") {
     return <MaintenanceScreen />;
   }
 
