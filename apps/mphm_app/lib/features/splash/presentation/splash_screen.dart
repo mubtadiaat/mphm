@@ -15,7 +15,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   late AnimationController _rotationController;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
-  late Animation<double> _fadeAnimation;
 
   double _progress = 0.0;
   String _statusText = 'Menyiapkan Ekosistem Pesantren...';
@@ -25,40 +24,36 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void initState() {
     super.initState();
 
-    // 1. Rotation Animation for Outer Ring
+    // 1. Rotation Animation for Outer Rings
     _rotationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 12),
     )..repeat();
 
-    // 2. Pulsing Animation for Central Logo
+    // 2. Pulsing Animation for Official Logo Emblem
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1600),
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.08).animate(
+    _pulseAnimation = Tween<double>(begin: 0.94, end: 1.08).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeIn),
     );
 
     _startSimulatedLoading();
   }
 
   void _startSimulatedLoading() {
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 60), (timer) {
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (!mounted) return;
       setState(() {
-        _progress += 0.02;
+        _progress += 0.025;
         if (_progress >= 0.3 && _progress < 0.6) {
-          _statusText = 'Menghubungkan ke API Gateway Live Production...';
-        } else if (_progress >= 0.6 && _progress < 0.9) {
-          _statusText = 'Memverifikasi Matriks Peran Dinamis...';
-        } else if (_progress >= 0.9) {
-          _statusText = 'Sistem Siap!';
+          _statusText = 'Menghubungkan ke Gateway Server Live Production...';
+        } else if (_progress >= 0.6 && _progress < 0.85) {
+          _statusText = 'Memverifikasi Matriks Otorisasi Akun...';
+        } else if (_progress >= 0.85) {
+          _statusText = 'Sistem Pesantren Siap!';
         }
 
         if (_progress >= 1.0) {
@@ -103,28 +98,28 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         children: [
           // 1. Ambient Background Glowing Orbs
           Positioned(
-            top: -100,
-            left: -100,
+            top: -80,
+            left: -80,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 320,
+              height: 320,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF059669).withOpacity(0.15),
-                blurRadius: 100,
+                color: const Color(0xFF059669).withOpacity(0.18),
+                blurRadius: 110,
               ),
             ),
           ),
           Positioned(
-            bottom: -100,
-            right: -100,
+            bottom: -80,
+            right: -80,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 320,
+              height: 320,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF0284C7).withOpacity(0.15),
-                blurRadius: 100,
+                color: const Color(0xFF0284C7).withOpacity(0.18),
+                blurRadius: 110,
               ),
             ),
           ),
@@ -148,14 +143,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         return Transform.rotate(
                           angle: _rotationController.value * 2 * math.pi,
                           child: Container(
-                            width: 170,
-                            height: 170,
+                            width: 175,
+                            height: 175,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF10B981).withOpacity(0.3),
+                                color: const Color(0xFF10B981).withOpacity(0.35),
                                 width: 2,
-                                style: BorderStyle.solid,
                               ),
                             ),
                           ),
@@ -170,12 +164,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         return Transform.rotate(
                           angle: -_rotationController.value * 2 * math.pi,
                           child: Container(
-                            width: 140,
-                            height: 140,
+                            width: 145,
+                            height: 145,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF38BDF8).withOpacity(0.4),
+                                color: const Color(0xFF38BDF8).withOpacity(0.45),
                                 width: 1.5,
                               ),
                             ),
@@ -184,39 +178,43 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       },
                     ),
 
-                    // Central Pulsing Logo Badge
+                    // Central Pulsing OFFICIAL INSTITUTION LOGO
                     ScaleTransition(
                       scale: _pulseAnimation,
                       child: Container(
-                        width: 110,
-                        height: 110,
+                        width: 115,
+                        height: 115,
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF059669), Color(0xFF0284C7)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          color: const Color(0xFF0F172A),
+                          border: Border.all(color: const Color(0xFF10B981).withOpacity(0.5), width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF10B981).withOpacity(0.5),
-                              blurRadius: 30,
+                              color: const Color(0xFF10B981).withOpacity(0.4),
+                              blurRadius: 28,
                               spreadRadius: 2,
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.school_rounded,
-                          size: 56,
-                          color: Colors.white,
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.school_rounded,
+                            size: 56,
+                            color: Colors.emerald,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 36),
 
-                // Institution Name
+                // Official Institution Titles
                 const Text(
                   AppConfig.instansiPondok,
                   style: TextStyle(
@@ -225,6 +223,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -233,12 +232,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     color: const Color(0xFF38BDF8).withOpacity(0.9),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 1.5,
+                    letterSpacing: 1.4,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(20),
@@ -247,7 +247,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   child: Text(
                     'Pusat Data Abadi Enterprise v${AppConfig.appVersion}',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withOpacity(0.6),
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -256,7 +256,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
                 const Spacer(),
 
-                // Progress Bar & Dynamic Status
+                // Progress Bar & Dynamic Loading Status
                 Column(
                   children: [
                     Text(

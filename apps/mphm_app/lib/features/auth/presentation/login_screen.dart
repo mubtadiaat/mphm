@@ -138,17 +138,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Institution Logo Header
+                    // Official Institution Logo Header
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: 84,
+                      height: 84,
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF059669), Color(0xFF0284C7)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: const Color(0xFF0F172A),
                         shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.5), width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF059669).withOpacity(0.4),
@@ -157,10 +155,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.school,
-                        color: Colors.white,
-                        size: 40,
+                      child: Image.asset(
+                        'assets/logo.png',
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.school,
+                          color: Colors.white,
+                          size: 40,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
