@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   # -------------------------------------------------------------------
-  # 1. BUILD RELEASE APK & AAB (ANDROID WITH JDK 17 & SHA FINGERPRINTS)
+  # 1. BUILD RELEASE APK & AAB (ANDROID WITH JDK 17 & GRADLE 8.4)
   # -------------------------------------------------------------------
   build-android-release:
     name: Build Release Android Binary (APK & AAB)
@@ -39,11 +39,9 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Configure Android Project Runner
-        run: flutter create --platforms=android .
-
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Install Dependencies & Setup Android Runner
+        run: |
+          flutter pub get
 
       - name: Build Android Release APK & AAB
         run: |
@@ -87,7 +85,7 @@ jobs:
       - name: Enable Windows Desktop Support
         run: flutter config --enable-windows-desktop
 
-      - name: Purge Stale CMake & Configure Fresh Windows Runner
+      - name: Generate Fresh Windows Runner Configuration
         run: |
           Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force windows -ErrorAction SilentlyContinue
