@@ -3,12 +3,12 @@
 
 ## #00: VISI STRATEGIS, ARSITEKTUR STACK & DEPLOYMENT
 
-Sistem Informasi Akademik MPHM dibangun sebagai platform **Enterprise Internal SaaS**. Arsitektur wajib dipisah sepenuhnya (*Strictly Decoupled*) untuk menjamin performa maksimal, keamanan militer, dan keandalan jangka panjang di jaringan Vercel.
+Sistem Informasi Akademik MPHM dibangun sebagai platform **Enterprise Internal SaaS Web Application**. Seluruh layanan terpusat di satu Web App terpadu yang dapat diakses dari PC Desktop, Laptop, Tablet, maupun HP Android via Web & Progressive Web App (PWA).
 
 **1. Tech Stack Mutlak (The New Stack):**
-* **Frontend Layer (PWA & Visual Presentation):** Next.js 16+ (App Router dengan Turbopack), React 19, TypeScript, Progressive Web App (PWA). Di-deploy ke ekosistem **Vercel**.
+* **Frontend Layer (PWA & Visual Presentation):** Next.js 15+ (App Router dengan Turbopack), React 19, TypeScript, Progressive Web App (PWA). Di-deploy ke ekosistem **Vercel**.
 * **Backend API Gateway (Business Logic):** **Next.js Native Route Handlers** (`apps/web/src/app/api/.../route.ts`). (Murni JSON REST API).
-* **Pusat Data (Database & ORM):** Basis Data Relasional Terenkripsi dikelola dengan **Prisma ORM 7** (`@prisma/client`, `prisma/schema.prisma`).
+* **Pusat Data (Database & ORM):** Basis Data Relasional Terenkripsi PostgreSQL dikelola dengan **Prisma ORM 7** (`@prisma/client`, `prisma/schema.prisma`).
 * **Autentikasi:** Native Auth Sesi JWT & Google OAuth yang dipetakan langsung ke entitas pengguna di database (`user_accounts`).
 * **Media & Asset Storage:** **Cloud Storage**. Seluruh foto profil & aset media diunggah via Direct Signed Upload.
 
@@ -23,7 +23,7 @@ Seluruh antarmuka WAJIB **100% Responsive (Mobile-First, Tablet, Desktop)** dan 
 
 - **Policy #UI-08 (Tanpa Hardcoded Fallback String):** Cell renderer dilarang keras menampilkan string fallback buatan (`|| "Tsanawiyyah"`, `|| "Belum Ditentukan"`). Semua tampilan berasal dari database atau `-`.
 - **Universal Data Grid:** Realtime Search (Debounced 300ms), Server-Side Pagination, Column Manager, Identity Cell Pattern (Avatar + Nama Tebal + Sub-teks).
-- **Dual-Workspace Architecture:** Hub PondokPesantren & Hub Madrasah Diniyyah.
+- **Dual-Workspace Architecture:** Hub Pondok Pesantren & Hub Madrasah Diniyyah.
 
 ---
 
