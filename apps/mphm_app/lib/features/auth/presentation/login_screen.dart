@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/auth/google_auth_service.dart';
+import '../../../core/auth/biometric_auth_service.dart';
 import '../../../core/config/app_config.dart';
 import '../../../shared/widgets/premium_loader_widget.dart';
 import '../../guardian/presentation/guardian_dashboard_screen.dart';
@@ -21,6 +22,54 @@ class _LoginScreenState extends State<LoginScreen> {
   
   bool _isLoading = false;
   String _errorMessage = '';
+  bool _canUseBiometrics = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometricsSupport();
+  }
+
+  Future<void> _checkBiometricsSupport() async {
+    final available = await BiometricAuthService.isBiometricAvailable();
+    if (mounted) {
+      setState(() {
+        _canUseBiometrics = available;
+      });
+    }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      final authenticated = await BiometricAuthService.authenticateWithBiometrics(
+        reason: 'Pindai Sidik Jari / Wajah untuk Masuk ke Aplikasi MPHM Enterprise',
+      );
+
+      if (authenticated) {
+        // Default to Staff / Guardian Dashboard upon Biometric Success
+        _navigateToRoleDashboard('staff');
+      } else {
+        setState(() {
+          _errorMessage = 'Autentikasi Biometrik (Sidik Jari/Wajah) dibatalkan.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Gagal memproses Sidik Jari/Wajah.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   Future<void> _handleGoogleSignIn() async {
     setState(() {
@@ -64,208 +113,156 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
       body: Stack(
         children: [
-          // Background Gradient Orbs
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF10B981).withOpacity(0.15),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -100,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF2563EB).withOpacity(0.15),
-              ),
-            ),
-          ),
-
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 420),
+                maxWidth: 420,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF18181B) : Colors.white,
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: isDark ? Colors.white10 : Colors.black12,
-                    width: 1,
-                  ),
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.1)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 30,
-                      offset: const Offset(0, 10),
+                      color: Colors.black.withOpacity(0.4),
+                      blurRadius: 32,
+                      offset: const Offset(0, 16),
                     ),
                   ],
                 ),
                 padding: const EdgeInsets.all(32.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header Logo & Title
-                    Center(
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
+                    // Institution Logo Header
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF059669), Color(0xFF0284C7)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        child: const Icon(
-                          Icons.account_balance_rounded,
-                          size: 38,
-                          color: Color(0xFF10B981),
-                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF059669).withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.school,
+                        color: Colors.white,
+                        size: 40,
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+
+                    Text(
                       AppConfig.appName,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Portal Akun Resmi Enterprise P3HM & MPHM Lirboyo',
-                      textAlign: TextAlign.center,
+                      'Portal Wali Santri & Staff Mustahiq (v${AppConfig.appVersion})',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? Colors.white60 : Colors.black54,
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 13,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 28),
 
-                    if (_errorMessage.isNotEmpty) ...[
+                    if (_errorMessage.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
+                          color: Colors.red.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.red.withOpacity(0.3)),
                         ),
                         child: Text(
                           _errorMessage,
-                          style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                          style: const TextStyle(color: Colors.redAccent, fontSize: 13),
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                    ],
 
-                    // ENTERPRISE GOOGLE SIGN-IN BUTTON
+                    // Google Enterprise Sign In Button
                     ElevatedButton(
                       onPressed: _isLoading ? null : _handleGoogleSignIn,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? Colors.white : const Color(0xFF1F2937),
-                        foregroundColor: isDark ? Colors.black : Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF0F172A),
+                        minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        elevation: 2,
+                        elevation: 0,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          FaIcon(FontAwesomeIcons.google, size: 18, color: Color(0xFFEA4335)),
+                        children: const [
+                          FaIcon(FontAwesomeIcons.google, color: Color(0xFFEA4335), size: 18),
                           SizedBox(width: 12),
                           Text(
-                            'Masuk dengan Google (Enterprise)',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            'Masuk via Google Account',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 20),
-                    const Row(
-                      children: [
-                        Expanded(child: Divider()),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('atau login kredensial', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                    // Biometric Authentication (Fingerprint / Face ID) Button
+                    if (_canUseBiometrics) ...[
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: _isLoading ? null : _handleBiometricLogin,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF38BDF8),
+                          side: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
-                        Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Kredensial Username
-                    TextField(
-                      controller: _usernameController,
-                      decoration: InputDecoration(
-                        labelText: 'Username / NIK',
-                        prefixIcon: const Icon(Icons.person_outline),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.fingerprint, color: Color(0xFF38BDF8), size: 22),
+                            SizedBox(width: 10),
+                            Text(
+                              'Masuk via Sidik Jari / Wajah',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Kredensial Password
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: 'Kata Sandi',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    ElevatedButton(
-                      onPressed: () {
-                        final un = _usernameController.text.trim();
-                        if (un.contains('sek') || un == 'develzy') {
-                          _navigateToRoleDashboard('sek.madrasah');
-                        } else if (un.contains('mustahiq')) {
-                          _navigateToRoleDashboard('mustahiq');
-                        } else {
-                          _navigateToRoleDashboard('wali_santri');
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF10B981),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: const Text('Masuk Sistem', style: TextStyle(fontWeight: FontWeight.extrabold)),
-                    ),
+                    ],
                   ],
                 ),
               ),
             ),
           ),
 
+          // Loading Overlay
           if (_isLoading)
             Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const PremiumLoaderWidget(
-                message: 'Mengotentikasi Google Enterprise...',
-                subtext: 'Memverifikasi token Google OAuth 2.0 dengan server pusat...',
+              color: Colors.black.withOpacity(0.7),
+              child: const Center(
+                child: PremiumLoaderWidget(message: 'Memverifikasi Akses Enterprise...'),
               ),
             ),
         ],

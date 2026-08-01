@@ -41,8 +41,10 @@ model UserAccount {
   firebaseUid  String?   @unique @map("firebase_uid")
   passwordHash String?   @map("password_hash")
   role         String    // sek.pondok, sek.madrasah, Mustahiq, Mufattisy, Mundzir, Keamanan, Wali Santri
-  status       String    @default("ACTIVE")
-  deletedAt    DateTime? @map("deleted_at")
+  status               String    @default("ACTIVE")
+  isBiometricEnabled   Boolean   @default(false) @map("is_biometric_enabled")
+  biometricToken       String?   @map("biometric_token")
+  deletedAt            DateTime? @map("deleted_at")
 
   person Person @relation(fields: [personId], references: [id], onDelete: Restrict)
 

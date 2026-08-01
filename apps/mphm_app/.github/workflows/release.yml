@@ -39,8 +39,9 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Install Dependencies & Setup Android Runner
+      - name: Configure Flutter SDK in android/local.properties
         run: |
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
           flutter pub get
 
       - name: Build Android Release APK & AAB
@@ -90,9 +91,7 @@ jobs:
           Remove-Item -Recurse -Force build -ErrorAction SilentlyContinue
           Remove-Item -Recurse -Force windows -ErrorAction SilentlyContinue
           flutter create --platforms=windows .
-
-      - name: Install Dependencies
-        run: flutter pub get
+          flutter pub get
 
       - name: Build Windows Desktop App
         run: flutter build windows --release
