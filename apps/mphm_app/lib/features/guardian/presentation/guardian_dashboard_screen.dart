@@ -51,7 +51,7 @@ class GuardianDashboardScreen extends StatelessWidget {
               mainAxisSpacing: 12,
               children: [
                 _buildCard(context, Icons.menu_book_rounded, 'Nilai & Rapor', 'Kwartal I, II, III', Colors.blue),
-                _buildCard(context, Icons.calendar_today_rounded, 'Presensi Kehadiran', '98.5% Hadir', Colors.emerald),
+                _buildCard(context, Icons.calendar_today_rounded, 'Presensi Kehadiran', '98.5% Hadir', const Color(0xFF10B981)),
                 _buildCard(context, Icons.account_balance_wallet_rounded, 'Tabungan Santri', 'Rp 1.250.000', Colors.purple),
                 _buildCard(context, Icons.card_membership_rounded, 'Izin & Sambangan', 'Aktif / Mukim', Colors.amber),
               ],

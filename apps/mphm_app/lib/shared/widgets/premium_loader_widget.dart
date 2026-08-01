@@ -18,15 +18,15 @@ class PremiumLoaderWidget extends StatelessWidget {
         padding: const EdgeInsets.all(28.0),
         constraints: const BoxConstraints(maxWidth: 320),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor.withOpacity(0.85),
+          color: Theme.of(context).cardColor.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -68,7 +68,7 @@ class PremiumLoaderWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
               ),
             ),
           ],

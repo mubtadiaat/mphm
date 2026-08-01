@@ -17,8 +17,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final GoogleAuthService _googleAuthService = GoogleAuthService();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   
   bool _isLoading = false;
   String _errorMessage = '';
@@ -121,14 +119,14 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Container(
-                maxWidth: 420,
+                constraints: const BoxConstraints(maxWidth: 420),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withValues(alpha: 0.4),
                       blurRadius: 32,
                       offset: const Offset(0, 16),
                     ),
@@ -146,10 +144,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFF0F172A),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.5), width: 2),
+                        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF059669).withOpacity(0.4),
+                            color: const Color(0xFF059669).withValues(alpha: 0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -181,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Portal Wali Santri & Staff Mustahiq (v${AppConfig.appVersion})',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
@@ -193,9 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.15),
+                          color: Colors.red.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                         ),
                         child: Text(
                           _errorMessage,
@@ -264,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Loading Overlay
           if (_isLoading)
             Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: const Center(
                 child: PremiumLoaderWidget(message: 'Memverifikasi Akses Enterprise...'),
               ),

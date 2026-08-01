@@ -105,8 +105,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               height: 320,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF059669).withOpacity(0.18),
-                blurRadius: 110,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF059669).withOpacity(0.18),
+                    blurRadius: 110,
+                    spreadRadius: 50,
+                  ),
+                ],
               ),
             ),
           ),
@@ -118,8 +123,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
               height: 320,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF0284C7).withOpacity(0.18),
-                blurRadius: 110,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0284C7).withOpacity(0.18),
+                    blurRadius: 110,
+                    spreadRadius: 50,
+                  ),
+                ],
               ),
             ),
           ),
@@ -205,7 +215,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           errorBuilder: (_, __, ___) => const Icon(
                             Icons.school_rounded,
                             size: 56,
-                            color: Colors.emerald,
+                            color: Color(0xFF10B981),
                           ),
                         ),
                       ),
