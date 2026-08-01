@@ -38,6 +38,34 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Enforce Odd Version & Rollover Policy (> .39)
+        id: version_check
+        run: |
+          RAW_VER=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
+          echo "Raw version from pubspec: $RAW_VER"
+          
+          # Parse Major, Minor, Patch
+          MAJOR=$(echo $RAW_VER | cut -d'.' -f1)
+          MINOR=$(echo $RAW_VER | cut -d'.' -f2)
+          PATCH=$(echo $RAW_VER | cut -d'.' -f3)
+          
+          # Check Patch Rollover (> 39) -> Rollover to Minor + 1, Patch = 1
+          if [ "$PATCH" -gt 39 ]; then
+            MINOR=$((MINOR + 1))
+            PATCH=1
+            echo "Rollover triggered! Patch > 39 -> New Version: $MAJOR.$MINOR.$PATCH"
+          fi
+
+          # Ensure Patch is Odd
+          if [ $((PATCH % 2)) -eq 0 ]; then
+            PATCH=$((PATCH + 1))
+            echo "Odd version rule enforced! Patch was even -> Adjusted to: $MAJOR.$MINOR.$PATCH"
+          fi
+
+          FINAL_VER="$MAJOR.$MINOR.$PATCH"
+          echo "APP_VERSION=$FINAL_VER" >> $GITHUB_ENV
+          echo "Enforced Release Version: $FINAL_VER"
+
       - name: Install Dependencies
         run: flutter pub get
 
@@ -48,15 +76,22 @@ jobs:
 
       - name: Rename APK Artifacts with Version Tag
         run: |
-          VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
-          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-          cp build/app/outputs/flutter-apk/app-release.apk Mubtadiaat-v${VERSION}.apk
-          cp build/app/outputs/flutter-apk/app-release.apk e-Mubtadiaat-v${VERSION}.apk
+          cp build/app/outputs/flutter-apk/app-release.apk Mubtadiaat-v${{ env.APP_VERSION }}.apk
+          cp build/app/outputs/flutter-apk/app-release.apk e-Mubtadiaat-v${{ env.APP_VERSION }}.apk
 
-      - name: Extract & Display SHA-1 / SHA-256 Fingerprints for Firebase
+      - name: Generate Production Release Keystore & Extract SHA Fingerprints
         run: |
-          # Generate debug keystore if it doesn't exist
           mkdir -p ~/.android
+
+          # 1. Generate Production Release Keystore
+          if [ ! -f ~/.android/release.keystore ]; then
+            keytool -genkey -v -keystore ~/.android/release.keystore \
+              -storepass androidrelease -alias androidreleasekey -keypass androidrelease \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=P3HM Lirboyo Release,OU=IT,O=P3HM Lirboyo,L=Kediri,ST=Jawa Timur,C=ID" > /dev/null 2>&1 || true
+          fi
+
+          # 2. Generate Debug Keystore
           if [ ! -f ~/.android/debug.keystore ]; then
             keytool -genkey -v -keystore ~/.android/debug.keystore \
               -storepass android -alias androiddebugkey -keypass android \
@@ -64,21 +99,31 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US" > /dev/null 2>&1 || true
           fi
 
-          # Export SHA fingerprints to GITHUB_STEP_SUMMARY
+          # 3. Export SHA-1 and SHA-256 for BOTH Keystores to GITHUB_STEP_SUMMARY
           {
-            echo "### 🔑 Android Signing Fingerprints"
-            echo "> Daftarkan SHA-1 & SHA-256 berikut ke **Firebase Console → Project Settings → Android App**"
+            echo "### 🔑 Android RELEASE Keystore Signing Fingerprints (Production Official)"
+            echo "> **Daftarkan SHA-1 & SHA-256 RELEASE ini ke Firebase Console → Project Settings → Android App**"
             echo ""
+            echo '```text'
+            keytool -list -v \
+              -keystore ~/.android/release.keystore \
+              -alias androidreleasekey \
+              -storepass androidrelease \
+              -keypass androidrelease 2>/dev/null \
+              | grep -E "Alias|SHA1|SHA256|MD5" || echo "SHA Release Error"
+            echo '```'
+            echo ""
+            echo "---"
+            echo ""
+            echo "### 🔑 Android DEBUG Keystore Fingerprints (Development Test)"
             echo '```text'
             keytool -list -v \
               -keystore ~/.android/debug.keystore \
               -alias androiddebugkey \
               -storepass android \
               -keypass android 2>/dev/null \
-              | grep -E "Alias|SHA1|SHA256|MD5" || echo "SHA: Automated Build - Lihat Build Logs"
+              | grep -E "Alias|SHA1|SHA256|MD5" || echo "SHA Debug Error"
             echo '```'
-            echo ""
-            echo "> ⚠️ SHA di atas adalah **debug keystore**. Untuk production, gunakan **release keystore** yang telah didaftarkan di Firebase."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Android APK Artifact (Staff Mustahiq)
@@ -124,12 +169,26 @@ jobs:
       - name: Build Windows Desktop App
         run: flutter build windows --release
 
-      - name: Read App Version from pubspec.yaml
+      - name: Read & Enforce Odd Version from pubspec.yaml
         id: get_version
         run: |
-          $version = (Get-Content pubspec.yaml | Select-String 'version:' | Select-Object -First 1).Line.Trim().Split(' ')[1].Split('+')[0]
-          echo "APP_VERSION=$version" >> $env:GITHUB_ENV
-          echo "Version detected: $version"
+          $rawVer = (Get-Content pubspec.yaml | Select-String 'version:' | Select-Object -First 1).Line.Trim().Split(' ')[1].Split('+')[0]
+          $parts = $rawVer.Split('.')
+          $major = [int]$parts[0]
+          $minor = [int]$parts[1]
+          $patch = [int]$parts[2]
+
+          if ($patch -gt 39) {
+            $minor = $minor + 1
+            $patch = 1
+          }
+          if ($patch % 2 -eq 0) {
+            $patch = $patch + 1
+          }
+
+          $finalVer = "$major.$minor.$patch"
+          echo "APP_VERSION=$finalVer" >> $env:GITHUB_ENV
+          echo "Version detected & enforced: $finalVer"
 
       - name: Rename Windows Executable to Professional Name
         run: |
@@ -214,7 +273,7 @@ jobs:
           path: installer_output/MPHM.Enterprise.Setup.*.exe
 
   # -------------------------------------------------------------------
-  # 3. PURGE LEGACY RELEASES/TAGS & PUBLISH NEW OFFICIAL GITHUB RELEASE
+  # 3. DAILY BUILD RETENTION & PUBLISH OFFICIAL GITHUB RELEASE
   # -------------------------------------------------------------------
   create-github-release:
     name: Publish GitHub Release Binaries
@@ -226,13 +285,27 @@ jobs:
       - name: Checkout Codebase
         uses: actions/checkout@v4
 
-      - name: Read App Version
+      - name: Read & Enforce Odd Version
         run: |
-          VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
-          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Building release for version: $VERSION"
+          RAW_VER=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
+          MAJOR=$(echo $RAW_VER | cut -d'.' -f1)
+          MINOR=$(echo $RAW_VER | cut -d'.' -f2)
+          PATCH=$(echo $RAW_VER | cut -d'.' -f3)
 
-      - name: Purge Legacy Releases & Legacy Tags in mubtadiaat/app_software
+          if [ "$PATCH" -gt 39 ]; then
+            MINOR=$((MINOR + 1))
+            PATCH=1
+          fi
+
+          if [ $((PATCH % 2)) -eq 0 ]; then
+            PATCH=$((PATCH + 1))
+          fi
+
+          FINAL_VER="$MAJOR.$MINOR.$PATCH"
+          echo "APP_VERSION=$FINAL_VER" >> $GITHUB_ENV
+          echo "Building release for version: $FINAL_VER"
+
+      - name: Execute Daily Build Retention & Legacy Tag Cleanup
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -240,49 +313,75 @@ jobs:
             const { owner, repo } = context.repo;
             const currentTag = `v${process.env.APP_VERSION}`;
 
-            // 1. Purge all legacy Releases
-            try {
-              const releases = await github.rest.repos.listReleases({ owner, repo, per_page: 100 });
-              console.log(`Found ${releases.data.length} releases in repository.`);
-              for (const rel of releases.data) {
-                console.log(`Purging legacy release: ${rel.name || rel.tag_name} (ID: ${rel.id})...`);
-                await github.rest.repos.deleteRelease({ owner, repo, release_id: rel.id });
-              }
-              console.log("Legacy releases purged successfully!");
-            } catch (err) {
-              console.error("Purge releases error:", err.message);
-            }
+            console.log(`Executing Daily Build Retention Policy & Tag Cleanup for target tag: ${currentTag}...`);
 
-            // 2. Purge all legacy Tags except current release tag
-            try {
-              const tags = await github.rest.repos.listTags({ owner, repo, per_page: 100 });
-              console.log(`Found ${tags.data.length} tags in repository.`);
-              for (const tag of tags.data) {
-                if (tag.name !== currentTag && tag.name.startsWith('v1.')) {
-                  console.log(`Purging legacy tag: ${tag.name}...`);
-                  await github.rest.git.deleteRef({ owner, repo, ref: `tags/${tag.name}` });
-                }
-              }
-              console.log("Legacy tags purged successfully!");
-            } catch (err) {
-              console.error("Purge tags error:", err.message);
-            }
-
-            // 3. Keep Max 3 Latest Workflow Runs (Purge older ones)
+            // 1. Kebijakan Retensi Build Harian (Daily Build Retention for Workflow Runs)
+            // • Hari yang sama: Simpan 1 build TERBARU, hapus build lama di hari yang sama.
+            // • Lintas tanggal: Simpan 1 build terbaru pada tanggal-tanggal sebelumnya.
             try {
               const runs = await github.rest.actions.listWorkflowRunsForRepo({ owner, repo, per_page: 100 });
-              const workflowRuns = runs.data.workflow_runs;
-              console.log(`Total workflow runs found: ${workflowRuns.length}`);
-              if (workflowRuns.length > 3) {
-                const runsToDelete = workflowRuns.slice(3);
-                for (const r of runsToDelete) {
-                  console.log(`Purging old workflow run #${r.run_number} (ID: ${r.id})...`);
-                  await github.rest.actions.deleteWorkflowRun({ owner, repo, run_id: r.id });
-                }
-                console.log("Old workflow runs purged. Max 3 runs preserved!");
+              const runsByDate = {};
+
+              for (const r of runs.data.workflow_runs) {
+                const dateStr = r.created_at.split('T')[0];
+                if (!runsByDate[dateStr]) runsByDate[dateStr] = [];
+                runsByDate[dateStr].push(r);
               }
+
+              for (const dateStr of Object.keys(runsByDate)) {
+                const dayRuns = runsByDate[dateStr];
+                if (dayRuns.length > 1) {
+                  // Keep 1 latest run for that date, delete older runs of the same date
+                  const olderRunsForDay = dayRuns.slice(1);
+                  for (const r of olderRunsForDay) {
+                    console.log(`[Daily Retention] Deleting duplicate run #${r.run_number} (ID: ${r.id}) for date ${dateStr}...`);
+                    await github.rest.actions.deleteWorkflowRun({ owner, repo, run_id: r.id }).catch(e => console.error(e.message));
+                  }
+                }
+              }
+              console.log("Daily Workflow Run Retention applied successfully!");
             } catch (err) {
-              console.error("Purge workflow runs error:", err.message);
+              console.error("Daily run retention error:", err.message);
+            }
+
+            // 2. Kebijakan Retensi Release Harian (Daily Release Retention)
+            try {
+              const releases = await github.rest.repos.listReleases({ owner, repo, per_page: 100 });
+              const releasesByDate = {};
+
+              for (const rel of releases.data) {
+                const dateStr = (rel.published_at || rel.created_at).split('T')[0];
+                if (!releasesByDate[dateStr]) releasesByDate[dateStr] = [];
+                releasesByDate[dateStr].push(rel);
+              }
+
+              for (const dateStr of Object.keys(releasesByDate)) {
+                const dayReleases = releasesByDate[dateStr];
+                if (dayReleases.length > 1) {
+                  const olderReleasesForDay = dayReleases.slice(1);
+                  for (const rel of olderReleasesForDay) {
+                    console.log(`[Daily Retention] Purging older release ${rel.name || rel.tag_name} (${rel.id}) for date ${dateStr}...`);
+                    await github.rest.repos.deleteRelease({ owner, repo, release_id: rel.id }).catch(e => console.error(e.message));
+                  }
+                }
+              }
+              console.log("Daily Release Retention applied successfully!");
+            } catch (err) {
+              console.error("Daily release retention error:", err.message);
+            }
+
+            // 3. Purge all legacy v1.x tags
+            try {
+              const tags = await github.rest.repos.listTags({ owner, repo, per_page: 100 });
+              for (const tag of tags.data) {
+                if (tag.name.startsWith('v1.')) {
+                  console.log(`Purging legacy v1 tag: ${tag.name}...`);
+                  await github.rest.git.deleteRef({ owner, repo, ref: `tags/${tag.name}` }).catch(e => console.error(e.message));
+                }
+              }
+              console.log("Legacy v1 tags purged successfully!");
+            } catch (err) {
+              console.error("Tag cleanup error:", err.message);
             }
 
       - name: Download Android Staff APK Artifact
@@ -307,7 +406,7 @@ jobs:
         run: ls -lah ./release-artifacts/
 
       - name: Create Official GitHub Release (v${{ env.APP_VERSION }})
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ./release-artifacts/*
           draft: false
@@ -333,7 +432,7 @@ jobs:
             ---
 
             ### 🔑 Catatan Firebase SHA Fingerprint:
-            Nilai SHA-1 & SHA-256 tersedia di tab **Summary → Build Actions** untuk didaftarkan ke Firebase Console.
+            Nilai SHA-1 & SHA-256 (Release Keystore & Debug Keystore) tersedia di tab **Summary → Build Actions** untuk didaftarkan ke Firebase Console.
 
             ---
 
