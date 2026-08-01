@@ -16,8 +16,6 @@
         "flutter",
         "flutter_riverpod",
         "flutter_secure_storage",
-        "flutter_spinkit",
-        "font_awesome_flutter",
         "google_fonts",
         "google_sign_in",
         "hive",
@@ -286,22 +284,8 @@
       ]
     },
     {
-      "name": "font_awesome_flutter",
-      "version": "10.12.0",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
       "name": "animate_do",
       "version": "3.3.9",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
-      "name": "flutter_spinkit",
-      "version": "5.2.2",
       "dependencies": [
         "flutter"
       ]

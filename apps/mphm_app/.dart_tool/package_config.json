@@ -278,12 +278,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "flutter_spinkit",
-      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_spinkit-5.2.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "flutter_test",
       "rootUri": "file:///D:/DEVELZY/flutter/packages/flutter_test",
       "packageUri": "lib/",
@@ -294,12 +288,6 @@
       "rootUri": "file:///D:/DEVELZY/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
       "languageVersion": "3.10"
-    },
-    {
-      "name": "font_awesome_flutter",
-      "rootUri": "file:///C:/Users/ASUS/AppData/Local/Pub/Cache/hosted/pub.dev/font_awesome_flutter-10.12.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.9"
     },
     {
       "name": "frontend_server_client",

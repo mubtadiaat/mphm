@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/auth/google_auth_service.dart';
 import '../../../core/auth/biometric_auth_service.dart';
 import '../../../core/config/app_config.dart';
@@ -49,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (authenticated) {
-        // Default to Staff / Guardian Dashboard upon Biometric Success
         _navigateToRoleDashboard('staff');
       } else {
         setState(() {
@@ -123,10 +121,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  border: Border.all(color: const Color(0xFFFFFFFF).withAlpha(26)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
+                      color: const Color(0xFF000000).withAlpha(102),
                       blurRadius: 32,
                       offset: const Offset(0, 16),
                     ),
@@ -144,10 +142,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFF0F172A),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 2),
+                        border: Border.all(color: const Color(0xFF10B981).withAlpha(128), width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF059669).withValues(alpha: 0.4),
+                            color: const Color(0xFF059669).withAlpha(102),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -179,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Portal Wali Santri & Staff Mustahiq (v${AppConfig.appVersion})',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: const Color(0xFFFFFFFF).withAlpha(153),
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
@@ -191,9 +189,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.15),
+                          color: Colors.red.withAlpha(38),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                          border: Border.all(color: Colors.red.withAlpha(77)),
                         ),
                         child: Text(
                           _errorMessage,
@@ -214,11 +212,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          FaIcon(FontAwesomeIcons.google, color: Color(0xFFEA4335), size: 18),
-                          SizedBox(width: 12),
+                        children: [
+                          Icon(Icons.g_mobiledata_rounded, color: Color(0xFFEA4335), size: 28),
+                          SizedBox(width: 8),
                           Text(
                             'Masuk via Google Account',
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -240,9 +238,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             Icon(Icons.fingerprint, color: Color(0xFF38BDF8), size: 22),
                             SizedBox(width: 10),
                             Text(
@@ -262,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Loading Overlay
           if (_isLoading)
             Container(
-              color: Colors.black.withValues(alpha: 0.7),
+              color: const Color(0xFF000000).withAlpha(179),
               child: const Center(
                 child: PremiumLoaderWidget(message: 'Memverifikasi Akses Enterprise...'),
               ),

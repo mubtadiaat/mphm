@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class PremiumLoaderWidget extends StatelessWidget {
   final String message;
@@ -18,15 +17,15 @@ class PremiumLoaderWidget extends StatelessWidget {
         padding: const EdgeInsets.all(28.0),
         constraints: const BoxConstraints(maxWidth: 320),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor.withValues(alpha: 0.85),
+          color: Theme.of(context).cardColor.withAlpha(217),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: const Color(0xFFFFFFFF).withAlpha(38),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
+              color: const Color(0xFF000000).withAlpha(51),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -38,19 +37,9 @@ class PremiumLoaderWidget extends StatelessWidget {
             const SizedBox(
               height: 70,
               width: 70,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SpinKitRing(
-                    color: Color(0xFF10B981),
-                    size: 70.0,
-                    lineWidth: 3.0,
-                  ),
-                  SpinKitRipple(
-                    color: Color(0xFF2563EB),
-                    size: 45.0,
-                  ),
-                ],
+              child: CircularProgressIndicator(
+                strokeWidth: 3.0,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
               ),
             ),
             const SizedBox(height: 20),
@@ -68,7 +57,7 @@ class PremiumLoaderWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(179),
               ),
             ),
           ],

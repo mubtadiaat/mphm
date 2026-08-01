@@ -24,13 +24,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void initState() {
     super.initState();
 
-    // 1. Rotation Animation for Outer Rings
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 12),
     )..repeat();
 
-    // 2. Pulsing Animation for Official Logo Emblem
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1600),
@@ -96,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // 1. Ambient Background Glowing Orbs
+          // Ambient Background Glowing Orbs
           Positioned(
             top: -80,
             left: -80,
@@ -107,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF059669).withValues(alpha: 0.18),
+                    color: const Color(0xFF059669).withAlpha(46),
                     blurRadius: 110,
                     spreadRadius: 50,
                   ),
@@ -125,7 +123,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0284C7).withValues(alpha: 0.18),
+                    color: const Color(0xFF0284C7).withAlpha(46),
                     blurRadius: 110,
                     spreadRadius: 50,
                   ),
@@ -134,7 +132,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             ),
           ),
 
-          // 2. Central Content Container
+          // Central Content Container
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Column(
@@ -146,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Outer Rotating Dashed Ring
+                    // Outer Rotating Ring
                     AnimatedBuilder(
                       animation: _rotationController,
                       builder: (_, __) {
@@ -158,7 +156,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                                color: const Color(0xFF10B981).withAlpha(89),
                                 width: 2,
                               ),
                             ),
@@ -179,7 +177,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF38BDF8).withValues(alpha: 0.45),
+                                color: const Color(0xFF38BDF8).withAlpha(115),
                                 width: 1.5,
                               ),
                             ),
@@ -198,10 +196,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: const Color(0xFF0F172A),
-                          border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 2),
+                          border: Border.all(color: const Color(0xFF10B981).withAlpha(128), width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                              color: const Color(0xFF10B981).withAlpha(102),
                               blurRadius: 28,
                               spreadRadius: 2,
                             ),
@@ -239,7 +237,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 Text(
                   AppConfig.instansiMadrasah,
                   style: TextStyle(
-                    color: const Color(0xFF38BDF8).withValues(alpha: 0.9),
+                    color: const Color(0xFF38BDF8).withAlpha(230),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.4,
@@ -250,14 +248,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: const Color(0xFFFFFFFF).withAlpha(15),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    border: Border.all(color: const Color(0xFFFFFFFF).withAlpha(26)),
                   ),
                   child: Text(
                     'Pusat Data Abadi Enterprise v${AppConfig.appVersion}',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: const Color(0xFFFFFFFF).withAlpha(153),
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -272,7 +270,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     Text(
                       _statusText,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: const Color(0xFFFFFFFF).withAlpha(179),
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -285,7 +283,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         width: 220,
                         child: LinearProgressIndicator(
                           value: _progress,
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          backgroundColor: const Color(0xFFFFFFFF).withAlpha(26),
                           valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
                         ),
                       ),
