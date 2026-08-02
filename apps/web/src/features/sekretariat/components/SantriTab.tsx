@@ -462,19 +462,76 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     {
       accessorKey: "status",
       header: "Status Keasramaan",
-      cell: (info) => <PillBadge label={info.getValue() as string === "ACTIVE" ? "AKTIF ASRAMA" : (info.getValue() as string)} variant={info.getValue() === "ACTIVE" ? "success" : "warning"} />,
+      cell: (info) => {
+        const val = info.getValue() as string;
+        if (val === "BOYONG_PENDING") {
+          return (
+            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-[11px] rounded-md border border-amber-500/20 inline-flex items-center gap-1">
+              ⏳ Pengajuan Boyong (Membutuhkan Approval Pondok)
+            </span>
+          );
+        }
+        return <PillBadge label={val === "ACTIVE" ? "AKTIF ASRAMA" : val} variant={val === "ACTIVE" ? "success" : "warning"} />;
+      },
     },
     {
       id: "actions",
-      header: "Aksi Management",
-      cell: (info) => (
-        <TableActions
-          onEdit={() => handleOpenEdit(info.row.original)}
-          onDelete={() => handleDeleteSantri(info.row.original.id)}
-          onMutasi={() => handleOpenMutasi(info.row.original)}
-          isReadOnly={isReadOnly}
-        />
-      ),
+      header: "Aksi Management & Approval",
+      cell: (info) => {
+        const row = info.row.original;
+        if (row.status === "BOYONG_PENDING") {
+          return (
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: "Setujui Permohonan Boyong?",
+                    message: `Apakah Anda yakin ingin menyetujui (Approve) status Boyong untuk santriwati ${row.name}? Status di Pondok & Madrasah akan diubah menjadi BOYONG RESMI.`,
+                    confirmText: "Ya, Setujui Boyong",
+                    cancelText: "Batal",
+                    type: "danger",
+                  });
+                  if (ok) {
+                    await updateSantri({ id: row.id, data: { status: "DROPPED" } });
+                    toast(`✅ Permohonan Boyong ${row.name} Berhasil Disetujui oleh Pondok P3HM!`, "success", "Boyong Disetujui");
+                  }
+                }}
+                className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-lg shadow-xs cursor-pointer"
+              >
+                ✅ Setujui Boyong
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: "Tolak Permohonan Boyong?",
+                    message: `Apakah Anda yakin ingin menolak pengajuan Boyong untuk santriwati ${row.name}? Status santriwati akan dikembalikan menjadi AKTIF.`,
+                    confirmText: "Tolak Pengajuan",
+                    cancelText: "Batal",
+                    type: "warning",
+                  });
+                  if (ok) {
+                    await updateSantri({ id: row.id, data: { status: "ACTIVE" } });
+                    toast(`Pengajuan Boyong ${row.name} ditolak. Status dikembalikan ke AKTIF.`, "info");
+                  }
+                }}
+                className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-lg cursor-pointer"
+              >
+                ❌ Tolak
+              </button>
+            </div>
+          );
+        }
+        return (
+          <TableActions
+            onEdit={() => handleOpenEdit(row)}
+            onDelete={() => handleDeleteSantri(row.id)}
+            onMutasi={() => handleOpenMutasi(row)}
+            isReadOnly={isReadOnly}
+          />
+        );
+      },
     },
   ];
 

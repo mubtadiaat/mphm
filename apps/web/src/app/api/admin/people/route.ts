@@ -44,6 +44,10 @@ export async function GET(req: NextRequest) {
           ? { enrollments: { none: { deletedAt: null } } }
           : statusTab === "cuti" || statusTab === "on_leave"
           ? { status: { in: ["CUTI", "ON_LEAVE"] } }
+          : statusTab === "boyong_pending" || statusTab === "pengajuan_boyong"
+          ? { status: "BOYONG_PENDING" }
+          : statusTab === "boyong" || statusTab === "mutasi" || statusTab === "dropped"
+          ? { status: { in: ["DROPPED", "MUTATED", "BOYONG", "BOYONG_PENDING"] } }
           : statusTab && statusTab !== "all" && statusTab !== "aktif"
           ? { status: statusTab.toUpperCase() }
           : statusTab === "aktif"

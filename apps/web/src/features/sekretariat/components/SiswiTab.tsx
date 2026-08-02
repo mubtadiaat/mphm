@@ -343,16 +343,26 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
     if (!mutasiSantriTarget) return;
 
     try {
-      await updateSantri({
-        id: mutasiSantriTarget.id,
-        data: {
-          status: mutasiType,
-          graduationYear: mutasiType === "GRADUATED" ? new Date().getFullYear() : undefined,
-        },
-      });
+      if (mutasiType === ("BOYONG_REQUEST" as any)) {
+        await updateSantri({
+          id: mutasiSantriTarget.id,
+          data: {
+            status: "BOYONG_PENDING",
+          },
+        });
+        toast(`✅ Pengajuan Boyong untuk siswi ${mutasiSantriTarget.name} telah dikirim ke Pondok P3HM untuk persetujuan (approval)!`, "info", "Pengajuan Boyong Dikirim");
+      } else {
+        await updateSantri({
+          id: mutasiSantriTarget.id,
+          data: {
+            status: mutasiType,
+            graduationYear: mutasiType === "GRADUATED" ? new Date().getFullYear() : undefined,
+          },
+        });
+        toast(`✅ Status Siswi ${mutasiSantriTarget.name} Berhasil Diperbarui Menjadi ${mutasiType === "CUTI" ? "CUTI" : mutasiType === "GRADUATED" ? "LULUS / ALUMNI" : "AKTIF"}!`, "success");
+      }
       setShowMutasiModal(false);
       setMutasiSantriTarget(null);
-      toast(`✅ Status Siswi ${mutasiSantriTarget.name} Diperbarui Menjadi ${mutasiType}!`, "success");
     } catch {
       toast("Gagal mengubah status siswi", "error");
     }
@@ -1154,15 +1164,14 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
               </div>
               <form onSubmit={handleSaveMutasi} className="p-5 space-y-4">
                 {/* Banner Kewenangan Status */}
-                {mutasiSantriTarget.residenceType !== "UNIT_LAIN" ? (
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed font-medium">
-                    🔒 <strong>Sinkronisasi Otomatis P3HM:</strong> Status Keaktifan (Aktif, Cuti, Keluar) disinkronkan otomatis dari Pondok P3HM. Pihak Madrasah berwenang menetapkan status <strong>Lulus / Alumni Diniyyah</strong>.
-                  </div>
-                ) : (
-                  <div className="p-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl text-[11px] text-purple-900 dark:text-purple-200 leading-relaxed font-medium">
-                    🔓 <strong>Siswi Asrama Luar / Non-P3HM:</strong> Kelola status keaktifan pembelajaran secara mandiri di Madrasah.
-                  </div>
-                )}
+                <div className="p-3 bg-blue-50/90 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-2xl text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed font-medium">
+                  ✨ <strong>Aturan Kewenangan Status Siswi:</strong>
+                  <ul className="list-disc pl-4 mt-1 space-y-0.5">
+                    <li><strong>Status Cuti:</strong> Kewenangan mandiri Madrasah (langsung ditetapkan tanpa approval Pondok).</li>
+                    <li><strong>Status Boyong:</strong> Memerlukan pengajuan dan persetujuan (approval) dari Pondok P3HM.</li>
+                    <li><strong>Status Lulus/Alumni:</strong> Kewenangan mandiri Madrasah.</li>
+                  </ul>
+                </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Siswi</label>
@@ -1170,21 +1179,16 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Pilih Status Akademik Baru *</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Pilih Penetapan / Pengajuan Status *</label>
                   <select
                     value={mutasiType}
                     onChange={(e) => setMutasiType(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold dark:text-white cursor-pointer"
+                    className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold dark:text-white cursor-pointer"
                   >
-                    <option value="GRADUATED">🎓 Lulus / Alumni Diniyyah (Kewenangan Madrasah)</option>
-                    {mutasiSantriTarget.residenceType === "UNIT_LAIN" && (
-                      <>
-                        <option value="ACTIVE">✅ Aktif Pembelajaran</option>
-                        <option value="CUTI">🌴 Cuti Pembelajaran Diniyyah</option>
-                        <option value="MUTATED">🔄 Mutasi Pindah</option>
-                        <option value="DROPPED">❌ Keluar / Off</option>
-                      </>
-                    )}
+                    <option value="ACTIVE">✅ Aktif Pembelajaran Diniyyah</option>
+                    <option value="CUTI">🌴 Cuti Pembelajaran Madrasah (Mandiri Madrasah)</option>
+                    <option value="GRADUATED">🎓 Lulus / Alumni Diniyyah (Mandiri Madrasah)</option>
+                    <option value="BOYONG_REQUEST">🚚 Pengajuan Boyong ke Pondok (Memerlukan Approval P3HM)</option>
                   </select>
                 </div>
                 <div className="space-y-1">
