@@ -551,7 +551,7 @@ export function SystemSettingsCockpit() {
               }`}
             >
               <Lock className="w-4 h-4 shrink-0" />
-              <span>4. Matriks Peran 6 User</span>
+              <span>4. Pembuatan Role Users</span>
             </button>
 
             <button
@@ -738,12 +738,12 @@ export function SystemSettingsCockpit() {
             </div>
           )}
 
-          {/* 4. Matriks Peran 6 User */}
+          {/* 4. Pembuatan Role Users */}
           {settingsTab === "matrix" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 4: Matriks Peran & Hak Akses 6 User"
-                description="Kelola matriks otorisasi secara presisi untuk 6 Peran Baku (Sekretariat Pondok, Sekretariat Madrasah, Mustahiq, Munawwib, Mufattish, Wali Santri)."
+                title="Modul 4: Pembuatan Role Users & Matriks Hak Akses"
+                description="Kelola dan buat role kustom baru yang diambil langsung dari jabatan pengurus/staf di database, serta atur matriks otorisasi dan hak akses per menu secara terhubung persisten ke Database."
               />
               <CustomRoleMatrixManager />
             </div>

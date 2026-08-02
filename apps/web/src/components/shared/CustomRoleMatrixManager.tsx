@@ -120,25 +120,94 @@ export function CustomRoleMatrixManager() {
   const [newRoleDesc, setNewRoleDesc] = useState("");
   const [newRoleInst, setNewRoleInst] = useState<"PONDOK" | "MADRASAH" | "ALL">("MADRASAH");
 
-  // Load custom roles from localStorage
+  const [isDbSynced, setIsDbSynced] = useState<boolean>(false);
+
+  // Load custom roles & DB roles directly from PostgreSQL database via API
   useEffect(() => {
-    const saved = localStorage.getItem("mphm_custom_roles");
-    if (saved) {
+    async function loadRolesFromDb() {
       try {
-        const parsed = JSON.parse(saved);
-        setRoles([...DEFAULT_BUILTIN_ROLES, ...parsed]);
-      } catch {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const json = await res.json();
+          const dbData = json.data || {};
+          let customFromDb: CustomRoleDefinition[] = [];
+
+          if (Array.isArray(dbData.system_custom_roles)) {
+            customFromDb = dbData.system_custom_roles;
+          }
+
+          // Build dynamic roles for distinct DB roles & positions if not existing
+          const dbRoles: string[] = Array.isArray(dbData.db_user_roles) ? dbData.db_user_roles : [];
+          const extraDbRoles: CustomRoleDefinition[] = [];
+
+          dbRoles.forEach((rName) => {
+            const cleanId = String(rName).toLowerCase().trim().replace(/[^a-z0-9_.]/g, "_");
+            const exists = DEFAULT_BUILTIN_ROLES.some(b => b.id === cleanId) || customFromDb.some(c => c.id === cleanId);
+            
+            if (!exists && cleanId) {
+              const isKeamanan = cleanId.includes("keamanan");
+              extraDbRoles.push({
+                id: cleanId,
+                name: `Pengurus (${rName})`,
+                code: cleanId,
+                description: isKeamanan 
+                  ? "Akses Pengurus Keamanan: Pencarian 1 data santriwati & pencatatan poin pelanggaran."
+                  : `Pengurus Jabatan ${rName} terdaftar di Database.`,
+                institution: "PONDOK",
+                accentColor: isKeamanan ? "orange" : "violet",
+                enabledMenus: isKeamanan ? ["/sekretariat/santri", "/sekretariat/pelanggaran"] : ["/sekretariat/santri"],
+                capabilities: {
+                  "/sekretariat/santri": { permissionType: isKeamanan ? "SEARCH_VIEW" : "READ_ONLY", view: true, input: false, edit: false, delete: false, export: false, import: false },
+                  "/sekretariat/pelanggaran": { permissionType: "CRUD", view: true, input: true, edit: true, delete: false, export: true, import: false }
+                },
+                createdAt: new Date().toISOString()
+              });
+            }
+          });
+
+          const merged = [...DEFAULT_BUILTIN_ROLES, ...customFromDb, ...extraDbRoles];
+          setRoles(merged);
+          setIsDbSynced(true);
+          localStorage.setItem("mphm_custom_roles", JSON.stringify([...customFromDb, ...extraDbRoles]));
+          return;
+        }
+      } catch (err) {
+        console.error("Gagal memuat role dari database:", err);
+      }
+
+      // Fallback to localStorage if API fails
+      const saved = localStorage.getItem("mphm_custom_roles");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setRoles([...DEFAULT_BUILTIN_ROLES, ...parsed]);
+        } catch {
+          setRoles(DEFAULT_BUILTIN_ROLES);
+        }
+      } else {
         setRoles(DEFAULT_BUILTIN_ROLES);
       }
-    } else {
-      setRoles(DEFAULT_BUILTIN_ROLES);
     }
+
+    loadRolesFromDb();
   }, []);
 
-  const saveRolesToStorage = (updatedRoles: CustomRoleDefinition[]) => {
+  const saveRolesToStorage = async (updatedRoles: CustomRoleDefinition[]) => {
     setRoles(updatedRoles);
     const customOnly = updatedRoles.filter(r => !DEFAULT_BUILTIN_ROLES.some(b => b.id === r.id));
     localStorage.setItem("mphm_custom_roles", JSON.stringify(customOnly));
+
+    // Save directly to PostgreSQL Database via API
+    try {
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ system_custom_roles: customOnly }),
+      });
+      toast("✨ Peran & Matriks Otorisasi berhasil disimpan ke Database!", "success");
+    } catch (err) {
+      console.error("Gagal menyimpan role ke Database:", err);
+    }
   };
 
   const selectedRole = roles.find(r => r.id === selectedRoleId) || roles[0];

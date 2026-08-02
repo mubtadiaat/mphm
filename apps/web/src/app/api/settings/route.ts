@@ -34,12 +34,34 @@ function deserializeValue(raw: string): unknown {
 
 export async function GET(req: NextRequest) {
   try {
-    const settingsList = await prisma.systemSetting.findMany();
+    const [settingsList, userRoles, orgRoles] = await Promise.all([
+      prisma.systemSetting.findMany(),
+      prisma.userAccount.findMany({
+        where: { deletedAt: null },
+        select: { role: true },
+        distinct: ["role"],
+      }).catch(() => []),
+      prisma.organizationMembership.findMany({
+        where: { deletedAt: null },
+        select: { role: true },
+        distinct: ["role"],
+      }).catch(() => []),
+    ]);
+
     const settingsObject: Record<string, unknown> = {};
 
     settingsList.forEach((s) => {
       settingsObject[s.key] = deserializeValue(s.value);
     });
+
+    const distinctDbRoles = Array.from(
+      new Set([
+        ...userRoles.map((r) => r.role).filter(Boolean),
+        ...orgRoles.map((r) => r.role).filter(Boolean),
+      ])
+    );
+
+    settingsObject["db_user_roles"] = distinctDbRoles;
 
     return NextResponse.json({
       status: "Success",
