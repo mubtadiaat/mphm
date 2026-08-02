@@ -366,8 +366,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         class: newClass,
         room: isPondok || newResidenceType === "PONDOK_MUBTADIAAT" ? newRoom : undefined,
         residenceType: isPondok ? "PONDOK_MUBTADIAAT" : newResidenceType,
-        externalResidenceName: newResidenceType === "UNIT_LAIN" 
-          ? (newExternalResidenceName === "Lainnya" ? newExternalResidenceCustom : newExternalResidenceName) 
+        externalResidenceName: newResidenceType === "UNIT_LAIN"
+          ? (newExternalResidenceName === "Lainnya" ? newExternalResidenceCustom : newExternalResidenceName)
           : null,
         enrollmentYear: Number(newEnrollmentYear),
         graduationYear: newGraduationYear ? Number(newGraduationYear) : undefined,
@@ -746,8 +746,8 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         const availableClasses = userSupervisedLevel
           ? dbClasses.filter((cls) => (cls.institutionLevel || cls.name || "").toLowerCase().includes(userSupervisedLevel.toLowerCase()))
           : selectedJenjangFilter !== "ALL"
-          ? dbClasses.filter((cls) => (cls.institutionLevel || cls.name || "").toLowerCase().includes(selectedJenjangFilter.toLowerCase()))
-          : dbClasses;
+            ? dbClasses.filter((cls) => (cls.institutionLevel || cls.name || "").toLowerCase().includes(selectedJenjangFilter.toLowerCase()))
+            : dbClasses;
 
         return (
           <div className="bg-white dark:bg-zinc-900 p-3 sm:p-4 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xs">
@@ -764,55 +764,50 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                 <button
                   type="button"
                   onClick={() => setSelectedJenjangFilter("ALL")}
-                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-                    selectedJenjangFilter === "ALL"
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${selectedJenjangFilter === "ALL"
                       ? "bg-blue-600 text-white font-extrabold shadow-xs"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-                  }`}
+                    }`}
                 >
                   Semua
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedJenjangFilter("Ibtida'iyyah")}
-                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-                    selectedJenjangFilter === "Ibtida'iyyah"
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${selectedJenjangFilter === "Ibtida'iyyah"
                       ? "bg-blue-600 text-white font-extrabold shadow-xs"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-                  }`}
+                    }`}
                 >
                   Ibtida'iyyah
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedJenjangFilter("Tsanawiyyah")}
-                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-                    selectedJenjangFilter === "Tsanawiyyah"
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${selectedJenjangFilter === "Tsanawiyyah"
                       ? "bg-blue-600 text-white font-extrabold shadow-xs"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-                  }`}
+                    }`}
                 >
                   Tsanawiyyah
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedJenjangFilter("Aliyyah")}
-                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-                    selectedJenjangFilter === "Aliyyah"
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${selectedJenjangFilter === "Aliyyah"
                       ? "bg-blue-600 text-white font-extrabold shadow-xs"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-                  }`}
+                    }`}
                 >
                   Aliyyah
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedJenjangFilter("I'dadiyyah")}
-                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-                    selectedJenjangFilter === "I'dadiyyah"
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all ${selectedJenjangFilter === "I'dadiyyah"
                       ? "bg-blue-600 text-white font-extrabold shadow-xs"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200"
-                  }`}
+                    }`}
                 >
                   I'dadiyyah
                 </button>
@@ -936,7 +931,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                   <Search className="w-4 h-4" />
                   <span>Penarikan Data Siswi dari Database Pondok P3HM</span>
                 </div>
-                <button onClick={() => setShowPondokPullModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-lg"><X className="w-5 h-5"/></button>
+                <button onClick={() => setShowPondokPullModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-lg"><X className="w-5 h-5" /></button>
               </div>
 
               <div className="p-6 space-y-4">
