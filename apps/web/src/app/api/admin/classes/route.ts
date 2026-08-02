@@ -142,41 +142,38 @@ async function autoEnsureClassesFromMustahiqs(targetYearId: string) {
       const rawRole = m.role || "Mustahiq";
       if (!rawRole || rawRole.trim() === "Mustahiq") continue;
 
-      let jenjang = "Ibtida'iyyah";
-      if (/i['`’]?dadiyyah/i.test(rawRole)) jenjang = "I'dadiyyah";
-      else if (/ibtida['`’]?iyyah/i.test(rawRole)) jenjang = "Ibtida'iyyah";
-      else if (/tsanawiyyah/i.test(rawRole)) jenjang = "Tsanawiyyah";
-      else if (/aliyyah/i.test(rawRole)) jenjang = "Aliyyah";
+      // Extract level string after Mustahiq prefix
+      const roleClean = rawRole.replace(/^Mustahiq\s*/i, "").split("&")[0].trim();
+      if (!roleClean) continue;
 
-      const cleanStr = rawRole
-        .replace(/^Mustahiq\s*/i, "")
-        .replace(/i['`’]?dadiyyah/i, "")
-        .replace(/ibtida['`’]?iyyah/i, "")
-        .replace(/tsanawiyyah/i, "")
-        .replace(/aliyyah/i, "")
-        .trim();
+      let className = roleClean;
+      let fullClassName = `Kelas ${roleClean}`;
+      let institutionLevel = roleClean;
+      let levelNum = 1;
 
-      let tingkat = "I";
-      const tingkatMatch = cleanStr.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
-      if (tingkatMatch) tingkat = tingkatMatch[1].toUpperCase();
+      if (roleClean.includes("-")) {
+        const parts = roleClean.split("-");
+        const levelName = parts[0].trim();
+        const lokalName = parts[1].trim().toUpperCase();
+        className = `${levelName}-${lokalName}`;
+        fullClassName = `Kelas ${levelName} Lokal ${lokalName}`;
+        institutionLevel = levelName;
 
-      let lokal = "A";
-      const parts = cleanStr.split(/\s+/);
-      const lastPart = parts[parts.length - 1];
-      if (/^[A-Z]$/i.test(lastPart)) {
-        lokal = lastPart.toUpperCase();
+        const numMatch = levelName.match(/\b(VI|IV|V|III|II|I|1|2|3|4|5|6)\b/i);
+        if (numMatch) {
+          const map: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6 };
+          levelNum = map[numMatch[1].toUpperCase()] || 1;
+        }
       }
-
-      const className = `${jenjang} ${tingkat}-${lokal}`;
-      const fullClassName = `Kelas ${jenjang} ${tingkat}-${lokal}`;
-
-      const map: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6 };
-      const levelNum = map[tingkat] || 1;
 
       const existingClass = await prisma.academicClass.findFirst({
         where: {
           academicYearId: targetYearId,
-          OR: [{ name: className }, { name: className.replace("-", " ") }],
+          OR: [
+            { name: className },
+            { name: className.replace("-", " ") },
+            { fullName: fullClassName }
+          ],
           deletedAt: null,
         },
       });
@@ -187,7 +184,7 @@ async function autoEnsureClassesFromMustahiqs(targetYearId: string) {
             academicYearId: targetYearId,
             name: className,
             fullName: fullClassName,
-            institutionLevel: jenjang,
+            institutionLevel: institutionLevel,
             levelNumber: levelNum,
             mustahiqId: m.personId,
           },

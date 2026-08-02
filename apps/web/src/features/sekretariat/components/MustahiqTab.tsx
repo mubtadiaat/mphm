@@ -175,9 +175,9 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     
     let fullRole = "";
     if (isMustahiq && isMunawwib) {
-      fullRole = `Mustahiq ${jenjang} ${tingkat} ${lokal} & Munawwib ${subjectName}`;
+      fullRole = `Mustahiq ${jenjang}-${lokal} & Munawwib ${subjectName}`;
     } else if (isMustahiq) {
-      fullRole = `Mustahiq ${jenjang} ${tingkat} ${lokal}`;
+      fullRole = `Mustahiq ${jenjang}-${lokal}`;
     } else if (isMunawwib) {
       fullRole = `Munawwib ${subjectName} (${subjectClasses})`;
     } else {
@@ -202,7 +202,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
           gender: "L",
         });
         if (isMustahiq) {
-          await addPosisiToJabatan("Mustahiq", `${jenjang} ${tingkat} ${lokal}`.trim() || "Mustahiq", "MADRASAH");
+          await addPosisiToJabatan("Mustahiq", `${jenjang}-${lokal}`.trim() || "Mustahiq", "MADRASAH");
           // Trigger auto-creation of AcademicClass (Rombel) in DB
           await apiRequest("/api/admin/classes").catch(() => {});
         }
@@ -476,38 +476,48 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
                   {isMustahiq && (
                     <div className="space-y-3 pt-1">
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Jenjang Instansi</label>
-                          <select value={jenjang} onChange={e => setJenjang(e.target.value)} className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
-                            <option value="I'dadiyyah">I&apos;dadiyyah</option>
-                            <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
-                            <option value="Tsanawiyyah">Tsanawiyyah</option>
-                            <option value="Aliyyah">Aliyyah</option>
+                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Jenjang &amp; Tingkat Kelas (Baku) *</label>
+                          <select value={jenjang} onChange={e => setJenjang(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-bold text-zinc-900 dark:text-white">
+                            <optgroup label="I'dadiyyah">
+                              <option value="I'dadiyyah I">I&apos;dadiyyah I</option>
+                              <option value="I'dadiyyah II">I&apos;dadiyyah II</option>
+                              <option value="I'dadiyyah III">I&apos;dadiyyah III</option>
+                            </optgroup>
+                            <optgroup label="Ibtida'iyyah">
+                              <option value="Ibtida'iyyah I">Ibtida&apos;iyyah I</option>
+                              <option value="Ibtida'iyyah II">Ibtida&apos;iyyah II</option>
+                              <option value="Ibtida'iyyah III">Ibtida&apos;iyyah III</option>
+                            </optgroup>
+                            <optgroup label="Tsanawiyyah">
+                              <option value="Tsanawiyyah I">Tsanawiyyah I</option>
+                              <option value="Tsanawiyyah II">Tsanawiyyah II</option>
+                              <option value="Tsanawiyyah III">Tsanawiyyah III</option>
+                              <option value="Tsanawiyyah IV">Tsanawiyyah IV</option>
+                              <option value="Tsanawiyyah V">Tsanawiyyah V</option>
+                              <option value="Tsanawiyyah VI">Tsanawiyyah VI</option>
+                            </optgroup>
+                            <optgroup label="Aliyyah">
+                              <option value="Aliyyah I">Aliyyah I</option>
+                              <option value="Aliyyah II">Aliyyah II</option>
+                              <option value="Aliyyah III">Aliyyah III</option>
+                            </optgroup>
+                            <optgroup label="Khusus">
+                              <option value="Al-Rabithoh">Al-Rabithoh</option>
+                            </optgroup>
                           </select>
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Tingkat</label>
-                          <select value={tingkat} onChange={e => setTingkat(e.target.value)} className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
-                            <option value="Tingkat I">Tingkat I</option>
-                            <option value="Tingkat II">Tingkat II</option>
-                            <option value="Tingkat III">Tingkat III</option>
-                            <option value="Tingkat IV">Tingkat IV</option>
-                            <option value="Tingkat V">Tingkat V</option>
-                            <option value="Tingkat VI">Tingkat VI</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Lokal (Manual)</label>
-                          <input value={lokal} onChange={e => setLokal(e.target.value)} placeholder="Contoh: A, B, C..." className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white" />
+                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Ruang / Lokal (Manual) *</label>
+                          <input value={lokal} onChange={e => setLokal(e.target.value.toUpperCase())} placeholder="Contoh: A, B, C..." className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-bold text-zinc-900 dark:text-white uppercase" />
                         </div>
                       </div>
 
-                      <div className="p-2.5 bg-purple-100/60 dark:bg-purple-900/40 rounded-xl flex items-center gap-2 text-[11px] text-purple-900 dark:text-purple-200 font-semibold">
+                      <div className="p-3 bg-purple-100/60 dark:bg-purple-900/40 rounded-xl flex items-center gap-2.5 text-[11px] text-purple-900 dark:text-purple-200 font-semibold">
                         <Info className="w-4 h-4 shrink-0 text-purple-600" />
-                        <span>Kelas Rombel (<strong>{jenjang} {tingkat}-{lokal}</strong>) akan terisi &amp; dibuat otomatis di database begitu Mustahiq disimpan.</span>
+                        <span>Kelas Rombel (<strong>{jenjang}-{lokal}</strong>) akan terisi &amp; dibuat otomatis di database untuk pencetakan Raport, Ijazah &amp; Sertifikat.</span>
                       </div>
                     </div>
                   )}
