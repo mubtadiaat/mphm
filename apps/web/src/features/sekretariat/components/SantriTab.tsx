@@ -964,99 +964,46 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               <form onSubmit={handleSaveForm} className="flex-1 overflow-y-auto p-6 space-y-8">
                 {/* Feature: Tarik Data Santriwati Pondok (P3HM) & Input Unit Lain */}
                 {!isPondok && !editingSantri && (
-                  <div className="p-5 bg-linear-to-br from-blue-50/90 via-indigo-50/60 to-purple-50/50 dark:from-zinc-800/90 dark:to-zinc-900 border border-blue-200/80 dark:border-zinc-700 rounded-2xl space-y-4 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
-                        <Home className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                        Kategori Asrama Siswi Madrasah (MPHM)
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setNewResidenceType("PONDOK_MUBTADIAAT")}
-                        className={`px-3.5 py-3 rounded-xl text-xs font-extrabold transition-all border text-left flex flex-col gap-0.5 cursor-pointer shadow-xs ${
-                          newResidenceType === "PONDOK_MUBTADIAAT"
-                            ? "bg-emerald-600 text-white border-emerald-700 shadow-md"
-                            : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-750"
-                        }`}
-                      >
-                        <span>🏛️ Santri Pondok Mubtadi-aat</span>
-                        <span className={`text-[10px] font-normal ${newResidenceType === "PONDOK_MUBTADIAAT" ? "text-emerald-100" : "text-zinc-500"}`}>Tarik dari P3HM Lirboyo</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewResidenceType("UNIT_LAIN");
-                          setSelectedPondokSantriId("");
-                        }}
-                        className={`px-3.5 py-3 rounded-xl text-xs font-extrabold transition-all border text-left flex flex-col gap-0.5 cursor-pointer shadow-xs ${
-                          newResidenceType === "UNIT_LAIN"
-                            ? "bg-purple-600 text-white border-purple-700 shadow-md"
-                            : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-750"
-                        }`}
-                      >
-                        <span>🏡 Unit Asrama Lain</span>
-                        <span className={`text-[10px] font-normal ${newResidenceType === "UNIT_LAIN" ? "text-purple-100" : "text-zinc-500"}`}>Darussa&apos;adah, Ar-Risalah, dll</span>
-                      </button>
-                    </div>
-
-                    {newResidenceType === "PONDOK_MUBTADIAAT" && (
-                      <div className="space-y-2 pt-3 border-t border-blue-200/60 dark:border-zinc-700">
-                        <label className="text-xs font-extrabold text-blue-900 dark:text-blue-300 block">🔍 Pilih &amp; Tarik Data Santriwati Pondok (P3HM)</label>
-                        <select
-                          value={selectedPondokSantriId}
-                          onChange={(e) => handleSelectPondokSantri(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-blue-300 dark:border-zinc-700 rounded-xl text-xs font-extrabold text-zinc-900 dark:text-white shadow-xs focus:ring-2 focus:ring-blue-500 outline-hidden cursor-pointer"
-                        >
-                          <option value="">-- Pilih Santriwati Pondok (Stambuk / NIK / Nama) --</option>
-                          {pondokSantriList.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.name} (Stambuk: {s.stambuk} • NIK: {s.nik || "-"})
-                            </option>
-                          ))}
-                        </select>
+                  selectedPondokSantriId ? (
+                    <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl flex items-center justify-between gap-3 text-xs shadow-xs">
+                      <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200 font-extrabold">
+                        <Home className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Data Siswi Ditarik dari Santriwati Pondok P3HM Lirboyo (Stambuk: {newStambuk})</span>
                       </div>
-                    )}
-
-                    {newResidenceType === "UNIT_LAIN" && (
-                      <div className="space-y-3 pt-2 border-t border-zinc-800">
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-bold text-purple-300">Pilih Nama Unit Asrama Asal</label>
-                          <select
-                            value={newExternalResidenceName}
-                            onChange={(e) => setNewExternalResidenceName(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-700 rounded-xl text-xs font-semibold text-white outline-none focus:border-purple-500 cursor-pointer"
-                          >
-                            <option value="">-- Pilih Nama Unit Asrama --</option>
-                            <option value="Darussa'adah">Pondok Pesantren Darussa'adah</option>
-                            <option value="Ar-Risalah">Pondok Pesantren Ar-Risalah</option>
-                            <option value="Dalem Gus Ya'lu">Dalem Gus Ya'lu</option>
-                            <option value="Dalem Yai Atho">Dalem Yai Atho'</option>
-                            <option value="Lainnya">Asrama Unit Lainnya (Lain-Lain)</option>
-                          </select>
-                        </div>
-
+                      <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider">Terhubung P3HM</span>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-2xl space-y-3 text-xs shadow-xs">
+                      <div className="flex items-center gap-2 text-purple-900 dark:text-purple-200 font-extrabold">
+                        <Home className="w-4 h-4 text-purple-600 shrink-0" />
+                        <span>🔓 Input Manual Siswi Madrasah (Bukan Santri P3HM / Unit Asrama Luar)</span>
+                      </div>
+                      <div className="space-y-1.5 pt-2 border-t border-purple-200 dark:border-purple-800">
+                        <label className="text-[11px] font-bold text-purple-900 dark:text-purple-300">Pilih / Masukkan Nama Unit Asrama Asal</label>
+                        <select
+                          value={newExternalResidenceName}
+                          onChange={(e) => setNewExternalResidenceName(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-purple-300 dark:border-purple-800 rounded-xl text-xs font-bold text-zinc-900 dark:text-white cursor-pointer focus:ring-2 focus:ring-purple-500 outline-hidden"
+                        >
+                          <option value="">-- Pilih Nama Unit Asrama --</option>
+                          <option value="Darussa'adah">Pondok Pesantren Darussa&apos;adah</option>
+                          <option value="Ar-Risalah">Pondok Pesantren Ar-Risalah</option>
+                          <option value="Dalem Gus Ya'lu">Dalem Gus Ya&apos;lu</option>
+                          <option value="Dalem Yai Atho">Dalem Yai Atho&apos;</option>
+                          <option value="Lainnya">Asrama Unit Lainnya (Lain-Lain)</option>
+                        </select>
                         {newExternalResidenceName === "Lainnya" && (
-                          <div className="space-y-1.5 p-3 bg-purple-950/30 border border-purple-500/30 rounded-xl">
-                            <label className="text-xs font-bold text-purple-200 flex items-center gap-1.5">
-                              <span>✍️ Tuliskan Nama Unit Asrama / Pondok Tempat Siswi Berada *</span>
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              value={newExternalResidenceCustom}
-                              onChange={(e) => setNewExternalResidenceCustom(e.target.value)}
-                              placeholder="Ketikkan nama lengkap unit asrama tempat siswi berada..."
-                              className="w-full px-3 py-2 bg-zinc-900 border border-purple-400 rounded-xl text-xs font-bold text-white outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-zinc-500"
-                            />
-                          </div>
+                          <input
+                            type="text"
+                            placeholder="Tuliskan nama unit/asrama asal..."
+                            value={newExternalResidenceCustom}
+                            onChange={(e) => setNewExternalResidenceCustom(e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-purple-300 dark:border-purple-800 rounded-xl text-xs font-bold text-zinc-900 dark:text-white mt-2"
+                          />
                         )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )
                 )}
 
                 {/* 1. Pas Foto */}
