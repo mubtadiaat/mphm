@@ -104,6 +104,7 @@ function LoginSekretariatContent() {
         body: JSON.stringify({
           uid: fbUser.uid,
           email: fbUser.email,
+          portal: "sekretariat",
         }),
       });
 

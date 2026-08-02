@@ -91,6 +91,7 @@ export default function LoginGuardianPage() {
         body: JSON.stringify({
           uid: fbUser.uid,
           email: fbUser.email,
+          portal: "guardian",
         }),
       });
 

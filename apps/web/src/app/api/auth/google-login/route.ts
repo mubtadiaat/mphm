@@ -43,6 +43,46 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const roleLower = String(userAccount.role || "").trim().toLowerCase();
+
+    // Strict Portal Role Validation for Google Login
+    if (body.portal === "sekretariat") {
+      const allowedKeywords = ["sek", "admin", "sekretariat", "superadmin", "super_admin", "super admin"];
+      const isAllowed = allowedKeywords.some((kw) => roleLower.includes(kw));
+      if (!isAllowed) {
+        return NextResponse.json(
+          { status: "Error", message: "Akun Anda bukan merupakan akun Sekretariat. Silakan login di portal Sekretariat." },
+          { status: 403 }
+        );
+      }
+    } else if (body.portal === "mustahiq") {
+      const isAllowed = roleLower.includes("mustahiq");
+      if (!isAllowed) {
+        return NextResponse.json(
+          { status: "Error", message: "Akun Anda bukan Mustahiq. Silakan login di portal Mustahiq." },
+          { status: 403 }
+        );
+      }
+    } else if (body.portal === "staff") {
+      const forbiddenRoleKeywords = ["sek.pondok", "sek.madrasah", "mustahiq", "wali_santri", "wali", "guardian"];
+      const isForbidden = forbiddenRoleKeywords.some((kw) => roleLower === kw || roleLower.startsWith(kw));
+      if (isForbidden) {
+        return NextResponse.json(
+          { status: "Error", message: "Akun Anda bukan Pengurus. Silakan login di portal yang sesuai." },
+          { status: 403 }
+        );
+      }
+    } else if (body.portal === "guardian") {
+      const allowedKeywords = ["wali", "santri", "guardian"];
+      const isAllowed = allowedKeywords.some((kw) => roleLower.includes(kw));
+      if (!isAllowed) {
+        return NextResponse.json(
+          { status: "Error", message: "Akun Anda bukan merupakan akun Wali Santri." },
+          { status: 403 }
+        );
+      }
+    }
+
     // Tautkan firebaseUid jika belum tersimpan
     if (!userAccount.firebaseUid) {
       await prisma.userAccount.update({

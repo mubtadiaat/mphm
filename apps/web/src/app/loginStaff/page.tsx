@@ -105,6 +105,7 @@ export default function LoginStaffPage() {
         body: JSON.stringify({
           uid: fbUser.uid,
           email: fbUser.email,
+          portal: "staff",
         }),
       });
 
@@ -114,12 +115,7 @@ export default function LoginStaffPage() {
       }
 
       await queryClient.invalidateQueries({ queryKey: ["auth-session"] });
-      const roleStr = String(resData.data?.role || "").toLowerCase();
-      if (roleStr.includes("mustahiq")) router.push("/mustahiq");
-      else if (roleStr.includes("mufat")) router.push("/mufattisy");
-      else if (roleStr.includes("mundzir") || roleStr.includes("pimpinan")) router.push("/pimpinan");
-      else if (roleStr.includes("keamanan")) router.push("/keamanan");
-      else router.push("/mustahiq");
+      router.push("/sekretariat");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login Google gagal.");
     } finally {
@@ -130,13 +126,13 @@ export default function LoginStaffPage() {
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-slate-50 text-slate-900 flex flex-col justify-between items-center p-3 sm:p-6 select-none relative font-sans">
       {/* Background Soft Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-96 bg-gradient-to-b from-amber-300/20 via-blue-400/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-96 bg-gradient-to-b from-purple-300/20 via-blue-400/15 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Realtime Header Bar */}
       <div className="w-full max-w-md flex items-center justify-between px-4 py-2.5 mb-3 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 text-[11px] text-slate-600 font-semibold shadow-sm z-20">
         <div className="flex items-center gap-1.5 text-slate-700">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-bold">Mubtadiaat Staff</span>
+          <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+          <span className="font-bold">Pengurus System</span>
         </div>
         <span className="text-slate-600 font-bold">{formattedDate || "Realtime Info"}</span>
       </div>
@@ -149,12 +145,12 @@ export default function LoginStaffPage() {
         className="w-full max-w-md bg-white border border-slate-200/90 rounded-[32px] sm:rounded-[36px] p-6 sm:p-8 shadow-[0_20px_50px_rgba(15,23,42,0.08)] relative z-10 overflow-hidden my-auto"
       >
         {/* Top Gold & Blue Premium Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-400 via-yellow-500 to-blue-600" />
+        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 via-indigo-600 to-blue-600" />
 
         {/* Logo & Header */}
         <div className="flex flex-col items-center text-center space-y-3 mb-6">
           <div className="relative group">
-            <div className="absolute -inset-1.5 bg-gradient-to-r from-amber-400 to-blue-600 rounded-3xl blur-md opacity-40 group-hover:opacity-70 transition duration-300" />
+            <div className="absolute -inset-1.5 bg-gradient-to-r from-purple-500 to-blue-600 rounded-3xl blur-md opacity-40 group-hover:opacity-70 transition duration-300" />
             <div className="relative w-20 h-20 bg-white border border-slate-200 rounded-2xl p-2 flex items-center justify-center shadow-md">
               <Image 
                 src="/logo.png" 
@@ -168,12 +164,12 @@ export default function LoginStaffPage() {
           </div>
 
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-700 text-[11px] font-extrabold uppercase tracking-wider mb-2 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-              <span>Aplikasi Staf Premium</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-700 text-[11px] font-extrabold uppercase tracking-wider mb-2 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-purple-500 fill-purple-400" />
+              <span>Portal Pengurus Resmi</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Portal Login Staf</h1>
-            <p className="text-xs text-slate-500 mt-1 font-medium">Mustahiq • Mufattisy • Mundzir • Musyrifah • Keamanan</p>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Portal Login Pengurus</h1>
+            <p className="text-xs text-slate-500 mt-1 font-medium">Khusus Pengurus &amp; Tenaga Pengawas (Keamanan, Mufattish, Mundzir, Musyrifah, Pimpinan)</p>
           </div>
         </div>
 
@@ -193,7 +189,7 @@ export default function LoginStaffPage() {
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-              Username Staf / Guru
+              Username Pengurus
             </label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -202,8 +198,8 @@ export default function LoginStaffPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Masukkan username staf..."
-                className="w-full bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 text-slate-900 placeholder-slate-400 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-semibold transition-all outline-none shadow-inner"
+                placeholder="Masukkan username Pengurus..."
+                className="w-full bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-purple-600 focus:ring-4 focus:ring-purple-600/15 text-slate-900 placeholder-slate-400 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-semibold transition-all outline-none shadow-inner"
               />
             </div>
           </div>
@@ -220,7 +216,7 @@ export default function LoginStaffPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan kata sandi"
-                className="w-full bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/15 text-slate-900 placeholder-slate-400 rounded-2xl pl-11 pr-11 py-3.5 text-sm font-semibold transition-all outline-none shadow-inner"
+                className="w-full bg-slate-50/80 border border-slate-200 focus:bg-white focus:border-purple-600 focus:ring-4 focus:ring-purple-600/15 text-slate-900 placeholder-slate-400 rounded-2xl pl-11 pr-11 py-3.5 text-sm font-semibold transition-all outline-none shadow-inner"
               />
               <button
                 type="button"
@@ -232,17 +228,17 @@ export default function LoginStaffPage() {
             </div>
           </div>
 
-          {/* Primary Action Button: Biru Premium */}
+          {/* Primary Action Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-3 py-4 px-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-black text-sm transition-all duration-200 shadow-xl shadow-blue-600/25 flex items-center justify-center gap-2.5 group disabled:opacity-50 cursor-pointer active:scale-[0.98]"
+            className="w-full mt-3 py-4 px-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-700 hover:from-purple-700 hover:to-blue-800 text-white font-black text-sm transition-all duration-200 shadow-xl shadow-purple-600/25 flex items-center justify-center gap-2.5 group disabled:opacity-50 cursor-pointer active:scale-[0.98]"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                <span>Masuk Aplikasi Staf</span>
+                <span>Masuk Aplikasi Pengurus</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
@@ -258,7 +254,7 @@ export default function LoginStaffPage() {
             className="w-full py-3.5 px-4 rounded-2xl bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200/90 text-slate-700 font-bold text-xs transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer active:scale-[0.98]"
           >
             {googleLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+              <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
             ) : (
               <>
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -267,7 +263,7 @@ export default function LoginStaffPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                 </svg>
-                <span>Masuk Staf dengan Google</span>
+                <span>Masuk Pengurus dengan Google</span>
               </>
             )}
           </button>

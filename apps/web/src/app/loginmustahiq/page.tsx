@@ -99,6 +99,7 @@ export default function LoginMustahiqPage() {
         body: JSON.stringify({
           uid: fbUser.uid,
           email: fbUser.email,
+          portal: "mustahiq",
         }),
       });
 
