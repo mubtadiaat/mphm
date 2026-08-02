@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, X, MapPin, User, Heart,
-  BookOpen, Search, Home, Camera
+  BookOpen, Search, Home, Camera,
+  Palmtree, Sparkles, Truck, GraduationCap, Lock, Unlock, Download, AlertTriangle, Award, CheckCircle2
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
@@ -513,7 +514,10 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
             : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
-          Siswi Cuti Diniyyah 🌴
+          <span className="inline-flex items-center gap-1.5">
+            <Palmtree className="w-4 h-4 text-amber-500" />
+            <span>Siswi Cuti Diniyyah</span>
+          </span>
         </button>
 
         <button
@@ -706,17 +710,19 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                       <button
                         type="button"
                         onClick={() => handlePullPondokSantriToMadrasah(c)}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg cursor-pointer shrink-0 shadow-xs"
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg cursor-pointer shrink-0 shadow-xs flex items-center gap-1"
                       >
-                        📥 Tarik Data
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Tarik Data</span>
                       </button>
                     </div>
                   ))}
 
                   {hasSearchedPondok && pondokCandidates.length === 0 && !isSearchingPondok && (
                     <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-center space-y-3">
-                      <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
-                        ⚠️ Data Siswi tidak ditemukan di Database Pondok Pesantren P3HM.
+                      <p className="text-xs text-amber-800 dark:text-amber-300 font-medium flex items-center justify-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>Data Siswi tidak ditemukan di Database Pondok Pesantren P3HM.</span>
                       </p>
                       <button
                         type="button"
@@ -728,7 +734,8 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                         }}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-xl shadow-md cursor-pointer inline-flex items-center gap-1.5"
                       >
-                        🔓 Buka Form Input Manual Baru
+                        <Unlock className="w-4 h-4" />
+                        <span>Buka Form Input Manual Baru</span>
                       </button>
                     </div>
                   )}
