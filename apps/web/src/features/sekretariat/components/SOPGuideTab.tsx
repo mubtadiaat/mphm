@@ -491,7 +491,7 @@ export function SOPGuideTab() {
                     <li>Modul Kalender Akademik dan Kwartal Freeze Lock Switches</li>
                     <li>Modul Formulasi Nilai dan Syarat Kenaikan Kelas KKTP</li>
                     <li>Modul Matriks Hak Akses 6 User</li>
-                    <li>Modul Stempel dan Tanda Tangan Digital Resmi Cloudinary HD Auto RemoveBG</li>
+                    <li>Modul Stempel dan Tanda Tangan Digital Resmi HD Auto RemoveBG</li>
                     <li>Modul Master Kedisiplinan dan Sanksi Poin</li>
                     <li>Modul Struktur Jabatan Pengurus 14 Pondok dan 11 Madrasah</li>
                     <li>Modul WhatsApp Gateway Fonnte dan Template Notifikasi</li>

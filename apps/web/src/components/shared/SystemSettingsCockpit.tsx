@@ -82,13 +82,13 @@ function SignatureImageUploader({
 
       // 2. Fetch signature from API
       const sigRes = await fetch("/api/media/signature");
-      if (!sigRes.ok) throw new Error("Gagal mengambil token upload Cloud Storage.");
+      if (!sigRes.ok) throw new Error("Gagal mengambil token upload Database.");
       const sigData = await sigRes.json();
       if (sigData.status !== "Success") throw new Error(sigData.message || "Gagal mendapatkan token.");
 
       const { signature, timestamp, apiKey, cloudName, folder } = sigData.data;
 
-      // 3. Upload to Cloudinary
+      // 3. Upload file
       const formData = new FormData();
       formData.append("file", processedBlob, "signature.png");
       formData.append("api_key", apiKey);
@@ -101,7 +101,7 @@ function SignatureImageUploader({
         body: formData,
       });
 
-      if (!cloudinaryRes.ok) throw new Error("Gagal mengunggah berkas ke Cloudinary.");
+      if (!cloudinaryRes.ok) throw new Error("Gagal mengunggah berkas ke Database.");
       const cloudinaryData = await cloudinaryRes.json();
       
       const finalUrl = cloudinaryData.secure_url;
@@ -152,7 +152,7 @@ function SignatureImageUploader({
           {isUploading ? (
             <div className="flex flex-col items-center gap-2 text-blue-600">
               <Loader2 className="w-8 h-8 animate-spin" />
-              <span className="text-xs font-bold">Memproses RemoveBG &amp; Upload HD ke Cloudinary...</span>
+              <span className="text-xs font-bold">Memproses RemoveBG &amp; Simpan HD ke Database...</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-center">
@@ -749,12 +749,12 @@ export function SystemSettingsCockpit() {
             </div>
           )}
 
-          {/* 5. Stempel & TTD Digital (Cloudinary File Uploader + RemoveBG HD) */}
+          {/* 5. Stempel & TTD Digital (Server File Uploader + RemoveBG HD) */}
           {settingsTab === "signature" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 5: Stempel & Tanda Tangan Digital Resmi (Cloudinary HD & Auto RemoveBG)"
-                description="Unggah file gambar TTD Digital & Stempel resmi instansi. Sistem secara otomatis memproses transparansi latar belakang (RemoveBG HD) dan mengunggahnya ke Cloud Storage."
+                title="Modul 5: Stempel & Tanda Tangan Digital Resmi (HD Auto RemoveBG)"
+                description="Unggah file gambar TTD Digital & Stempel resmi instansi. Sistem secara otomatis memproses transparansi latar belakang (RemoveBG HD) dan menyimpannya ke Database."
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6 shadow-sm">
                 <SignatureImageUploader

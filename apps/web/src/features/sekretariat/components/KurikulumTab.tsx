@@ -127,7 +127,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
       const res = await apiRequest<{ status: string; message: string }>("/api/admin/curriculum/sync", {
         method: "POST",
       });
-      toast(res.message || "Kurikulum Resmi MPHM Lirboyo berhasil disinkronkan ke Database Neon!", "success", "Sinkronisasi Berhasil");
+      toast(res.message || "Kurikulum Resmi MPHM Lirboyo berhasil disinkronkan ke Database!", "success", "Sinkronisasi Berhasil");
       window.location.reload();
     } catch (err: any) {
       toast(err?.message || "Gagal menyinkronkan kurikulum resmi", "error");
