@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, X, MapPin, UploadCloud, Camera, User, Heart, Award,
-  Calendar, Hash, Phone, FileText, Home, BookOpen, ExternalLink, ShieldCheck, Download, Layers, Lock
+  Calendar, Hash, Phone, FileText, Home, BookOpen, ExternalLink, ShieldCheck, Download, Layers, Lock, Search
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
@@ -178,7 +178,14 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     }
   };
 
-  const handleOpenAdd = () => {
+  // Pondok Search States for Madrasah Pulling
+  const [showPondokPullModal, setShowPondokPullModal] = useState(false);
+  const [pondokSearchQuery, setPondokSearchQuery] = useState("");
+  const [pondokCandidates, setPondokCandidates] = useState<Santri[]>([]);
+  const [isSearchingPondok, setIsSearchingPondok] = useState(false);
+  const [hasSearchedPondok, setHasSearchedPondok] = useState(false);
+
+  const resetFormFields = () => {
     setSelectedPondokSantriId("");
     setEditingSantri(null);
     setNewName("");
@@ -203,6 +210,39 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
     setNewGuardianPhone("");
     setNewGuardianRelation("AYAH");
     setNewFamilyCardNumber("");
+  };
+
+  const handleOpenAdd = () => {
+    if (!isPondok) {
+      setPondokSearchQuery("");
+      setPondokCandidates([]);
+      setHasSearchedPondok(false);
+      setShowPondokPullModal(true);
+    } else {
+      resetFormFields();
+      setShowFormModal(true);
+    }
+  };
+
+  const handleSearchPondokSantri = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pondokSearchQuery.trim()) return;
+    setIsSearchingPondok(true);
+    setHasSearchedPondok(true);
+    try {
+      const res = await apiRequest<{ data: Santri[] }>(`/api/admin/people?role=student&scope=pondok&q=${encodeURIComponent(pondokSearchQuery)}&limit=20`);
+      if (res.data) setPondokCandidates(res.data);
+    } catch {
+      setPondokCandidates([]);
+    } finally {
+      setIsSearchingPondok(false);
+    }
+  };
+
+  const handlePullPondokSantriToMadrasah = (candidate: Santri) => {
+    setShowPondokPullModal(false);
+    resetFormFields();
+    handleSelectPondokSantri(candidate.id);
     setShowFormModal(true);
   };
 
@@ -805,6 +845,85 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
           }
         }}
       />
+
+      {/* Modal Tarik Data Santriwati Pondok P3HM (Untuk Madrasah) */}
+      <AnimatePresence>
+        {showPondokPullModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setShowPondokPullModal(false)} />
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden">
+              <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-blue-50/50 dark:bg-blue-950/30">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-extrabold text-sm">
+                  <Search className="w-4 h-4" />
+                  <span>Penarikan Data Siswi dari Database Pondok P3HM</span>
+                </div>
+                <button onClick={() => setShowPondokPullModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-lg"><X className="w-5 h-5"/></button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  Sesuai alur resmi sistem: <strong>Pondok Input — Madrasah Tarik</strong>. Silakan cari NIK, Nomor Stambuk, atau Nama Santriwati di database Pondok P3HM untuk didaftarkan sebagai Siswi Madrasah (MPHM).
+                </p>
+
+                <form onSubmit={handleSearchPondokSantri} className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ketik NIK / Stambuk / Nama Santriwati..."
+                    value={pondokSearchQuery}
+                    onChange={(e) => setPondokSearchQuery(e.target.value)}
+                    className="flex-1 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-hidden dark:text-white"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSearchingPondok}
+                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer shrink-0"
+                  >
+                    {isSearchingPondok ? "Mencari..." : "Cari di Pondok"}
+                  </button>
+                </form>
+
+                {/* Candidate Results */}
+                <div className="max-h-60 overflow-y-auto space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                  {pondokCandidates.map((c) => (
+                    <div key={c.id} className="p-3 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl flex items-center justify-between gap-3">
+                      <div>
+                        <span className="font-bold text-xs text-zinc-900 dark:text-white block">{c.name}</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">Stambuk: {c.stambuk} • NIK: {c.nik || "-"}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handlePullPondokSantriToMadrasah(c)}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg cursor-pointer shrink-0 shadow-xs"
+                      >
+                        📥 Tarik Data
+                      </button>
+                    </div>
+                  ))}
+
+                  {hasSearchedPondok && pondokCandidates.length === 0 && !isSearchingPondok && (
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-center space-y-3">
+                      <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                        ⚠️ Data Siswi tidak ditemukan di Database Pondok Pesantren P3HM.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPondokPullModal(false);
+                          resetFormFields();
+                          setShowFormModal(true);
+                        }}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-xl shadow-md cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        🔓 Buka Form Input Manual Baru
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Form Modal (Tambah / Edit) */}
       <AnimatePresence>

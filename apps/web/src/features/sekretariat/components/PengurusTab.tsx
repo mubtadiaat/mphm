@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, Users, Briefcase, Trash2, Edit } from "lucide-react";
+import { Plus, X, Users, Briefcase, Trash2, Edit, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
@@ -12,6 +12,7 @@ import { usePengurus, Pengurus } from "../queries/usePengurus";
 import { getPositionsForJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { apiRequest } from "@/lib/api";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 
 const DEFAULT_PAGINATED_DATA = { data: [], total: 0 };
 
@@ -27,13 +28,26 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const [pengurusData, setPengurusData] = useState<Pengurus[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
+  let isPondokWorkspace = false;
+  try {
+    const ws = useWorkspace();
+    isPondokWorkspace = ws.activeWorkspace === "pondok";
+  } catch {}
+
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
   const { toast, confirm } = useToast();
   
   const [showModal, setShowModal] = useState(false);
   const [showJabatanModal, setShowJabatanModal] = useState(false);
+  const [showPondokPullModal, setShowPondokPullModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Pengurus | null>(null);
+
+  // Pondok Search States
+  const [pondokSearchQuery, setPondokSearchQuery] = useState("");
+  const [pondokCandidates, setPondokCandidates] = useState<any[]>([]);
+  const [isSearchingPondok, setIsSearchingPondok] = useState(false);
+  const [hasSearchedPondok, setHasSearchedPondok] = useState(false);
   
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -90,7 +104,41 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   };
 
   const handleOpenAdd = () => {
-    setEditingData(null); resetForm(); setShowModal(true);
+    if (!isPondokWorkspace) {
+      setPondokSearchQuery("");
+      setPondokCandidates([]);
+      setHasSearchedPondok(false);
+      setShowPondokPullModal(true);
+    } else {
+      setEditingData(null);
+      resetForm();
+      setShowModal(true);
+    }
+  };
+
+  const handleSearchPondokPeople = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pondokSearchQuery.trim()) return;
+    setIsSearchingPondok(true);
+    setHasSearchedPondok(true);
+    try {
+      const res = await apiRequest<{ data: any[] }>(`/api/admin/people?q=${encodeURIComponent(pondokSearchQuery)}&limit=20`);
+      if (res.data) setPondokCandidates(res.data);
+    } catch {
+      setPondokCandidates([]);
+    } finally {
+      setIsSearchingPondok(false);
+    }
+  };
+
+  const handlePullPondokPersonToPengurus = (candidate: any) => {
+    setEditingData(null);
+    resetForm();
+    setName(candidate.fullName || candidate.name || "");
+    setPhone(candidate.phoneNumber || candidate.phone || "");
+    setShowPondokPullModal(false);
+    setShowModal(true);
+    toast(`Data ${candidate.fullName} ditarik dari Pondok. Silakan atur Jabatan Pengurus.`, "info");
   };
 
   const handleOpenEdit = (item: Pengurus) => {
@@ -208,7 +256,8 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
               onClick={handleOpenAdd} 
               className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-sm font-black shadow-lg transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4" /> Tambah Pengurus
+              {!isPondokWorkspace ? <Search className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              <span>{!isPondokWorkspace ? "Tarik Data dari Pondok P3HM" : "Tambah Pengurus"}</span>
             </button>
           </div>
         )}
@@ -308,6 +357,86 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
                 <button type="button" onClick={() => setShowJabatanModal(false)} className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl cursor-pointer">
                   Selesai
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Tarik Data Pondok (Untuk Madrasah) */}
+      <AnimatePresence>
+        {showPondokPullModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setShowPondokPullModal(false)} />
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden">
+              <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-blue-50/50 dark:bg-blue-950/30">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-extrabold text-sm">
+                  <Search className="w-4 h-4" />
+                  <span>Penarikan Data Pengurus dari Database Pondok P3HM</span>
+                </div>
+                <button onClick={() => setShowPondokPullModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-lg"><X className="w-5 h-5"/></button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  Sesuai prinsip sistem: <strong>Pondok Input — Madrasah Tarik</strong>. Silakan cari NIK, Username, atau Nama Pengurus/Santri di database Pondok untuk didaftarkan sebagai Pengurus Madrasah.
+                </p>
+
+                <form onSubmit={handleSearchPondokPeople} className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ketik NIK / Username / Nama..."
+                    value={pondokSearchQuery}
+                    onChange={(e) => setPondokSearchQuery(e.target.value)}
+                    className="flex-1 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-hidden dark:text-white"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSearchingPondok}
+                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer shrink-0"
+                  >
+                    {isSearchingPondok ? "Mencari..." : "Cari di Pondok"}
+                  </button>
+                </form>
+
+                {/* Candidate Results */}
+                <div className="max-h-60 overflow-y-auto space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                  {pondokCandidates.map((c) => (
+                    <div key={c.id} className="p-3 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl flex items-center justify-between gap-3">
+                      <div>
+                        <span className="font-bold text-xs text-zinc-900 dark:text-white block">{c.fullName || c.name}</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">{c.phoneNumber || "No HP: -"} • NIK: {c.nik || "-"}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handlePullPondokPersonToPengurus(c)}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg cursor-pointer shrink-0 shadow-xs"
+                      >
+                        📥 Tarik Data
+                      </button>
+                    </div>
+                  ))}
+
+                  {hasSearchedPondok && pondokCandidates.length === 0 && !isSearchingPondok && (
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-center space-y-3">
+                      <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                        ⚠️ Data yang dicari tidak ditemukan di Database Pondok Pesantren P3HM.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPondokPullModal(false);
+                          setEditingData(null);
+                          resetForm();
+                          setShowModal(true);
+                        }}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-xl shadow-md cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        🔓 Buka Form Input Manual Baru
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           </div>
