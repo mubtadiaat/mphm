@@ -329,7 +329,11 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
 
   const handleOpenMutasi = (student: Santri) => {
     setMutasiSantriTarget(student);
-    setMutasiType("MUTATED");
+    if (student.residenceType !== "UNIT_LAIN") {
+      setMutasiType("GRADUATED");
+    } else {
+      setMutasiType((student.status as any) || "MUTATED");
+    }
     setMutasiNotes("");
     setShowMutasiModal(true);
   };
@@ -1086,28 +1090,46 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
               exit={{ scale: 0.95 }}
               className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl z-10 overflow-hidden"
             >
-              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-rose-50 dark:bg-rose-950/40">
-                <span className="font-bold text-sm text-rose-800 dark:text-rose-300">
-                  Mutasi &amp; Status Pembelajaran Siswi
+              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-indigo-50 dark:bg-indigo-950/40">
+                <span className="font-bold text-sm text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-blue-600" />
+                  Kewenangan Status Pembelajaran Siswi
                 </span>
                 <button onClick={() => setShowMutasiModal(false)} className="text-zinc-400 hover:text-zinc-600"><X className="w-5 h-5"/></button>
               </div>
               <form onSubmit={handleSaveMutasi} className="p-5 space-y-4">
+                {/* Banner Kewenangan Status */}
+                {mutasiSantriTarget.residenceType !== "UNIT_LAIN" ? (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed font-medium">
+                    🔒 <strong>Sinkronisasi Otomatis P3HM:</strong> Status Keaktifan (Aktif, Cuti, Keluar) disinkronkan otomatis dari Pondok P3HM. Pihak Madrasah berwenang menetapkan status <strong>Lulus / Alumni Diniyyah</strong>.
+                  </div>
+                ) : (
+                  <div className="p-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl text-[11px] text-purple-900 dark:text-purple-200 leading-relaxed font-medium">
+                    🔓 <strong>Siswi Asrama Luar / Non-P3HM:</strong> Kelola status keaktifan pembelajaran secara mandiri di Madrasah.
+                  </div>
+                )}
+
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Siswi</label>
                   <input type="text" readOnly value={mutasiSantriTarget.name} className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-xs font-bold dark:text-white" />
                 </div>
+
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Pilih Status Baru</label>
+                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Pilih Status Akademik Baru *</label>
                   <select
                     value={mutasiType}
                     onChange={(e) => setMutasiType(e.target.value as any)}
                     className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold dark:text-white cursor-pointer"
                   >
-                    <option value="CUTI">🌴 Cuti Pembelajaran Diniyyah</option>
-                    <option value="GRADUATED">🎓 Alumni / Lulus</option>
-                    <option value="MUTATED">🔄 Mutasi Pindah</option>
-                    <option value="DROPPED">❌ Keluar / Off</option>
+                    <option value="GRADUATED">🎓 Lulus / Alumni Diniyyah (Kewenangan Madrasah)</option>
+                    {mutasiSantriTarget.residenceType === "UNIT_LAIN" && (
+                      <>
+                        <option value="ACTIVE">✅ Aktif Pembelajaran</option>
+                        <option value="CUTI">🌴 Cuti Pembelajaran Diniyyah</option>
+                        <option value="MUTATED">🔄 Mutasi Pindah</option>
+                        <option value="DROPPED">❌ Keluar / Off</option>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div className="space-y-1">
@@ -1122,7 +1144,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
                   <button type="button" onClick={() => setShowMutasiModal(false)} className="px-4 py-2 text-xs font-bold text-zinc-500">Batal</button>
-                  <button type="submit" className="px-4 py-2 bg-rose-600 text-white font-extrabold text-xs rounded-xl shadow-md">Simpan Status</button>
+                  <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md">Simpan Perubahan Status</button>
                 </div>
               </form>
             </motion.div>
