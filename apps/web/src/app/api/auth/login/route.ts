@@ -5,8 +5,8 @@ import { createAuditLog } from "@/lib/auditLog";
 import { detectInstitutionFromRole } from "@/lib/institutionGuard";
 import bcrypt from "bcryptjs";
 
-// Tipe lengkap UserAccount dengan relasi person (hasil dari findFirst dengan include)
-type UserAccountFull = NonNullable<Awaited<ReturnType<typeof prisma.userAccount.findFirst<{ include: { person: true } }>>>>;
+// Cast helper: menghindari stale Prisma IDE types untuk field baru (institution)
+const db = prisma as any;
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     const cleanUsername = String(username).trim();
 
-    let userAccount: UserAccountFull | null = await prisma.userAccount.findFirst({
+    let userAccount: any = await db.userAccount.findFirst({
       where: {
         OR: [{ username: cleanUsername }, { email: cleanUsername }],
         deletedAt: null,

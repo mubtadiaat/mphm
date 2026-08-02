@@ -4,6 +4,9 @@ import { createAuditLog } from "@/lib/auditLog";
 import { requireAuthSession, getSessionInstitution } from "@/lib/apiGuard";
 import bcrypt from "bcryptjs";
 
+// Cast helper: menghindari stale Prisma IDE types untuk field baru (institution)
+const db = prisma as any;
+
 export async function GET(req: NextRequest) {
   try {
     const { session, errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
@@ -61,8 +64,8 @@ export async function GET(req: NextRequest) {
     }
 
     const [total, users] = await Promise.all([
-      prisma.userAccount.count({ where: whereCondition }),
-      prisma.userAccount.findMany({
+      db.userAccount.count({ where: whereCondition }),
+      db.userAccount.findMany({
         where: whereCondition,
         take: limit,
         skip: offset,
@@ -71,7 +74,7 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    const formatted = users.map((u) => {
+    const formatted = users.map((u: any) => {
       return {
         id: u.id,
         username: u.username,
@@ -120,7 +123,6 @@ export async function POST(req: NextRequest) {
     // Deteksi institution dari role yang diberikan, atau gunakan session institution
     const { detectInstitutionFromRole } = await import("@/lib/institutionGuard");
     const targetInstitution = role ? detectInstitutionFromRole(role) : sessionInstitution;
-
     // Pastikan sekretariat hanya bisa buat akun untuk instansinya sendiri (kecuali admin)
     if (sessionInstitution !== "ALL" && targetInstitution !== "ALL" && targetInstitution !== sessionInstitution) {
       return NextResponse.json(
@@ -143,7 +145,7 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password || "mphm123", 10);
 
-    const newUser = await prisma.userAccount.create({
+    const newUser = await db.userAccount.create({
       data: {
         personId: targetPersonId,
         username,

@@ -3,6 +3,9 @@ import { signJWT } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
 import { detectInstitutionFromRole } from "@/lib/institutionGuard";
 
+// Cast helper: menghindari stale Prisma IDE types untuk field baru (institution)
+const db = prisma as any;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -18,14 +21,11 @@ export async function POST(req: NextRequest) {
     const cleanEmail = String(email).toLowerCase().trim();
 
     // 1. Cari UserAccount berdasarkan email atau username
-    let account = await prisma.userAccount.findFirst({
+    let account = await db.userAccount.findFirst({
       where: {
-        OR: [
-          { email: cleanEmail },
-          { username: cleanEmail }
-        ]
+        OR: [{ email: cleanEmail }, { username: cleanEmail }],
       },
-      include: { person: true }
+      include: { person: true },
     });
 
     // 2. Jika user account belum ada, buat Person & UserAccount otomatis
@@ -35,10 +35,10 @@ export async function POST(req: NextRequest) {
           fullName: displayName || cleanEmail.split("@")[0],
           gender: "P",
           avatarUrl: photoUrl || null,
-        }
+        },
       });
 
-      account = await prisma.userAccount.create({
+      account = await db.userAccount.create({
         data: {
           personId: newPerson.id,
           username: cleanEmail.split("@")[0],
@@ -48,8 +48,15 @@ export async function POST(req: NextRequest) {
           passwordHash: "GOOGLE_OAUTH_ENTERPRISE_AUTHENTICATED",
           status: "ACTIVE",
         },
-        include: { person: true }
+        include: { person: true },
       });
+    }
+
+    if (!account) {
+      return NextResponse.json(
+        { status: "error", message: "Gagal membuat atau menemukan akun." },
+        { status: 500 }
+      );
     }
 
     // 3. Generate JWT Token resmi
@@ -80,7 +87,7 @@ export async function POST(req: NextRequest) {
         email: account.email,
         role: account.role,
         avatarUrl: account.person?.avatarUrl,
-      }
+      },
     });
   } catch (error: any) {
     console.error("GOOGLE_AUTH_GATEWAY_ERROR:", error);

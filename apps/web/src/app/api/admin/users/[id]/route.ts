@@ -4,6 +4,9 @@ import { requireAuthSession, getSessionInstitution } from "@/lib/apiGuard";
 import { canAccessCrossInstitution } from "@/lib/institutionGuard";
 import bcrypt from "bcryptjs";
 
+// Cast helper: menghindari stale Prisma IDE types untuk field baru (institution)
+const db = prisma as any;
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,9 +22,9 @@ export async function PUT(
     const { username, email, role, status, fullName, phone, password } = body;
 
     // Ambil akun target untuk validasi cross-institution
-    const targetAccount = await prisma.userAccount.findUnique({
+    const targetAccount = await db.userAccount.findUnique({
       where: { id },
-      select: { institution: true, username: true },
+      select: { id: true, institution: true, username: true },
     });
 
     if (!targetAccount) {
@@ -110,9 +113,9 @@ export async function DELETE(
     const force = searchParams.get("force") === "true";
 
     // Validasi cross-institution sebelum hapus
-    const targetAccount = await prisma.userAccount.findUnique({
+    const targetAccount = await db.userAccount.findUnique({
       where: { id },
-      select: { institution: true, username: true },
+      select: { id: true, institution: true, username: true },
     });
 
     if (!targetAccount) {
