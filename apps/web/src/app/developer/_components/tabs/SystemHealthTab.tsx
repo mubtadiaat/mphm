@@ -65,10 +65,32 @@ export function SystemHealthTab() {
       // ignore
     }
 
+    // Dynamically fetch real active classId from DB for assessment endpoints
+    let realClassId = "default";
+    try {
+      const classRes = await fetch("/api/admin/classes");
+      if (classRes.ok) {
+        const classJson = await classRes.json();
+        const classes = Array.isArray(classJson.data) ? classJson.data : Array.isArray(classJson) ? classJson : [];
+        if (classes.length > 0 && classes[0].id) {
+          realClassId = classes[0].id;
+        }
+      }
+    } catch {
+      // fallback
+    }
+
     const allResults: EndpointResult[] = [];
 
     for (let i = 0; i < ENDPOINTS_TO_CHECK.length; i++) {
       const ep = ENDPOINTS_TO_CHECK[i];
+      let targetEndpoint = ep.endpoint;
+
+      // Replace dummy classId with real active classId if available
+      if (targetEndpoint.includes("classId=default")) {
+        targetEndpoint = targetEndpoint.replace("classId=default", `classId=${realClassId}`);
+      }
+
       const start = performance.now();
       let status: number | null = null;
       let error: string | null = null;
@@ -76,7 +98,7 @@ export function SystemHealthTab() {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch(ep.endpoint, { signal: controller.signal });
+        const res = await fetch(targetEndpoint, { signal: controller.signal });
         clearTimeout(timeout);
         status = res.status;
         if (!res.ok) {
@@ -89,7 +111,7 @@ export function SystemHealthTab() {
       }
 
       const latency = Math.round(performance.now() - start);
-      allResults.push({ ...ep, status, latency, error });
+      allResults.push({ ...ep, endpoint: targetEndpoint, status, latency, error });
       setResults([...allResults]);
       setProgress(Math.round(((i + 1) / ENDPOINTS_TO_CHECK.length) * 100));
     }
