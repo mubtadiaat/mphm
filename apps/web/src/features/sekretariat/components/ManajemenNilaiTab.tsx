@@ -139,31 +139,29 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
   return (
     <div className="flex flex-col gap-6">
       {/* Header Halaman - Premium Gradient Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/20 dark:border-emerald-500/10 rounded-2xl flex flex-col sm:flex-row justify-between gap-6 shadow-sm">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row justify-between gap-6 shadow-xl text-white">
         <div className="flex flex-col gap-1.5 z-10 flex-1">
-          <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
             <ClipboardList className="w-4 h-4" />
-            <span>Manajemen Nilai Terpusat</span>
+            <span>Kewenangan Akademik Madrasah (MPHM)</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Audit & Koreksi Nilai Kwartal
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            Penilaian Akademik Siswi &amp; Koreksi Raport Diniyyah
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm max-w-xl">
-            Layar ini ditujukan bagi Sekretariat untuk memantau, mengaudit, dan mengoreksi nilai yang diinput oleh Mustahiq sebelum pencetakan rapor dan ijazah.
+          <p className="text-blue-100/90 text-xs sm:text-sm max-w-2xl leading-relaxed">
+            Alur Akademik: 1. Input Nilai oleh <strong>Mustahiq</strong> → 2. Persetujuan Nilai oleh <strong>Mufattish</strong> → 3. Penandatanganan Digital → 4. Penetapan Kenaikan Kelas Otomatis. Layar ini digunakan Operator Madrasah untuk memantau, mengaudit, dan mengoreksi nilai.
           </p>
         </div>
 
         {/* Filter Kelas & Kwartal */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 z-10 shrink-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 z-10 shrink-0 bg-white/10 p-3 rounded-2xl border border-white/20 backdrop-blur-md">
           {!fixedClass && (
             <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase">Filter Kelas</label>
+              <label className="text-[10px] font-black text-blue-100 uppercase tracking-wider">Pilih Kelas Rombel *</label>
               <select
                 value={selectedClassId}
                 onChange={(e) => setSelectedClassId(e.target.value)}
-                className="px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-zinc-100 font-semibold cursor-pointer"
+                className="px-3 py-2 bg-white text-zinc-900 rounded-xl text-xs font-bold focus:outline-hidden cursor-pointer shadow-md"
               >
                 {classes.map(cls => (
                   <option key={cls.id} value={cls.id}>{cls.name}</option>
@@ -173,19 +171,27 @@ export function ManajemenNilaiTab({ isReadOnly: propsIsReadOnly, selectedYearId,
           )}
           
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase">Pilih Kwartal</label>
+            <label className="text-[10px] font-black text-blue-100 uppercase tracking-wider">Kwartal Akademik *</label>
             <select
               value={selectedKwartal}
               onChange={(e) => setSelectedKwartal(parseInt(e.target.value))}
-              className="px-3 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-zinc-100 font-semibold cursor-pointer"
+              className="px-3 py-2 bg-white text-zinc-900 rounded-xl text-xs font-bold focus:outline-hidden cursor-pointer shadow-md"
             >
-              <option value={1}>Kwartal 1</option>
-              <option value={2}>Kwartal 2</option>
-              <option value={3}>Kwartal 3</option>
-              <option value={4}>Kwartal 4</option>
+              <option value={1}>Kwartal 1 (Ganjil Awal)</option>
+              <option value={2}>Kwartal 2 (Ganjil Akhir)</option>
+              <option value={3}>Kwartal 3 (Genap Awal)</option>
+              <option value={4}>Kwartal 4 (Genap Akhir / Final)</option>
             </select>
           </div>
         </div>
+      </div>
+
+      {/* Rules Info Notice Banner */}
+      <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex items-center gap-3 text-xs font-semibold text-blue-900 dark:text-blue-200 shadow-xs">
+        <span className="text-base">✨</span>
+        <span>
+          <strong>Ketentuan Penilaian Akademik:</strong> Penilaian Diniyyah sepenuhnya merupakan kewenangan Madrasah. Seluruh nilai yang sah akan dijadikan acuan utama pencetakan Raport, Ijazah, dan Kenaikan Kelas otomatis siswi.
+        </span>
       </div>
 
       {/* Auto-Save & Error Status */}
