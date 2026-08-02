@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Layers } from "lucide-react";
+import { Sparkles, BookOpen, Download } from "lucide-react";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
 
 interface GuidedEmptyStateProps {
@@ -21,7 +21,7 @@ export function GuidedEmptyState({
   prerequisiteStep,
   actionLabel,
   actionHref,
-  icon: IconComponent = Layers,
+  icon: IconComponent = BookOpen,
 }: GuidedEmptyStateProps) {
   let isPondok = false;
   try {
@@ -73,7 +73,7 @@ export function GuidedEmptyState({
         }`}
       >
         <span>{actionLabel}</span>
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        <Download className="w-4 h-4" />
       </Link>
     </motion.div>
   );

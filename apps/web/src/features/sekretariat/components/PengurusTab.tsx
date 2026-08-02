@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, Users, Briefcase, Search } from "lucide-react";
+import { Plus, X, Users, Briefcase, Search, BookOpen, Download, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
@@ -239,7 +239,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
       <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl text-white">
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
-            <Users className="w-4 h-4" />
+            <BookOpen className="w-4 h-4" />
             <span>Manajemen SDM Pengurus Madrasah (MPHM)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
@@ -256,13 +256,13 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
               onClick={() => setShowJabatanModal(true)} 
               className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold border border-white/20 transition-all cursor-pointer backdrop-blur-md"
             >
-              <Briefcase className="w-4 h-4" /> Kelola Jabatan ({pengurusTitles.length})
+              <BookOpen className="w-4 h-4" /> Kelola Jabatan ({pengurusTitles.length})
             </button>
             <button 
               onClick={handleOpenAdd} 
               className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs font-black shadow-lg transition-all cursor-pointer"
             >
-              {!isPondokWorkspace ? <Search className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              <Download className="w-4 h-4" />
               <span>{!isPondokWorkspace ? "Tarik Data dari Pondok P3HM" : "Tambah Pengurus"}</span>
             </button>
           </div>

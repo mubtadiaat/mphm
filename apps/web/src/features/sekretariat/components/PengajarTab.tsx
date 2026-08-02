@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, UserCheck, Info, Lock, CheckSquare, Square } from "lucide-react";
+import { Plus, X, UserCheck, Info, Lock, CheckSquare, Square, BookOpen, Download, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
@@ -253,7 +253,7 @@ export function PengajarTab({ onViewDetail, isReadOnly = false }: { onViewDetail
       <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl text-white">
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
-            <UserCheck className="w-4 h-4" />
+            <BookOpen className="w-4 h-4" />
             <span>Kewenangan Penuh Madrasah (MPHM)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
@@ -269,7 +269,7 @@ export function PengajarTab({ onViewDetail, isReadOnly = false }: { onViewDetail
               onClick={handleOpenAdd}
               className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 font-black text-xs rounded-xl shadow-md transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Download className="w-4 h-4" />
               <span>Tambah Pengajar Baru</span>
             </button>
           </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, BookOpen, Layers, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Plus, X, BookOpen, Layers, RefreshCw, CheckCircle2, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
@@ -257,7 +257,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
               onClick={handleOpenAdd}
               className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs font-black shadow-lg transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4" /> Tambah Mapel Custom
+              <Download className="w-4 h-4" /> Tambah Mapel Custom
             </button>
           </div>
         )}
