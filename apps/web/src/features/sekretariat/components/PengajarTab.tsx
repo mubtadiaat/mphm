@@ -118,9 +118,13 @@ export function PengajarTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     setIsSearchingPondok(true);
     setHasSearchedPondok(true);
     try {
-      const res = await apiRequest<{ data: any[] }>(`/api/admin/people?q=${encodeURIComponent(pondokSearchQuery)}&limit=20`);
+      const res = await apiRequest<{ data: any[] }>(`/api/admin/people?q=${encodeURIComponent(pondokSearchQuery)}&scope=pondok&limit=20`);
       if (res.data) {
-        setPondokCandidates(res.data);
+        const cleanList = res.data.filter((item: any) => {
+          const fn = (item.fullName || item.name || "").toLowerCase();
+          return !fn.includes("super admin") && !fn.includes("master developer") && !fn.includes("sekretariat madrasah") && !fn.includes("system admin") && !fn.includes("develzy");
+        });
+        setPondokCandidates(cleanList);
       }
     } catch {
       setPondokCandidates([]);

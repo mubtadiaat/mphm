@@ -465,18 +465,39 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ status: "Success", data: formatted, total });
     }
 
-    // Default: General People query
-    const whereCondition = {
+    // Default: General People query (Excludes System Admin, Master Developer, & System Accounts)
+    const whereCondition: any = {
       deletedAt: null,
-      ...(query
-        ? {
-            OR: [
-              { fullName: { contains: query, mode: "insensitive" as const } },
-              { nik: { contains: query, mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
+      NOT: [
+        { fullName: { contains: "Super Admin", mode: "insensitive" as const } },
+        { fullName: { contains: "Master Developer", mode: "insensitive" as const } },
+        { fullName: { contains: "Sekretariat Madrasah", mode: "insensitive" as const } },
+        { fullName: { contains: "System Admin", mode: "insensitive" as const } },
+        { fullName: { contains: "Develzy", mode: "insensitive" as const } },
+      ],
+      OR: [
+        { userAccount: { is: null } },
+        {
+          userAccount: {
+            role: {
+              notIn: ["SUPER_ADMIN", "DEVELOPER", "DEV", "ADMIN_SYSTEM", "ADMIN"],
+            },
+          },
+        },
+      ],
     };
+
+    if (query) {
+      whereCondition.AND = [
+        ...(whereCondition.AND || []),
+        {
+          OR: [
+            { fullName: { contains: query, mode: "insensitive" as const } },
+            { nik: { contains: query, mode: "insensitive" as const } },
+          ],
+        },
+      ];
+    }
 
     const [total, list] = await Promise.all([
       prisma.person.count({ where: whereCondition }),
