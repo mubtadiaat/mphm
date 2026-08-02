@@ -83,8 +83,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
     group: "B. TENAGA PENGAJAR & PENGURUS",
     items: [
       { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
-      { label: "Mustahiq", href: "/sekretariat/mustahiq", icon: Users },
-      { label: "Munawwib", href: "/sekretariat/munawwib", icon: Users },
+      { label: "Data Pengajar (Mustahiq & Munawwib)", href: "/sekretariat/mustahiq", icon: UserCheck },
     ]
   },
   {

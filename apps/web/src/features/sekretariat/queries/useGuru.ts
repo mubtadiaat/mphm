@@ -7,6 +7,7 @@ export interface Guru {
   name: string;
   teacherCode: string;
   role?: string;
+  roleName?: string;
   jenjang?: string;
   tingkat?: string;
   lokal?: string;
