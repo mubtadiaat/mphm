@@ -161,7 +161,7 @@ export default function Page() {
 
   const loginOptions = [
     {
-      title: "Sekretariat Madrasah",
+      title: "Sekretariat",
       roleLabel: "Sekretaris & Admin Sistem",
       href: "/loginsekr",
       badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",
@@ -170,16 +170,16 @@ export default function Page() {
       icon: ShieldCheck,
     },
     {
-      title: "Mustahiq (Wali Kelas)",
+      title: "Mustahiq",
       roleLabel: "Wali Kelas Diniyyah",
-      href: "/loginStaff",
+      href: "/loginmustahiq",
       badgeColor: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
       btnColor: "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-900/50",
       desc: "Input nilai kwartal harian, presensi kehadiran siswi kelas, dan audit kenaikan kelas.",
       icon: UserCheck,
     },
     {
-      title: "Pengurus Madrasah",
+      title: "Pengurus",
       roleLabel: "Pengurus & Tenaga Pengajar",
       href: "/loginStaff",
       badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
@@ -267,7 +267,7 @@ export default function Page() {
             Sekretariat
           </a>
           <a
-            href="/loginStaff"
+            href="/loginmustahiq"
             className="px-3.5 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 text-xs font-semibold transition-all"
           >
             Mustahiq
@@ -686,7 +686,7 @@ export default function Page() {
               Sekretariat
             </a>
             <span>•</span>
-            <a href="/loginStaff" className="hover:text-indigo-400 transition-colors">
+            <a href="/loginmustahiq" className="hover:text-indigo-400 transition-colors">
               Mustahiq
             </a>
             <span>•</span>
