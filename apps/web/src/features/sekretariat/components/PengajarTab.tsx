@@ -325,8 +325,8 @@ export function PengajarTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         onRowClick={(row) => setViewingDetail(row as unknown as Guru)}
         tableName="pengajar"
         importExportProps={{
-          title: "Data Pengajar",
-          headers: ["Nama Lengkap Pengajar", "No. HP / WhatsApp", "Mustahiq Wali Kelas", "Munawwib Mapel & Kelas"],
+          title: "Data Pengajar Diniyyah",
+          headers: ["Nama_Pengajar", "NIK_KTP", "No_HP", "Jenjang_Tingkat_Baku", "Lokal_Ruang", "Peran_Utama", "Mapel_Munawwib", "Status"],
           onExportFetchAll: async () => {
             let url = `/api/admin/people?role=teacher&limit=10000&offset=0`;
             if (searchQuery) url += `&q=${encodeURIComponent(searchQuery)}`;
@@ -336,23 +336,34 @@ export function PengajarTab({ onViewDetail, isReadOnly = false }: { onViewDetail
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
-              const nameVal = r["Nama Lengkap Pengajar"] || r["Nama Lengkap"] || r["nama"] || "";
+              const nameVal = r["Nama_Pengajar"] || r["Nama Lengkap Pengajar"] || r["Nama Lengkap"] || r["nama"] || "";
               if (!nameVal.trim()) continue;
-              const phoneVal = r["No. HP / WhatsApp"] || r["phone"] || "";
+              const phoneVal = r["No_HP"] || r["No. HP / WhatsApp"] || r["phone"] || "";
+              const jenjangTingkat = r["Jenjang_Tingkat_Baku"] || r["Mustahiq Wali Kelas"] || "Ibtida'iyyah I";
+              const lokalRuang = r["Lokal_Ruang"] || "A";
+              const mapel = r["Mapel_Munawwib"] || "";
+
+              let fullRole = `Mustahiq ${jenjangTingkat}-${lokalRuang}`;
+              if (mapel && mapel !== "-") {
+                fullRole += ` & Munawwib ${mapel}`;
+              }
+
               try {
                 await createGuru({
                   name: nameVal,
                   phone: phoneVal,
-                  roleName: "Pengajar Diniyyah",
+                  roleName: fullRole,
                   gender: "L",
                 });
+                await addPosisiToJabatan("Mustahiq", `${jenjangTingkat}-${lokalRuang}`.trim(), "MADRASAH");
                 count++;
               } catch (err) {
                 console.error("Import row failed:", err);
               }
             }
             if (count > 0) {
-              toast(`Berhasil mengimpor ${count} data Pengajar!`, "success", "Import Berhasil");
+              await apiRequest("/api/admin/classes").catch(() => {});
+              toast(`Berhasil mengimpor ${count} data Pengajar! Kelas Rombel terisi otomatis di database.`, "success", "Import Berhasil");
             }
           }
         }}

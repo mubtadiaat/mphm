@@ -21,12 +21,12 @@ const OFFICIAL_TEMPLATES: ExcelTemplateDef[] = [
     category: "Master Data Santri",
     defaultMenuPath: "/sekretariat/santri",
     fileName: "Template_Impor_Santriwati_MPHM_P3HM.csv",
-    columns: ["NIS", "NISN", "NIK", "Nama_Lengkap", "Tempat_Lahir", "Tanggal_Lahir_YYYY-MM-DD", "Gender_L_P", "No_HP_Wali", "Alamat_Lengkap", "Status_Mukim", "Nama_Blok", "Nama_Kamar"],
+    columns: ["NIS", "NISN", "NIK", "Nama_Lengkap", "Tempat_Lahir", "Tanggal_Lahir_YYYY-MM-DD", "Gender_L_P", "No_HP_Wali", "Alamat_Lengkap", "Status_Mukim", "Nama_Blok", "Nama_Kamar", "Kelas_Rombel_Diniyyah"],
     sampleData: [
-      ["2026001", "0051234567", "3506123456780001", "Siti Maryam Al-Zahra", "Kediri", "2008-05-12", "P", "081234567890", "Jl. KH. Abdul Karim No. 1 Lirboyo", "ASRAMA_PONDOK", "Blok Fatimah", "Fatimah 02"],
-      ["2026002", "0051234568", "3506123456780002", "Khadijah Az-Zahra", "Nganjuk", "2008-08-20", "P", "081987654321", "Jl. Sunan Ampel Lirboyo", "ASRAMA_PONDOK", "Blok Aisyah", "Aisyah 01"],
+      ["2026001", "0051234567", "3506123456780001", "Siti Maryam Al-Zahra", "Kediri", "2008-05-12", "P", "081234567890", "Jl. KH. Abdul Karim No. 1 Lirboyo", "ASRAMA_PONDOK", "Blok Fatimah", "Fatimah 02", "Ibtida'iyyah I-A"],
+      ["2026002", "0051234568", "3506123456780002", "Khadijah Az-Zahra", "Nganjuk", "2008-08-20", "P", "081987654321", "Jl. Sunan Ampel Lirboyo", "ASRAMA_PONDOK", "Blok Aisyah", "Aisyah 01", "Tsanawiyyah III-B"],
     ],
-    description: "Template standar untuk mengunggah biodata santriwati baru atau pemutakhiran data massal.",
+    description: "Template standar pengunggahan masal biodata santriwati/siswi. Format Kelas Rombel Baku: [Jenjang-Tingkat]-[Lokal] (Contoh: Ibtida'iyyah I-A, Tsanawiyyah III-B, Al-Rabithoh-A).",
   },
   {
     id: "tpl_pengurus",
@@ -34,25 +34,26 @@ const OFFICIAL_TEMPLATES: ExcelTemplateDef[] = [
     category: "Organisasi & Pengurus",
     defaultMenuPath: "/sekretariat/pengurus",
     fileName: "Template_Impor_Pengurus_P3HM_Lirboyo.csv",
-    columns: ["Username", "Nama_Lengkap", "Gender_L_P", "Role_Jabatan", "Instansi", "No_HP", "Email"],
+    columns: ["Username", "Nama_Lengkap", "Gender_L_P", "Role_Jabatan", "Instansi_P3HM_atau_MPHM", "No_HP", "Email"],
     sampleData: [
       ["pengurus_pondok1", "Ning Hj. Hamidah", "P", "Ketua Pengurus Pondok", "P3HM Lirboyo", "081234567890", "hamidah@p3hm.org"],
       ["pengurus_madrasah1", "Ustadz Ahmad Mudrik", "L", "Mustahiq Utama", "MPHM Lirboyo", "081987654321", "mudrik@mphm.org"],
     ],
-    description: "Template impor pengurus pondok P3HM dan madrasah MPHM.",
+    description: "Template impor masal pengurus pondok P3HM dan madrasah MPHM.",
   },
   {
     id: "tpl_mustahiq",
     name: "Template Impor Data Pengajar Diniyyah",
     category: "Akademik & Pengajar",
     defaultMenuPath: "/sekretariat/pengajar",
-    fileName: "Template_Impor_Mustahiq_Guru_MPHM.csv",
-    columns: ["Nama_Guru", "NIK", "No_HP", "Jenjang_Diniyyah", "Kelas_Ampuan", "Status"],
+    fileName: "Template_Impor_Pengajar_Diniyyah_MPHM.csv",
+    columns: ["Nama_Pengajar", "NIK_KTP", "No_HP", "Jenjang_Tingkat_Baku", "Lokal_Ruang", "Peran_Utama", "Mapel_Munawwib", "Status"],
     sampleData: [
-      ["Ustadz Abdullah Faqih", "3506123456780003", "081333444555", "Ibtida'iyyah", "3 Ula Diniyyah", "ACTIVE"],
-      ["Ustadzah Fatimah Khadijah", "3506123456780004", "081666777888", "Tsanawiyyah", "1 Ulya Diniyyah", "ACTIVE"],
+      ["Ustadz Abdullah Faqih", "3506123456780003", "081333444555", "Ibtida'iyyah I", "A", "MUSTAHIQ_DAN_MUNAWWIB", "Fathul Qorib", "ACTIVE"],
+      ["Ustadzah Fatimah Khadijah", "3506123456780004", "081666777888", "Tsanawiyyah III", "B", "MUSTAHIQ", "-", "ACTIVE"],
+      ["Ustadz Ahmad Mudrik", "3506123456780005", "081999000111", "Al-Rabithoh", "A", "MUNAWWIB", "Alfiyyah Ibnu Malik", "ACTIVE"],
     ],
-    description: "Template pendaftaran wali kelas & pengajar diniyyah.",
+    description: "Template impor dewan pengajar. Pilihan Jenjang Baku: I'dadiyyah I-III, Ibtida'iyyah I-III, Tsanawiyyah I-VI, Aliyyah I-III, Al-Rabithoh. Kelas Rombel terisi & dibuat otomatis di database!",
   },
   {
     id: "tpl_nilai",
@@ -60,12 +61,12 @@ const OFFICIAL_TEMPLATES: ExcelTemplateDef[] = [
     category: "Penilaian & Raport",
     defaultMenuPath: "/sekretariat/penilaian",
     fileName: "Template_Impor_Nilai_Kwartal_Diniyyah.csv",
-    columns: ["NIS", "Nama_Siswi", "Kode_Mapel", "Nama_Mapel", "Kwartal_1", "Kwartal_2", "Kwartal_3", "Kwartal_4"],
+    columns: ["NIS", "Nama_Siswi", "Kelas_Rombel", "Kode_Mapel", "Nama_Mapel", "Kwartal_1", "Kwartal_2", "Kwartal_3", "Kwartal_4"],
     sampleData: [
-      ["2026001", "Siti Maryam Al-Zahra", "MPL-001", "Fathul Qorib", "85", "88", "90", "92"],
-      ["2026002", "Khadijah Az-Zahra", "MPL-002", "Alfiyyah Ibnu Malik", "78", "82", "85", "88"],
+      ["2026001", "Siti Maryam Al-Zahra", "Ibtida'iyyah I-A", "MPL-001", "Fathul Qorib", "85", "88", "90", "92"],
+      ["2026002", "Khadijah Az-Zahra", "Tsanawiyyah III-B", "MPL-002", "Alfiyyah Ibnu Malik", "78", "82", "85", "88"],
     ],
-    description: "Template upload masal nilai kwartal santriwati per mata pelajaran.",
+    description: "Template upload masal nilai kwartal santriwati per mata pelajaran dan rombel kelas.",
   },
   {
     id: "tpl_kamar",
@@ -138,7 +139,18 @@ export function ExcelTemplateManagerTab() {
 
   // Generate & Download CSV/XLS File
   const downloadTemplateFile = (tpl: ExcelTemplateDef) => {
+    const headerNotes = [
+      `# ========================================================================================`,
+      `# PETUNJUK PENULISAN & ATURAN SISTEM: ${tpl.name.toUpperCase()}`,
+      `# DESKRIPSI: ${tpl.description}`,
+      `# PILIHAN BAKU JENJANG & TINGKAT: I'dadiyyah I-III | Ibtida'iyyah I-III | Tsanawiyyah I-VI | Aliyyah I-III | Al-Rabithoh`,
+      `# CONTOH FORMAT KELAS ROMBEL: Ibtida'iyyah I-A, Tsanawiyyah III-B, Al-Rabithoh-A`,
+      `# MOHON TIDAK MENGUBAH BARIS HEADER NAMA KOLOM DI BAWAH INI!`,
+      `# ========================================================================================`,
+    ];
+
     const csvContent = [
+      ...headerNotes,
       tpl.columns.join(","),
       ...tpl.sampleData.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(",")),
     ].join("\n");
