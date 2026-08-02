@@ -5,14 +5,44 @@ export interface StructuralJabatan {
   posisiList: string[];
 }
 
+export const PONDOK_PENGURUS_JABATAN_LIST = [
+  "Pimpinan Umum",
+  "Pimpinan 1",
+  "Pimpinan 2",
+  "Pimpinan 3",
+  "Pimpinan 4",
+  "Sekretaris Umum",
+  "Sekretaris 1",
+  "Sekretaris 2",
+  "Sekretaris 3",
+  "Bendahara",
+  "Keuangan 1",
+  "Keuangan 2",
+  "Keuangan 3"
+];
+
+export const MADRASAH_PENGURUS_JABATAN_LIST = [
+  "Pimpinan Umum",
+  "Pimpinan 1",
+  "Pimpinan 2",
+  "Pimpinan 3",
+  "Sekretaris Umum",
+  "Sekretaris 1",
+  "Sekretaris 2",
+  "Sekretaris 3",
+  "Bendahara",
+  "Keuangan 1",
+  "Keuangan 2"
+];
+
 export const DEFAULT_STRUCTURAL_JABATAN: StructuralJabatan[] = [
   // Madrasah Diniyyah (MPHM) Default Categories
-  { id: "mad-pengurus", institution: "MADRASAH", jabatan: "Pengurus", posisiList: [] },
+  { id: "mad-pengurus", institution: "MADRASAH", jabatan: "Pengurus", posisiList: MADRASAH_PENGURUS_JABATAN_LIST },
   { id: "mad-mustahiq", institution: "MADRASAH", jabatan: "Mustahiq", posisiList: [] },
   { id: "mad-munawwib", institution: "MADRASAH", jabatan: "Munawwib", posisiList: [] },
 
   // Pondok Pesantren (P3HM) Default Categories
-  { id: "pon-pengurus", institution: "PONDOK", jabatan: "Pengurus", posisiList: [] },
+  { id: "pon-pengurus", institution: "PONDOK", jabatan: "Pengurus", posisiList: PONDOK_PENGURUS_JABATAN_LIST },
 ];
 
 export function getStoredStructuralJabatan(): StructuralJabatan[] {

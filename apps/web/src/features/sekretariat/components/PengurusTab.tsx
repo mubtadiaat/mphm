@@ -1,15 +1,17 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, Users, Briefcase, Trash2, Edit, Search } from "lucide-react";
+import { Plus, X, Users, Briefcase, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
 import { useToast } from "@/components/shared/ToastContext";
 
 import { usePengurus, Pengurus } from "../queries/usePengurus";
-import { getPositionsForJabatan, addPosisiToJabatan } from "@/config/jobPositions.config";
+import {
+  PONDOK_PENGURUS_JABATAN_LIST,
+  MADRASAH_PENGURUS_JABATAN_LIST,
+  addPosisiToJabatan
+} from "@/config/jobPositions.config";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { apiRequest } from "@/lib/api";
 import { useWorkspace } from "@/components/shared/WorkspaceContext";
@@ -34,6 +36,8 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
     isPondokWorkspace = ws.activeWorkspace === "pondok";
   } catch {}
 
+  const activePositionList = isPondokWorkspace ? PONDOK_PENGURUS_JABATAN_LIST : MADRASAH_PENGURUS_JABATAN_LIST;
+
   const { data: remoteData = DEFAULT_PAGINATED_DATA, isLoading, createPengurus, updatePengurus, deletePengurus } = usePengurus(searchQuery, pageIndex, pageSize);
   const { toast, confirm } = useToast();
   
@@ -42,6 +46,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const [showPondokPullModal, setShowPondokPullModal] = useState(false);
   const [editingData, setEditingData] = useState<Pengurus | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Pengurus | null>(null);
+  const [isPulledFromPondok, setIsPulledFromPondok] = useState(false);
 
   // Pondok Search States
   const [pondokSearchQuery, setPondokSearchQuery] = useState("");
@@ -55,13 +60,12 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const [newJabatanName, setNewJabatanName] = useState("");
 
   const [pengurusTitles, setPengurusTitles] = useState<string[]>(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("mphm_custom_pengurus_jabatan") : null;
-    if (saved) {
-      try { return JSON.parse(saved); } catch {}
-    }
-    const defaults = getPositionsForJabatan("Pengurus Harian", "PONDOK");
-    return defaults.length > 0 ? defaults : ["Ketua Pengurus", "Penasehat", "Pembina Kamar (Musyrifah)", "Sekretaris", "Bendahara", "Keamanan", "Pendidikan"];
+    return activePositionList;
   });
+
+  useEffect(() => {
+    setPengurusTitles(activePositionList);
+  }, [isPondokWorkspace, activePositionList]);
 
   useEffect(() => {
     if (remoteData) {
@@ -85,8 +89,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
 
     const updated = [...pengurusTitles, title];
     setPengurusTitles(updated);
-    localStorage.setItem("mphm_custom_pengurus_jabatan", JSON.stringify(updated));
-    await addPosisiToJabatan("Pengurus Harian", title, "PONDOK");
+    await addPosisiToJabatan("Pengurus", title, isPondokWorkspace ? "PONDOK" : "MADRASAH");
     setNewJabatanName("");
     toast(`Jabatan "${title}" berhasil ditambahkan!`, "success");
   };
@@ -95,12 +98,12 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const handleDeleteJabatan = (titleToDelete: string) => {
     const updated = pengurusTitles.filter(t => t !== titleToDelete);
     setPengurusTitles(updated);
-    localStorage.setItem("mphm_custom_pengurus_jabatan", JSON.stringify(updated));
     toast(`Jabatan "${titleToDelete}" dihapus dari opsi.`, "info");
   };
 
   const resetForm = () => {
     setName(""); setPhone(""); setRole("");
+    setIsPulledFromPondok(false);
   };
 
   const handleOpenAdd = () => {
@@ -134,15 +137,19 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
   const handlePullPondokPersonToPengurus = (candidate: any) => {
     setEditingData(null);
     resetForm();
+    setIsPulledFromPondok(true);
     setName(candidate.fullName || candidate.name || "");
     setPhone(candidate.phoneNumber || candidate.phone || "");
+    // Jabatan TIDAK disalin dari Pondok, operator WAJIB memilih Jabatan Madrasah
+    setRole("");
     setShowPondokPullModal(false);
     setShowModal(true);
-    toast(`Data ${candidate.fullName} ditarik dari Pondok. Silakan atur Jabatan Pengurus.`, "info");
+    toast(`✅ Identitas ${candidate.fullName} ditarik dari Pondok. Silakan pilih Jabatan Pengurus Madrasah!`, "info");
   };
 
   const handleOpenEdit = (item: Pengurus) => {
     setEditingData(item);
+    setIsPulledFromPondok(false);
     setName(item.name); setPhone(item.phone || ""); setRole(item.role || "");
     setShowModal(true);
   };
@@ -166,19 +173,13 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
     }
   };
 
-  const formatFullRole = (pos: string, defaultJabatan: string) => {
-    if (!pos || !pos.trim()) return defaultJabatan;
-    const p = pos.trim();
-    if (p.toLowerCase().includes("pengurus") || p.toLowerCase().includes("harian") || p.toLowerCase().includes("pleno") || p.toLowerCase().includes("penasihat") || p.toLowerCase().includes("musyrifah")) return p;
-    return `${defaultJabatan} ${p}`;
-  };
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return toast("Nama Lengkap wajib diisi", "warning");
     if (!phone.trim()) return toast("Nomor WhatsApp Aktif wajib diisi", "warning");
+    if (!role.trim()) return toast("Jabatan Pengurus wajib dipilih!", "warning");
 
-    const fullRole = formatFullRole(role, "Pengurus");
+    const fullRole = role.trim();
 
     try {
       if (editingData) {
@@ -192,8 +193,7 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
         if (role && !pengurusTitles.includes(role)) {
           const updated = [...pengurusTitles, role];
           setPengurusTitles(updated);
-          localStorage.setItem("mphm_custom_pengurus_jabatan", JSON.stringify(updated));
-          await addPosisiToJabatan("Pengurus Harian", role, "PONDOK");
+          await addPosisiToJabatan("Pengurus", role, isPondokWorkspace ? "PONDOK" : "MADRASAH");
         }
         toast("Pengurus baru berhasil didaftarkan!", "success");
       }
@@ -454,21 +454,47 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
                 <button onClick={() => setShowModal(false)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-md cursor-pointer"><X className="w-5 h-5"/></button>
               </div>
               <form onSubmit={handleSave} className="p-6 space-y-4">
+                {isPulledFromPondok && (
+                  <div className="p-3.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-2xl text-xs text-blue-900 dark:text-blue-200 leading-relaxed font-medium shadow-xs">
+                    🔒 <strong>Sinkronisasi Identitas P3HM:</strong> Data Identitas ditarik otomatis dari Pondok. Jabatan Pengurus Pondok <strong>TIDAK disalin</strong> karena merupakan kewenangan masing-masing instansi. Silakan pilih <strong>Jabatan Pengurus Madrasah</strong> di bawah ini.
+                  </div>
+                )}
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-500 uppercase">Nama Lengkap Pengurus *</label>
-                  <input required value={name} onChange={e => setName(e.target.value)} placeholder="Nama Lengkap beserta Gelar" className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white outline-none" />
+                  <input
+                    required
+                    disabled={isPulledFromPondok}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Nama Lengkap beserta Gelar"
+                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white outline-none disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                  />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-500 uppercase">No. WhatsApp Aktif *</label>
-                  <input required value={phone} onChange={e => setPhone(e.target.value)} placeholder="+6281234567890" className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
+                  <input
+                    required
+                    disabled={isPulledFromPondok}
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    placeholder="+6281234567890"
+                    className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                  />
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-bold text-zinc-500 uppercase">Jabatan / Posisi Pengurus *</label>
-                    <button type="button" onClick={() => setShowJabatanModal(true)} className="text-[10px] font-bold text-blue-500 hover:underline cursor-pointer">+ Tambah Jabatan Baru</button>
+                    <label className="text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase">
+                      Jabatan Pengurus {isPondokWorkspace ? "Pondok (P3HM)" : "Madrasah (MPHM)"} *
+                    </label>
+                    <button type="button" onClick={() => setShowJabatanModal(true)} className="text-[10px] font-bold text-blue-500 hover:underline cursor-pointer">+ Kelola Jabatan</button>
                   </div>
-                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-bold text-zinc-900 dark:text-white outline-none cursor-pointer">
-                    <option value="">-- Pilih Jabatan Pengurus --</option>
+                  <select
+                    required
+                    value={role}
+                    onChange={e => setRole(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-blue-50/60 dark:bg-blue-950/40 border-2 border-blue-500 rounded-xl text-sm font-black text-blue-900 dark:text-blue-200 outline-none cursor-pointer"
+                  >
+                    <option value="">-- WAJIB PILIH JABATAN PENGURUS --</option>
                     {pengurusTitles.map((title) => (
                       <option key={title} value={title}>{title}</option>
                     ))}
