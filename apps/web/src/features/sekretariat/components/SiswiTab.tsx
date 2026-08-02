@@ -418,12 +418,23 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
       id: "actions",
       header: "Aksi Management",
       cell: (info) => (
-        <TableActions
-          onEdit={() => handleOpenEdit(info.row.original)}
-          onDelete={() => handleDeleteSantri(info.row.original.id)}
-          onMutasi={() => handleOpenMutasi(info.row.original)}
-          isReadOnly={isReadOnly}
-        />
+        <div className="flex items-center gap-2 justify-end">
+          {activeSubTab === "tanpa_kelas" && !isReadOnly && (
+            <button
+              onClick={() => handleOpenEdit(info.row.original)}
+              className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-[11px] rounded-lg shadow-xs flex items-center gap-1 cursor-pointer"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Penempatan Kelas</span>
+            </button>
+          )}
+          <TableActions
+            onEdit={() => handleOpenEdit(info.row.original)}
+            onDelete={() => handleDeleteSantri(info.row.original.id)}
+            onMutasi={() => handleOpenMutasi(info.row.original)}
+            isReadOnly={isReadOnly}
+          />
+        </div>
       ),
     },
   ];
@@ -760,7 +771,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                         <Home className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span>Data Siswi Ditarik dari Santriwati Pondok P3HM Lirboyo (Stambuk: {newStambuk})</span>
                       </div>
-                      <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider">Terhubung P3HM</span>
+                      <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider">🔒 Identitas Terhubung P3HM</span>
                     </div>
                   ) : (
                     <div className="p-4 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-2xl space-y-3 text-xs shadow-xs">
@@ -844,144 +855,172 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                 </div>
 
                 {/* I. INFORMASI PRIBADI */}
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 border-b border-zinc-200 dark:border-zinc-800 pb-2 flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    I. INFORMASI PRIBADI
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Siswi *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                        placeholder="Masukkan nama lengkap sesuai ijazah/KTP..."
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
-                      />
-                    </div>
+                {(() => {
+                  const isFromPondok = Boolean(selectedPondokSantriId || (editingSantri && editingSantri.residenceType !== "UNIT_LAIN"));
+                  return (
+                    <>
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 border-b border-zinc-200 dark:border-zinc-800 pb-2 flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <User className="w-4 h-4" />
+                            I. INFORMASI PRIBADI
+                          </span>
+                          {isFromPondok && (
+                            <span className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800">
+                              🔒 Identitas Dikunci (Sinkron P3HM)
+                            </span>
+                          )}
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Siswi *</label>
+                            <input
+                              type="text"
+                              required
+                              disabled={isFromPondok}
+                              value={newName}
+                              onChange={(e) => setNewName(e.target.value)}
+                              placeholder="Masukkan nama lengkap..."
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                            />
+                          </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NIK Siswi (16 Digit) *</label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={16}
-                        value={newNik}
-                        onChange={(e) => setNewNik(e.target.value)}
-                        placeholder="350301..."
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
-                      />
-                    </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NIK Siswi (16 Digit) *</label>
+                            <input
+                              type="text"
+                              required
+                              disabled={isFromPondok}
+                              maxLength={16}
+                              value={newNik}
+                              onChange={(e) => setNewNik(e.target.value)}
+                              placeholder="350301..."
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                            />
+                          </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Tempat Lahir</label>
-                      <input
-                        type="text"
-                        value={newBirthPlace}
-                        onChange={(e) => setNewBirthPlace(e.target.value)}
-                        placeholder="Kota / Kabupaten tempat lahir..."
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
-                      />
-                    </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Tempat Lahir</label>
+                            <input
+                              type="text"
+                              disabled={isFromPondok}
+                              value={newBirthPlace}
+                              onChange={(e) => setNewBirthPlace(e.target.value)}
+                              placeholder="Kota tempat lahir..."
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                            />
+                          </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Tanggal Lahir</label>
-                      <input
-                        type="date"
-                        value={newBirthDate}
-                        onChange={(e) => setNewBirthDate(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
-                      />
-                    </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Tanggal Lahir</label>
+                            <input
+                              type="date"
+                              disabled={isFromPondok}
+                              value={newBirthDate}
+                              onChange={(e) => setNewBirthDate(e.target.value)}
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                            />
+                          </div>
 
-                    <div className="space-y-1 md:col-span-2">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WA Siswi</label>
-                      <input
-                        type="text"
-                        value={newPhoneNumber}
-                        onChange={(e) => setNewPhoneNumber(e.target.value)}
-                        placeholder="081234567890"
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WA Siswi</label>
+                            <input
+                              type="text"
+                              disabled={isFromPondok}
+                              value={newPhoneNumber}
+                              onChange={(e) => setNewPhoneNumber(e.target.value)}
+                              placeholder="081234567890"
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-blue-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                {/* II. DATA AKADEMIS */}
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 border-b border-zinc-200 dark:border-zinc-800 pb-2 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
-                    II. DATA AKADEMIS &amp; KELAS DINIYYAH
-                  </h4>
+                      {/* II. DATA AKADEMIS */}
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 border-b border-zinc-200 dark:border-zinc-800 pb-2 flex items-center gap-2">
+                          <BookOpen className="w-4 h-4" />
+                          II. DATA AKADEMIS &amp; PENEMPATAN KELAS DINIYYAH
+                        </h4>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nomor Stambuk Induk *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newStambuk}
-                        onChange={(e) => setNewStambuk(e.target.value)}
-                        placeholder="2026001"
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"
-                      />
-                    </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nomor Stambuk Induk *</label>
+                            <input
+                              type="text"
+                              required
+                              disabled={isFromPondok}
+                              value={newStambuk}
+                              onChange={(e) => setNewStambuk(e.target.value)}
+                              placeholder="2026001"
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed"
+                            />
+                          </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NIS (Nomor Induk Siswi)</label>
-                      <input
-                        type="text"
-                        value={newNis}
-                        onChange={(e) => setNewNis(e.target.value)}
-                        placeholder="NIS Madrasah..."
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"
-                      />
-                    </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NIS (Nomor Induk Siswi)</label>
+                            <input
+                              type="text"
+                              value={newNis}
+                              onChange={(e) => setNewNis(e.target.value)}
+                              placeholder="NIS Madrasah..."
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"
+                            />
+                          </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NISN (Nomor Induk Siswi Nasional)</label>
-                      <input
-                        type="text"
-                        value={newNisn}
-                        onChange={(e) => setNewNisn(e.target.value)}
-                        placeholder="0041234567"
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"
-                      />
-                    </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NISN (Nomor Induk Siswi Nasional)</label>
+                            <input
+                              type="text"
+                              value={newNisn}
+                              onChange={(e) => setNewNisn(e.target.value)}
+                              placeholder="0041234567"
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-emerald-500 outline-none dark:text-white"
+                            />
+                          </div>
 
-                    <div className="space-y-1 md:col-span-2">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Penempatan Kelas &amp; Rombel Diniyyah *</label>
-                      <select
-                        value={newClass}
-                        onChange={(e) => setNewClass(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-blue-700 dark:text-blue-400 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
-                      >
-                        {dbClasses.map((cls) => (
-                          <option key={cls.id} value={cls.name}>
-                            {cls.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                          {/* KELAS & LOKAL: KEWENANGAN MUTLAK MADRASAH */}
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-xs font-extrabold text-blue-700 dark:text-blue-400 flex items-center justify-between">
+                              <span>Penempatan Kelas &amp; Rombel (Lokal) Diniyyah *</span>
+                              <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-blue-600 text-white rounded-md shadow-xs">
+                                ⭐ Kewenangan Khusus Madrasah
+                              </span>
+                            </label>
+                            <select
+                              value={newClass}
+                              onChange={(e) => setNewClass(e.target.value)}
+                              className="w-full px-3.5 py-2.5 bg-blue-50/70 dark:bg-blue-950/40 border-2 border-blue-500 rounded-xl text-xs font-black text-blue-900 dark:text-blue-200 focus:ring-2 focus:ring-blue-600 outline-none cursor-pointer shadow-sm"
+                            >
+                              <option value="">-- Pilih Kelas &amp; Lokal Diniyyah --</option>
+                              {dbClasses.map((cls) => (
+                                <option key={cls.id} value={cls.name}>
+                                  {cls.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Status Keaktifan Akademik *</label>
-                      <select
-                        value={newStatus}
-                        onChange={(e) => setNewStatus(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer dark:text-white"
-                      >
-                        <option value="ACTIVE">✅ Aktif Diniyyah</option>
-                        <option value="CUTI">🌴 Cuti Pembelajaran Madrasah</option>
-                        <option value="GRADUATED">🎓 Lulus / Alumni</option>
-                        <option value="MUTATED">🔄 Mutasi Pindah</option>
-                        <option value="DROPPED">❌ Keluar / Off</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Status Keaktifan Akademik *</label>
+                            <select
+                              value={newStatus}
+                              disabled={isFromPondok}
+                              onChange={(e) => setNewStatus(e.target.value)}
+                              className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed"
+                            >
+                              <option value="ACTIVE">✅ Aktif Diniyyah</option>
+                              <option value="CUTI">🌴 Cuti Pembelajaran Madrasah</option>
+                              <option value="GRADUATED">🎓 Lulus / Alumni</option>
+                              <option value="MUTATED">🔄 Mutasi Pindah</option>
+                              <option value="DROPPED">❌ Keluar / Off</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
 
                 {/* III. DOMISILI WILAYAH */}
                 <div className="space-y-4">
@@ -995,62 +1034,78 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                 </div>
 
                 {/* IV. INFORMASI WALI */}
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 border-b border-zinc-200 dark:border-zinc-800 pb-2 flex items-center gap-2">
-                    <Heart className="w-4 h-4" />
-                    IV. INFORMASI WALI &amp; SMART KK MAPPING
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Wali *</label>
-                      <input
-                        type="text"
-                        required
-                        value={newGuardianName}
-                        onChange={(e) => setNewGuardianName(e.target.value)}
-                        placeholder="Nama Ayah/Ibu/Wali..."
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500 outline-none dark:text-white"
-                      />
-                    </div>
+                {(() => {
+                  const isFromPondok = Boolean(selectedPondokSantriId || (editingSantri && editingSantri.residenceType !== "UNIT_LAIN"));
+                  return (
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 border-b border-zinc-200 dark:border-zinc-800 pb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <Heart className="w-4 h-4" />
+                          IV. INFORMASI WALI &amp; SMART KK MAPPING
+                        </span>
+                        {isFromPondok && (
+                          <span className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800">
+                            🔒 Disinkronkan dari P3HM
+                          </span>
+                        )}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Wali *</label>
+                          <input
+                            type="text"
+                            required
+                            disabled={isFromPondok}
+                            value={newGuardianName}
+                            onChange={(e) => setNewGuardianName(e.target.value)}
+                            placeholder="Nama Ayah/Ibu/Wali..."
+                            className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                          />
+                        </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nomor Kartu Keluarga (KK) *</label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={16}
-                        value={newFamilyCardNumber}
-                        onChange={(e) => setNewFamilyCardNumber(e.target.value)}
-                        placeholder="350301..."
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-amber-500 outline-none dark:text-white"
-                      />
-                    </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nomor Kartu Keluarga (KK) *</label>
+                          <input
+                            type="text"
+                            required
+                            disabled={isFromPondok}
+                            maxLength={16}
+                            value={newFamilyCardNumber}
+                            onChange={(e) => setNewFamilyCardNumber(e.target.value)}
+                            placeholder="350301..."
+                            className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-amber-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                          />
+                        </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WA Wali</label>
-                      <input
-                        type="text"
-                        value={newGuardianPhone}
-                        onChange={(e) => setNewGuardianPhone(e.target.value)}
-                        placeholder="081234567890"
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-amber-500 outline-none dark:text-white"
-                      />
-                    </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WA Wali</label>
+                          <input
+                            type="text"
+                            disabled={isFromPondok}
+                            value={newGuardianPhone}
+                            onChange={(e) => setNewGuardianPhone(e.target.value)}
+                            placeholder="081234567890"
+                            className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-medium focus:ring-2 focus:ring-amber-500 outline-none dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed disabled:text-zinc-600 dark:disabled:text-zinc-400"
+                          />
+                        </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Hubungan Wali</label>
-                      <select
-                        value={newGuardianRelation}
-                        onChange={(e) => setNewGuardianRelation(e.target.value as "AYAH" | "IBU" | "WALI")}
-                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-amber-500 outline-none cursor-pointer dark:text-white"
-                      >
-                        <option value="AYAH">Ayah Kandung</option>
-                        <option value="IBU">Ibu Kandung</option>
-                        <option value="WALI">Wali / Pengasuh</option>
-                      </select>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Hubungan Wali</label>
+                          <select
+                            value={newGuardianRelation}
+                            disabled={isFromPondok}
+                            onChange={(e) => setNewGuardianRelation(e.target.value as "AYAH" | "IBU" | "WALI")}
+                            className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-amber-500 outline-none cursor-pointer dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed"
+                          >
+                            <option value="AYAH">Ayah Kandung</option>
+                            <option value="IBU">Ibu Kandung</option>
+                            <option value="WALI">Wali / Pengasuh</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                   <button
