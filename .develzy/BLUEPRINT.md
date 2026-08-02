@@ -1,48 +1,105 @@
-# BLUEPRINT SISTEM MANAJEMEN MPHM & P3HM LIRBOYO
-*Versi Blueprint Resmi Terbaru: 2026.6 (Enterprise Web & PWA Standalone Edition)*
+# 🌟 MASTER BLUEPRINT MPHM v5.1
+## BLUEPRINT.md — Quick Reference Card (Ringkasan Cepat)
 
-Dokumen ini merupakan acuan resmi (*single source of truth*) mengenai seluruh arsitektur sistem, aturan bisnis, alur data, hak akses, serta spesifikasi teknis untuk sistem **Madrasah Putri Hidayatul Mubtadi'aat [MPHM]** dan **Pondok Pesantren Putri Hidayatul Mubtadi'aat [P3HM] Lirboyo**.
-
----
-
-## 1. UNIFIED REPOSITORY & DEPLOYMENT UTAMA
-1. **Repository Platform Web (`mubtadiaat/mphm`)**:
-   - Terintegrasi penuh untuk Web Application & API Gateway Next.js 15 di **Vercel Production** (`https://m.p3hm.my.id`).
-   - Mendukung Progressive Web App (PWA) 1-Klik yang dapat diinstal langsung di Windows Desktop (Standalone App) dan HP Android/iOS.
+**Versi**: 5.1 LIVE PRODUCTION
+**Domain**: `https://m.p3hm.my.id`
+**Repository**: `mubtadiaat/mphm` (branch: `main`)
+**Terakhir Diperbarui**: 02 Agustus 2026
 
 ---
 
-## 2. RESTRUKTURISASI PENGURUS & SANTRIWATI MUKIM 100%
-1. **Single Source of Truth Pengurus**:
-   - Seluruh data Pengurus berawal dari Pondok Pesantren P3HM Lirboyo.
-   - Folder dan peran statis legacy (*Mufattisy*, *Mundzir*, *Keamanan*, *Dewan Harian*, *Dewan Pleno*) telah diselaraskan ke dalam matriks peran dinamis.
-2. **Aturan Mutlak Santriwati Mukim**:
-   - Opsi Santri Non-Mukim / Kalong telah dieliminasi 100%.
-   - Pilihan Unit Asrama: **🏛️ Santri Pondok Mubtadi-aat** (Tarik dari P3HM Lirboyo) & **🏡 Unit Asrama Lain** (Darussa'adah, Ar-Risalah, Dalem Gus Ya'lu, Dalem Yai Atho', dan Isian Kustom Manual).
-3. **Form Auto-Locking Data Pondok pada Madrasah**:
-   - Saat Siswi Pondok dipilih di Madrasah, identitas & alamat fisik **OTOMATIS TERKUNCI** dengan banner `🔒 FORM IDENTITAS & ALAMAT TERKUNCI RESMI DARI PONDOK P3HM`. HANYA field Jenjang & Kelas Diniyyah yang terbuka.
+## 🏛️ INSTANSI & WORKSPACE
+
+| Instansi | Workspace | Tema | Kewenangan Utama |
+|---|---|---|---|
+| Pondok P3HM Lirboyo | `pondok` | Emerald | Identitas Santriwati, Asrama, Boyong Approval, Perizinan, Pelanggaran |
+| Madrasah MPHM Lirboyo | `madrasah` | Blue/Indigo | Rombel, Kurikulum, Penilaian, Raport, Ijazah, Cuti Mandiri |
 
 ---
 
-## 3. DEVELOPER SAAS COCKPIT & DYNAMIC ROLE MATRIX
-1. **Developer Cockpit (`m.p3hm.my.id/developer`)**:
-   - Akses Developer (`develzy` / `develzy25`) untuk mengendalikan 100% sistem, killswitches, DB inspector, dan versi aplikasi.
-2. **Dynamic Role Matrix & Navigation Style Switcher**:
-   - Peran & Hak Akses ditentukan 100% oleh Instansi secara dinamis (Full CRUD, View Only, Cari-View, Block Access).
-   - Penentuan Gaya Navigasi per akun: **Sidebar Utama** (Desktop) vs **Bottom Navigation** (Mobile/Tablet).
+## 👤 ROLE & AKSES
+
+| Role | Workspace | Navigasi | Menu Utama |
+|---|---|---|---|
+| `sek.pondok` | Pondok | Sidebar Emerald | Data Santriwati, Asrama, Perizinan, Pelanggaran, Settings |
+| `sek.madrasah` | Madrasah | Sidebar Blue | Data Siswi, Kelas, Pengajar, Kurikulum, Penilaian, Rapor, Settings |
+| `mustahiq` | Akademik | Bottom Nav | Nilai Rapor, Presensi, Data Kelas |
+| `wali_santri` | Guardian | Bottom Nav | Data Anak, Nilai, Presensi, Kedisiplinan |
 
 ---
 
-## 4. ENTERPRISE PWA & UNIVERSAL RESPONSIVE ENGINE
-1. **Unified Enterprise Web Architecture**:
-   - Next.js 15 App Router, React 19, TypeScript, TailwindCSS, Prisma ORM 7 PostgreSQL.
-2. **Progressive Web App (PWA Standalone)**:
-   - Instalasi 1-Klik di Windows Desktop (tanpa browser URL bar) & HP Android (ikon aplikasi di Home Screen).
-3. **Pembaruan Realtime Terpusat**:
-   - Seluruh perbaikan data dan rilis fitur baru aktif secara realtime di semua perangkat tanpa perlu mengunduh installer ulang.
+## 🔧 KONFIGURASI SISTEM (10 MODUL)
+
+1. Dikotomi Workspace — Hak Akses Instansi
+2. Kalender Akademik & Freeze Kwartal (1-4)
+3. Formulasi Nilai & KKTP Kenaikan Kelas
+4. Matriks Hak Akses 6 User
+5. TTD Digital & Stempel (Upload → RemoveBG → Database)
+6. Master Kedisiplinan & Poin Sanksi
+7. Jabatan Pengurus (14 Pondok + 11 Madrasah)
+8. WhatsApp Gateway (Fonnte + Template Pesan)
+9. API Data Wilayah (Cahyadsn / Binderbyte / Kemendagri)
+10. Keamanan & Auto-Backup Database
 
 ---
 
-<div align="center">
-**BLUEPRINT RESMI MPHM & P3HM LIRBOYO v2026.6 ENTERPRISE HAS BEEN APPROVED FOR LIVE PRODUCTION**
-</div>
+## ✅ WHITELIST 10 IKON RESMI
+
+`✅ 🔄 ❌ 📌 📖 🔒 🔓 ⏳ 📥 ✨`
+
+**DILARANG**: Semua ikon emoji di luar daftar ini.
+
+---
+
+## 🏷️ TERMINOLOGI TEKNIS
+
+- Nama vendor (Database, Penyimpanan Cloud, dll) → Cukup sebut **"Database"**
+- Tidak boleh menyebut nama vendor teknis di teks UI yang terlihat pengguna
+
+---
+
+## 🔑 DEVELOPER COCKPIT
+
+- URL: `https://m.p3hm.my.id/developer`
+- Login: `develzy` / `develzy25`
+
+---
+
+## 📖 PANDUAN SOP SISTEM
+
+- URL: `/sekretariat/sop`
+- Konten dinamis: berbeda untuk Pondok & Madrasah
+- Tampil di sidebar: Kelompok SISTEM & UTILITAS (kedua workspace)
+
+---
+
+## 📁 STRUKTUR FOLDER PENTING
+
+```
+apps/web/src/
+├── app/(dashboard)/sekretariat/
+│   ├── santri/          — Data Siswi/Santriwati
+│   ├── kelas/           — Data Kelas Diniyyah
+│   ├── pengajar/        — Data Pengajar
+│   ├── pengurus/        — Data Pengurus
+│   ├── kurikulum/       — Kurikulum & Mapel
+│   ├── penilaian/       — Manajemen Nilai
+│   ├── raport/          — Raport Kwartal
+│   ├── sop/             — Panduan & SOP Sistem [BARU]
+│   └── settings/        — Konfigurasi Sistem (10 Modul)
+├── components/shared/
+│   ├── SystemSettingsCockpit.tsx
+│   ├── GuidedEmptyState.tsx
+│   ├── CustomRoleMatrixManager.tsx
+│   └── DocumentTemplateBuilder.tsx
+├── features/sekretariat/components/
+│   ├── SOPGuideTab.tsx              [BARU]
+│   ├── SantriTab.tsx / SiswiTab.tsx
+│   ├── PengajarTab.tsx / PengurusTab.tsx
+│   ├── KurikulumTab.tsx
+│   ├── ManajemenNilaiTab.tsx
+│   └── MasterPelanggaranTab.tsx
+└── config/
+    ├── navigation.config.ts          — Konfigurasi menu sidebar
+    └── jobPositions.config.ts        — Jabatan baku pengurus
+```

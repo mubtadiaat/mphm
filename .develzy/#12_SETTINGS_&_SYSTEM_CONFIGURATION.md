@@ -1,12 +1,11 @@
-# 🌟 MASTER BLUEPRINT MPHM v4.5 (COCKPIT CONFIGURATION ENGINE)
-## #12_SETTINGS_&_SYSTEM_CONFIGURATION
-
-Modul Konfigurasi & Parameter Sistem (`SystemSettingsCockpit`) bertanggung jawab atas kontrol operasional global yang memengaruhi seluruh modul di MPHM Enterprise. Seluruh konfigurasi disimpan secara persisten di basis data pada tabel `system_settings` dan disinkronisasi melalui API `/api/settings` (GET & PUT).
+# 🌟 MASTER BLUEPRINT MPHM v5.1
+## #12_SETTINGS_&_SYSTEM_CONFIGURATION — Cockpit 10 Master Modules
 
 ---
 
-## 1. ARSITEKTUR PERSISTENSI DATABASE & SERIALISASI JSON
-Seluruh pengaturan sistem disimpan dalam format Key-Value pada tabel `system_settings`:
+## 1. ARSITEKTUR PERSISTENSI DATABASE
+
+Seluruh pengaturan sistem disimpan di tabel `system_settings` (format key-value):
 
 ```prisma
 model SystemSetting {
@@ -18,37 +17,95 @@ model SystemSetting {
 }
 ```
 
-### Aturan Serialisasi JSON (JSON Serialization Standard):
-1. **Penyimpanan Object/Array**: Konfigurasi kompleks (seperti daftar tabel kustom `custom_tables_registry`, visibilitas kolom `col_vis_*`, konfigurasi menu peran `system_role_ui_configs`, daftar jabatan struktural `job_titles_*`, dan parameter matematis `math_formulas`) diserialisasi menjadi JSON String murni (`JSON.stringify`) saat disimpan via `PUT /api/settings`.
-2. **Deserialisasi Otomatis**: Saat dibaca via `GET /api/settings`, handler API secara otomatis mendeteksi format JSON dan melakukan `JSON.parse`, sehingga mengembalikan struktur data asli.
-3. **Penyimpanan Ganda (DB ➔ LocalStorage Sync)**: Konfigurasi disimpan ke database terenkripsi, kemudian di-sync ke `localStorage` browser untuk akses instan tanpa latensi di UI.
+**Standar Serialisasi JSON:**
+1. Object/Array kompleks di-`JSON.stringify` saat `PUT /api/settings`.
+2. Saat dibaca via `GET /api/settings`, handler API melakukan `JSON.parse` otomatis.
+3. Konfigurasi tersimpan ke database terenkripsi, lalu di-sync ke `localStorage` browser.
 
 ---
 
-## 2. RE-ARCHITECTED USER-FRIENDLY COCKPIT (4 KATEGORI & 10 SUB-TAB)
-`SystemSettingsCockpit.tsx` dikelompokkan ke dalam 4 kategori navigasi yang ramah bagi sekretaris baru:
+## 2. 10 MASTER CONTROL MODULES (LIVE & AKTIF)
 
-### A. MODUL & OTORISASI
-1. **Tampilan & Modul (`visibility`)**: Visibilitas modul operasional (Mustahiq, Wali Santri, Keamanan, Mufattisy).
-2. **Hak Akses & Otorisasi (`permissions`)**: Izin khusus seperti override nilai, pengajuan perizinan wali, dan eskalasi.
+Setiap modul tersambung penuh ke database via API `PUT /api/settings`:
 
-### B. PERAN & HIRARKI
-3. **Peran & Tampilan UI (`roles`)**: Navigasi khusus dan penyesuaian UI per role (`system_role_ui_configs`).
-4. **Jabatan Struktural (`job_titles`)**: Pengelolaan daftar jabatan Pengurus Pondok, Pengurus Madrasah, Mundzir, dan Mustahiq.
+### Modul 1 — Dikotomi Workspace & Hak Akses Instansi
+- Toggle: `allowMadrasahCutiMandiri` (default: `true`)
+- Toggle: `allowPondokBoyongApproval` (default: `true`)
+- Toggle: `lockPondokIdentityFields` (default: `true`)
 
-### C. ATURAN & INTEGRASI
-5. **Parameter & Sesi Keamanan (`security`)**: Status pemeliharaan sistem (*maintenance mode*), Enforce HTTPS, SSO, dan Cookie Lifetime.
-6. **API Wilayah Indonesia (`region_api`)**: Konfigurasi API Wilayah Kemendagri & Binderbyte API Key.
-7. **Master Pelanggaran & Takzir (`master_pelanggaran`)**: Kategori pelanggaran, poin kedisiplinan, dan tindakan takzir.
-8. **Parameter Matematis & KKM (`math_formula`)**: Formula pembobotan nilai kwartal dan KKM Diniyyah.
-9. **Tabel Kustom Dynamic (`custom_tables`)**: Pembuat tabel data tambahan yang tersimpan persisten.
+### Modul 2 — Kalender Akademik & Kwartal Freeze Lock Engine
+- `activeTahunAjaran`: String (contoh: `"2026/2027"`)
+- `activeKwartal`: Number (1–4)
+- `kwartal1Locked`, `kwartal2Locked`, `kwartal3Locked`, `kwartal4Locked`: Boolean
 
-### D. PEMELIHARAAN DATA
-10. **Pembersihan Data Masal (`purge_data`)**: Pembersihan data berkala dan reset log.
+### Modul 3 — Formulasi Nilai & Kriteria Kenaikan Kelas
+- `weightHarian`: Number (%) — default: 30
+- `weightKwartal`: Number (%) — default: 40
+- `weightSyafai`: Number (%) — default: 30
+- `minPassingScore`: Number — default: 70 (KKTP)
+- `maxRedSubjects`: Number — default: 2 (Maks mapel merah naik kelas)
+
+### Modul 4 — Matriks Hak Akses 6 User
+- `system_role_ui_configs`: JSON Object → CustomRoleMatrixManager
+- 6 Peran Baku: `sek.pondok`, `sek.madrasah`, `mustahiq`, `munawwib`, `mufattish`, `wali_santri`
+
+### Modul 5 — Stempel & TTD Digital Resmi (HD Auto RemoveBG)
+- Upload File (PNG/JPG) → Canvas RemoveBG otomatis → Simpan ke Database
+- `pengasuhSignatureUrl`, `kepalaMadrasahSignatureUrl`, `mufattishSignatureUrl`, `officialStampUrl`
+- Preview gambar pada latar checker pattern (penanda transparansi)
+
+### Modul 6 — Master Kedisiplinan & Poin Sanksi
+- Terintegrasi langsung dengan komponen `MasterPelanggaranTab`
+- Data tersimpan di tabel khusus pelanggaran di database
+
+### Modul 7 — Struktur Jabatan Pengurus & Pengajar
+- `structural_job_positions`: Array JSON
+- Filter per instansi: `MADRASAH` (11 jabatan) atau `PONDOK` (14 jabatan)
+
+### Modul 8 — WhatsApp Gateway & Notifikasi Wali Santri
+- `fonnteApiKey`: String (token gateway)
+- `whatsappTemplateRapor`, `whatsappTemplateBoyong`, `whatsappTemplateAbsensi`: String template
+
+### Modul 9 — API Data Wilayah Indonesia
+- `regionApiSource`: `"cahyadsn"` | `"binderbyte"` | `"kemendagri"`
+- `binderbyteApiKey`: String (hanya aktif jika `regionApiSource === "binderbyte"`)
+
+### Modul 10 — Keamanan Sistem, Backup & Emergency Lock
+- `systemMaintenance`: Boolean (Emergency Maintenance Lock)
+- `enforceHttps`: Boolean
+- `cookieLifetime`: Number (hari)
+- `autoBackupInterval`: `"daily"` | `"weekly"` | `"manual"`
 
 ---
 
-## 3. STANDAR ANTARMUKA USER-FRIENDLY (GUIDE CARDS & STATUS BADGES)
-- **`FriendlyGuideCard`**: Setiap sub-tab dilengkapi kartu petunjuk penggunaan berbahasa Indonesia yang jelas, ringkas, dan disertai langkah-langkah praktis.
-- **`FriendlySwitch`**: Sakelar kontrol dilengkapi lencana indikator status tebal yang kontras: `[ AKTIF ]` (Hijau) dan `[ NON-AKTIF ]` (Zinc Grey).
-- **Banner Eksekusi Terpusat**: Tombol **"Simpan Seluruh Konfigurasi"** dipasang di bagian atas layar dengan animasi *spin loading* saat melakukan sinkronisasi database.
+## 3. KOMPONEN UI COCKPIT
+
+### FriendlyGuideCard
+Setiap modul dilengkapi kartu petunjuk penggunaan dengan ikon `✨` dan deskripsi berbahasa Indonesia.
+
+### FriendlySwitch
+Sakelar kontrol dengan badge status: `AKTIF` (Emerald) / `NON-AKTIF` (Zinc) atau kustom (`TERKUNCI` / `TERBUKA`).
+
+### SignatureImageUploader
+Komponen upload TTD/Stempel yang:
+1. Menerima file PNG/JPG dari user
+2. Memproses RemoveBG via Canvas API (menghapus latar putih → PNG transparan HD)
+3. Upload ke server via `/api/media/signature`
+4. Menampilkan preview pada checker pattern
+
+### CustomRoleMatrixManager
+Matriks otorisasi granular untuk 6 peran baku dengan toggle akses per menu.
+
+---
+
+## 4. TOMBOL SIMPAN TERPUSAT
+
+Tombol **"Simpan Konfigurasi Terpusat"** di banner header:
+- Memanggil `PUT /api/settings` dengan payload JSON seluruh konfigurasi
+- Menampilkan `Loader2` spin saat proses berlangsung
+- Menampilkan banner sukses (3 detik) setelah berhasil
+- Men-sync ke `localStorage` & mengirim window events untuk update realtime
+
+---
+
+**Terakhir Diperbarui: 02 Agustus 2026 | Versi: v5.1**

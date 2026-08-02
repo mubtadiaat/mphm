@@ -1,75 +1,90 @@
-# #20_DEVELOPER_SAAS_DASHBOARD_AND_DYNAMIC_ROLE_MATRIX.md
-*Dokumen Blueprint Dashboard Developer SaaS & Engine Matriks Peran Dinamis Granular*
-*Sistem Manajemen MPHM & P3HM Lirboyo*
+# 🌟 MASTER BLUEPRINT MPHM v5.1
+## #20_DEVELOPER_SAAS_DASHBOARD_AND_DYNAMIC_ROLE_MATRIX
 
 ---
 
-## 1. PORTAL DEVELOPER SAAS (`m.p3hm.my.id/developer` -> `/developer`)
+## 1. PORTAL DEVELOPER SAAS (`/developer`)
 
-### Kredensial Master Developer:
-* **Username**: `develzy`
-* **Password**: `develzy25`
-* **Cakupan Akses**: 100% Kontrol Penuh atas seluruh sistem dan database aplikasi.
+### Kredensial:
+- **Username**: `develzy`
+- **Password**: `develzy25`
+- **Cakupan Akses**: 100% Kontrol Penuh seluruh sistem dan database
 
-### Fitur Utilitas Dashboard Developer:
-1. **System Health & Metrics Real-Time**:
-   * Monitoring penggunaan CPU server, V8 Heap Memory, dan DB Latency (ms).
-   * Counter total record tabel DB (Santri, Pengurus, Users, Audit Logs, Settings).
+### Fitur Dashboard Developer:
+1. **System Health & Metrics Real-Time**: CPU server, V8 Heap Memory, DB Latency (ms), counter total record tabel (Santri, Pengurus, Users, Audit Logs, Settings).
 2. **Master System Switches (Killswitches)**:
-   * 🛑 **Maintenance Mode Global** (Lock/Unlock portal umum).
-   * 🔒 **Database Write Lock** (Read-Only Mode).
-   * 🚫 **Lock Pendaftaran & Impor Excel**.
-   * 🛡️ **API Rate Limiter & Security Firewall**.
-   * 📲 **Mobile App & Guardian API Switch** (Android Guardian & Staff).
-3. **Database Inspector & Emergency Maintenance**:
-   * Live Raw Data Table Explorer (Santri, Pengurus, Users, Audit Logs).
-   * Export Backup System JSON.
+   - Maintenance Mode Global (Lock/Unlock portal umum)
+   - Database Write Lock (Read-Only Mode)
+   - Lock Pendaftaran & Import Excel
+   - API Rate Limiter & Security Firewall
+   - Mobile App & Guardian API Switch
+3. **Database Inspector & Emergency Maintenance**: Live Raw Data Table Explorer, Export Backup System JSON.
 
 ---
 
 ## 2. ENGINE MATRIKS PERAN DINAMIS & HAK AKSES GRANULAR
 
-### Pembuatan Role Kustom (Dynamic Custom Role Creation):
-* Pengguna / Developer dapat membuat role kustom baru tanpa batas (misal: *Bendahara Diniyyah*, *Pembina Asrama*, *Keamanan Gerbang*, dll).
-* Setiap role memiliki ID/Kode unik, Nama Role, Deskripsi, dan Cakupan Instansi (*PONDOK*, *MADRASAH*, *ALL*).
+### 6 Peran Baku Sistem:
 
-### Matriks Otorisasi Granular Per Menu:
-1. **Permission Types**:
-   * 🟢 **Full CRUD** (Tambah, Lihat, Ubah, Hapus).
-   * 🔵 **View Only** (Hanya Lihat Data — tombol aksi/input tersembunyi).
-   * 🟡 **Cari-View** (Pencarian + Lihat Data saja — tanpa ekspor/impor/aksi).
-   * 🔴 **No Access / Block** (Menu Tersembunyi).
-2. **Toggle Fitur Data**:
-   * `[✓] Export Data (PDF / Excel)`
-   * `[✓] Import Data (Excel / CSV)`
+| Kode Role | Nama Role | Workspace | Navigasi |
+|---|---|---|---|
+| `sek.pondok` | Sekretariat Pondok | P3HM (Emerald) | Sidebar |
+| `sek.madrasah` | Sekretariat Madrasah | MPHM (Blue) | Sidebar |
+| `mustahiq` | Mustahiq (Wali Kelas) | Akademik | Bottom Nav |
+| `wali_santri` | Wali Santri | Guardian Portal | Bottom Nav |
+| *(munawwib)* | Munawwib (Guru Mapel) | Akademik | Konfigurabel |
+| *(mufattish)* | Mufattish (Pengawas Nilai) | Pengawas | Konfigurabel |
 
----
+### Tipe Permission Granular Per Menu:
+- **Full CRUD**: Tambah, Lihat, Ubah, Hapus
+- **View Only**: Hanya Lihat Data (tombol aksi/input tersembunyi)
+- **Cari-View**: Pencarian + Lihat Data saja (tanpa ekspor/impor)
+- **No Access / Block**: Menu Tersembunyi
 
-## 3. PEMBERSIHAN ROLE & FOLDER TIDAK TERPAKAI
-
-1. **Role `Keamanan`**, `Mufattisy`, `Mundzir`, `Dewan Harian`, `Dewan Pleno` telah dihapuskan dari seluruh `RoleTypes`, RBAC, dan navigasi bawaan.
-2. **Folder Tidak Terpakai Dihapus Total**:
-   * `apps/web/src/app/(dashboard)/keamanan`
-   * `apps/web/src/app/(dashboard)/mufattisy`
-   * `apps/web/src/app/(dashboard)/pimpinan`
-   * `apps/web/src/app/api/keamanan`
-   * `apps/web/src/app/api/mufattisy`
-   * `apps/web/src/app/api/pimpinan`
-   * `apps/web/src/features/keamanan`
-   * `apps/web/src/features/mufattisy`
----
-
-## 4. GAYA NAVIGASI DINAMIS PER AKUN / ROLE (SIDEBAR VS BOTTOM NAV)
-1. **Fleksibilitas Instansi Menentukan Tampilan**:
-   * Setiap akun / role pengguna dapat diatur gaya navigasinya secara individual: **Sidebar Utama** (Desktop/Tablet) atau **Bottom Navigation** (Mobile/Tablet).
-   * Matriks konfigurasi disimpan per role/akun (`navigationStyle: "sidebar" | "bottom_nav"`) dan dieksekusi secara otomatis oleh [`DashboardShell.tsx`](file:///d:/DEVELZY/MPHM_V.02/apps/web/src/components/navigation/DashboardShell.tsx).
+### Toggle Fitur Data Per Role:
+- Export Data (PDF / Excel)
+- Import Data (Excel / CSV)
 
 ---
 
-## 5. ANIMASI LOADING NYATA ULTRA-PREMIUM (`PremiumLoader.tsx`)
-1. **Desain Visual Modern & Estetik**:
-   * Menggunakan Glassmorphism backdrop dengan dual glowing background orbs (`emerald` & `blue`).
-   * Spinning Multi-Ring (Ring dashed terluar, Ring gradien tengah, Core pulsing inner).
-   * Animated Progress Shimmer Line (`Framer Motion`).
-2. **Keterterapan Aplikasi**:
-   * Diintegrasikan ke [`SkeletonLoader.tsx`](file:///d:/DEVELZY/MPHM_V.02/apps/web/src/components/shared/SkeletonLoader.tsx), transisi rute, serta pemuatan data tabel.
+## 3. MENU YANG DIKELOLA PER ROLE (ENABLEDMENUS)
+
+### Sekretariat Pondok (`sek.pondok`):
+`/sekretariat`, `/sekretariat/santri`, `/sekretariat/wali-santri`, `/sekretariat/rooms`, `/sekretariat/pengurus`, `/sekretariat/alumni`, `/sekretariat/perizinan`, `/sekretariat/pelanggaran`, `/sekretariat/users`, `/sekretariat/audit-log`, `/sekretariat/recycle-bin`, `/sekretariat/sop`, `/sekretariat/settings`
+
+### Sekretariat Madrasah (`sek.madrasah`):
+`/sekretariat`, `/sekretariat/santri`, `/sekretariat/kelas`, `/sekretariat/pengurus`, `/sekretariat/pengajar`, `/sekretariat/kurikulum`, `/sekretariat/penilaian`, `/sekretariat/kenaikan-kelas`, `/sekretariat/sertifikat`, `/sekretariat/raport`, `/sekretariat/ijazah`, `/sekretariat/template-dokumen`, `/sekretariat/users`, `/sekretariat/audit-log`, `/sekretariat/recycle-bin`, `/sekretariat/sop`, `/sekretariat/settings`
+
+---
+
+## 4. GAYA NAVIGASI DINAMIS PER AKUN / ROLE
+
+Setiap role dapat dikonfigurasi gaya navigasinya:
+- **Sidebar Utama** (`"sidebar"`): Desktop/Tablet — Pondok & Madrasah Sekretariat
+- **Bottom Navigation** (`"bottom_nav"`): Mobile/Tablet — Mustahiq, Wali Santri
+
+Dikonfigurasi via `system_role_ui_configs` di database, dieksekusi oleh `DashboardShell.tsx`.
+
+---
+
+## 5. KOMPONEN YANG DIHAPUS / TIDAK AKTIF
+
+Role lama yang telah dieliminasi total dari sistem:
+- `keamanan`, `mufattisy` (lama), `mundzir`, `dewan_harian`, `dewan_pleno`
+
+Folder yang telah dihapus:
+- `apps/web/src/app/(dashboard)/keamanan`
+- `apps/web/src/app/(dashboard)/mufattisy`
+- `apps/web/src/app/(dashboard)/pimpinan`
+
+---
+
+## 6. ANIMASI LOADING PREMIUM (`PremiumLoader.tsx`)
+
+- Glassmorphism backdrop dengan dual glowing orbs (`emerald` & `blue`)
+- Multi-Ring Rotating Spinner + Animated Progress Shimmer Line (Framer Motion)
+- Terintegrasi ke `SkeletonLoader.tsx`, transisi rute, dan pemuatan data tabel
+
+---
+
+**Terakhir Diperbarui: 02 Agustus 2026 | Versi: v5.1**
