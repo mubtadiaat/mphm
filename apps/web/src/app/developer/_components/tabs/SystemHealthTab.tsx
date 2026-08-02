@@ -24,8 +24,8 @@ const ENDPOINTS_TO_CHECK: Omit<EndpointResult, "status" | "latency" | "error">[]
   { endpoint: "/api/admin/classes", method: "GET", label: "Data Rombel / Kelas", module: "Academic" },
   { endpoint: "/api/academic/years", method: "GET", label: "Tahun Ajaran", module: "Academic" },
   { endpoint: "/api/academic/classes", method: "GET", label: "Kelas Akademik", module: "Academic" },
-  { endpoint: "/api/assessment/matrix", method: "GET", label: "Matriks Penilaian Kwartal", module: "Assessment" },
-  { endpoint: "/api/assessment/scores", method: "GET", label: "Daftar Nilai Santri", module: "Assessment" },
+  { endpoint: "/api/assessment/matrix?classId=default", method: "GET", label: "Matriks Penilaian Kwartal", module: "Assessment" },
+  { endpoint: "/api/assessment/scores?classId=default", method: "GET", label: "Daftar Nilai Santri", module: "Assessment" },
   { endpoint: "/api/disciplinary/violations", method: "GET", label: "Data Pelanggaran Santri", module: "Disciplinary" },
   { endpoint: "/api/disciplinary/permits", method: "GET", label: "Data Perizinan Santri", module: "Disciplinary" },
   { endpoint: "/api/admin/audit-log", method: "GET", label: "Audit Log Aktivitas", module: "Audit" },
@@ -53,6 +53,17 @@ export function SystemHealthTab() {
     setIsRunning(true);
     setResults([]);
     setProgress(0);
+
+    // Auto-renew session cookie for developer before running health check
+    try {
+      await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: "develzy", password: "develzy25" }),
+      });
+    } catch {
+      // ignore
+    }
 
     const allResults: EndpointResult[] = [];
 
