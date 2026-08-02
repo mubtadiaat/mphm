@@ -64,6 +64,7 @@ export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
       { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
       { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
+      { label: "Panduan & SOP Sistem", href: "/sekretariat/sop", icon: BookOpen },
       { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
     ]
   }
@@ -109,6 +110,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
       { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
       { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
+      { label: "Panduan & SOP Sistem", href: "/sekretariat/sop", icon: BookOpen },
       { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
     ]
   }
