@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, X, MapPin, User, Heart,
   BookOpen, Search, Home, Camera,
-  Palmtree, Sparkles, Truck, GraduationCap, Lock, Unlock, Download, AlertTriangle, Award, CheckCircle2
+  Sparkles, Lock, Unlock, Download, AlertTriangle, Award, CheckCircle2
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
@@ -514,10 +514,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
             : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
-          <span className="inline-flex items-center gap-1.5">
-            <Palmtree className="w-4 h-4 text-amber-500" />
-            <span>Siswi Cuti Diniyyah</span>
-          </span>
+          Siswi Cuti Diniyyah
         </button>
 
         <button
@@ -1027,8 +1024,8 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                               className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer dark:text-white disabled:bg-zinc-100 dark:disabled:bg-zinc-800/80 disabled:cursor-not-allowed"
                             >
                               <option value="ACTIVE">✅ Aktif Diniyyah</option>
-                              <option value="CUTI">🌴 Cuti Pembelajaran Madrasah</option>
-                              <option value="GRADUATED">🎓 Lulus / Alumni</option>
+                              <option value="CUTI">✨ Cuti Pembelajaran Madrasah</option>
+                              <option value="GRADUATED">✅ Lulus / Alumni</option>
                               <option value="MUTATED">🔄 Mutasi Pindah</option>
                               <option value="DROPPED">❌ Keluar / Off</option>
                             </select>
@@ -1193,9 +1190,9 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                     className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold dark:text-white cursor-pointer"
                   >
                     <option value="ACTIVE">✅ Aktif Pembelajaran Diniyyah</option>
-                    <option value="CUTI">🌴 Cuti Pembelajaran Madrasah (Mandiri Madrasah)</option>
-                    <option value="GRADUATED">🎓 Lulus / Alumni Diniyyah (Mandiri Madrasah)</option>
-                    <option value="BOYONG_REQUEST">🚚 Pengajuan Boyong ke Pondok (Memerlukan Approval P3HM)</option>
+                    <option value="CUTI">✨ Cuti Pembelajaran Madrasah (Mandiri Madrasah)</option>
+                    <option value="GRADUATED">✅ Lulus / Alumni Diniyyah (Mandiri Madrasah)</option>
+                    <option value="BOYONG_REQUEST">⏳ Pengajuan Boyong ke Pondok (Memerlukan Approval P3HM)</option>
                   </select>
                 </div>
                 <div className="space-y-1">

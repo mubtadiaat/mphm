@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, X, MapPin, UploadCloud, Camera, User, Heart, Award,
   Calendar, Hash, Phone, FileText, Home, BookOpen, ExternalLink, ShieldCheck, Download, Layers, Lock, Search,
-  Palmtree, GraduationCap, Truck, Sparkles, Clock, CheckCircle2, XCircle, AlertTriangle, Unlock
+  Sparkles, Clock, CheckCircle2, XCircle, AlertTriangle, Unlock
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
@@ -692,61 +692,56 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
       <div className="flex border-b border-zinc-200 dark:border-zinc-800 gap-1 overflow-x-auto pb-px">
         <button
           onClick={() => setActiveSubTab("aktif")}
-          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap inline-flex items-center gap-2 ${activeSubTab === "aktif"
+          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "aktif"
             ? isPondok ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-extrabold" : "border-blue-600 text-blue-600 dark:text-blue-400 font-extrabold"
             : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
-          {isPondok ? <Home className="w-4 h-4 text-emerald-500" /> : <BookOpen className="w-4 h-4 text-blue-500" />}
-          <span>{isPondok ? "Santriwati Asrama Aktif" : "Siswi Diniyyah Aktif"}</span>
+          {isPondok ? "Santriwati Asrama Aktif" : "Siswi Diniyyah Aktif"}
         </button>
 
         {!isPondok && (
           <button
             onClick={() => setActiveSubTab("cuti")}
-            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap inline-flex items-center gap-2 ${activeSubTab === ("cuti" as any)
+            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === ("cuti" as any)
               ? "border-amber-600 text-amber-600 dark:text-amber-400 font-extrabold"
               : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               }`}
           >
-            <Palmtree className="w-4 h-4 text-amber-500" />
-            <span>Siswi Cuti Diniyyah</span>
+            Siswi Cuti Diniyyah
           </button>
         )}
 
         {!isPondok && (
           <button
             onClick={() => setActiveSubTab("tanpa_kelas")}
-            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap inline-flex items-center gap-2 ${activeSubTab === "tanpa_kelas"
+            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "tanpa_kelas"
               ? "border-purple-600 text-purple-600 dark:text-purple-400 font-extrabold"
               : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               }`}
           >
-            <Layers className="w-4 h-4 text-purple-500" />
-            <span>Tanpa Kelas / Belum Belajar</span>
+            Tanpa Kelas / Belum Belajar
           </button>
         )}
 
         <button
           onClick={() => setActiveSubTab("alumni")}
-          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap inline-flex items-center gap-2 ${activeSubTab === "alumni"
+          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "alumni"
             ? isPondok ? "border-teal-600 text-teal-600 dark:text-teal-400 font-extrabold" : "border-indigo-600 text-indigo-600 dark:text-indigo-400 font-extrabold"
             : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
-          <GraduationCap className="w-4 h-4 text-indigo-500" />
-          <span>{isPondok ? "Santriwati Khidmah P3HM" : "Siswi Alumni / Lulus 🎓"}</span>
+          {isPondok ? "Santriwati Khidmah P3HM" : "Siswi Alumni / Lulus"}
         </button>
 
         <button
           onClick={() => setActiveSubTab("mutasi")}
-          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap inline-flex items-center gap-2 ${activeSubTab === "mutasi"
+          className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "mutasi"
             ? "border-rose-600 text-rose-600 dark:text-rose-400 font-extrabold"
             : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             }`}
         >
-          <Truck className="w-4 h-4 text-rose-500" />
-          <span>{isPondok ? "Santriwati Boyong" : "Mutasi & Keluar 🚚"}</span>
+          {isPondok ? "Santriwati Boyong" : "Mutasi & Keluar"}
         </button>
       </div>
 
