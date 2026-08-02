@@ -65,8 +65,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [isMustahiq, setIsMustahiq] = useState(true);
-  const [jenjang, setJenjang] = useState("Ibtida'iyyah");
-  const [tingkat, setTingkat] = useState("Tingkat I");
+  const [kelasLevel, setKelasLevel] = useState("Ibtida'iyyah I");
   const [lokal, setLokal] = useState("A");
 
   // Munawwib Role States
@@ -94,7 +93,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   }, [remoteData.data, remoteData.total]);
 
   const resetForm = () => {
-    setName(""); setPhone(""); setJenjang("Ibtida'iyyah"); setTingkat("Tingkat I"); setLokal("A");
+    setName(""); setPhone(""); setKelasLevel("Ibtida'iyyah I"); setLokal("A");
     setIsMustahiq(true); setIsMunawwib(true); 
     setSubjectName(dbSubjects[0]?.name || "");
     setSubjectClasses(dbClasses[0]?.name || "");
@@ -144,8 +143,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     setEditingData(item);
     setName(item.name);
     setPhone(item.phone || "");
-    setJenjang(item.jenjang && item.jenjang !== "-" ? item.jenjang : "Ibtida'iyyah");
-    setTingkat(item.tingkat && item.tingkat !== "-" ? item.tingkat : "1 (Ula)");
+    setKelasLevel(item.jenjang && item.jenjang !== "-" ? item.jenjang : "Ibtida'iyyah I");
     setLokal(item.lokal && item.lokal !== "-" ? item.lokal : "A");
     setShowModal(true);
   };
@@ -175,9 +173,9 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     
     let fullRole = "";
     if (isMustahiq && isMunawwib) {
-      fullRole = `Mustahiq ${jenjang}-${lokal} & Munawwib ${subjectName}`;
+      fullRole = `Mustahiq ${kelasLevel}-${lokal} & Munawwib ${subjectName}`;
     } else if (isMustahiq) {
-      fullRole = `Mustahiq ${jenjang}-${lokal}`;
+      fullRole = `Mustahiq ${kelasLevel}-${lokal}`;
     } else if (isMunawwib) {
       fullRole = `Munawwib ${subjectName} (${subjectClasses})`;
     } else {
@@ -202,7 +200,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
           gender: "L",
         });
         if (isMustahiq) {
-          await addPosisiToJabatan("Mustahiq", `${jenjang}-${lokal}`.trim() || "Mustahiq", "MADRASAH");
+          await addPosisiToJabatan("Mustahiq", `${kelasLevel}-${lokal}`.trim() || "Mustahiq", "MADRASAH");
           // Trigger auto-creation of AcademicClass (Rombel) in DB
           await apiRequest("/api/admin/classes").catch(() => {});
         }
@@ -479,7 +477,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Jenjang &amp; Tingkat Kelas (Baku) *</label>
-                          <select value={jenjang} onChange={e => setJenjang(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-bold text-zinc-900 dark:text-white">
+                          <select value={kelasLevel} onChange={e => setKelasLevel(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-bold text-zinc-900 dark:text-white">
                             <optgroup label="I'dadiyyah">
                               <option value="I'dadiyyah I">I&apos;dadiyyah I</option>
                               <option value="I'dadiyyah II">I&apos;dadiyyah II</option>
@@ -517,7 +515,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
 
                       <div className="p-3 bg-purple-100/60 dark:bg-purple-900/40 rounded-xl flex items-center gap-2.5 text-[11px] text-purple-900 dark:text-purple-200 font-semibold">
                         <Info className="w-4 h-4 shrink-0 text-purple-600" />
-                        <span>Kelas Rombel (<strong>{jenjang}-{lokal}</strong>) akan terisi &amp; dibuat otomatis di database untuk pencetakan Raport, Ijazah &amp; Sertifikat.</span>
+                        <span>Kelas Rombel (<strong>{kelasLevel}-{lokal}</strong>) akan terisi &amp; dibuat otomatis di database untuk pencetakan Raport, Ijazah &amp; Sertifikat.</span>
                       </div>
                     </div>
                   )}

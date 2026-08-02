@@ -40,29 +40,29 @@ export type { RoleTypes };
 
 // WORKSPACE PONDOK PESANTREN PUTRI [P3HM Lirboyo]
 export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
-  { label: "Dashboard Pondok", href: "/sekretariat", icon: LayoutGrid },
+  { label: "Dashboard", href: "/sekretariat", icon: LayoutGrid },
   {
-    group: "A. DATABASE PONDOK",
+    group: "DATABASE PONDOK",
     items: [
-      { label: "Santriwati (P3HM)", href: "/sekretariat/santri", icon: Users },
-      { label: "Wali Santri (Smart KK)", href: "/sekretariat/wali-santri", icon: UserCircle },
-      { label: "Data Asrama (Blok & Kamar)", href: "/sekretariat/rooms", icon: Home },
+      { label: "Data Santriwati", href: "/sekretariat/santri", icon: Users },
+      { label: "Wali Santri", href: "/sekretariat/wali-santri", icon: UserCircle },
+      { label: "Data Asrama", href: "/sekretariat/rooms", icon: Home },
       { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
-      { label: "Alumni Pondok", href: "/sekretariat/alumni", icon: Archive },
+      { label: "Alumni", href: "/sekretariat/alumni", icon: Archive },
     ]
   },
   {
-    group: "B. PERIZINAN & KEDISIPLINAN",
+    group: "PERIZINAN & KEDISIPLINAN",
     items: [
-      { label: "Perizinan Santri", href: "/sekretariat/perizinan", icon: Ticket },
-      { label: "Pelanggaran & Takzir", href: "/sekretariat/pelanggaran", icon: ShieldAlert },
+      { label: "Perizinan", href: "/sekretariat/perizinan", icon: Ticket },
+      { label: "Pelanggaran", href: "/sekretariat/pelanggaran", icon: ShieldAlert },
     ]
   },
   {
     group: "SISTEM & UTILITAS",
     items: [
-      { label: "Manajemen Akun (Users)", href: "/sekretariat/users", icon: UserCheck },
-      { label: "Audit Log 24 Jam", href: "/sekretariat/audit-log", icon: History },
+      { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
+      { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
       { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
     ]
@@ -71,34 +71,34 @@ export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
 
 // WORKSPACE MADRASAH PUTRI [MPHM Lirboyo]
 export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
-  { label: "Dashboard Madrasah", href: "/sekretariat", icon: LayoutGrid },
+  { label: "Dashboard", href: "/sekretariat", icon: LayoutGrid },
   {
-    group: "A. MANAJEMEN DATA",
+    group: "MANAJEMEN DATA",
     items: [
-      { label: "Data Siswi (MPHM)", href: "/sekretariat/santri", icon: Users },
-      { label: "Rombel / Kelas", href: "/sekretariat/kelas", icon: BookOpen },
+      { label: "Data Siswi", href: "/sekretariat/santri", icon: Users },
+      { label: "Data Kelas (Rombel)", href: "/sekretariat/kelas", icon: BookOpen },
     ]
   },
   {
-    group: "B. TENAGA PENGAJAR & PENGURUS",
+    group: "PENGAJAR & PENGURUS",
     items: [
       { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
-      { label: "Data Pengajar (Mustahiq & Munawwib)", href: "/sekretariat/mustahiq", icon: UserCheck },
+      { label: "Data Pengajar", href: "/sekretariat/mustahiq", icon: UserCheck },
     ]
   },
   {
-    group: "C. AKADEMIK & PENILAIAN",
+    group: "AKADEMIK & PENILAIAN",
     items: [
-      { label: "Kurikulum & Mapel Diniyyah", href: "/sekretariat/kurikulum", icon: ClipboardList },
-      { label: "Manajemen Nilai", href: "/sekretariat/penilaian", icon: FileText },
+      { label: "Kurikulum", href: "/sekretariat/kurikulum", icon: ClipboardList },
+      { label: "Penilaian", href: "/sekretariat/penilaian", icon: FileText },
       { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas", icon: Award },
     ]
   },
   {
-    group: "D. DOKUMEN SISWI",
+    group: "DOKUMEN SISWI",
     items: [
       { label: "Sertifikat", href: "/sekretariat/sertifikat", icon: Award },
-      { label: "Raport Kwartal Diniyyah", href: "/sekretariat/raport", icon: FileText },
+      { label: "Raport Kwartal", href: "/sekretariat/raport", icon: FileText },
       { label: "Ijazah Kelulusan", href: "/sekretariat/ijazah", icon: Award },
       { label: "Template Dokumen", href: "/sekretariat/template-dokumen", icon: FileCode },
     ]
@@ -106,8 +106,8 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
   {
     group: "SISTEM & UTILITAS",
     items: [
-      { label: "Manajemen Akun (Users)", href: "/sekretariat/users", icon: UserCheck },
-      { label: "Audit Log 24 Jam", href: "/sekretariat/audit-log", icon: History },
+      { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
+      { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
       { label: "Konfigurasi Sistem", href: "/sekretariat/settings", icon: Settings },
     ]

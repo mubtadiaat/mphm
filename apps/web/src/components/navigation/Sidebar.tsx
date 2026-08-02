@@ -125,22 +125,12 @@ export function Sidebar({ role }: { role: RoleTypes }) {
     navItems = [...filteredStaticItems];
   }
 
-  const isMenuLocked = (href: string): boolean => {
-    return checkRbacMenuLocked(href, role, isPondokWorkspace ? "pondok" : "madrasah", onboardingStatus);
+  const isMenuLocked = (_href: string): boolean => {
+    return false;
   };
 
-  const checkAccess = (e: React.MouseEvent, href: string) => {
-    if (!isSekretariatRole || loadingStatus) return;
-    const warning = getPrerequisiteWarning(href, role, isPondokWorkspace ? "pondok" : "madrasah", onboardingStatus);
-    if (warning) {
-      e.preventDefault();
-      // Ekstrak rute prasyarat dari warning message untuk action button
-      const steps = getWorkspaceReadinessSteps(isPondokWorkspace ? "pondok" : "madrasah", onboardingStatus ?? {});
-      const missingStep = steps?.find((s: any) => !s.ready);
-      toast(warning, "warning", "Prasyarat Belum Lengkap", 10000,
-        missingStep?.href ? { label: `Buka ${missingStep.label}`, href: missingStep.href } : undefined
-      );
-    }
+  const checkAccess = (_e: React.MouseEvent, _href: string) => {
+    // Unlocked: All navigation allowed
   };
 
 
@@ -190,9 +180,6 @@ export function Sidebar({ role }: { role: RoleTypes }) {
                           className={`w-5 h-5 z-10 transition-colors ${isActive ? accentColorClasses.text : "text-slate-500 group-hover:text-slate-300"}`}
                         />
                         <span className="text-sm z-10 flex-1">{subItem.label}</span>
-                        {isSekretariatRole && !loadingStatus && isMenuLocked(subItem.href) && (
-                          <Lock className="w-3 h-3 text-red-400/70" />
-                        )}
                       </Link>
                     );
                   })}
@@ -224,9 +211,6 @@ export function Sidebar({ role }: { role: RoleTypes }) {
                 className={`w-5 h-5 z-10 transition-colors ${isActive ? accentColorClasses.text : "text-slate-500 group-hover:text-slate-300"}`}
               />
               <span className="text-sm z-10 flex-1">{item.label}</span>
-              {isSekretariatRole && !loadingStatus && isMenuLocked(item.href) && (
-                <Lock className="w-3 h-3 text-red-400/70" />
-              )}
             </Link>
           );
         })}
