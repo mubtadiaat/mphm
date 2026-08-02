@@ -16,16 +16,37 @@ export async function GET(req: NextRequest) {
 
     if (role === "without_account" || role === "no_account") {
       const scope = searchParams.get("scope") || undefined;
-      const source = searchParams.get("source") || undefined;
+      const session = await getSessionFromCookies();
+      const sessionInst = session?.institution || (session?.role === "sek.pondok" ? "PONDOK" : session?.role === "sek.madrasah" ? "MADRASAH" : "ALL");
+      const activeInst = scope === "pondok" ? "PONDOK" : scope === "madrasah" ? "MADRASAH" : sessionInst;
+
+      let whereCond: any = {
+        userAccount: null,
+        deletedAt: null,
+        ...(query
+          ? { fullName: { contains: query, mode: "insensitive" as const } }
+          : {}),
+      };
+
+      if (activeInst === "PONDOK") {
+        // Pondok: hanya pengurus pondok tanpa akun
+        whereCond.organizationMemberships = {
+          some: {
+            deletedAt: null,
+            institution: { in: ["PONDOK", "ALL"] }
+          }
+        };
+        whereCond.teacherProfile = { is: null };
+      } else if (activeInst === "MADRASAH") {
+        // Madrasah: guru/mustahiq ATAU pengurus madrasah tanpa akun
+        whereCond.OR = [
+          { teacherProfile: { isNot: null } },
+          { organizationMemberships: { some: { deletedAt: null, institution: { in: ["MADRASAH", "ALL"] } } } }
+        ];
+      }
 
       const peopleWithoutAccount = await prisma.person.findMany({
-        where: {
-          userAccount: null,
-          deletedAt: null,
-          ...(query
-            ? { fullName: { contains: query, mode: "insensitive" as const } }
-            : {}),
-        },
+        where: whereCond,
         include: {
           teacherProfile: true,
           organizationMemberships: { where: { deletedAt: null } },
@@ -271,6 +292,10 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === "pengurus") {
+      const session = await getSessionFromCookies();
+      const sessionInst = session?.institution || (session?.role === "sek.pondok" ? "PONDOK" : session?.role === "sek.madrasah" ? "MADRASAH" : "ALL");
+      const activeInst = scope === "pondok" ? "PONDOK" : scope === "madrasah" ? "MADRASAH" : sessionInst;
+
       const qLower = (query || "").trim().toLowerCase();
       const isMufattisyQuery = qLower.includes("mufat") || qLower.includes("mufattisy") || qLower.includes("mufatish");
       const isMundzirQuery = qLower.includes("mundzir");
@@ -278,6 +303,7 @@ export async function GET(req: NextRequest) {
       let whereCondition: any = {
         deletedAt: null,
         person: { deletedAt: null },
+        ...(activeInst !== "ALL" ? { institution: { in: [activeInst, "ALL"] } } : {}),
       };
 
       if (isMundzirQuery) {

@@ -20,10 +20,28 @@ export async function GET(req: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0");
     const statusParam = searchParams.get("status");
 
-    // Filter instansi: hanya tampilkan akun milik instansi yang sama
-    const institutionFilter = sessionInstitution === "ALL"
-      ? {} // Admin/superadmin bisa lihat semua
-      : { institution: sessionInstitution };
+    const userRoleLower = String(session?.role || "").toLowerCase();
+    const isPondokSession = userRoleLower === "sek.pondok" || (sessionInstitution === "PONDOK" && !userRoleLower.includes("admin"));
+    const isMadrasahSession = userRoleLower === "sek.madrasah" || (sessionInstitution === "MADRASAH" && !userRoleLower.includes("admin"));
+
+    // Filter instansi ganda (Double Barrier: Institution Field + Role Excluded)
+    const institutionFilter = isPondokSession
+      ? {
+          institution: { in: ["PONDOK", "ALL"] },
+          NOT: [
+            { role: { contains: "madrasah", mode: "insensitive" as const } },
+            { role: { contains: "mphm", mode: "insensitive" as const } },
+          ],
+        }
+      : isMadrasahSession
+      ? {
+          institution: { in: ["MADRASAH", "ALL"] },
+          NOT: [
+            { role: { contains: "pondok", mode: "insensitive" as const } },
+            { role: { contains: "p3hm", mode: "insensitive" as const } },
+          ],
+        }
+      : {};
 
     let whereCondition: any = {
       deletedAt: null,
