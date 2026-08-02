@@ -232,11 +232,55 @@ export function DashboardTab() {
   const readinessPercent = Math.round((completedCount / totalStepCount) * 100);
   const nextMissingStep = currentSteps.find(s => !s.ready);
 
+  const getTimeBasedTheme = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      // PAGI (05:00 - 11:59 WIB) -> Premium Sky & Royal Blue
+      return {
+        greeting: "Selamat Pagi 🌅",
+        periodName: "PAGI",
+        bannerBg: "bg-linear-to-r from-sky-600 via-blue-600 to-indigo-700 border-sky-400/40 text-white shadow-xl shadow-sky-500/10",
+        progressBg: "bg-linear-to-r from-sky-50/90 via-blue-50/70 to-indigo-50/60 dark:from-zinc-900 dark:to-zinc-900 border-sky-200 dark:border-zinc-800 text-sky-950 dark:text-sky-100",
+        badgeBg: "bg-white/20 text-white border-white/30 backdrop-blur-md",
+        clockBg: "bg-white/20 text-white border-white/30 backdrop-blur-md",
+      };
+    } else if (hour >= 12 && hour < 15) {
+      // SIANG (12:00 - 14:59 WIB) -> Premium Warm Golden Amber
+      return {
+        greeting: "Selamat Siang ☀️",
+        periodName: "SIANG",
+        bannerBg: "bg-linear-to-r from-amber-500 via-amber-600 to-orange-600 border-amber-300/40 text-white shadow-xl shadow-amber-500/10",
+        progressBg: "bg-linear-to-r from-amber-50/90 via-yellow-50/70 to-orange-50/60 dark:from-zinc-900 dark:to-zinc-900 border-amber-200 dark:border-zinc-800 text-amber-950 dark:text-amber-100",
+        badgeBg: "bg-white/20 text-white border-white/30 backdrop-blur-md",
+        clockBg: "bg-white/20 text-white border-white/30 backdrop-blur-md",
+      };
+    } else if (hour >= 15 && hour < 18.5) {
+      // SORE (15:00 - 18:29 WIB) -> Premium Sunset Orange & Rose
+      return {
+        greeting: "Selamat Sore 🌤️",
+        periodName: "SORE",
+        bannerBg: "bg-linear-to-r from-amber-600 via-orange-600 to-rose-600 border-orange-400/40 text-white shadow-xl shadow-orange-500/10",
+        progressBg: "bg-linear-to-r from-orange-50/90 via-rose-50/70 to-amber-50/60 dark:from-zinc-900 dark:to-zinc-900 border-orange-200 dark:border-zinc-800 text-orange-950 dark:text-orange-100",
+        badgeBg: "bg-white/20 text-white border-white/30 backdrop-blur-md",
+        clockBg: "bg-white/20 text-white border-white/30 backdrop-blur-md",
+      };
+    } else {
+      // MALAM (18:30 - 04:59 WIB) -> Premium Deep Midnight Indigo
+      return {
+        greeting: "Selamat Malam 🌙",
+        periodName: "MALAM",
+        bannerBg: "bg-linear-to-r from-slate-900 via-indigo-950 to-purple-950 border-indigo-500/30 text-white shadow-xl shadow-indigo-900/20",
+        progressBg: "bg-linear-to-r from-indigo-950/40 via-purple-950/30 to-slate-900 border-indigo-800/40 text-indigo-100",
+        badgeBg: "bg-white/10 text-white border-white/20 backdrop-blur-md",
+        clockBg: "bg-white/10 text-white border-white/20 backdrop-blur-md",
+      };
+    }
+  };
+
   const handleStepClick = (e: React.MouseEvent, href: string) => {
     const warning = getPrerequisiteWarning(href, isPondok ? "sek.pondok" : "sek.madrasah", isPondok ? "pondok" : "madrasah", onboardingStatus);
     if (warning) {
       e.preventDefault();
-      // Cari step yang belum selesai untuk dapatkan href tujuan
       const missingStep = currentSteps.find(s => !s.ready);
       toast(warning, "warning", "Prasyarat Belum Lengkap", 10000,
         missingStep?.href ? { label: `Buka ${missingStep.label}`, href: missingStep.href } : undefined
@@ -244,21 +288,19 @@ export function DashboardTab() {
     }
   };
 
+  const timeTheme = getTimeBasedTheme();
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-12">
-      {/* Real-time Header Banner */}
-      <div className={`p-6 sm:p-8 rounded-3xl border shadow-sm transition-all duration-300 relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 ${
-        isPondok
-          ? "bg-gradient-to-r from-emerald-950/40 via-teal-900/20 to-zinc-900 border-emerald-500/20 dark:border-emerald-800/40"
-          : "bg-gradient-to-r from-blue-950/40 via-indigo-900/20 to-zinc-900 border-blue-500/20 dark:border-blue-800/40"
-      }`}>
+      {/* Real-time Dynamic Time-based Header Banner */}
+      <div className={`p-6 sm:p-8 rounded-3xl border shadow-lg transition-all duration-500 relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6 ${timeTheme.bannerBg}`}>
         <div className="flex flex-col gap-3 z-10">
           <div className="flex flex-wrap items-center gap-2">
             {/* Live Real-time DB Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider border ${timeTheme.badgeBg}`}>
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-300"></span>
               </span>
               <span className="flex items-center gap-1">
                 <Database className="w-3 h-3" />
@@ -268,18 +310,18 @@ export function DashboardTab() {
 
             {/* Live Clock Badge */}
             {currentTime && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-zinc-400 bg-zinc-800/60 border border-zinc-700/60 backdrop-blur-md font-mono">
-                <Clock className="w-3.5 h-3.5 text-zinc-400" />
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border font-mono ${timeTheme.clockBg}`}>
+                <Clock className="w-3.5 h-3.5 text-white/90" />
                 <span>{currentTime} WIB</span>
               </div>
             )}
           </div>
 
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
-              <span>{getGreeting()}, Sekretariat!</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <span>{timeTheme.greeting}, Sekretariat!</span>
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-2xl">
+            <p className="text-xs sm:text-sm text-white/90 font-medium mt-1 max-w-2xl">
               {isPondok 
                 ? "Pusat kendali operasional Sekretariat Pondok Pesantren Putri (P3HM)."
                 : "Pusat kendali operasional Sekretariat Madrasah Diniyyah (MPHM)."
@@ -290,12 +332,8 @@ export function DashboardTab() {
 
         {/* Institution Badge & Refresh Trigger */}
         <div className="flex items-center gap-3 z-10 shrink-0">
-          <div className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 border ${
-            isPondok
-              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-              : "bg-blue-500/10 text-blue-400 border-blue-500/30"
-          }`}>
-            {isPondok ? <Home className="w-4 h-4 text-emerald-400" /> : <School className="w-4 h-4 text-blue-400" />}
+          <div className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 border ${timeTheme.badgeBg}`}>
+            {isPondok ? <Home className="w-4 h-4 text-white" /> : <School className="w-4 h-4 text-white" />}
             <span>{isPondok ? "Pondok Pesantren (P3HM)" : "Madrasah Diniyyah (MPHM)"}</span>
           </div>
 
@@ -303,29 +341,29 @@ export function DashboardTab() {
             type="button"
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="p-2.5 bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 rounded-2xl border border-zinc-700 transition-all flex items-center justify-center cursor-pointer shadow-xs"
+            className="p-2.5 bg-white/20 hover:bg-white/30 text-white rounded-2xl border border-white/30 transition-all flex items-center justify-center cursor-pointer shadow-xs backdrop-blur-md"
             title="Muat Ulang Data Database"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin text-blue-400" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin text-white" : ""}`} />
           </button>
         </div>
       </div>
 
       {/* System Readiness Wizard Progress Banner */}
-      <div className="p-5 bg-gradient-to-r from-zinc-900 via-zinc-850 to-zinc-900 border border-zinc-800 rounded-2xl shadow-md space-y-3">
+      <div className={`p-5 rounded-2xl shadow-md space-y-3 border ${timeTheme.progressBg}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+            <div className="p-2 bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-xl border border-amber-400/30 shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-xs font-extrabold text-white tracking-wide flex items-center gap-2">
+              <span className="text-xs font-extrabold tracking-wide flex items-center gap-2">
                 🚀 Panduan Kesiapan Sistem Sekretariat {isPondok ? "Pondok" : "Madrasah"}
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-blue-600 text-white border border-blue-700 font-extrabold shadow-xs">
                   {readinessPercent}% Selesai
                 </span>
               </span>
-              <p className="text-[11px] text-zinc-400 mt-0.5">
+              <p className="text-[11px] opacity-80 mt-0.5 font-medium">
                 {readinessPercent === 100
                   ? "Seluruh fondasi data dasar dan prasyarat operasional telah terisi 100% sempurna."
                   : `Langkah Selanjutnya: ${nextMissingStep?.label || "Lengkapi Data Prasyarat"}`
@@ -338,7 +376,7 @@ export function DashboardTab() {
             <Link
               href={nextMissingStep.href}
               onClick={(e) => handleStepClick(e, nextMissingStep.href)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
             >
               <span>+ Isi {nextMissingStep.label} Now</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -348,9 +386,9 @@ export function DashboardTab() {
 
         {/* Progress Bar & Steps Badges */}
         <div className="space-y-2">
-          <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden border border-zinc-700/50">
+          <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2 overflow-hidden border border-zinc-300 dark:border-zinc-700/50">
             <div
-              className={`h-full transition-all duration-500 ${isPondok ? "bg-emerald-500" : "bg-blue-500"}`}
+              className={`h-full transition-all duration-500 ${isPondok ? "bg-emerald-600" : "bg-blue-600"}`}
               style={{ width: `${readinessPercent}%` }}
             />
           </div>

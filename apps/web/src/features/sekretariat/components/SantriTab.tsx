@@ -964,26 +964,26 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
               <form onSubmit={handleSaveForm} className="flex-1 overflow-y-auto p-6 space-y-8">
                 {/* Feature: Tarik Data Santriwati Pondok (P3HM) & Input Unit Lain */}
                 {!isPondok && !editingSantri && (
-                  <div className="p-4 bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-zinc-900 border border-blue-500/30 rounded-2xl space-y-4">
+                  <div className="p-5 bg-linear-to-br from-blue-50/90 via-indigo-50/60 to-purple-50/50 dark:from-zinc-800/90 dark:to-zinc-900 border border-blue-200/80 dark:border-zinc-700 rounded-2xl space-y-4 shadow-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
-                        <Home className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-extrabold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+                        <Home className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         Kategori Asrama Siswi Madrasah (MPHM)
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <button
                         type="button"
                         onClick={() => setNewResidenceType("PONDOK_MUBTADIAAT")}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border text-left flex flex-col gap-0.5 cursor-pointer ${
+                        className={`px-3.5 py-3 rounded-xl text-xs font-extrabold transition-all border text-left flex flex-col gap-0.5 cursor-pointer shadow-xs ${
                           newResidenceType === "PONDOK_MUBTADIAAT"
-                            ? "bg-emerald-600/30 border-emerald-500 text-emerald-200"
-                            : "bg-zinc-800/60 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                            ? "bg-emerald-600 text-white border-emerald-700 shadow-md"
+                            : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-750"
                         }`}
                       >
                         <span>🏛️ Santri Pondok Mubtadi-aat</span>
-                        <span className="text-[10px] font-normal opacity-80">Tarik dari P3HM Lirboyo</span>
+                        <span className={`text-[10px] font-normal ${newResidenceType === "PONDOK_MUBTADIAAT" ? "text-emerald-100" : "text-zinc-500"}`}>Tarik dari P3HM Lirboyo</span>
                       </button>
 
                       <button
@@ -992,24 +992,24 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
                           setNewResidenceType("UNIT_LAIN");
                           setSelectedPondokSantriId("");
                         }}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border text-left flex flex-col gap-0.5 cursor-pointer ${
+                        className={`px-3.5 py-3 rounded-xl text-xs font-extrabold transition-all border text-left flex flex-col gap-0.5 cursor-pointer shadow-xs ${
                           newResidenceType === "UNIT_LAIN"
-                            ? "bg-purple-600/30 border-purple-500 text-purple-200"
-                            : "bg-zinc-800/60 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                            ? "bg-purple-600 text-white border-purple-700 shadow-md"
+                            : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-750"
                         }`}
                       >
                         <span>🏡 Unit Asrama Lain</span>
-                        <span className="text-[10px] font-normal opacity-80">Darussa'adah, Ar-Risalah, dll</span>
+                        <span className={`text-[10px] font-normal ${newResidenceType === "UNIT_LAIN" ? "text-purple-100" : "text-zinc-500"}`}>Darussa&apos;adah, Ar-Risalah, dll</span>
                       </button>
                     </div>
 
                     {newResidenceType === "PONDOK_MUBTADIAAT" && (
-                      <div className="space-y-2 pt-2 border-t border-zinc-800">
-                        <label className="text-xs font-bold text-blue-300">🔍 Pilih &amp; Tarik Data Santriwati Pondok (P3HM)</label>
+                      <div className="space-y-2 pt-3 border-t border-blue-200/60 dark:border-zinc-700">
+                        <label className="text-xs font-extrabold text-blue-900 dark:text-blue-300 block">🔍 Pilih &amp; Tarik Data Santriwati Pondok (P3HM)</label>
                         <select
                           value={selectedPondokSantriId}
                           onChange={(e) => handleSelectPondokSantri(e.target.value)}
-                          className="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-700 rounded-xl text-xs font-semibold text-white outline-none focus:border-blue-500 cursor-pointer"
+                          className="w-full px-3.5 py-2.5 bg-white dark:bg-zinc-800 border border-blue-300 dark:border-zinc-700 rounded-xl text-xs font-extrabold text-zinc-900 dark:text-white shadow-xs focus:ring-2 focus:ring-blue-500 outline-hidden cursor-pointer"
                         >
                           <option value="">-- Pilih Santriwati Pondok (Stambuk / NIK / Nama) --</option>
                           {pondokSantriList.map((s) => (
