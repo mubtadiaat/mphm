@@ -68,6 +68,9 @@ export async function GET(req: NextRequest) {
               { residenceType: "PONDOK_MUBTADIAAT" },
               { roomId: { not: null } }
             ]
+          },
+          {
+            residenceType: { not: "UNIT_LAIN" }
           }
         ];
       }

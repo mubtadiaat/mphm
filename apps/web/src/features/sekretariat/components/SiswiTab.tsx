@@ -140,10 +140,13 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
     }
   }, [showFormModal, editingSantri]);
 
-  const handleSelectPondokSantri = (id: string) => {
-    setSelectedPondokSantriId(id);
-    const target = pondokSantriList.find((s) => s.id === id);
+  const handleSelectPondokSantri = (idOrCandidate: string | Santri) => {
+    const target = typeof idOrCandidate === "string"
+      ? pondokSantriList.find((s) => s.id === idOrCandidate) || pondokCandidates.find((s) => s.id === idOrCandidate)
+      : idOrCandidate;
+
     if (target) {
+      setSelectedPondokSantriId(target.id);
       setNewName(target.name);
       setNewNik(target.nik);
       setNewGender(target.gender || "P");
@@ -161,7 +164,8 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
       setNewGuardianRelation(target.guardianRelation || "AYAH");
       setNewFamilyCardNumber(target.familyCardNumber || "");
       if (target.room) setNewRoom(target.room);
-      toast(`✅ Data ${target.name} (${target.stambuk}) ditarik dari Santriwati Pondok!`, "success");
+      if (target.enrollmentYear) setNewEnrollmentYear(target.enrollmentYear);
+      toast(`✅ Data Siswi ${target.name} (${target.stambuk}) otomatis terisi 100% dari Pondok P3HM!`, "success");
     }
   };
 
@@ -217,7 +221,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
     setShowPondokPullModal(false);
     resetFormFields();
     setNewResidenceType("PONDOK_MUBTADIAAT");
-    handleSelectPondokSantri(candidate.id);
+    handleSelectPondokSantri(candidate);
     setShowFormModal(true);
   };
 
