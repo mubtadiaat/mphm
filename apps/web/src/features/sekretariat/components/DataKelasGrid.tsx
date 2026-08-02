@@ -92,119 +92,18 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
           >
             {jenjangOptions.map(j => <option key={j} value={j}>{j}</option>)}
           </select>
-          {!isReadOnly && (
-            <button 
-              onClick={() => setShowForm(!showForm)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm flex items-center gap-2 transition-colors"
-            >
-              {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-              {showForm ? "Batal" : "Tambah Kelas"}
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Form Tambah Kelas */}
-      {showForm && !isReadOnly && (
-        <div className="bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-900/50 rounded-xl p-5 shadow-sm mb-2 animate-in fade-in slide-in-from-top-2">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-white mb-4 uppercase tracking-wider flex items-center gap-2">
-            <Layers className="w-4 h-4 text-blue-500" /> Registrasi Kelas Permanen
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-zinc-500">Jenjang *</label>
-              <select 
-                value={newJenjang}
-                onChange={(e) => {
-                  setNewJenjang(e.target.value);
-                  setNewTingkat(CLASS_LEVELS_MAP[e.target.value][0]);
-                }}
-                className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none"
-              >
-                {Object.keys(CLASS_LEVELS_MAP).map(j => <option key={j} value={j}>{j}</option>)}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-zinc-500">Tingkat *</label>
-              <select 
-                value={newTingkat}
-                onChange={(e) => setNewTingkat(e.target.value)}
-                className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none"
-              >
-                {CLASS_LEVELS_MAP[newJenjang].map(t => <option key={t} value={t}>Tingkat {t}</option>)}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-zinc-500">Ruang/Lokal *</label>
-              <input 
-                type="text" 
-                value={newRuang}
-                onChange={(e) => setNewRuang(e.target.value.toUpperCase())}
-                placeholder="Contoh: A, B, C"
-                className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none uppercase"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-zinc-500">Wali Kelas (Mustahiq)</label>
-              <select 
-                value={newMustahiq}
-                onChange={(e) => setNewMustahiq(e.target.value)}
-                className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none"
-              >
-                <option value="">Pilih Mustahiq...</option>
-                {sortedMustahiqList.map((guru) => {
-                  const r = (guru.role || "").toLowerCase();
-                  const isExact = r.includes(targetPattern);
-                  const isPartial = r.includes(newJenjang.toLowerCase()) && r.includes(newRuang.toLowerCase());
-                  const star = isExact ? "⭐ " : isPartial ? "✨ " : "";
-                  const matchBadge = isExact
-                    ? ` [Sesuai ${newJenjang} ${newTingkat} ${newRuang}]`
-                    : isPartial
-                    ? ` [Sesuai ${newJenjang} ${newRuang}]`
-                    : "";
-                  return (
-                    <option key={guru.id} value={guru.id}>
-                      {star}{guru.name} — ({guru.role || "Mustahiq"}){matchBadge}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
+      {/* Auto-fill Info Banner */}
+      <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex items-center gap-3 text-xs font-semibold text-blue-900 dark:text-blue-200 shadow-xs">
+        <span className="text-base">✨</span>
+        <span>
+          <strong>Informasi Rombel Otomatis:</strong> Tidak ada formulir input manual di menu ini. Seluruh data Rombongan Belajar (Kelas) <strong>terisi &amp; terhubung secara otomatis di database</strong> saat Anda menambahkan Mustahiq (Wali Kelas) di menu <a href="/sekretariat/mustahiq" className="underline font-extrabold text-blue-700 dark:text-blue-300">Data Pengajar</a>.
+        </span>
+      </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-zinc-500">Kapasitas (Siswa)</label>
-              <input 
-                type="number" 
-                value={newCapacity}
-                onChange={(e) => setNewCapacity(Number(e.target.value))}
-                className="px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-none"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end mt-4">
-            <button 
-              disabled={isCreating || !newRuang || !newMustahiq}
-              onClick={async () => {
-                await createClass({
-                  academicYearId: selectedYearId,
-                  institutionLevel: newJenjang,
-                  classLevel: newTingkat,
-                  section: newRuang,
-                  mustahiqId: newMustahiq,
-                  capacity: newCapacity
-                } as any);
-                setShowForm(false);
-                setNewRuang("");
-                setNewMustahiq("");
-              }}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              {isCreating ? "Menyimpan..." : "Simpan Kelas"}
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {/* Grid Layout 3-3 */}
       {isLoading ? (

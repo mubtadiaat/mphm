@@ -66,7 +66,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [phone, setPhone] = useState("");
   const [isMustahiq, setIsMustahiq] = useState(true);
   const [jenjang, setJenjang] = useState("Ibtida'iyyah");
-  const [tingkat, setTingkat] = useState("1 (Ula)");
+  const [tingkat, setTingkat] = useState("Tingkat I");
   const [lokal, setLokal] = useState("A");
 
   // Munawwib Role States
@@ -94,7 +94,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   }, [remoteData.data, remoteData.total]);
 
   const resetForm = () => {
-    setName(""); setPhone(""); setJenjang("Ibtida'iyyah"); setTingkat("1 (Ula)"); setLokal("A");
+    setName(""); setPhone(""); setJenjang("Ibtida'iyyah"); setTingkat("Tingkat I"); setLokal("A");
     setIsMustahiq(true); setIsMunawwib(true); 
     setSubjectName(dbSubjects[0]?.name || "");
     setSubjectClasses(dbClasses[0]?.name || "");
@@ -490,9 +490,12 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                         <div>
                           <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Tingkat</label>
                           <select value={tingkat} onChange={e => setTingkat(e.target.value)} className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
-                            <option value="1 (Ula)">1 (Ula)</option>
-                            <option value="2 (Wustho)">2 (Wustho)</option>
-                            <option value="3 (Ulya)">3 (Ulya)</option>
+                            <option value="Tingkat I">Tingkat I</option>
+                            <option value="Tingkat II">Tingkat II</option>
+                            <option value="Tingkat III">Tingkat III</option>
+                            <option value="Tingkat IV">Tingkat IV</option>
+                            <option value="Tingkat V">Tingkat V</option>
+                            <option value="Tingkat VI">Tingkat VI</option>
                           </select>
                         </div>
 
