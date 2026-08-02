@@ -167,23 +167,7 @@ export function isMenuLocked(
   workspace: WorkspaceType,
   status: OnboardingStatus
 ): boolean {
-  const isSekretariatRole = role === "sek.pondok" || role === "sek.madrasah";
-  if (!isSekretariatRole) return false;
-
-  const isPondok = role === "sek.pondok" || workspace === "pondok";
-
-  if (isPondok) {
-    if (href === "/sekretariat/rooms" && !status.hasMusyrifah) return true;
-    if (href === "/sekretariat/pelanggaran" && !status.hasRooms) return true;
-    if (href === "/sekretariat/santri" && (!status.hasRooms || !status.hasViolationTypes)) return true;
-    if ((href === "/sekretariat/perizinan" || href === "/sekretariat/khidmah") && !status.hasSantri) return true;
-  } else {
-    if (href === "/sekretariat/mustahiq" && !status.hasMunawwib) return true;
-    if (href === "/sekretariat/kelas" && !status.hasMustahiq) return true;
-    if (href === "/sekretariat/kurikulum" && !status.hasClasses) return true;
-    if (href === "/sekretariat/santri" && !status.hasSubjects) return true;
-    if ((href === "/sekretariat/penilaian" || href === "/sekretariat/raport") && !status.hasSantri) return true;
-  }
+  // Always return false: All menus unlocked per user directive
   return false;
 }
 

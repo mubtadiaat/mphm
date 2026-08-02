@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, Users, BookOpen, Search, Download, CheckCircle2, AlertTriangle, ShieldCheck, UserCheck } from "lucide-react";
+import { Plus, X, Users, BookOpen, Search, Download, CheckCircle2, AlertTriangle, ShieldCheck, UserCheck, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
@@ -37,6 +37,24 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [editingData, setEditingData] = useState<Guru | null>(null);
   const [viewingDetail, setViewingDetail] = useState<Guru | null>(null);
 
+  // DB Subjects & Classes
+  const [dbSubjects, setDbSubjects] = useState<Array<{ id: string; name: string; code?: string }>>([]);
+  const [dbClasses, setDbClasses] = useState<Array<{ id: string; name: string; fullName?: string }>>([]);
+
+  useEffect(() => {
+    apiRequest<{ data: Array<{ id: string; name: string; code?: string }> }>("/api/admin/subjects")
+      .then((res) => {
+        if (res.data) setDbSubjects(res.data);
+      })
+      .catch(() => {});
+
+    apiRequest<{ data: Array<{ id: string; name: string; fullName?: string }> }>("/api/admin/classes")
+      .then((res) => {
+        if (res.data) setDbClasses(res.data);
+      })
+      .catch(() => {});
+  }, []);
+
   // Pondok Search States
   const [pondokSearchQuery, setPondokSearchQuery] = useState("");
   const [pondokCandidates, setPondokCandidates] = useState<any[]>([]);
@@ -48,13 +66,25 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   const [phone, setPhone] = useState("");
   const [isMustahiq, setIsMustahiq] = useState(true);
   const [jenjang, setJenjang] = useState("Ibtida'iyyah");
-  const [tingkat, setTingkat] = useState("I");
+  const [tingkat, setTingkat] = useState("1 (Ula)");
   const [lokal, setLokal] = useState("A");
 
   // Munawwib Role States
   const [isMunawwib, setIsMunawwib] = useState(true);
-  const [subjectName, setSubjectName] = useState("Fathul Qorib");
-  const [subjectClasses, setSubjectClasses] = useState("1 Ula A, 2 Wustho B");
+  const [subjectName, setSubjectName] = useState("");
+  const [subjectClasses, setSubjectClasses] = useState("");
+
+  useEffect(() => {
+    if (dbSubjects.length > 0 && !subjectName) {
+      setSubjectName(dbSubjects[0].name);
+    }
+  }, [dbSubjects, subjectName]);
+
+  useEffect(() => {
+    if (dbClasses.length > 0 && !subjectClasses) {
+      setSubjectClasses(dbClasses[0].name);
+    }
+  }, [dbClasses, subjectClasses]);
 
   useEffect(() => {
     if (remoteData) {
@@ -64,19 +94,19 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
   }, [remoteData.data, remoteData.total]);
 
   const resetForm = () => {
-    setName(""); setPhone(""); setJenjang("Ibtida'iyyah"); setTingkat("I"); setLokal("A");
-    setIsMustahiq(true); setIsMunawwib(true); setSubjectName("Fathul Qorib"); setSubjectClasses("1 Ula A");
+    setName(""); setPhone(""); setJenjang("Ibtida'iyyah"); setTingkat("1 (Ula)"); setLokal("A");
+    setIsMustahiq(true); setIsMunawwib(true); 
+    setSubjectName(dbSubjects[0]?.name || "");
+    setSubjectClasses(dbClasses[0]?.name || "");
   };
 
   const handleOpenAdd = () => {
     if (!isPondokWorkspace) {
-      // In Madrasah: Always open Pondok Pull Modal first!
       setPondokSearchQuery("");
       setPondokCandidates([]);
       setHasSearchedPondok(false);
       setShowPondokPullModal(true);
     } else {
-      // In Pondok: Open direct input
       setEditingData(null);
       resetForm();
       setShowModal(true);
@@ -115,7 +145,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
     setName(item.name);
     setPhone(item.phone || "");
     setJenjang(item.jenjang && item.jenjang !== "-" ? item.jenjang : "Ibtida'iyyah");
-    setTingkat(item.tingkat && item.tingkat !== "-" ? item.tingkat : "I");
+    setTingkat(item.tingkat && item.tingkat !== "-" ? item.tingkat : "1 (Ula)");
     setLokal(item.lokal && item.lokal !== "-" ? item.lokal : "A");
     setShowModal(true);
   };
@@ -171,8 +201,12 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
           roleName: fullRole,
           gender: "L",
         });
-        await addPosisiToJabatan("Mustahiq", `${jenjang} ${tingkat} ${lokal}`.trim() || "Mustahiq", "MADRASAH");
-        toast("Pengajar baru berhasil didaftarkan!", "success", "Sukses");
+        if (isMustahiq) {
+          await addPosisiToJabatan("Mustahiq", `${jenjang} ${tingkat} ${lokal}`.trim() || "Mustahiq", "MADRASAH");
+          // Trigger auto-creation of AcademicClass (Rombel) in DB
+          await apiRequest("/api/admin/classes").catch(() => {});
+        }
+        toast("Pengajar baru berhasil didaftarkan! Kelas Rombel terisi otomatis.", "success", "Sukses");
       }
       setShowModal(false);
       resetForm();
@@ -411,8 +445,8 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setShowModal(false)} />
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden">
-              <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/40">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden max-h-[90vh]">
+              <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/40 shrink-0">
                 <h3 className="font-extrabold text-sm text-zinc-900 dark:text-white flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-blue-600" />
                   <span>{editingData ? "Edit Penugasan Pengajar" : "Form Input Data Pengajar Diniyyah"}</span>
@@ -420,7 +454,7 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                 <button onClick={() => setShowModal(false)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-lg cursor-pointer"><X className="w-5 h-5"/></button>
               </div>
 
-              <form onSubmit={handleSave} className="p-6 space-y-4 text-xs">
+              <form onSubmit={handleSave} className="p-6 space-y-4 text-xs overflow-y-auto">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Pengajar *</label>
                   <input required value={name} onChange={e => setName(e.target.value)} className="w-full px-3.5 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-500 outline-hidden dark:bg-zinc-800 dark:text-white" />
@@ -441,29 +475,36 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                   </div>
 
                   {isMustahiq && (
-                    <div className="grid grid-cols-3 gap-2 pt-1">
-                      <div>
-                        <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Jenjang</label>
-                        <select value={jenjang} onChange={e => setJenjang(e.target.value)} className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
-                          <option value="I'dadiyyah">I&apos;dadiyyah</option>
-                          <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
-                          <option value="Tsanawiyyah">Tsanawiyyah</option>
-                          <option value="Aliyyah">Aliyyah</option>
-                        </select>
+                    <div className="space-y-3 pt-1">
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Jenjang Instansi</label>
+                          <select value={jenjang} onChange={e => setJenjang(e.target.value)} className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
+                            <option value="I'dadiyyah">I&apos;dadiyyah</option>
+                            <option value="Ibtida'iyyah">Ibtida&apos;iyyah</option>
+                            <option value="Tsanawiyyah">Tsanawiyyah</option>
+                            <option value="Aliyyah">Aliyyah</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Tingkat</label>
+                          <select value={tingkat} onChange={e => setTingkat(e.target.value)} className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
+                            <option value="1 (Ula)">1 (Ula)</option>
+                            <option value="2 (Wustho)">2 (Wustho)</option>
+                            <option value="3 (Ulya)">3 (Ulya)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Lokal (Manual)</label>
+                          <input value={lokal} onChange={e => setLokal(e.target.value)} placeholder="Contoh: A, B, C..." className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white" />
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Tingkat</label>
-                        <select value={tingkat} onChange={e => setTingkat(e.target.value)} className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
-                          <option value="I">1 (Ula)</option>
-                          <option value="II">2 (Wustho)</option>
-                          <option value="III">3 (Ulya)</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="text-[10px] font-bold text-purple-800 dark:text-purple-300 block mb-1">Lokal / Rombel</label>
-                        <input value={lokal} onChange={e => setLokal(e.target.value)} placeholder="A" className="w-full px-2.5 py-2 bg-white dark:bg-zinc-800 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white" />
+                      <div className="p-2.5 bg-purple-100/60 dark:bg-purple-900/40 rounded-xl flex items-center gap-2 text-[11px] text-purple-900 dark:text-purple-200 font-semibold">
+                        <Info className="w-4 h-4 shrink-0 text-purple-600" />
+                        <span>Kelas Rombel (<strong>{jenjang} {tingkat}-{lokal}</strong>) akan terisi &amp; dibuat otomatis di database begitu Mustahiq disimpan.</span>
                       </div>
                     </div>
                   )}
@@ -473,26 +514,45 @@ export function MustahiqTab({ onViewDetail, isReadOnly = false }: { onViewDetail
                 <div className="p-4 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/60 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="font-extrabold text-xs text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
-                      📖 Peran Munawwib (Guru Mapel)
+                      📖 Peran Munawwib (Guru Mata Pelajaran)
                     </span>
                     <input type="checkbox" checked={isMunawwib} onChange={(e) => setIsMunawwib(e.target.checked)} className="w-4 h-4 accent-blue-600 rounded cursor-pointer" />
                   </div>
 
                   {isMunawwib && (
-                    <div className="space-y-2 pt-1">
+                    <div className="space-y-3 pt-1">
                       <div>
-                        <label className="text-[10px] font-bold text-blue-800 dark:text-blue-300 block mb-1">Mata Pelajaran Utama</label>
-                        <input value={subjectName} onChange={e => setSubjectName(e.target.value)} placeholder="Contoh: Fathul Qorib, Alfiyyah..." className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white" />
+                        <label className="text-[10px] font-bold text-blue-800 dark:text-blue-300 block mb-1">Mata Pelajaran (Dari Database Kurikulum)</label>
+                        {dbSubjects.length > 0 ? (
+                          <select value={subjectName} onChange={e => setSubjectName(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
+                            {dbSubjects.map((s) => (
+                              <option key={s.id} value={s.name}>{s.name} {s.code ? `(${s.code})` : ""}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <div className="p-2.5 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 rounded-xl text-[11px] font-semibold border border-amber-200">
+                            ⚠️ Belum ada Mata Pelajaran dibuat di Database. Silakan buat Kurikulum / Mapel di menu <a href="/sekretariat/kurikulum" className="underline font-bold">/sekretariat/kurikulum</a> terlebih dahulu.
+                          </div>
+                        )}
                       </div>
+
                       <div>
-                        <label className="text-[10px] font-bold text-blue-800 dark:text-blue-300 block mb-1">Daftar Kelas Ampuan</label>
-                        <input value={subjectClasses} onChange={e => setSubjectClasses(e.target.value)} placeholder="Contoh: 1 Ula A, 2 Wustho B" className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white" />
+                        <label className="text-[10px] font-bold text-blue-800 dark:text-blue-300 block mb-1">Kelas Ampuan (Dari Database Rombel)</label>
+                        {dbClasses.length > 0 ? (
+                          <select value={subjectClasses} onChange={e => setSubjectClasses(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white">
+                            {dbClasses.map((c) => (
+                              <option key={c.id} value={c.name}>{c.fullName || c.name}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input value={subjectClasses} onChange={e => setSubjectClasses(e.target.value)} placeholder="Contoh: 1 Ula A, 2 Wustho B" className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-zinc-900 dark:text-white" />
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800 shrink-0">
                   <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl cursor-pointer">Batal</button>
                   <button type="submit" className="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md cursor-pointer">
                     Simpan Data Pengajar
