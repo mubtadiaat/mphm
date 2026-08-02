@@ -676,6 +676,17 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         )}
       </div>
 
+      {/* Rules Notice Banner for Santri/Siswi */}
+      <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex items-center gap-3 text-xs font-semibold text-blue-900 dark:text-blue-200 shadow-xs">
+        <span className="text-base">✨</span>
+        <span>
+          <strong>Ketentuan Data Siswi &amp; Kewenangan:</strong>
+          {isPondok
+            ? " Seluruh status santriwati (Aktif, Cuti, Keluar/Boyong) dikelola dan disetujui di Pondok P3HM."
+            : " Data siswi asal P3HM terisi otomatis melalui penarikan data Pondok. Pihak Madrasah berwenang menetapkan Kelas, Lokal, Status Cuti (langsung), & Status Lulus/Alumni. Status Boyong memerlukan persetujuan (approval) Pondok P3HM."}
+        </span>
+      </div>
+
       {/* Sub-tabs Menu */}
       <div className="flex border-b border-zinc-200 dark:border-zinc-800 gap-1 overflow-x-auto pb-px">
         <button

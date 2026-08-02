@@ -120,21 +120,27 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
 
   return (
     <div className="flex flex-col gap-6 mt-4">
-      {/* Header and Filter */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-        <div>
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-blue-500" />
-            Grid Data Kelas &amp; Ploting Rombel Siswi
-          </h2>
-          <p className="text-sm text-zinc-500">Pengelolaan Rombongan Belajar (Lokal) dan Ploting Siswi Hasil Kenaikan Kelas.</p>
+      {/* Top Banner Header */}
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl text-white">
+        <div className="flex flex-col gap-1.5 z-10">
+          <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
+            <Layers className="w-4 h-4" />
+            <span>Kewenangan Mutlak Madrasah (MPHM)</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            Data Kelas &amp; Rombongan Belajar (Rombel)
+          </h1>
+          <p className="text-blue-100/90 text-xs sm:text-sm max-w-2xl leading-relaxed">
+            Pengelolaan <strong>Kelas &amp; Lokal (Rombel)</strong> merupakan kewenangan mutlak Madrasah. Pihak Pondok tidak mengelola data Kelas &amp; Lokal karena merupakan bagian dari administrasi akademik Madrasah.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Filter Jenjang:</label>
+
+        <div className="flex items-center gap-3 z-10 shrink-0 bg-white/10 p-2.5 rounded-2xl border border-white/20 backdrop-blur-md">
+          <label className="text-xs font-black text-blue-100 uppercase tracking-wider">Filter Jenjang:</label>
           <select 
             value={jenjang} 
             onChange={(e) => setJenjang(e.target.value)}
-            className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-sm font-semibold focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
+            className="px-3.5 py-2 bg-white text-zinc-900 rounded-xl text-xs font-bold focus:outline-hidden cursor-pointer shadow-md"
           >
             {jenjangOptions.map(j => <option key={j} value={j}>{j}</option>)}
           </select>

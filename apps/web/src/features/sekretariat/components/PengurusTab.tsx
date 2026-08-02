@@ -240,13 +240,13 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
         <div className="flex flex-col gap-1.5 z-10">
           <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
             <Users className="w-4 h-4" />
-            <span>Manajemen SDM Pengurus</span>
+            <span>Manajemen SDM Pengurus Madrasah (MPHM)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Data Pengurus & Manajemen Jabatan
+            Data Pengurus &amp; Struktur Jabatan Madrasah
           </h1>
-          <p className="text-blue-100/90 text-sm max-w-xl">
-            Single Source of Truth Data Pengurus Induk (P3HM Lirboyo) serta pembuatan struktur Jabatan Instansi secara dinamis.
+          <p className="text-blue-100/90 text-xs sm:text-sm max-w-2xl leading-relaxed">
+            Penarikan data Pengurus Pondok ke Madrasah hanya mengambil <strong>data identitas</strong>. Jabatan di Pondok tidak disinkronkan, sehingga Operator Madrasah menentukan <strong>Jabatan Pengurus Madrasah (11 Jabatan Resmi)</strong> secara mandiri.
           </p>
         </div>
 
@@ -254,19 +254,27 @@ export function PengurusTab({ onViewDetail, isReadOnly = false }: PengurusTabPro
           <div className="flex items-center gap-3 z-10 shrink-0">
             <button 
               onClick={() => setShowJabatanModal(true)} 
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold border border-white/20 transition-all cursor-pointer backdrop-blur-md"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold border border-white/20 transition-all cursor-pointer backdrop-blur-md"
             >
               <Briefcase className="w-4 h-4" /> Kelola Jabatan ({pengurusTitles.length})
             </button>
             <button 
               onClick={handleOpenAdd} 
-              className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-sm font-black shadow-lg transition-all cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs font-black shadow-lg transition-all cursor-pointer"
             >
               {!isPondokWorkspace ? <Search className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
               <span>{!isPondokWorkspace ? "Tarik Data dari Pondok P3HM" : "Tambah Pengurus"}</span>
             </button>
           </div>
         )}
+      </div>
+
+      {/* Info Notice Banner */}
+      <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex items-center gap-3 text-xs font-semibold text-blue-900 dark:text-blue-200 shadow-xs">
+        <span className="text-base">✨</span>
+        <span>
+          <strong>Ketentuan Penarikan Data Pengurus:</strong> Penarikan data Pengurus Pondok hanya mengambil data identitas (Nama, NIK, HP, Alamat). Jabatan di Pondok dan Madrasah merupakan kewenangan masing-masing instansi dan tidak saling memengaruhi.
+        </span>
       </div>
 
       <UniversalDataGrid
