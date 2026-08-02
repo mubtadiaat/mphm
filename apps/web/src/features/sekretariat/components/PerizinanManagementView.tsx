@@ -15,7 +15,7 @@ export interface StudentPermitData {
   studentId: string;
   studentName: string;
   stambuk: string;
-  permitType: "PULANG" | "SAMBANGAN" | "KELUAR";
+  permitType: "PULANG" | "SAMBANGAN" | "KELUAR" | "BEROBAT";
   reason: string;
   startDate: string;
   endDate: string;
@@ -29,6 +29,7 @@ interface PermitLimitRules {
   PULANG: number;
   SAMBANGAN: number;
   KELUAR: number;
+  BEROBAT: number;
 }
 
 interface PerizinanManagementViewProps {
@@ -52,12 +53,12 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
     if (saved) {
       try { return JSON.parse(saved); } catch {}
     }
-    return { PULANG: 3, SAMBANGAN: 1, KELUAR: 1 };
+    return { PULANG: 30, SAMBANGAN: 1, KELUAR: 1, BEROBAT: 3 };
   });
 
   // Form states
   const [selectedStudentId, setSelectedStudentId] = useState("");
-  const [permitType, setPermitType] = useState<"PULANG" | "SAMBANGAN" | "KELUAR">("PULANG");
+  const [permitType, setPermitType] = useState<"PULANG" | "SAMBANGAN" | "KELUAR" | "BEROBAT">("PULANG");
   const [reason, setReason] = useState("");
   const [startDate, setStartDate] = useState(new Date().toISOString().split("T")[0]);
   const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
@@ -74,8 +75,9 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
   };
 
   const requestedDays = calculateDays(startDate, endDate);
-  const maxAllowedDays = limitRules[permitType] || 3;
-  const isExceedingLimit = requestedDays > maxAllowedDays;
+  const maxAllowedDays = limitRules[permitType] || 1;
+  // Izin Pulang is manually set by user based on residency/karesidenan, so it is never restricted by static max days
+  const isExceedingLimit = permitType !== "PULANG" && requestedDays > maxAllowedDays;
 
   const handleSaveLimits = (e: React.FormEvent) => {
     e.preventDefault();
@@ -489,12 +491,14 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
               </button>
             </div>
 
-            <form onSubmit={handleSaveLimits} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-500 uppercase">Max Hari Izin Pulang (Ke Rumah)</label>
-                <input type="number" min={1} required value={limitRules.PULANG} onChange={(e) => setLimitRules({ ...limitRules, PULANG: parseInt(e.target.value) || 1 })} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
-              </div>
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 text-blue-800 dark:text-blue-300 rounded-2xl text-xs space-y-1">
+              <span className="font-bold block">📍 Catatan Aturan Izin Pulang:</span>
+              <p className="text-[11px] leading-relaxed">
+                Durasi Izin Pulang (Ke Rumah) diatur secara <strong>manual oleh Sekretariat</strong> berdasarkan karesidenan / daerah asal santriwati. Batas maksimal di bawah berlaku untuk Sambangan Wali, Keluar Komplek, dan Berobat.
+              </p>
+            </div>
 
+            <form onSubmit={handleSaveLimits} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-zinc-500 uppercase">Max Hari Sambangan Wali Santri</label>
                 <input type="number" min={1} required value={limitRules.SAMBANGAN} onChange={(e) => setLimitRules({ ...limitRules, SAMBANGAN: parseInt(e.target.value) || 1 })} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
@@ -503,6 +507,11 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
               <div className="space-y-1">
                 <label className="text-xs font-bold text-zinc-500 uppercase">Max Hari Izin Keluar Komplek</label>
                 <input type="number" min={1} required value={limitRules.KELUAR} onChange={(e) => setLimitRules({ ...limitRules, KELUAR: parseInt(e.target.value) || 1 })} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zinc-500 uppercase">Max Hari Izin Berobat / Perawatan</label>
+                <input type="number" min={1} required value={limitRules.BEROBAT || 3} onChange={(e) => setLimitRules({ ...limitRules, BEROBAT: parseInt(e.target.value) || 1 })} className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-bold text-zinc-900 dark:text-white outline-none" />
               </div>
 
               <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 flex justify-end gap-2">
@@ -542,9 +551,10 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
               <div>
                 <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Jenis Perizinan *</label>
                 <select value={permitType} onChange={(e) => setPermitType(e.target.value as any)} required className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white font-bold">
-                  <option value="PULANG">Izin Pulang (Batas Max: {limitRules.PULANG} Hari)</option>
+                  <option value="PULANG">Izin Pulang (Diatur Manual Sesuai Karesidenan Daerah)</option>
                   <option value="SAMBANGAN">Sambangan Wali (Batas Max: {limitRules.SAMBANGAN} Hari)</option>
                   <option value="KELUAR">Izin Keluar Komplek (Batas Max: {limitRules.KELUAR} Hari)</option>
+                  <option value="BEROBAT">Izin Berobat / Perawatan (Batas Max: {limitRules.BEROBAT || 3} Hari)</option>
                 </select>
               </div>
 
@@ -560,10 +570,17 @@ export function PerizinanManagementView({ isReadOnly = false }: PerizinanManagem
               </div>
 
               {/* Realtime Limit Alert */}
-              <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${isExceedingLimit ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900" : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900"}`}>
-                {isExceedingLimit ? <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
-                <span>Durasi: <strong>{requestedDays} Hari</strong> (Max Diizinkan: {maxAllowedDays} Hari)</span>
-              </div>
+              {permitType === "PULANG" ? (
+                <div className="p-3 rounded-xl border bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900 flex items-center gap-2 text-xs font-bold">
+                  <Calendar className="w-4 h-4 text-blue-500 shrink-0" />
+                  <span>📍 Izin Pulang: Tanggal kembali diatur manual oleh Sekretariat sesuai karesidenan daerah santri. (Durasi: <strong>{requestedDays} Hari</strong>)</span>
+                </div>
+              ) : (
+                <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${isExceedingLimit ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900" : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900"}`}>
+                  {isExceedingLimit ? <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
+                  <span>Durasi: <strong>{requestedDays} Hari</strong> (Max Diizinkan: {maxAllowedDays} Hari)</span>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">Alasan Permohonan *</label>
