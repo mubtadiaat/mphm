@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, X, BookOpen } from "lucide-react";
+import { Plus, X, BookOpen, Layers, RefreshCw, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UniversalDataGrid } from "@/components/data-grid/UniversalDataGrid";
 import { TableActions } from "@/components/shared/TableActions";
 import { PillBadge } from "@/components/shared/PillBadge";
 import { useSubjects, Subject } from "@/features/sekretariat/queries/useSubjects";
 import { useToast } from "@/components/shared/ToastContext";
+import { OFFICIAL_CURRICULUM, getSubjectsForClass } from "@/config/curriculum.config";
+import { apiRequest } from "@/lib/api";
 
 interface KurikulumTabProps {
   onViewDetail: (data: Record<string, unknown>) => void;
@@ -16,9 +18,23 @@ interface KurikulumTabProps {
   selectedYearId?: string;
 }
 
+const JENJANG_LIST = ["I'dadiyyah", "Ibtida'iyyah", "Tsanawiyyah", "Aliyyah"] as const;
+
+const KELAS_MAP: Record<string, string[]> = {
+  "I'dadiyyah": ["I", "II", "III"],
+  "Ibtida'iyyah": ["III", "IV", "V", "VI"],
+  "Tsanawiyyah": ["I", "II", "III"],
+  "Aliyyah": ["I", "II", "III"],
+};
+
 export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabProps) {
   const { data: remoteData = [], isLoading, createSubject, updateSubject, deleteSubject } = useSubjects();
   const { toast, confirm } = useToast();
+
+  const [activeJenjang, setActiveJenjang] = useState<typeof JENJANG_LIST[number]>("Ibtida'iyyah");
+  const [activeKelas, setActiveKelas] = useState<string>("IV");
+
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Modal States
   const [showModal, setShowModal] = useState(false);
@@ -28,13 +44,21 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
   // Form States
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
-  const [subjectType, setSubjectType] = useState<"MAPEL" | "NON_MAPEL">("NON_MAPEL");
+  const [subjectType, setSubjectType] = useState<"MAPEL" | "NON_MAPEL">("MAPEL");
   const [isActive, setIsActive] = useState(true);
+
+  // Sync activeKelas when activeJenjang changes
+  useEffect(() => {
+    const availableKelas = KELAS_MAP[activeJenjang] || ["I"];
+    if (!availableKelas.includes(activeKelas)) {
+      setActiveKelas(availableKelas[0]);
+    }
+  }, [activeJenjang]);
 
   const resetForm = () => {
     setCode("");
     setName("");
-    setSubjectType("NON_MAPEL");
+    setSubjectType("MAPEL");
     setIsActive(true);
   };
 
@@ -48,7 +72,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
     setEditingSubject(sub);
     setCode(sub.code);
     setName(sub.name);
-    setSubjectType(sub.subjectType);
+    setSubjectType(sub.subjectType as "MAPEL" | "NON_MAPEL");
     setIsActive(sub.isActive);
     setShowModal(true);
   };
@@ -93,22 +117,60 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
     }
   };
 
+  const handleSyncOfficialCurriculum = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await apiRequest<{ status: string; message: string }>("/api/admin/curriculum/sync", {
+        method: "POST",
+      });
+      toast(res.message || "Kurikulum Resmi MPHM Lirboyo berhasil disinkronkan ke Database Neon!", "success", "Sinkronisasi Berhasil");
+      window.location.reload();
+    } catch (err: any) {
+      toast(err?.message || "Gagal menyinkronkan kurikulum resmi", "error");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Get official subjects for current active tab
+  const officialSubjectsForActiveTab = getSubjectsForClass(activeJenjang, activeKelas);
+
+  // Filter remote subjects or show official list
+  const filteredRemoteData = remoteData.filter((sub) => {
+    return officialSubjectsForActiveTab.some((ofName) => ofName.toLowerCase() === sub.name.toLowerCase());
+  });
+
+  const displayData = filteredRemoteData.length > 0
+    ? filteredRemoteData
+    : officialSubjectsForActiveTab.map((subjName, idx) => ({
+      id: `off-${idx}`,
+      code: `MP-${activeJenjang.substring(0, 3).toUpperCase()}-${activeKelas}-${idx + 1}`,
+      name: subjName,
+      subjectType: "MAPEL" as const,
+      isActive: true,
+    }));
+
   const columns: ColumnDef<Subject, unknown>[] = [
     {
       accessorKey: "code",
       header: "Kode Mapel",
       meta: { align: "left" },
       cell: (info) => (
-        <span className="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10 px-2 py-0.5 rounded border border-blue-100/50 dark:border-blue-800/30">
+        <span className="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10 px-2 py-0.5 rounded border border-blue-100/50 dark:border-blue-800/30 text-xs">
           {info.getValue() as string}
         </span>
       )
     },
     {
       accessorKey: "name",
-      header: "Nama Pelajaran",
+      header: "Nama Kitab / Mata Pelajaran",
       meta: { align: "left" },
-      cell: (info) => <span className="font-bold text-zinc-900 dark:text-white">{info.getValue() as string}</span>
+      cell: (info) => (
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+          <span className="font-bold text-zinc-900 dark:text-white text-xs">{info.getValue() as string}</span>
+        </div>
+      )
     },
     {
       accessorKey: "subjectType",
@@ -120,7 +182,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
         return (
           <div className="flex justify-center">
             <PillBadge
-              label={isSacred ? "NON_MAPEL" : "MAPEL"}
+              label={isSacred ? "NON_MAPEL" : "MAPEL DI'NIYYAH"}
               variant={isSacred ? "gold" : "info"}
             />
           </div>
@@ -129,12 +191,12 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
     },
     {
       accessorKey: "isActive",
-      header: "Status Kurikulum",
+      header: "Status Silabus",
       meta: { align: "center" },
       cell: (info) => (
         <div className="flex justify-center">
           <PillBadge
-            label={info.getValue() ? "AKTIF" : "NONAKTIF"}
+            label={info.getValue() ? "AKTIF RESMI" : "NONAKTIF"}
             variant={info.getValue() ? "success" : "danger"}
           />
         </div>
@@ -161,55 +223,113 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
   ];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 mt-4 pb-12">
       {/* Header Section - Premium Gradient Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-cyan-500/10 via-blue-500/5 to-transparent border border-cyan-500/20 dark:border-cyan-500/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        
+      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl text-white">
         <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-cyan-650 dark:text-cyan-400 text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
             <BookOpen className="w-4 h-4" />
-            <span>Kurikulum & Rencana Studi</span>
+            <span>Manajemen Kurikulum Berbasis Jenjang &amp; Tingkat Kelas</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Kurikulum Builder
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            Kurikulum &amp; Silabus Diniyyah MPHM
           </h1>
-          <p className="text-zinc-555 dark:text-zinc-400 text-sm max-w-xl">
-            Manajemen silabus, materi, dan bobot pelajaran akademik.
+          <p className="text-blue-100/90 text-xs sm:text-sm max-w-2xl leading-relaxed font-medium">
+            Seluruh Rombel, Jadwal Pelajaran, Guru Pengampu (Mustahiq / Munawwib), Input Nilai, Cetak Rapor, dan Kenaikan Kelas wajib disusun presisi berdasarkan Jenjang &amp; Kelas masing-masing.
           </p>
         </div>
 
         {!isReadOnly && (
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-5 py-3 bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 border border-cyan-500/20"
-          >
-            <Plus className="w-4 h-4" /> Tambah Pelajaran
-          </button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 z-10 shrink-0">
+            <button
+              onClick={handleSyncOfficialCurriculum}
+              disabled={isSyncing}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-extrabold border border-white/20 transition-all cursor-pointer backdrop-blur-md shadow-md disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
+              <span>{isSyncing ? "Menyinkronkan..." : "Sinkronkan Ke Database"}</span>
+            </button>
+            <button
+              onClick={handleOpenAdd}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs font-black shadow-lg transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" /> Tambah Mapel Custom
+            </button>
+          </div>
         )}
+      </div>
+
+      {/* Info Banner Rules */}
+      <div className="p-4 bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-2xl flex items-center gap-3 text-xs font-semibold text-emerald-900 dark:text-emerald-200 shadow-xs">
+        <span className="text-lg">✨</span>
+        <span>
+          <strong>Ketentuan Baku Kurikulum:</strong> Setiap Jenjang dan Kelas memiliki daftar mata pelajaran resmi yang terikat. Sistem tidak memperbolehkan penggunaan kurikulum yang sama untuk jenjang atau kelas yang berbeda.
+        </span>
+      </div>
+
+      {/* Filter Tabs Jenjang & Kelas */}
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 space-y-4 shadow-xs">
+        {/* Level 1: Filter Jenjang */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-3">
+          <span className="text-xs font-extrabold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Layers className="w-4 h-4 text-blue-500" /> Pilih Jenjang Pendidikan:
+          </span>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            {JENJANG_LIST.map((j) => (
+              <button
+                key={j}
+                onClick={() => setActiveJenjang(j)}
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${activeJenjang === j
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  }`}
+              >
+                {j}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Level 2: Filter Tingkat Kelas */}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs font-bold text-zinc-500">Tingkat Kelas ({activeJenjang}):</span>
+          <div className="flex flex-wrap gap-2">
+            {(KELAS_MAP[activeJenjang] || []).map((k) => (
+              <button
+                key={k}
+                onClick={() => setActiveKelas(k)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${activeKelas === k
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200"
+                  }`}
+              >
+                Kelas {k}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Grid Table */}
       <UniversalDataGrid
         columns={columns as unknown as ColumnDef<Record<string, unknown>, unknown>[]}
-        data={remoteData as unknown as Record<string, unknown>[]}
+        data={displayData as unknown as Record<string, unknown>[]}
         pageCount={1}
         pageIndex={0}
-        pageSize={10}
+        pageSize={50}
         loading={isLoading}
         onRowClick={(row) => setViewingDetail(row as unknown as Subject)}
         tableName="kurikulum"
         importExportProps={{
-          title: "Master Data Kurikulum dan Mata Pelajaran Diniyyah",
-          headers: ["Kode Mata Pelajaran", "Nama Mata Pelajaran Diniyyah", "Tipe Mata Pelajaran", "Status Keaktifan"],
+          title: `Kurikulum Resmi ${activeJenjang} Kelas ${activeKelas}`,
+          headers: ["Kode Mata Pelajaran", "Nama Kitab / Pelajaran", "Tipe Pelajaran", "Status Keaktifan"],
           onImportSuccess: async (rows) => {
             let count = 0;
             for (const r of rows) {
-              const nameVal = r["Nama Mata Pelajaran Diniyyah"] || r["name"] || "";
+              const nameVal = r["Nama Kitab / Pelajaran"] || r["Nama Mata Pelajaran Diniyyah"] || r["name"] || "";
               if (!nameVal.trim()) continue;
-              const codeVal = r["Kode Mata Pelajaran"] || r["code"] || `MP-${Math.floor(100 + Math.random() * 900)}`;
-              const typeVal = (r["Tipe Mata Pelajaran"] || r["subjectType"] || "").toUpperCase().includes("NON") ? "NON_MAPEL" : "MAPEL";
+              const codeVal = r["Kode Mata Pelajaran"] || r["code"] || `MP-${activeJenjang.substring(0, 3).toUpperCase()}-${activeKelas}-${Math.floor(100 + Math.random() * 900)}`;
+              const typeVal = (r["Tipe Pelajaran"] || r["subjectType"] || "").toUpperCase().includes("NON") ? "NON_MAPEL" : "MAPEL";
               try {
                 await createSubject({
                   code: codeVal,
@@ -244,16 +364,16 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden relative z-10 flex flex-col"
+              className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl overflow-hidden relative z-10 flex flex-col"
             >
               {/* Modal Header */}
               <div className="p-5 border-b border-zinc-150 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50 shrink-0">
                 <div>
-                  <h3 className="font-bold text-lg text-zinc-900 dark:text-white">
-                    {editingSubject ? "Edit Mata Pelajaran" : "Tambah Pelajaran Baru"}
+                  <h3 className="font-bold text-base text-zinc-900 dark:text-white">
+                    {editingSubject ? "Edit Mata Pelajaran" : "Tambah Pelajaran Custom"}
                   </h3>
                   <p className="text-xs text-zinc-500">
-                    {editingSubject ? "Ubah skema dan kode identifikasi silabus." : "Daftarkan silabus mata pelajaran baru."}
+                    {editingSubject ? "Ubah kode atau nama mata pelajaran." : "Daftarkan mata pelajaran tambahan ke silabus."}
                   </p>
                 </div>
                 <button
@@ -273,20 +393,20 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    placeholder="Contoh: MP-FQH-01"
-                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200 font-mono"
+                    placeholder={`Contoh: MP-${activeJenjang.substring(0, 3).toUpperCase()}-${activeKelas}-01`}
+                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
                     required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Nama Pelajaran *</label>
+                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Nama Pelajaran / Kitab *</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Contoh: Fiqih (Fath al-Qarib)"
-                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
+                    placeholder="Contoh: Safinah as-Sholah"
+                    className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
                     required
                   />
                 </div>
@@ -296,39 +416,26 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
                   <select
                     value={subjectType}
                     onChange={(e) => setSubjectType(e.target.value as "MAPEL" | "NON_MAPEL")}
-                    className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:text-white"
                   >
-                    <option value="MAPEL">MAPEL</option>
-                    <option value="NON_MAPEL">NON-MAPEL</option>
+                    <option value="MAPEL">MAPEL DINIYYAH (Diuijikan / Di-Raport)</option>
+                    <option value="NON_MAPEL">NON MAPEL (Ekstra / Kegiatan)</option>
                   </select>
                 </div>
 
-                <div className="flex items-center gap-3 py-2">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={isActive}
-                    onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-zinc-300 rounded focus:ring-blue-500 cursor-pointer"
-                  />
-                  <label htmlFor="isActive" className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
-                    Mata pelajaran aktif dalam kurikulum tahun ajaran berjalan
-                  </label>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="flex justify-end gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-750 dark:text-zinc-200 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2.5 text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-colors cursor-pointer"
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer"
                   >
-                    Simpan Perubahan
+                    Simpan Mata Pelajaran
                   </button>
                 </div>
               </form>
@@ -341,37 +448,46 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
       <AnimatePresence>
         {viewingDetail && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setViewingDetail(null)} />
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-xl z-10 flex flex-col overflow-hidden max-h-[85vh]">
-              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-800/30">
-                <h3 className="font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-cyan-500" />
-                  Detail Pelajaran
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setViewingDetail(null)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+            />
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-xl z-10 flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800"
+            >
+              <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between bg-zinc-50 dark:bg-zinc-950">
+                <h3 className="font-extrabold text-base text-zinc-900 dark:text-white flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-blue-500" />
+                  Detail Mata Pelajaran
                 </h3>
-                <button onClick={() => setViewingDetail(null)} className="text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded-md transition-colors"><X className="w-5 h-5"/></button>
+                <button onClick={() => setViewingDetail(null)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-md cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <div className="p-6 overflow-y-auto space-y-4 text-sm font-medium">
+              <div className="p-6 space-y-4 text-xs font-medium">
                 <table className="w-full border-collapse">
                   <tbody>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Kode Mapel</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-mono">{viewingDetail.code || "-"}</td>
+                      <td className="py-2.5 font-bold text-zinc-400 w-1/3">Kode Mapel</td>
+                      <td className="py-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">{viewingDetail.code || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Nama Pelajaran</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-bold">{viewingDetail.name || "-"}</td>
+                      <td className="py-2.5 font-bold text-zinc-400 w-1/3">Nama Pelajaran</td>
+                      <td className="py-2.5 font-bold text-zinc-900 dark:text-white">{viewingDetail.name || "-"}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Tipe</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left font-mono">{viewingDetail.subjectType || "-"}</td>
+                      <td className="py-2.5 font-bold text-zinc-400 w-1/3">Jenjang &amp; Kelas</td>
+                      <td className="py-2.5 font-bold text-emerald-600 dark:text-emerald-400">{activeJenjang} — Kelas {activeKelas}</td>
                     </tr>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800/60">
-                      <td className="py-2.5 pr-4 font-bold text-zinc-400 dark:text-zinc-500 w-1/3 text-left">Status</td>
-                      <td className="py-2.5 text-zinc-800 dark:text-zinc-200 text-left">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${viewingDetail.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                          {viewingDetail.isActive ? 'AKTIF' : 'NONAKTIF'}
-                        </span>
-                      </td>
+                      <td className="py-2.5 font-bold text-zinc-400 w-1/3">Tipe Pelajaran</td>
+                      <td className="py-2.5 font-bold text-zinc-800 dark:text-zinc-200">{viewingDetail.subjectType || "MAPEL"}</td>
                     </tr>
                   </tbody>
                 </table>
