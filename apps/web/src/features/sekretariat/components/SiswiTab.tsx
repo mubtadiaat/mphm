@@ -421,8 +421,8 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
   ];
 
   const excelHeaders = [
-    "Nama Lengkap Santriwati",
-    "NIK Santri (16 Digit)",
+    "Nama Lengkap Siswi",
+    "NIK Siswi (16 Digit)",
     "Jenis Kelamin",
     "Nomor Stambuk",
     "NIS",
@@ -601,8 +601,8 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
             for (const r of importedRows) {
               try {
                 await createSantri({
-                  name: r["Nama Lengkap Santriwati"] || r["Nama Lengkap"] || r["Nama"] || "",
-                  nik: r["NIK Santri (16 Digit)"] || r["NIK Santri"] || r["NIK"] || "",
+                  name: r["Nama Lengkap Siswi"] || r["Nama Lengkap Santriwati"] || r["Nama Lengkap"] || r["Nama"] || "",
+                  nik: r["NIK Siswi (16 Digit)"] || r["NIK Siswi"] || r["NIK Santri (16 Digit)"] || r["NIK"] || "",
                   gender: (r["Jenis Kelamin"] || "P") as "L" | "P",
                   stambuk: r["Nomor Stambuk"] || r["Stambuk"] || "",
                   nis: r["NIS"] || "",
@@ -843,7 +843,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Santriwati *</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nama Lengkap Siswi *</label>
                       <input
                         type="text"
                         required
@@ -855,7 +855,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NIK (16 Digit) *</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NIK Siswi (16 Digit) *</label>
                       <input
                         type="text"
                         required
@@ -889,7 +889,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                     </div>
 
                     <div className="space-y-1 md:col-span-2">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WA Santri</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">No. HP / WA Siswi</label>
                       <input
                         type="text"
                         value={newPhoneNumber}
@@ -933,7 +933,7 @@ export function SiswiTab({ isReadOnly = false, selectedYearId }: SiswiTabProps) 
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NISN (Nomor Induk Siswa Nasional)</label>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">NISN (Nomor Induk Siswi Nasional)</label>
                       <input
                         type="text"
                         value={newNisn}
