@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAuthSession } from "@/lib/apiGuard";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * GET /api/academic/pull-pondok
+ * Mengambil daftar santriwati Pondok P3HM untuk keperluan penarikan data ke Madrasah MPHM.
+ * Hanya akun dari instansi Madrasah (atau admin) yang diizinkan mengakses endpoint ini.
+ * Ini adalah SATU-SATUNYA mekanisme resmi sinkronisasi data Pondok → Madrasah.
+ */
+
 export async function GET(req: NextRequest) {
   try {
+    // Guard: hanya Madrasah (sek.madrasah, mustahiq, admin) yang bisa akses
+    const { session, errorResponse } = await requireAuthSession(req, ["sek", "mustahiq", "admin", "superadmin"]);
+    if (errorResponse) return errorResponse;
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("q") || "";
     const academicYearId = searchParams.get("academicYearId") || undefined;

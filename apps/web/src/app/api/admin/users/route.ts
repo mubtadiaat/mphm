@@ -1,24 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/auditLog";
-import { requireAuthSession } from "@/lib/apiGuard";
+import { requireAuthSession, getSessionInstitution } from "@/lib/apiGuard";
 import bcrypt from "bcryptjs";
 
 export async function GET(req: NextRequest) {
   try {
-    const { errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
+    const { session, errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
     if (errorResponse) return errorResponse;
+
+    const sessionInstitution = getSessionInstitution(session);
 
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("q") || undefined;
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
-
     const statusParam = searchParams.get("status");
+
+    // Filter instansi: hanya tampilkan akun milik instansi yang sama
+    const institutionFilter = sessionInstitution === "ALL"
+      ? {} // Admin/superadmin bisa lihat semua
+      : { institution: sessionInstitution };
 
     let whereCondition: any = {
       deletedAt: null,
       status: { not: "INACTIVE" },
+      ...institutionFilter,
       ...(query
         ? {
             OR: [
@@ -33,15 +40,20 @@ export async function GET(req: NextRequest) {
 
     if (statusParam === "dorman" || statusParam === "trash") {
       whereCondition = {
+        ...institutionFilter,
         OR: [
           { deletedAt: { not: null } },
           { status: "INACTIVE" },
         ],
         ...(query
           ? {
-              OR: [
-                { username: { contains: query, mode: "insensitive" as const } },
-                { person: { fullName: { contains: query, mode: "insensitive" as const } } },
+              AND: [
+                {
+                  OR: [
+                    { username: { contains: query, mode: "insensitive" as const } },
+                    { person: { fullName: { contains: query, mode: "insensitive" as const } } },
+                  ],
+                },
               ],
             }
           : {}),
@@ -60,19 +72,21 @@ export async function GET(req: NextRequest) {
     ]);
 
     const formatted = users.map((u) => {
-      const isOnline = u.status === "ACTIVE" && (u.role === "sek.pondok" || u.role === "sek.madrasah" || u.username.includes("admin"));
       return {
         id: u.id,
         username: u.username,
         email: u.email,
         role: u.role,
+        institution: u.institution,
         status: u.status,
         isActive: u.status === "ACTIVE",
-        isOnline,
+        isOnline: false,
         personName: u.person.fullName,
         personId: u.personId,
         personPhone: u.person.phoneNumber || "",
         avatarUrl: u.person.avatarUrl || null,
+        gender: u.person.gender,
+        lastLoginAt: null,
       };
     });
 
@@ -91,8 +105,10 @@ export async function POST(req: NextRequest) {
     const { session, errorResponse } = await requireAuthSession(req, ["sek", "admin", "superadmin"]);
     if (errorResponse) return errorResponse;
 
+    const sessionInstitution = getSessionInstitution(session);
+
     const body = await req.json();
-    const { personId, username, email, password, role = "Mustahiq" } = body;
+    const { personId, username, email, password, role, fullName, phone, gender } = body;
 
     if (!username) {
       return NextResponse.json(
@@ -101,18 +117,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Deteksi institution dari role yang diberikan, atau gunakan session institution
+    const { detectInstitutionFromRole } = await import("@/lib/institutionGuard");
+    const targetInstitution = role ? detectInstitutionFromRole(role) : sessionInstitution;
+
+    // Pastikan sekretariat hanya bisa buat akun untuk instansinya sendiri (kecuali admin)
+    if (sessionInstitution !== "ALL" && targetInstitution !== "ALL" && targetInstitution !== sessionInstitution) {
+      return NextResponse.json(
+        { status: "Error", message: "Anda tidak dapat membuat akun untuk instansi yang berbeda." },
+        { status: 403 }
+      );
+    }
+
     let targetPersonId = personId;
     if (!targetPersonId) {
       const newPerson = await prisma.person.create({
         data: {
-          fullName: username,
-          gender: "L",
+          fullName: fullName || username,
+          gender: gender || "L",
+          phoneNumber: phone || null,
         },
       });
       targetPersonId = newPerson.id;
     }
 
-    const hashedPassword = await bcrypt.hash(password || "mubtadiaat123", 10);
+    const hashedPassword = await bcrypt.hash(password || "mphm123", 10);
 
     const newUser = await prisma.userAccount.create({
       data: {
@@ -120,23 +149,24 @@ export async function POST(req: NextRequest) {
         username,
         email: email || null,
         passwordHash: hashedPassword,
-        role,
+        role: role || "pengurus",
+        institution: targetInstitution,
         status: "ACTIVE",
       },
       include: { person: true },
     });
 
     await createAuditLog({
-      userId: session?.username || "ADMIN",
+      userId: session?.username || "SEKRETARIAT",
       action: "CREATE_USER",
       entity: "USER_ACCOUNT",
       entityId: newUser.id,
-      afterState: { username: newUser.username, role: newUser.role },
+      afterState: { username: newUser.username, role: newUser.role, institution: newUser.institution },
     });
 
     return NextResponse.json({
       status: "Success",
-      message: "Pengguna berhasil ditambahkan.",
+      message: "Akun berhasil diterbitkan.",
       data: newUser,
     });
   } catch (err: any) {

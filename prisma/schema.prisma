@@ -40,7 +40,8 @@ model UserAccount {
   email        String?   @unique
   firebaseUid  String?   @unique @map("firebase_uid")
   passwordHash String?   @map("password_hash")
-  role         String    // sek.pondok, sek.madrasah, Mustahiq, Mufattisy, Mundzir, Keamanan, Wali Santri
+  role         String    // sek.pondok, sek.madrasah, mustahiq, pengurus, wali_santri, dll.
+  institution  String    @default("MADRASAH") @map("institution") // "PONDOK" | "MADRASAH" | "ALL"
   status               String    @default("ACTIVE")
   isBiometricEnabled   Boolean   @default(false) @map("is_biometric_enabled")
   biometricToken       String?   @map("biometric_token")
@@ -111,6 +112,7 @@ model OrganizationMembership {
   id              String    @id @default(uuid())
   personId        String    @map("person_id")
   role            String    // Mufattisy, Mundzir, Sekretariat, Keamanan, Pimpinan
+  institution     String    @default("PONDOK") @map("institution") // "PONDOK" | "MADRASAH"
   serviceYear     String    @map("service_year")
   status          String    @default("ACTIVE")
   supervisedLevel String?   @map("supervised_level")

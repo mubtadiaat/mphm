@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/jwt";
 import { createAuditLog } from "@/lib/auditLog";
+import { detectInstitutionFromRole } from "@/lib/institutionGuard";
 
 export async function POST(req: NextRequest) {
   try {
@@ -91,12 +92,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const institution = detectInstitutionFromRole(userAccount.role);
+
     const sessionPayload = {
       userId: userAccount.id,
       accountId: userAccount.id,
       personId: userAccount.personId,
       username: userAccount.username,
       role: userAccount.role,
+      institution,
       fullName: userAccount.person?.fullName || userAccount.username,
       avatarUrl: userAccount.person?.avatarUrl || null,
       email: userAccount.email || email,

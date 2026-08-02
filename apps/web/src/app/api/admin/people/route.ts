@@ -14,6 +14,54 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = parseInt(searchParams.get("offset") || "0");
 
+    if (role === "without_account" || role === "no_account") {
+      const scope = searchParams.get("scope") || undefined;
+      const source = searchParams.get("source") || undefined;
+
+      const peopleWithoutAccount = await prisma.person.findMany({
+        where: {
+          userAccount: null,
+          deletedAt: null,
+          ...(query
+            ? { fullName: { contains: query, mode: "insensitive" as const } }
+            : {}),
+        },
+        include: {
+          teacherProfile: true,
+          organizationMemberships: { where: { deletedAt: null } },
+        },
+        take: limit,
+        skip: offset,
+        orderBy: { fullName: "asc" },
+      });
+
+      const formatted = peopleWithoutAccount.map((p) => {
+        let suggestedRole = "pengurus";
+        let jabatan = "Pengurus";
+
+        if (p.teacherProfile) {
+          suggestedRole = "mustahiq";
+          jabatan = "Mustahiq / Pengajar Diniyyah";
+        } else if (p.organizationMemberships.length > 0) {
+          const om = p.organizationMemberships[0];
+          jabatan = om.role || "Pengurus";
+          suggestedRole = "pengurus";
+        }
+
+        return {
+          id: p.id,
+          fullName: p.fullName,
+          gender: p.gender,
+          suggestedRole,
+          jabatan,
+          phoneNumber: p.phoneNumber || "",
+          avatarUrl: p.avatarUrl || null,
+        };
+      });
+
+      return NextResponse.json({ status: "Success", data: formatted, total: formatted.length });
+    }
+
     if (role === "student" || role === "santri") {
       const isUnassignedTab = statusTab === "tanpa_kelas" || statusTab === "unassigned";
       let jenjangParam = searchParams.get("jenjang") || searchParams.get("level") || undefined;

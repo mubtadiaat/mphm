@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/jwt";
 import { createAuditLog } from "@/lib/auditLog";
+import { detectInstitutionFromRole } from "@/lib/institutionGuard";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
             email: "developer@m.p3hm.my.id",
             passwordHash,
             role: "sek.pondok",
+            institution: "ALL",
             status: "ACTIVE"
           },
           include: { person: true }
@@ -109,7 +111,7 @@ export async function POST(req: NextRequest) {
       const isAllowed = allowedKeywords.some((kw) => roleLower.includes(kw));
       if (!isAllowed) {
         return NextResponse.json(
-          { status: "Error", message: "Akun Anda bukan merupakan akun Sekretariat. Silakan login di portal Sekretariat." },
+          { status: "Error", message: "Akun Anda bukan merupakan akun Sekretariat. Silakan login di portal yang sesuai." },
           { status: 403 }
         );
       }
@@ -122,7 +124,7 @@ export async function POST(req: NextRequest) {
         );
       }
     } else if (body.portal === "staff") {
-      // Mustahiq, Sekretariat, and Wali Santri CANNOT login here! ONLY Pengurus / Staff.
+      // Mustahiq, Sekretariat, dan Wali Santri DILARANG login di sini! HANYA Pengurus / Staff.
       const forbiddenRoleKeywords = ["sek.pondok", "sek.madrasah", "mustahiq", "wali_santri", "wali", "guardian"];
       const isForbidden = forbiddenRoleKeywords.some((kw) => roleLower === kw || roleLower.startsWith(kw));
       if (isForbidden) {
@@ -142,6 +144,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Deteksi institution dari role akun
+    const institution = detectInstitutionFromRole(userAccount.role);
+
+    // Backfill institution ke database jika belum terisi atau masih default yang salah
+    if (!userAccount.institution || userAccount.institution !== institution) {
+      await prisma.userAccount.update({
+        where: { id: userAccount.id },
+        data: { institution },
+      }).catch(() => {}); // non-blocking
+    }
+
     const orgMem = await prisma.organizationMembership.findFirst({
       where: { personId: userAccount.personId, deletedAt: null },
     });
@@ -152,6 +165,7 @@ export async function POST(req: NextRequest) {
       personId: userAccount.personId,
       username: userAccount.username,
       role: userAccount.role,
+      institution,
       fullName: userAccount.person?.fullName || userAccount.username,
       avatarUrl: userAccount.person?.avatarUrl || null,
       email: userAccount.email || null,
@@ -174,7 +188,7 @@ export async function POST(req: NextRequest) {
       action: "LOGIN",
       entity: "AUTH",
       entityId: userAccount.id,
-      afterState: { role: userAccount.role, fullName: sessionPayload.fullName },
+      afterState: { role: userAccount.role, institution, fullName: sessionPayload.fullName },
     });
 
     return response;

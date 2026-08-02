@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { signJWT } from "@/lib/jwt";
 import { prisma } from "@/lib/prisma";
+import { detectInstitutionFromRole } from "@/lib/institutionGuard";
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
           username: cleanEmail.split("@")[0],
           email: cleanEmail,
           role: "wali_santri",
+          institution: "MADRASAH",
           passwordHash: "GOOGLE_OAUTH_ENTERPRISE_AUTHENTICATED",
           status: "ACTIVE",
         },
@@ -51,12 +53,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Generate JWT Token resmi
+    const institution = detectInstitutionFromRole(account.role);
     const jwtToken = await signJWT({
       userId: account.id,
       accountId: account.id,
       personId: account.personId,
       username: account.username,
       role: account.role,
+      institution,
       fullName: account.person?.fullName || account.username,
       avatarUrl: account.person?.avatarUrl || null,
       email: account.email,

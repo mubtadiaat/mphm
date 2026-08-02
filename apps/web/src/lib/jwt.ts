@@ -10,6 +10,7 @@ export interface JWTPayload {
   personId: string;
   username: string;
   role: string;
+  institution: "PONDOK" | "MADRASAH" | "ALL"; // Isolasi data antarinstansi
   fullName: string;
   avatarUrl: string | null;
   email?: string | null;
