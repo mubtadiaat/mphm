@@ -43,9 +43,9 @@ const OFFICIAL_TEMPLATES: ExcelTemplateDef[] = [
   },
   {
     id: "tpl_mustahiq",
-    name: "Template Impor Mustahiq / Guru Diniyyah",
+    name: "Template Impor Data Pengajar Diniyyah",
     category: "Akademik & Pengajar",
-    defaultMenuPath: "/sekretariat/mustahiq",
+    defaultMenuPath: "/sekretariat/pengajar",
     fileName: "Template_Impor_Mustahiq_Guru_MPHM.csv",
     columns: ["Nama_Guru", "NIK", "No_HP", "Jenjang_Diniyyah", "Kelas_Ampuan", "Status"],
     sampleData: [

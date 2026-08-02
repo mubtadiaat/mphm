@@ -99,7 +99,7 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
       <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex items-center gap-3 text-xs font-semibold text-blue-900 dark:text-blue-200 shadow-xs">
         <span className="text-base">✨</span>
         <span>
-          <strong>Informasi Rombel Otomatis:</strong> Tidak ada formulir input manual di menu ini. Seluruh data Rombongan Belajar (Kelas) <strong>terisi &amp; terhubung secara otomatis di database</strong> saat Anda menambahkan Mustahiq (Wali Kelas) di menu <a href="/sekretariat/mustahiq" className="underline font-extrabold text-blue-700 dark:text-blue-300">Data Pengajar</a>.
+          <strong>Informasi Rombel Otomatis:</strong> Tidak ada formulir input manual di menu ini. Seluruh data Rombongan Belajar (Kelas) <strong>terisi &amp; terhubung secara otomatis di database</strong> saat Anda menambahkan Mustahiq (Wali Kelas) di menu <a href="/sekretariat/pengajar" className="underline font-extrabold text-blue-700 dark:text-blue-300">Data Pengajar</a>.
         </span>
       </div>
 

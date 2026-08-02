@@ -29,8 +29,7 @@ export const ALL_SYSTEM_MENUS = [
   { href: "/sekretariat/wali-santri", label: "Data Wali Santri (Smart KK)", icon: "👨‍👩‍👧", category: "DATABASE INDUK" },
   { href: "/sekretariat/alumni", label: "Data Alumni Pondok", icon: "🎓", category: "DATABASE INDUK" },
   
-  { href: "/sekretariat/mustahiq", label: "Mustahiq (Wali Kelas)", icon: "📚", category: "TENAGA PENGAJAR" },
-  { href: "/sekretariat/munawwib", label: "Munawwib (Guru Mapel)", icon: "📖", category: "TENAGA PENGAJAR" },
+  { href: "/sekretariat/pengajar", label: "Data Pengajar", icon: "👨‍🏫", category: "TENAGA PENGAJAR" },
   
   { href: "/sekretariat/kelas", label: "Rombel Kelas Diniyyah", icon: "🏫", category: "AKADEMIK & PENILAIAN" },
   { href: "/sekretariat/kurikulum", label: "Kurikulum & Mapel Diniyyah", icon: "📋", category: "AKADEMIK & PENILAIAN" },
