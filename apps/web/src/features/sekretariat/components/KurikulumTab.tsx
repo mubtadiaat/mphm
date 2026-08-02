@@ -42,6 +42,8 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
   const [viewingDetail, setViewingDetail] = useState<Subject | null>(null);
 
   // Form States
+  const [formJenjang, setFormJenjang] = useState<typeof JENJANG_LIST[number]>("Ibtida'iyyah");
+  const [formKelas, setFormKelas] = useState<string>("IV");
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [subjectType, setSubjectType] = useState<"MAPEL" | "NON_MAPEL">("MAPEL");
@@ -56,7 +58,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
   }, [activeJenjang]);
 
   const resetForm = () => {
-    setCode("");
+    setCode(`MP-${activeJenjang.substring(0, 3).toUpperCase()}-${activeKelas}-01`);
     setName("");
     setSubjectType("MAPEL");
     setIsActive(true);
@@ -64,6 +66,8 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
 
   const handleOpenAdd = () => {
     setEditingSubject(null);
+    setFormJenjang(activeJenjang);
+    setFormKelas(activeKelas);
     resetForm();
     setShowModal(true);
   };
@@ -387,13 +391,57 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
 
               {/* Form Content */}
               <form onSubmit={handleSave} className="p-6 space-y-4">
+                {/* Target Jenjang & Kelas Selection */}
+                <div className="grid grid-cols-2 gap-3 p-3.5 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/80 rounded-2xl">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-extrabold text-blue-900 dark:text-blue-200 uppercase tracking-wider">Jenjang Pendidikan *</label>
+                    <select
+                      value={formJenjang}
+                      onChange={(e) => {
+                        const newJ = e.target.value as typeof JENJANG_LIST[number];
+                        setFormJenjang(newJ);
+                        const avail = KELAS_MAP[newJ] || ["I"];
+                        const nextK = avail[0];
+                        setFormKelas(nextK);
+                        if (!editingSubject) {
+                          setCode(`MP-${newJ.substring(0, 3).toUpperCase()}-${nextK}-01`);
+                        }
+                      }}
+                      className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-200 dark:border-blue-700 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none cursor-pointer"
+                    >
+                      {JENJANG_LIST.map((j) => (
+                        <option key={j} value={j}>{j}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-extrabold text-blue-900 dark:text-blue-200 uppercase tracking-wider">Tingkat Kelas *</label>
+                    <select
+                      value={formKelas}
+                      onChange={(e) => {
+                        const newK = e.target.value;
+                        setFormKelas(newK);
+                        if (!editingSubject) {
+                          setCode(`MP-${formJenjang.substring(0, 3).toUpperCase()}-${newK}-01`);
+                        }
+                      }}
+                      className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-blue-200 dark:border-blue-700 rounded-xl text-xs font-bold text-zinc-900 dark:text-white outline-none cursor-pointer"
+                    >
+                      {(KELAS_MAP[formJenjang] || []).map((k) => (
+                        <option key={k} value={k}>Kelas {k}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Kode Mata Pelajaran *</label>
                   <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    placeholder={`Contoh: MP-${activeJenjang.substring(0, 3).toUpperCase()}-${activeKelas}-01`}
+                    placeholder={`Contoh: MP-${formJenjang.substring(0, 3).toUpperCase()}-${formKelas}-01`}
                     className="px-3 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-zinc-200"
                     required
                   />
@@ -416,7 +464,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
                   <select
                     value={subjectType}
                     onChange={(e) => setSubjectType(e.target.value as "MAPEL" | "NON_MAPEL")}
-                    className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:text-white cursor-pointer"
                   >
                     <option value="MAPEL">MAPEL DINIYYAH (Diuijikan / Di-Raport)</option>
                     <option value="NON_MAPEL">NON MAPEL (Ekstra / Kegiatan)</option>
@@ -427,7 +475,7 @@ export function KurikulumTab({ onViewDetail, isReadOnly = false }: KurikulumTabP
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl"
+                    className="px-4 py-2.5 text-xs font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl cursor-pointer"
                   >
                     Batal
                   </button>
