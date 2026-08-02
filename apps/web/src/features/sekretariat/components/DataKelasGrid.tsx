@@ -1,11 +1,9 @@
-"use client";
-
 import { useState, useEffect } from "react";
-import { Trash2, Edit3, BookOpen, Layers, Plus, X, Save } from "lucide-react";
+import { Trash2, Edit3, BookOpen, Layers, Plus, X, Save, UserPlus, Search, CheckCircle2 } from "lucide-react";
 import { useClasses } from "@/features/sekretariat/queries/useClasses";
 import { useGuru } from "@/features/sekretariat/queries/useGuru";
-import { usePengurus } from "@/features/sekretariat/queries/usePengurus";
 import { useToast } from "@/components/shared/ToastContext";
+import { apiRequest } from "@/lib/api";
 
 const CLASS_LEVELS_MAP: Record<string, string[]> = {
   "I'dadiyyah": ["I", "II", "III"],
@@ -17,23 +15,29 @@ const CLASS_LEVELS_MAP: Record<string, string[]> = {
 
 export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false }: { onViewDetail?: (data: Record<string, unknown>) => void, selectedYearId?: string, isReadOnly?: boolean }) {
   const { toast, confirm } = useToast();
-  const { data: remoteData, isLoading, createClass, isCreating, updateClass, isUpdating, deleteClass } = useClasses(selectedYearId);
+  const { data: remoteData, isLoading, updateClass, isUpdating, deleteClass } = useClasses(selectedYearId);
   
   const { data: mustahiqListRemote = { data: [], total: 0 } } = useGuru("", 0, 100);
   const mustahiqList = mustahiqListRemote.data;
   const [jenjang, setJenjang] = useState<string>("Semua");
   
   // State for Create Form
-  const [showForm, setShowForm] = useState(false);
-  const [newJenjang, setNewJenjang] = useState("Ibtida'iyyah");
-  const [newTingkat, setNewTingkat] = useState("I");
-  const [newRuang, setNewRuang] = useState("A");
-  const [newMustahiq, setNewMustahiq] = useState("");
-  const [newCapacity, setNewCapacity] = useState(40);
+  const [newJenjang] = useState("Ibtida'iyyah");
+  const [newTingkat] = useState("I");
+  const [newRuang] = useState("A");
+  const [, setNewMustahiq] = useState("");
 
   const [editingClass, setEditingClass] = useState<any | null>(null);
   const [editMustahiqId, setEditMustahiqId] = useState("");
   const [editCapacity, setEditCapacity] = useState(40);
+
+  // State for Kenaikan Kelas Ploting Modal
+  const [plotingClass, setPlotingClass] = useState<any | null>(null);
+  const [plotingCandidates, setPlotingCandidates] = useState<any[]>([]);
+  const [selectedPlotingIds, setSelectedPlotingIds] = useState<string[]>([]);
+  const [isLoadingPloting, setIsLoadingPloting] = useState(false);
+  const [isSavingPloting, setIsSavingPloting] = useState(false);
+  const [plotingSearch, setPlotingSearch] = useState("");
 
   const classesData = remoteData || [];
 
@@ -56,8 +60,6 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
     return a.name.localeCompare(b.name);
   });
 
-
-
   useEffect(() => {
     if (mustahiqList.length > 0) {
       const match = sortedMustahiqList.find(g => {
@@ -70,7 +72,51 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
     }
   }, [newJenjang, newTingkat, newRuang, mustahiqList.length]);
 
+  const handleOpenPlotingModal = async (targetClass: any) => {
+    setPlotingClass(targetClass);
+    setSelectedPlotingIds([]);
+    setPlotingSearch("");
+    setIsLoadingPloting(true);
+    try {
+      const res = await apiRequest<{ data: any[] }>("/api/admin/people?role=student&scope=madrasah&limit=1000");
+      if (res.data) {
+        const baseName = targetClass.name.split("-")[0].split(" ")[0].trim();
+        const filtered = res.data.filter((s: any) => {
+          const sClass = (s.class || "").trim();
+          return sClass.toLowerCase().includes(baseName.toLowerCase());
+        });
+        setPlotingCandidates(filtered.length > 0 ? filtered : res.data.slice(0, 100));
+      }
+    } catch {
+      setPlotingCandidates([]);
+    } finally {
+      setIsLoadingPloting(false);
+    }
+  };
 
+  const handleSavePloting = async () => {
+    if (!plotingClass || selectedPlotingIds.length === 0) {
+      toast("Pilih minimal satu siswi untuk di-ploting ke lokal ini!", "warning");
+      return;
+    }
+    setIsSavingPloting(true);
+    let successCount = 0;
+    try {
+      for (const id of selectedPlotingIds) {
+        await apiRequest(`/api/admin/people/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ class: plotingClass.name }),
+        });
+        successCount++;
+      }
+      toast(`✅ ${successCount} Siswi Kenaikan Kelas berhasil di-ploting ke Lokal ${plotingClass.name}!`, "success", "Ploting Berhasil");
+      setPlotingClass(null);
+    } catch {
+      toast("Gagal memproses ploting lokal siswi", "error");
+    } finally {
+      setIsSavingPloting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 mt-4">
@@ -79,9 +125,9 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
         <div>
           <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             <Layers className="w-5 h-5 text-blue-500" />
-            Grid Data Kelas (Rombel)
+            Grid Data Kelas &amp; Ploting Rombel Siswi
           </h2>
-          <p className="text-sm text-zinc-500">Menampilkan data kelas dan rombongan belajar santri.</p>
+          <p className="text-sm text-zinc-500">Pengelolaan Rombongan Belajar (Lokal) dan Ploting Siswi Hasil Kenaikan Kelas.</p>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Filter Jenjang:</label>
@@ -95,15 +141,13 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
         </div>
       </div>
 
-      {/* Auto-fill Info Banner */}
+      {/* Auto-fill & Promotion Banner */}
       <div className="p-4 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex items-center gap-3 text-xs font-semibold text-blue-900 dark:text-blue-200 shadow-xs">
         <span className="text-base">✨</span>
         <span>
-          <strong>Informasi Rombel Otomatis:</strong> Tidak ada formulir input manual di menu ini. Seluruh data Rombongan Belajar (Kelas) <strong>terisi &amp; terhubung secara otomatis di database</strong> saat Anda menambahkan Mustahiq (Wali Kelas) di menu <a href="/sekretariat/pengajar" className="underline font-extrabold text-blue-700 dark:text-blue-300">Data Pengajar</a>.
+          <strong>Alur Kenaikan Kelas &amp; Ploting Lokal:</strong> Data Jenjang &amp; Kelas siswi <strong>diperbarui otomatis</strong> oleh sistem setelah pengesahan nilai (Mustahiq → Mufattish → TTD Digital). Pengisian <strong>Lokal (Rombel)</strong> dilakukan secara fleksibel oleh Operator Madrasah melalui tombol <em>"Ploting Siswi Kenaikan Kelas"</em> di setiap Lokal.
         </span>
       </div>
-
-
 
       {/* Grid Layout 3-3 */}
       {isLoading ? (
@@ -183,9 +227,25 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-zinc-500">Kapasitas</span>
                     <span className="font-mono bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-xs font-semibold border border-zinc-200 dark:border-zinc-700">
-                      {cls.capacity} Siswa
+                      {cls.capacity} Siswi
                     </span>
                   </div>
+
+                  {!isReadOnly && (
+                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenPlotingModal(cls);
+                        }}
+                        className="w-full py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-blue-200/60 dark:border-blue-800/60"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>📥 Ploting Siswi Kenaikan Kelas</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
@@ -222,7 +282,7 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Kapasitas Maksimal (Siswa)</label>
+                <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Kapasitas Maksimal (Siswi)</label>
                 <input 
                   type="number"
                   value={editCapacity} 
@@ -260,6 +320,116 @@ export function DataKelasGrid({ onViewDetail, selectedYearId, isReadOnly = false
           </div>
         </div>
       )}
+
+      {/* Modal Ploting Siswi Kenaikan Kelas ke Lokal (Rombel) */}
+      {plotingClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800 max-h-[90vh]">
+            <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-blue-50/70 dark:bg-blue-950/40">
+              <div className="flex items-center gap-2 text-blue-900 dark:text-blue-200 font-extrabold text-base">
+                <UserPlus className="w-5 h-5 text-blue-600" />
+                <span>Ploting Siswi Kenaikan Kelas ke Lokal: {plotingClass.name}</span>
+              </div>
+              <button onClick={() => setPlotingClass(null)} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white p-1 rounded-lg"><X className="w-5 h-5"/></button>
+            </div>
+
+            <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+              <div className="p-3.5 bg-blue-50/80 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-2xl text-xs text-blue-900 dark:text-blue-200 leading-relaxed font-medium">
+                ✨ <strong>Alur Otomatis Kenaikan Kelas:</strong> Data Jenjang &amp; Kelas siswi telah diperbarui secara otomatis setelah pengesahan nilai (Mustahiq → Mufattish → TTD Digital). Silakan centang siswi di bawah ini untuk ditempatkan ke <strong>{plotingClass.name}</strong>.
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    placeholder="Cari Nama / Stambuk / NIK Siswi..."
+                    value={plotingSearch}
+                    onChange={(e) => setPlotingSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-semibold dark:text-white outline-none"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedPlotingIds.length === plotingCandidates.length) {
+                      setSelectedPlotingIds([]);
+                    } else {
+                      setSelectedPlotingIds(plotingCandidates.map((c) => c.id));
+                    }
+                  }}
+                  className="px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 font-bold text-xs rounded-xl transition-colors cursor-pointer shrink-0"
+                >
+                  {selectedPlotingIds.length === plotingCandidates.length ? "Batal Pilih Semua" : "Pilih Semua Siswi"}
+                </button>
+              </div>
+
+              {isLoadingPloting ? (
+                <div className="p-8 text-center text-xs font-bold text-zinc-500 animate-pulse">Memuat daftar siswi kenaikan kelas...</div>
+              ) : plotingCandidates.length === 0 ? (
+                <div className="p-8 text-center text-xs font-semibold text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+                  Tidak ada siswi yang ditemukan untuk tingkat/jenjang kelas ini.
+                </div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+                  {plotingCandidates
+                    .filter((c) => !plotingSearch || c.name.toLowerCase().includes(plotingSearch.toLowerCase()) || c.stambuk?.includes(plotingSearch))
+                    .map((c) => {
+                      const isSelected = selectedPlotingIds.includes(c.id);
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedPlotingIds(selectedPlotingIds.filter((id) => id !== c.id));
+                            } else {
+                              setSelectedPlotingIds([...selectedPlotingIds, c.id]);
+                            }
+                          }}
+                          className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${isSelected
+                            ? "bg-blue-50/90 dark:bg-blue-950/60 border-blue-400 dark:border-blue-700 shadow-xs"
+                            : "bg-zinc-50 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100"
+                            }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-lg flex items-center justify-center border transition-colors ${isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"}`}>
+                              {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
+                            </div>
+                            <div>
+                              <span className="font-extrabold text-xs text-zinc-900 dark:text-white block">{c.name}</span>
+                              <span className="text-[10px] text-zinc-500 font-mono">Stambuk: {c.stambuk} • Kelas Saat Ini: {c.class || "-"}</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                            {c.class || "Belum Ditentukan"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/40">
+              <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400">
+                Terpilih: <strong className="text-blue-600">{selectedPlotingIds.length}</strong> Siswi
+              </span>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setPlotingClass(null)} className="px-4 py-2 text-xs font-bold text-zinc-500 hover:bg-zinc-100 rounded-xl">Batal</button>
+                <button
+                  type="button"
+                  disabled={isSavingPloting || selectedPlotingIds.length === 0}
+                  onClick={handleSavePloting}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingPloting ? "Memproses..." : `Tempatkan ${selectedPlotingIds.length} Siswi ke ${plotingClass.name}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
