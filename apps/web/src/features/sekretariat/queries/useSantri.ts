@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../../../lib/api";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 
 export interface Santri {
   id: string;
@@ -44,9 +45,11 @@ export function useSantri(
   scope?: string
 ) {
   const queryClient = useQueryClient();
+  const { activeWorkspace } = useWorkspace();
+  const resolvedScope = scope || (activeWorkspace === "pondok" ? "pondok" : "madrasah");
 
   const query = useQuery<{ data: Santri[]; total: number }>({
-    queryKey: ["sekretariat-santri", academicYearId, pageIndex, pageSize, searchQuery, statusTab, classFilter, jenjangFilter, scope],
+    queryKey: ["sekretariat-santri", academicYearId, pageIndex, pageSize, searchQuery, statusTab, classFilter, jenjangFilter, resolvedScope],
     queryFn: async () => {
       const queryParams = new URLSearchParams({
         role: "student",
@@ -59,7 +62,7 @@ export function useSantri(
       if (statusTab) queryParams.append("status", statusTab);
       if (classFilter) queryParams.append("classFilter", classFilter);
       if (jenjangFilter) queryParams.append("jenjang", jenjangFilter);
-      if (scope) queryParams.append("scope", scope);
+      if (resolvedScope) queryParams.append("scope", resolvedScope);
 
       const url = `/api/admin/people?${queryParams.toString()}`;
       const res = await apiRequest<{ data: Santri[]; total: number }>(url);
@@ -74,7 +77,12 @@ export function useSantri(
     mutationFn: async (newSantri: Omit<Santri, "id">) => {
       const res = await apiRequest<{ data: Santri }>("/api/admin/people", {
         method: "POST",
-        body: JSON.stringify({ ...newSantri, role: "student" }),
+        body: JSON.stringify({
+          ...newSantri,
+          role: "student",
+          scope: resolvedScope,
+          residenceType: newSantri.residenceType || (resolvedScope === "pondok" ? "PONDOK_MUBTADIAAT" : "UNIT_LAIN"),
+        }),
       });
       return res.data;
     },

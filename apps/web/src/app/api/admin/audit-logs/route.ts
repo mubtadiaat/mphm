@@ -4,6 +4,9 @@ import { purgeOldAuditLogs } from "@/lib/auditLog";
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const scope = searchParams.get("scope") || undefined;
+
     // 1. Purge logs older than 24 hours
     await purgeOldAuditLogs();
 
@@ -17,37 +20,46 @@ export async function GET(req: NextRequest) {
           },
         },
         orderBy: { createdAt: "desc" },
-        take: 200,
+        take: 300,
       }),
-      prisma.userAccount.findMany({
-        select: { username: true, role: true, person: { select: { fullName: true } } }
+      (prisma.userAccount as any).findMany({
+        select: { username: true, role: true, institution: true, person: { select: { fullName: true } } }
       })
     ]);
 
-    const userRoleMap = new Map<string, { role: string; fullName: string }>();
-    userAccounts.forEach(u => {
-      userRoleMap.set(u.username, { role: u.role, fullName: u.person?.fullName || u.username });
+    const userRoleMap = new Map<string, { role: string; fullName: string; institution: string }>();
+    userAccounts.forEach((u: any) => {
+      userRoleMap.set(u.username, { role: u.role, fullName: u.person?.fullName || u.username, institution: u.institution || "ALL" });
     });
 
     const formattedLogs = logs.map(l => {
       let role = "Sekretariat";
       let fullName = l.userId || "System Admin";
+      let institution = "ALL";
       const uInfo = l.userId ? userRoleMap.get(l.userId) : null;
 
       if (uInfo) {
         role = uInfo.role;
         fullName = uInfo.fullName;
+        institution = uInfo.institution;
       } else if (l.afterState) {
         try {
           const parsed = JSON.parse(l.afterState);
           if (parsed.role) role = parsed.role;
+          if (parsed.institution) institution = parsed.institution;
         } catch {
           // ignore
         }
       }
 
-      if (l.userId === "mphm2026") role = "sek.madrasah";
-      if (l.userId === "p3hm20026") role = "sek.pondok";
+      if (l.userId === "mphm2026") {
+        role = "sek.madrasah";
+        institution = "MADRASAH";
+      }
+      if (l.userId === "p3hm2026") {
+        role = "sek.pondok";
+        institution = "PONDOK";
+      }
 
       let moduleName = l.entity;
       if (l.entity === "AUTH") moduleName = "Otentikasi System";
@@ -67,6 +79,7 @@ export async function GET(req: NextRequest) {
         userId: l.userId || "SYSTEM",
         fullName,
         role,
+        institution,
         module: moduleName,
         entity: l.entity,
         action: l.action,
@@ -75,7 +88,19 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({ status: "Success", data: formattedLogs });
+    // 100% data isolation between Pondok and Madrasah
+    const filteredLogs = formattedLogs.filter(log => {
+      if (scope === "pondok" || scope === "PONDOK") {
+        if (log.institution === "MADRASAH" || log.role === "sek.madrasah" || log.role === "mustahiq") return false;
+        if (log.entity === "CLASSES" || log.entity === "CURRICULUM" || log.entity === "SUBJECTS" || log.entity === "TEACHER") return false;
+      } else if (scope === "madrasah" || scope === "MADRASAH") {
+        if (log.institution === "PONDOK" || log.role === "sek.pondok") return false;
+        if (log.entity === "ROOM" || log.entity === "ROOMS" || log.entity === "VIOLATION" || log.entity === "PERMIT" || log.entity === "ALUMNI") return false;
+      }
+      return true;
+    });
+
+    return NextResponse.json({ status: "Success", data: filteredLogs });
   } catch (err: any) {
     console.error("AUDIT_LOGS_GET_ERROR:", err.message);
     return NextResponse.json(

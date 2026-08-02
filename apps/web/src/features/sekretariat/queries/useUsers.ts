@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../../../lib/api";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 
 export interface UserAccount {
   id: string;
@@ -16,24 +17,27 @@ export interface UserAccount {
   personPhone?: string;
   avatarUrl: string | null;
   gender: string;
+  institution?: string;
 }
 
 export function useUsers(query?: string) {
   const queryClient = useQueryClient();
+  const { activeWorkspace } = useWorkspace();
+  const scope = activeWorkspace === "pondok" ? "pondok" : "madrasah";
 
   const usersQuery = useQuery<UserAccount[]>({
-    queryKey: ["sekretariat-users", query],
+    queryKey: ["sekretariat-users", query, scope],
     queryFn: async () => {
-      const url = query ? `/api/admin/users?query=${query}` : "/api/admin/users";
+      const url = query ? `/api/admin/users?query=${query}&scope=${scope}` : `/api/admin/users?scope=${scope}`;
       const res = await apiRequest<{ data: UserAccount[] }>(url);
       return res.data || [];
     },
   });
 
   const dormanUsersQuery = useQuery<UserAccount[]>({
-    queryKey: ["sekretariat-users-dorman", query],
+    queryKey: ["sekretariat-users-dorman", query, scope],
     queryFn: async () => {
-      const url = query ? `/api/admin/users?status=dorman&query=${query}` : "/api/admin/users?status=dorman";
+      const url = query ? `/api/admin/users?status=dorman&query=${query}&scope=${scope}` : `/api/admin/users?status=dorman&scope=${scope}`;
       const res = await apiRequest<{ data: UserAccount[] }>(url);
       return res.data || [];
     },
@@ -43,7 +47,11 @@ export function useUsers(query?: string) {
     mutationFn: async (payload: Record<string, unknown>) => {
       const res = await apiRequest<{ data: UserAccount }>("/api/admin/users", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...payload,
+          scope,
+          institution: scope === "pondok" ? "PONDOK" : "MADRASAH",
+        }),
       });
       return res.data;
     },

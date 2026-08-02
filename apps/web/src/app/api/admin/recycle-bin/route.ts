@@ -31,31 +31,48 @@ function calculateExpiresAt(deletedAtInput: Date | string | null): string {
   return `${hours} Jam ${mins} Menit Tersisa`;
 }
 
+function matchPersonInstitution(p: any, targetInst: "PONDOK" | "MADRASAH" | null): boolean {
+  if (!targetInst) return true;
+  if (targetInst === "PONDOK") {
+    if (p.studentProfile && (p.studentProfile.residenceType === "PONDOK_MUBTADIAAT" || p.studentProfile.roomId)) return true;
+    if (p.organizationMemberships?.some((m: any) => m.institution === "PONDOK" || m.institution === "ALL")) return true;
+    if (p.userAccount && (p.userAccount.institution === "PONDOK" || p.userAccount.role?.includes("pondok"))) return true;
+    return false;
+  } else {
+    if (p.teacherProfile) return true;
+    if (p.studentProfile && (p.studentProfile.residenceType === "UNIT_LAIN" || p.studentProfile.nisn || p.studentProfile.currentClassId)) return true;
+    if (p.organizationMemberships?.some((m: any) => m.institution === "MADRASAH" || m.institution === "ALL")) return true;
+    if (p.userAccount && (p.userAccount.institution === "MADRASAH" || p.userAccount.role?.includes("madrasah") || p.userAccount.role === "mustahiq")) return true;
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     await cleanOrphanedGuardians();
+    const scope = req.nextUrl.searchParams.get("scope");
+    const targetInst = scope === "pondok" ? "PONDOK" : scope === "madrasah" ? "MADRASAH" : null;
+
     const deletedPeople = await prisma.person.findMany({
       where: { deletedAt: { not: null } },
       include: {
         studentProfile: true,
         teacherProfile: true,
         organizationMemberships: true,
+        userAccount: true,
       },
       orderBy: { deletedAt: "desc" },
     });
 
-    const deletedUsers = await prisma.userAccount.findMany({
+    const deletedClasses = targetInst === "PONDOK" ? [] : await prisma.academicClass.findMany({
       where: { deletedAt: { not: null } },
       orderBy: { deletedAt: "desc" },
     });
 
-    const deletedClasses = await prisma.academicClass.findMany({
-      where: { deletedAt: { not: null } },
-      orderBy: { deletedAt: "desc" },
-    });
+    const filteredPeople = deletedPeople.filter((p) => matchPersonInstitution(p, targetInst));
 
     const items = [
-      ...deletedPeople.map((p) => {
+      ...filteredPeople.map((p) => {
         let type = "TIPE DATA LAIN";
         if (p.studentProfile) {
           type = "SANTRIWATI / SISWI";
@@ -104,15 +121,25 @@ export async function GET(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     await cleanOrphanedGuardians();
+    const scope = req.nextUrl.searchParams.get("scope");
+    const targetInst = scope === "pondok" ? "PONDOK" : scope === "madrasah" ? "MADRASAH" : null;
+
     let totalPurged = 0;
 
     await prisma.$transaction(async (tx) => {
-      // 1. Find all deleted Person IDs
+      // 1. Find all deleted Person IDs matching target inst
       const deletedPeople = await tx.person.findMany({
         where: { deletedAt: { not: null } },
-        select: { id: true },
+        include: {
+          studentProfile: true,
+          teacherProfile: true,
+          organizationMemberships: true,
+          userAccount: true,
+        },
       });
-      const personIds = deletedPeople.map((p) => p.id);
+      
+      const targetPeople = deletedPeople.filter(p => matchPersonInstitution(p, targetInst));
+      const personIds = targetPeople.map((p) => p.id);
 
       if (personIds.length > 0) {
         // Find associated StudentProfiles
@@ -123,37 +150,30 @@ export async function DELETE(req: NextRequest) {
         const studentIds = students.map((s) => s.id);
 
         if (studentIds.length > 0) {
-          // Delete ClassEnrollments
           await tx.classEnrollment.deleteMany({
             where: { studentId: { in: studentIds } },
           });
-          // Delete StudentProfiles
           await tx.studentProfile.deleteMany({
             where: { id: { in: studentIds } },
           });
         }
 
-        // Delete TeacherProfiles
         await tx.teacherProfile.deleteMany({
           where: { personId: { in: personIds } },
         });
 
-        // Delete GuardianProfiles
         await tx.guardianProfile.deleteMany({
           where: { personId: { in: personIds } },
         });
 
-        // Delete OrganizationMemberships
         await tx.organizationMembership.deleteMany({
           where: { personId: { in: personIds } },
         });
 
-        // Delete UserAccounts
         await tx.userAccount.deleteMany({
           where: { personId: { in: personIds } },
         });
 
-        // Delete Persons
         const pRes = await tx.person.deleteMany({
           where: { id: { in: personIds } },
         });
@@ -161,17 +181,23 @@ export async function DELETE(req: NextRequest) {
         totalPurged += pRes.count || personIds.length;
       }
 
-      // 2. Delete remaining deleted UserAccounts (standalone)
+      // 2. Delete remaining deleted UserAccounts matching inst
+      const userWhere: any = { deletedAt: { not: null } };
+      if (targetInst) {
+        userWhere.institution = targetInst;
+      }
       const uRes = await tx.userAccount.deleteMany({
-        where: { deletedAt: { not: null } },
+        where: userWhere,
       });
       totalPurged += uRes.count || 0;
 
-      // 3. Delete remaining deleted AcademicClasses (standalone)
-      const cRes = await tx.academicClass.deleteMany({
-        where: { deletedAt: { not: null } },
-      });
-      totalPurged += cRes.count || 0;
+      // 3. Delete remaining deleted AcademicClasses (only if Madrasah or null)
+      if (targetInst !== "PONDOK") {
+        const cRes = await tx.academicClass.deleteMany({
+          where: { deletedAt: { not: null } },
+        });
+        totalPurged += cRes.count || 0;
+      }
     });
 
     return NextResponse.json({
@@ -190,13 +216,51 @@ export async function DELETE(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const [peopleResult, usersResult, classesResult] = await prisma.$transaction([
-      prisma.person.updateMany({ where: { deletedAt: { not: null } }, data: { deletedAt: null } }),
-      prisma.userAccount.updateMany({ where: { deletedAt: { not: null } }, data: { deletedAt: null } }),
-      prisma.academicClass.updateMany({ where: { deletedAt: { not: null } }, data: { deletedAt: null } }),
-    ]);
+    const scope = req.nextUrl.searchParams.get("scope");
+    const targetInst = scope === "pondok" ? "PONDOK" : scope === "madrasah" ? "MADRASAH" : null;
 
-    const totalRestored = (peopleResult.count || 0) + (usersResult.count || 0) + (classesResult.count || 0);
+    let totalRestored = 0;
+
+    await prisma.$transaction(async (tx) => {
+      const deletedPeople = await tx.person.findMany({
+        where: { deletedAt: { not: null } },
+        include: {
+          studentProfile: true,
+          teacherProfile: true,
+          organizationMemberships: true,
+          userAccount: true,
+        },
+      });
+
+      const targetPeople = deletedPeople.filter(p => matchPersonInstitution(p, targetInst));
+      const personIds = targetPeople.map(p => p.id);
+
+      if (personIds.length > 0) {
+        const pRes = await tx.person.updateMany({
+          where: { id: { in: personIds } },
+          data: { deletedAt: null },
+        });
+        totalRestored += pRes.count;
+      }
+
+      const userWhere: any = { deletedAt: { not: null } };
+      if (targetInst) {
+        userWhere.institution = targetInst;
+      }
+      const uRes = await tx.userAccount.updateMany({
+        where: userWhere,
+        data: { deletedAt: null },
+      });
+      totalRestored += uRes.count;
+
+      if (targetInst !== "PONDOK") {
+        const cRes = await tx.academicClass.updateMany({
+          where: { deletedAt: { not: null } },
+          data: { deletedAt: null },
+        });
+        totalRestored += cRes.count;
+      }
+    });
 
     return NextResponse.json({
       status: "Success",

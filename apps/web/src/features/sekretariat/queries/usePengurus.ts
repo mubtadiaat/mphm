@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../../../lib/api";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 
 export interface Pengurus {
   id: string;
@@ -13,13 +14,15 @@ export interface Pengurus {
   avatarUrl?: string | null;
 }
 
-export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
+export function usePengurus(query?: string, pageIndex = 0, pageSize = 10, customScope?: string) {
   const queryClient = useQueryClient();
+  const { activeWorkspace } = useWorkspace();
+  const scope = customScope || (activeWorkspace === "pondok" ? "pondok" : "madrasah");
 
   const queryReq = useQuery<{ data: Pengurus[]; total: number }>({
-    queryKey: ["sekretariat-pengurus", query, pageIndex, pageSize],
+    queryKey: ["sekretariat-pengurus", query, pageIndex, pageSize, scope],
     queryFn: async () => {
-      let url = `/api/admin/people?role=pengurus&limit=${pageSize}&offset=${pageIndex * pageSize}`;
+      let url = `/api/admin/people?role=pengurus&limit=${pageSize}&offset=${pageIndex * pageSize}&scope=${scope}`;
       if (query) url += `&q=${query}`;
       const res = await apiRequest<{ data: Pengurus[]; total: number }>(url);
       return res || { data: [], total: 0 };
@@ -35,6 +38,8 @@ export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
           phoneNumber: data.phone || null,
           gender: data.gender || "L",
           role: "pengurus",
+          scope,
+          institution: scope === "pondok" ? "PONDOK" : "MADRASAH",
         }),
       });
       const personId = personRes.data?.person?.id || (personRes.data as any)?.id;
@@ -47,6 +52,7 @@ export function usePengurus(query?: string, pageIndex = 0, pageSize = 10) {
           role: "pengurus",
           roleName: data.roleName,
           supervisedLevel: data.supervisedLevel || null,
+          institution: scope === "pondok" ? "PONDOK" : "MADRASAH",
         }),
       });
       return personRes.data;

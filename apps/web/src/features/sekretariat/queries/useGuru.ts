@@ -24,7 +24,7 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
   const queryReq = useQuery<{ data: Guru[]; total: number }>({
     queryKey: ["sekretariat-guru", query, pageIndex, pageSize],
     queryFn: async () => {
-      let url = `/api/admin/people?role=teacher&limit=${pageSize}&offset=${pageIndex * pageSize}`;
+      let url = `/api/admin/people?role=teacher&limit=${pageSize}&offset=${pageIndex * pageSize}&scope=madrasah`;
       if (query) url += `&q=${query}`;
       const res = await apiRequest<{ data: Guru[]; total: number }>(url);
       return res || { data: [], total: 0 };
@@ -41,6 +41,8 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
           gender: data.gender || "L",
           role: "teacher",
           roleName: data.roleName || "Mustahiq",
+          scope: "madrasah",
+          institution: "MADRASAH",
         }),
       });
       const personId = personRes.data?.person?.id || (personRes.data as any)?.id;
@@ -54,6 +56,7 @@ export function useGuru(query?: string, pageIndex = 0, pageSize = 10) {
           role: "teacher",
           teacherCode,
           roleName: data.roleName || "Mustahiq",
+          institution: "MADRASAH",
         }),
       });
       return personRes.data;

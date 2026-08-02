@@ -20,34 +20,35 @@ import {
 } from "lucide-react";
 import { CustomRoleDefinition, MenuCapabilities, CapabilityPermission } from "@/lib/rbac";
 import { useToast } from "@/components/shared/ToastContext";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 
-// List of all system menus that can be assigned permissions
+// List of all system menus with institution classification for strict isolation
 export const ALL_SYSTEM_MENUS = [
-  { href: "/sekretariat/santri", label: "Data Santriwati / Siswi", icon: "👥", category: "DATABASE INDUK" },
-  { href: "/sekretariat/rooms", label: "Data Asrama (Blok & Kamar)", icon: "🏡", category: "DATABASE INDUK" },
-  { href: "/sekretariat/pengurus", label: "Data Pengurus Induk", icon: "👔", category: "DATABASE INDUK" },
-  { href: "/sekretariat/wali-santri", label: "Data Wali Santri (Smart KK)", icon: "👨‍👩‍👧", category: "DATABASE INDUK" },
-  { href: "/sekretariat/alumni", label: "Data Alumni Pondok", icon: "🎓", category: "DATABASE INDUK" },
+  { href: "/sekretariat/santri", label: "Data Santriwati / Siswi", icon: "👥", category: "DATABASE INDUK", institution: "ALL" },
+  { href: "/sekretariat/rooms", label: "Data Asrama (Blok & Kamar)", icon: "🏡", category: "DATABASE INDUK", institution: "PONDOK" },
+  { href: "/sekretariat/pengurus", label: "Data Pengurus Induk", icon: "👔", category: "DATABASE INDUK", institution: "ALL" },
+  { href: "/sekretariat/wali-santri", label: "Data Wali Santri (Smart KK)", icon: "👨‍👩‍👧", category: "DATABASE INDUK", institution: "PONDOK" },
+  { href: "/sekretariat/alumni", label: "Data Alumni Pondok", icon: "🎓", category: "DATABASE INDUK", institution: "PONDOK" },
   
-  { href: "/sekretariat/pengajar", label: "Data Pengajar", icon: "👨‍🏫", category: "TENAGA PENGAJAR" },
+  { href: "/sekretariat/pengajar", label: "Data Pengajar", icon: "👨‍🏫", category: "TENAGA PENGAJAR", institution: "MADRASAH" },
   
-  { href: "/sekretariat/kelas", label: "Rombel Kelas Diniyyah", icon: "🏫", category: "AKADEMIK & PENILAIAN" },
-  { href: "/sekretariat/kurikulum", label: "Kurikulum & Mapel Diniyyah", icon: "📋", category: "AKADEMIK & PENILAIAN" },
-  { href: "/sekretariat/penilaian", label: "Manajemen Nilai Kwartal", icon: "📝", category: "AKADEMIK & PENILAIAN" },
-  { href: "/sekretariat/kenaikan-kelas", label: "Kenaikan Kelas", icon: "🎖️", category: "AKADEMIK & PENILAIAN" },
+  { href: "/sekretariat/kelas", label: "Rombel Kelas Diniyyah", icon: "🏫", category: "AKADEMIK & PENILAIAN", institution: "MADRASAH" },
+  { href: "/sekretariat/kurikulum", label: "Kurikulum & Mapel Diniyyah", icon: "📋", category: "AKADEMIK & PENILAIAN", institution: "MADRASAH" },
+  { href: "/sekretariat/penilaian", label: "Manajemen Nilai Kwartal", icon: "📝", category: "AKADEMIK & PENILAIAN", institution: "MADRASAH" },
+  { href: "/sekretariat/kenaikan-kelas", label: "Kenaikan Kelas", icon: "🎖️", category: "AKADEMIK & PENILAIAN", institution: "MADRASAH" },
   
-  { href: "/sekretariat/perizinan", label: "Perizinan Santri", icon: "🎫", category: "KEDISIPLINAN" },
-  { href: "/sekretariat/pelanggaran", label: "Pelanggaran & Takzir", icon: "⚖️", category: "KEDISIPLINAN" },
+  { href: "/sekretariat/perizinan", label: "Perizinan Santri", icon: "🎫", category: "KEDISIPLINAN", institution: "PONDOK" },
+  { href: "/sekretariat/pelanggaran", label: "Pelanggaran & Takzir", icon: "⚖️", category: "KEDISIPLINAN", institution: "PONDOK" },
   
-  { href: "/sekretariat/sertifikat", label: "Sertifikat Santri", icon: "📜", category: "DOKUMEN" },
-  { href: "/sekretariat/raport", label: "Raport Kwartal Diniyyah", icon: "📑", category: "DOKUMEN" },
-  { href: "/sekretariat/ijazah", label: "Ijazah Kelulusan", icon: "🎓", category: "DOKUMEN" },
-  { href: "/sekretariat/template-dokumen", label: "Template Dokumen", icon: "📄", category: "DOKUMEN" },
+  { href: "/sekretariat/sertifikat", label: "Sertifikat Santri", icon: "📜", category: "DOKUMEN", institution: "MADRASAH" },
+  { href: "/sekretariat/raport", label: "Raport Kwartal Diniyyah", icon: "📑", category: "DOKUMEN", institution: "MADRASAH" },
+  { href: "/sekretariat/ijazah", label: "Ijazah Kelulusan", icon: "🎓", category: "DOKUMEN", institution: "MADRASAH" },
+  { href: "/sekretariat/template-dokumen", label: "Template Dokumen", icon: "📄", category: "DOKUMEN", institution: "MADRASAH" },
   
-  { href: "/sekretariat/users", label: "Manajemen Akun (Users)", icon: "🔑", category: "SISTEM" },
-  { href: "/sekretariat/audit-log", label: "Audit Log 24 Jam", icon: "🕒", category: "SISTEM" },
-  { href: "/sekretariat/recycle-bin", label: "Recycle Bin", icon: "🗑️", category: "SISTEM" },
-  { href: "/sekretariat/settings", label: "Konfigurasi Sistem", icon: "⚙️", category: "SISTEM" },
+  { href: "/sekretariat/users", label: "Manajemen Akun (Users)", icon: "🔑", category: "SISTEM", institution: "ALL" },
+  { href: "/sekretariat/audit-log", label: "Audit Log 24 Jam", icon: "🕒", category: "SISTEM", institution: "ALL" },
+  { href: "/sekretariat/recycle-bin", label: "Recycle Bin", icon: "🗑️", category: "SISTEM", institution: "ALL" },
+  { href: "/sekretariat/settings", label: "Konfigurasi Sistem", icon: "⚙️", category: "SISTEM", institution: "ALL" },
 ];
 
 const DEFAULT_BUILTIN_ROLES: CustomRoleDefinition[] = [
@@ -58,8 +59,8 @@ const DEFAULT_BUILTIN_ROLES: CustomRoleDefinition[] = [
     description: "Pengelola penuh database pondok, asrama, perizinan, dan takzir santriwati.",
     institution: "PONDOK",
     accentColor: "emerald",
-    enabledMenus: ALL_SYSTEM_MENUS.map(m => m.href),
-    capabilities: ALL_SYSTEM_MENUS.reduce((acc, m) => {
+    enabledMenus: ALL_SYSTEM_MENUS.filter(m => m.institution === "ALL" || m.institution === "PONDOK").map(m => m.href),
+    capabilities: ALL_SYSTEM_MENUS.filter(m => m.institution === "ALL" || m.institution === "PONDOK").reduce((acc, m) => {
       acc[m.href] = { permissionType: "CRUD", view: true, input: true, edit: true, delete: true, export: true, import: true };
       return acc;
     }, {} as Record<string, MenuCapabilities>)
@@ -71,8 +72,8 @@ const DEFAULT_BUILTIN_ROLES: CustomRoleDefinition[] = [
     description: "Pengelola kurikulum, rombel kelas, penilaian, raport kwartal, dan ijazah.",
     institution: "MADRASAH",
     accentColor: "blue",
-    enabledMenus: ALL_SYSTEM_MENUS.map(m => m.href),
-    capabilities: ALL_SYSTEM_MENUS.reduce((acc, m) => {
+    enabledMenus: ALL_SYSTEM_MENUS.filter(m => m.institution === "ALL" || m.institution === "MADRASAH").map(m => m.href),
+    capabilities: ALL_SYSTEM_MENUS.filter(m => m.institution === "ALL" || m.institution === "MADRASAH").reduce((acc, m) => {
       acc[m.href] = { permissionType: "CRUD", view: true, input: true, edit: true, delete: true, export: true, import: true };
       return acc;
     }, {} as Record<string, MenuCapabilities>)
@@ -96,7 +97,7 @@ const DEFAULT_BUILTIN_ROLES: CustomRoleDefinition[] = [
     id: "wali_santri",
     name: "Wali Santri",
     code: "wali_santri",
-    description: "Orang tua / wali santri yang memantau perkembangan nilai dan perizinan anak.",
+    description: "Orang tua / wali santri yang memantau perkembangan anak.",
     institution: "ALL",
     accentColor: "blue",
     enabledMenus: ["/sekretariat/santri", "/sekretariat/raport", "/sekretariat/perizinan"],
@@ -110,17 +111,26 @@ const DEFAULT_BUILTIN_ROLES: CustomRoleDefinition[] = [
 
 export function CustomRoleMatrixManager() {
   const { toast } = useToast();
+  const { activeWorkspace } = useWorkspace();
+  const isPondok = activeWorkspace === "pondok";
+
   const [roles, setRoles] = useState<CustomRoleDefinition[]>([]);
-  const [selectedRoleId, setSelectedRoleId] = useState<string>("sek.pondok");
+  const [selectedRoleId, setSelectedRoleId] = useState<string>(isPondok ? "sek.pondok" : "sek.madrasah");
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // New role form state
+  // New role form state - locked to active institution
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleCode, setNewRoleCode] = useState("");
   const [newRoleDesc, setNewRoleDesc] = useState("");
-  const [newRoleInst, setNewRoleInst] = useState<"PONDOK" | "MADRASAH" | "ALL">("MADRASAH");
+  const [newRoleInst, setNewRoleInst] = useState<"PONDOK" | "MADRASAH" | "ALL">(isPondok ? "PONDOK" : "MADRASAH");
 
   const [isDbSynced, setIsDbSynced] = useState<boolean>(false);
+
+  // Ensure selectedRoleId matches current workspace when workspace switches
+  useEffect(() => {
+    setSelectedRoleId(isPondok ? "sek.pondok" : "sek.madrasah");
+    setNewRoleInst(isPondok ? "PONDOK" : "MADRASAH");
+  }, [isPondok]);
 
   // Load custom roles & DB roles directly from PostgreSQL database via API
   useEffect(() => {
@@ -146,19 +156,22 @@ export function CustomRoleMatrixManager() {
             
             if (!exists && cleanId) {
               const isKeamanan = cleanId.includes("keamanan");
+              const isMadrasahRole = cleanId.includes("madrasah") || cleanId.includes("mustahiq") || cleanId.includes("munawwib") || cleanId.includes("guru");
+              const targetInst = isMadrasahRole ? "MADRASAH" : isKeamanan || cleanId.includes("pondok") || cleanId.includes("mufat") || cleanId.includes("mundzir") ? "PONDOK" : isPondok ? "PONDOK" : "MADRASAH";
+
               extraDbRoles.push({
                 id: cleanId,
                 name: `Pengurus (${rName})`,
                 code: cleanId,
                 description: isKeamanan 
                   ? "Akses Pengurus Keamanan: Pencarian 1 data santriwati & pencatatan poin pelanggaran."
-                  : `Pengurus Jabatan ${rName} terdaftar di Database.`,
-                institution: "PONDOK",
-                accentColor: isKeamanan ? "orange" : "violet",
+                  : `Pengurus Jabatan ${rName} terdaftar di Database ${targetInst}.`,
+                institution: targetInst,
+                accentColor: isKeamanan ? "orange" : isMadrasahRole ? "blue" : "violet",
                 enabledMenus: isKeamanan ? ["/sekretariat/santri", "/sekretariat/pelanggaran"] : ["/sekretariat/santri"],
                 capabilities: {
                   "/sekretariat/santri": { permissionType: isKeamanan ? "SEARCH_VIEW" : "READ_ONLY", view: true, input: false, edit: false, delete: false, export: false, import: false },
-                  "/sekretariat/pelanggaran": { permissionType: "CRUD", view: true, input: true, edit: true, delete: false, export: true, import: false }
+                  ...(isKeamanan ? { "/sekretariat/pelanggaran": { permissionType: "CRUD" as const, view: true, input: true, edit: true, delete: false, export: true, import: false } } : {})
                 },
                 createdAt: new Date().toISOString()
               });
@@ -190,7 +203,7 @@ export function CustomRoleMatrixManager() {
     }
 
     loadRolesFromDb();
-  }, []);
+  }, [isPondok]);
 
   const saveRolesToStorage = async (updatedRoles: CustomRoleDefinition[]) => {
     setRoles(updatedRoles);
@@ -210,7 +223,27 @@ export function CustomRoleMatrixManager() {
     }
   };
 
-  const selectedRole = roles.find(r => r.id === selectedRoleId) || roles[0];
+  // Filter visible roles by active institution workspace (100% data & role separation)
+  const visibleRoles = roles.filter(r => {
+    if (isPondok) {
+      return r.institution === "PONDOK" || r.institution === "ALL" || r.id === "sek.pondok" || r.id === "wali_santri";
+    } else {
+      return r.institution === "MADRASAH" || r.institution === "ALL" || r.id === "sek.madrasah" || r.id === "mustahiq" || r.id === "wali_santri";
+    }
+  });
+
+  const selectedRole = visibleRoles.find(r => r.id === selectedRoleId) || visibleRoles[0];
+
+  // Filter system menus by institution for the Matrix
+  const visibleMenus = ALL_SYSTEM_MENUS.filter(m => {
+    return m.institution === "ALL" || m.institution === (isPondok ? "PONDOK" : "MADRASAH");
+  }).map(m => {
+    let customLabel = m.label;
+    if (m.href === "/sekretariat/santri") customLabel = isPondok ? "Data Santriwati Asrama (P3HM)" : "Data Siswi Diniyyah (MPHM)";
+    else if (m.href === "/sekretariat/pengurus") customLabel = isPondok ? "Data Pengurus Pondok (P3HM)" : "Data Pengurus Madrasah (MPHM)";
+    else if (m.href === "/sekretariat/settings") customLabel = isPondok ? "Konfigurasi Sistem Pondok (P3HM)" : "Konfigurasi Sistem Madrasah (MPHM)";
+    return { ...m, label: customLabel };
+  });
 
   // Handle creating custom role
   const handleCreateRole = (e: React.FormEvent) => {
@@ -226,16 +259,17 @@ export function CustomRoleMatrixManager() {
       return;
     }
 
+    const defaultMenu = "/sekretariat/santri";
     const newRole: CustomRoleDefinition = {
       id: cleanCode,
       name: newRoleName.trim(),
       code: cleanCode,
-      description: newRoleDesc.trim() || "Peran kustom dalam sistem.",
-      institution: newRoleInst,
-      accentColor: newRoleInst === "PONDOK" ? "emerald" : "blue",
-      enabledMenus: ["/sekretariat/santri"],
+      description: newRoleDesc.trim() || `Peran kustom dalam sistem ${isPondok ? "Pondok P3HM" : "Madrasah MPHM"}.`,
+      institution: isPondok ? "PONDOK" : "MADRASAH",
+      accentColor: isPondok ? "emerald" : "blue",
+      enabledMenus: [defaultMenu],
       capabilities: {
-        "/sekretariat/santri": { permissionType: "READ_ONLY", view: true, input: false, edit: false, delete: false, export: false, import: false }
+        [defaultMenu]: { permissionType: "READ_ONLY", view: true, input: false, edit: false, delete: false, export: false, import: false }
       },
       createdAt: new Date().toISOString()
     };
@@ -247,7 +281,7 @@ export function CustomRoleMatrixManager() {
     setNewRoleName("");
     setNewRoleCode("");
     setNewRoleDesc("");
-    toast(`Peran kustom "${newRole.name}" berhasil dibuat!`, "success");
+    toast(`Peran kustom "${newRole.name}" berhasil dibuat untuk instansi ${newRole.institution}!`, "success");
   };
 
   // Delete custom role
@@ -258,7 +292,7 @@ export function CustomRoleMatrixManager() {
     }
     const updated = roles.filter(r => r.id !== roleId);
     saveRolesToStorage(updated);
-    setSelectedRoleId("sek.pondok");
+    setSelectedRoleId(isPondok ? "sek.pondok" : "sek.madrasah");
     toast("Peran kustom berhasil dihapus", "success");
   };
 
@@ -328,55 +362,65 @@ export function CustomRoleMatrixManager() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="p-6 bg-linear-to-r from-zinc-900 via-zinc-850 to-zinc-900 text-white rounded-3xl border border-zinc-800 shadow-xl">
+      <div className={`p-6 bg-linear-to-r ${isPondok ? "from-emerald-900 via-zinc-900 to-emerald-950 border-emerald-500/30" : "from-blue-900 via-zinc-900 to-indigo-950 border-blue-500/30"} text-white rounded-3xl border shadow-xl`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-emerald-400 font-extrabold text-xs tracking-wider uppercase mb-1">
+            <div className={`flex items-center gap-2 ${isPondok ? "text-emerald-400" : "text-blue-400"} font-extrabold text-xs tracking-wider uppercase mb-1`}>
               <Sliders className="w-4 h-4" />
-              <span>SaaS Dynamic Role & Capability Matrix Engine</span>
+              <span>Otorisasi Role & Matriks Hak Akses {isPondok ? "Pondok P3HM" : "Madrasah MPHM"}</span>
             </div>
             <h2 className="text-2xl font-black tracking-tight text-white">
-              Manajemen Peran Dinamis & Hak Akses Granular
+              Manajemen Peran & Hak Akses {isPondok ? "Pondok" : "Madrasah"}
             </h2>
-            <p className="text-zinc-400 text-sm mt-1 max-w-2xl">
-              Buat role kustom sesuai kebutuhan instansi, tentukan menu yang boleh diakses, serta atur mode otorisasi granular (CRUD Full, Read Only, Cari-View, atau Tanpa Akses).
+            <p className="text-zinc-300 text-sm mt-1 max-w-2xl">
+              Atur hak akses granular per menu khusus untuk instansi {isPondok ? "Pondok Pesantren P3HM" : "Madrasah Diniyyah MPHM"}. Data peran dan kewenangan terisolasi penuh antar instansi.
             </p>
           </div>
           <button
             type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer shrink-0"
+            onClick={() => {
+              setNewRoleInst(isPondok ? "PONDOK" : "MADRASAH");
+              setShowCreateModal(true);
+            }}
+            className={`flex items-center gap-2 px-5 py-3 ${isPondok ? "bg-emerald-500 hover:bg-emerald-400 text-zinc-950" : "bg-blue-600 hover:bg-blue-500 text-white"} font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer shrink-0`}
           >
-            <Plus className="w-5 h-5" /> Buat Role Kustom Baru
+            <Plus className="w-5 h-5" /> Buat Role {isPondok ? "Pondok" : "Madrasah"} Baru
           </button>
         </div>
       </div>
 
-      {/* Role Selection Tabs */}
-      <div className="flex flex-wrap gap-2.5 p-2 bg-zinc-100 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-        {roles.map((r) => {
-          const isActive = r.id === selectedRoleId;
-          const isBuiltIn = DEFAULT_BUILTIN_ROLES.some(b => b.id === r.id);
-          return (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setSelectedRoleId(r.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all cursor-pointer ${
-                isActive
-                  ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-md border border-zinc-200 dark:border-zinc-700"
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/40"
-              }`}
-            >
-              <span>{r.name}</span>
-              {!isBuiltIn && (
-                <span className="px-1.5 py-0.5 text-[10px] bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-md">
-                  KUSTOM
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* Role Selection Tabs (Strictly Filtered by Active Institution) */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider px-1">
+          Pilih Role {isPondok ? "Pondok (P3HM)" : "Madrasah (MPHM)"} yang Ingin Dikonfigurasi:
+        </label>
+        <div className="flex flex-wrap gap-2.5 p-2 bg-zinc-100 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          {visibleRoles.map((r) => {
+            const isActive = r.id === (selectedRole?.id || selectedRoleId);
+            const isBuiltIn = DEFAULT_BUILTIN_ROLES.some(b => b.id === r.id);
+            return (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => setSelectedRoleId(r.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all cursor-pointer ${
+                  isActive
+                    ? isPondok 
+                      ? "bg-emerald-600 text-white shadow-md font-black" 
+                      : "bg-blue-600 text-white shadow-md font-black"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/40 bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60"
+                }`}
+              >
+                <span>{r.name}</span>
+                {!isBuiltIn && (
+                  <span className="px-1.5 py-0.5 text-[10px] bg-indigo-500/20 text-indigo-400 rounded-md font-mono font-bold">
+                    KUSTOM
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Selected Role Overview & Capability Matrix */}
@@ -390,8 +434,12 @@ export function CustomRoleMatrixManager() {
                 <span className="font-mono text-xs text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
                   ID: {selectedRole.id}
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-bold">
-                  {selectedRole.institution}
+                <span className={`text-xs px-2 py-0.5 rounded-md font-black uppercase tracking-wider ${
+                  selectedRole.institution === "PONDOK" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
+                  selectedRole.institution === "MADRASAH" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20" :
+                  "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                }`}>
+                  INSTANSI: {selectedRole.institution}
                 </span>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{selectedRole.description}</p>
@@ -410,7 +458,7 @@ export function CustomRoleMatrixManager() {
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
                     (selectedRole.navigationStyle || "sidebar") === "sidebar"
-                      ? "bg-emerald-500 text-zinc-950 shadow-xs"
+                      ? isPondok ? "bg-emerald-500 text-zinc-950 shadow-xs" : "bg-blue-600 text-white shadow-xs"
                       : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                   }`}
                 >
@@ -425,7 +473,7 @@ export function CustomRoleMatrixManager() {
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
                     selectedRole.navigationStyle === "bottom_nav"
-                      ? "bg-blue-500 text-white shadow-xs"
+                      ? isPondok ? "bg-emerald-500 text-zinc-950 shadow-xs" : "bg-blue-600 text-white shadow-xs"
                       : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                   }`}
                 >
@@ -445,14 +493,17 @@ export function CustomRoleMatrixManager() {
             </div>
           </div>
 
-          {/* Granular Permission Matrix Table */}
+          {/* Granular Permission Matrix Table (Filtered by Institution Menus) */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-xs">
             <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
               <div>
                 <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" /> Matriks Otorisasi Menu & Fitur
+                  <ShieldCheck className={`w-4 h-4 ${isPondok ? "text-emerald-500" : "text-blue-500"}`} /> 
+                  Matriks Otorisasi Menu & Fitur ({isPondok ? "Pondok P3HM" : "Madrasah MPHM"})
                 </h4>
-                <p className="text-xs text-zinc-500 mt-0.5">Tentukan tingkat izin per menu: CRUD, View Only, Cari-View, atau No Access.</p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Tentukan tingkat izin untuk {selectedRole.name} di setiap modul instansi {isPondok ? "Pondok" : "Madrasah"}.
+                </p>
               </div>
             </div>
 
@@ -468,7 +519,7 @@ export function CustomRoleMatrixManager() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800/60 font-medium">
-                  {ALL_SYSTEM_MENUS.map((m) => {
+                  {visibleMenus.map((m) => {
                     const isEnabled = selectedRole.enabledMenus.includes(m.href);
                     const cap = selectedRole.capabilities[m.href] || { permissionType: isEnabled ? "CRUD" : "NO_ACCESS", view: isEnabled, input: isEnabled, edit: isEnabled, delete: isEnabled, export: isEnabled, import: isEnabled };
                     const currentType: CapabilityPermission = isEnabled ? (cap.permissionType || "CRUD") : "NO_ACCESS";
@@ -490,7 +541,7 @@ export function CustomRoleMatrixManager() {
                             onClick={() => handleToggleMenu(m.href)}
                             className={`px-3 py-1 rounded-full text-[11px] font-black transition-all cursor-pointer ${
                               isEnabled 
-                                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                                ? isPondok ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30" : "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30"
                                 : "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 border border-zinc-300 dark:border-zinc-700"
                             }`}
                           >
@@ -504,7 +555,7 @@ export function CustomRoleMatrixManager() {
                               onClick={() => handleSetPermissionType(m.href, "CRUD")}
                               className={`px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all ${
                                 currentType === "CRUD"
-                                  ? "bg-emerald-500 text-zinc-950 font-black shadow-xs"
+                                  ? isPondok ? "bg-emerald-500 text-zinc-950 font-black shadow-xs" : "bg-blue-600 text-white font-black shadow-xs"
                                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                               }`}
                               title="Full CRUD: Tambah, Lihat, Edit, Hapus"
@@ -516,7 +567,7 @@ export function CustomRoleMatrixManager() {
                               onClick={() => handleSetPermissionType(m.href, "READ_ONLY")}
                               className={`px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all ${
                                 currentType === "READ_ONLY"
-                                  ? "bg-blue-500 text-white font-black shadow-xs"
+                                  ? "bg-indigo-600 text-white font-black shadow-xs"
                                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                               }`}
                               title="Read Only: Hanya dapat melihat data"
@@ -540,7 +591,7 @@ export function CustomRoleMatrixManager() {
                               onClick={() => handleSetPermissionType(m.href, "NO_ACCESS")}
                               className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all ${
                                 currentType === "NO_ACCESS"
-                                  ? "bg-rose-500 text-white font-black shadow-xs"
+                                  ? "bg-rose-600 text-white font-black shadow-xs"
                                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                               }`}
                               title="Tanpa Akses / Sembunyi"
@@ -587,18 +638,20 @@ export function CustomRoleMatrixManager() {
         </div>
       )}
 
-      {/* Modal Create New Custom Role */}
+      {/* Modal Create New Custom Role - Locked to Active Institution */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl p-6 space-y-5">
             <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                <div className={`p-2 ${isPondok ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-500/10 text-blue-500"} rounded-xl`}>
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">Buat Role Kustom Baru</h3>
-                  <p className="text-xs text-zinc-500">Definisikan peran baru untuk pengguna sistem.</p>
+                  <h3 className="font-extrabold text-lg text-zinc-900 dark:text-white">
+                    Buat Role {isPondok ? "Pondok (P3HM)" : "Madrasah (MPHM)"} Baru
+                  </h3>
+                  <p className="text-xs text-zinc-500">Definisikan peran kustom baru khusus untuk instansi Anda.</p>
                 </div>
               </div>
               <button
@@ -614,13 +667,13 @@ export function CustomRoleMatrixManager() {
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">Nama Role</label>
                 <input
                   type="text"
-                  placeholder="Contoh: Bendahara Diniyyah / Pembina Asrama"
+                  placeholder={isPondok ? "Contoh: Pembina Asrama / Staf Perizinan" : "Contoh: Bendahara Diniyyah / Staf Kurikulum"}
                   value={newRoleName}
                   onChange={(e) => {
                     setNewRoleName(e.target.value);
                     if (!newRoleCode) setNewRoleCode(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "_"));
                   }}
-                  className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-semibold focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                  className={`w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-semibold focus:outline-hidden focus:ring-2 ${isPondok ? "focus:ring-emerald-500" : "focus:ring-blue-500"}`}
                   required
                 />
               </div>
@@ -629,25 +682,32 @@ export function CustomRoleMatrixManager() {
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">Kode Role (Unique ID)</label>
                 <input
                   type="text"
-                  placeholder="Contoh: bendahara_diniyyah"
+                  placeholder={isPondok ? "Contoh: pembina_asrama" : "Contoh: bendahara_diniyyah"}
                   value={newRoleCode}
                   onChange={(e) => setNewRoleCode(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-semibold focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                  className={`w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-mono font-semibold focus:outline-hidden focus:ring-2 ${isPondok ? "focus:ring-emerald-500" : "focus:ring-blue-500"}`}
                   required
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">Cakupan Instansi</label>
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block mb-1">
+                  Cakupan Instansi (Terkunci Sesuai Workspace)
+                </label>
                 <select
                   value={newRoleInst}
-                  onChange={(e) => setNewRoleInst(e.target.value as any)}
-                  className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-semibold focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                  disabled
+                  className="w-full px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-extrabold text-zinc-700 dark:text-zinc-300 opacity-90 cursor-not-allowed"
                 >
-                  <option value="MADRASAH">Madrasah Diniyyah (MPHM)</option>
-                  <option value="PONDOK">Pondok Pesantren (P3HM)</option>
-                  <option value="ALL">Lintas Instansi (Pondok & Madrasah)</option>
+                  {isPondok ? (
+                    <option value="PONDOK">Pondok Pesantren (P3HM) - 100% Terisolasi</option>
+                  ) : (
+                    <option value="MADRASAH">Madrasah Diniyyah (MPHM) - 100% Terisolasi</option>
+                  )}
                 </select>
+                <p className="text-[11px] text-zinc-500 mt-1 font-medium">
+                  🔒 Sesuai aturan keamanan data antarinstansi, Anda hanya berwenang membuat role untuk instansi Anda sendiri.
+                </p>
               </div>
 
               <div>
@@ -657,7 +717,7 @@ export function CustomRoleMatrixManager() {
                   placeholder="Deskripsi tugas dan tanggung jawab peran ini..."
                   value={newRoleDesc}
                   onChange={(e) => setNewRoleDesc(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-semibold focus:outline-hidden focus:ring-2 focus:ring-emerald-500 resize-none"
+                  className={`w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-semibold focus:outline-hidden focus:ring-2 ${isPondok ? "focus:ring-emerald-500" : "focus:ring-blue-500"} resize-none`}
                 />
               </div>
 
@@ -671,7 +731,7 @@ export function CustomRoleMatrixManager() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs rounded-xl shadow-lg cursor-pointer"
+                  className={`px-5 py-2.5 ${isPondok ? "bg-emerald-500 hover:bg-emerald-400 text-zinc-950" : "bg-blue-600 hover:bg-blue-500 text-white"} font-extrabold text-xs rounded-xl shadow-lg cursor-pointer`}
                 >
                   Simpan Role Baru
                 </button>

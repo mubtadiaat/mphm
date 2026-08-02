@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { useSystemSettings } from "@/components/providers/SystemSettingsProvider";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/components/shared/ToastContext";
+import { useWorkspace } from "@/components/shared/WorkspaceContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2, RefreshCw, XCircle, Pin, BookOpen, Lock, Unlock, Clock, Download, Sparkles,
   Settings, Users, Database, Sliders, MapPin, Calculator, Briefcase, Plus, X, AlertCircle, Trash2, Loader2,
-  FileText, Send, Save, Key, ShieldAlert
+  FileText, Send, Save, Key, ShieldAlert, Upload
 } from "lucide-react";
 import { MasterPelanggaranTab } from "@/features/sekretariat/components/MasterPelanggaranTab";
 import { 
@@ -63,156 +64,118 @@ function SignatureImageUploader({
   onChange,
 }: {
   label: string;
-  description: string;
+  description?: string;
   value: string;
   onChange: (url: string) => void;
 }) {
-  const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      setError("Format file harus berupa gambar (JPG/PNG/WEBP)");
+      return;
+    }
+
     try {
-      setIsUploading(true);
-
-      // 1. Process client-side RemoveBG canvas transparency
+      setLoading(true);
+      setError(null);
       const processedBlob = await processSignatureImage(file);
-
-      // 2. Fetch signature from API
-      const sigRes = await fetch("/api/media/signature");
-      if (!sigRes.ok) throw new Error("Gagal mengambil token upload Database.");
-      const sigData = await sigRes.json();
-      if (sigData.status !== "Success") throw new Error(sigData.message || "Gagal mendapatkan token.");
-
-      const { signature, timestamp, apiKey, cloudName, folder } = sigData.data;
-
-      // 3. Upload file
       const formData = new FormData();
-      formData.append("file", processedBlob, "signature.png");
-      formData.append("api_key", apiKey);
-      formData.append("timestamp", timestamp.toString());
-      formData.append("signature", signature);
-      formData.append("folder", folder);
+      formData.append("file", processedBlob, "signature-clean-hd.png");
 
-      const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
 
-      if (!cloudinaryRes.ok) throw new Error("Gagal mengunggah berkas ke Database.");
-      const cloudinaryData = await cloudinaryRes.json();
-      
-      const finalUrl = cloudinaryData.secure_url;
-      onChange(finalUrl);
-      toast(`${label} berhasil diunggah & diproses (RemoveBG HD)!`, "success", "Berhasil Upload");
+      if (!res.ok) {
+        throw new Error("Gagal mengunggah gambar ke server.");
+      }
+
+      const json = await res.json();
+      if (json.url) {
+        onChange(json.url);
+      } else {
+        throw new Error("URL gambar tidak dikembalikan oleh server.");
+      }
     } catch (err: any) {
-      console.error(err);
-      toast(err?.message || "Gagal mengunggah berkas TTD.", "error", "Gagal Upload");
+      console.error("Signature Upload Error:", err);
+      setError(err.message || "Terjadi kesalahan saat pemrosesan gambar.");
     } finally {
-      setIsUploading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="p-5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl space-y-3">
-      <div>
-        <h4 className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">{label}</h4>
-        <p className="text-[11px] text-zinc-500 font-medium">{description}</p>
+    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="space-y-1 max-w-md">
+        <span className="text-sm font-black text-zinc-900 dark:text-white block">{label}</span>
+        {description && <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>}
+        {error && <p className="text-xs font-bold text-rose-600 dark:text-rose-400 mt-1">{error}</p>}
       </div>
 
-      {value ? (
-        <div className="flex flex-col sm:flex-row items-center gap-4 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl">
-          <div className="w-36 h-24 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:8px_8px] flex items-center justify-center p-2 overflow-hidden shrink-0 shadow-inner">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={value} alt={label} className="max-w-full max-h-full object-contain filter drop-shadow-md" />
+      <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+        {value ? (
+          <div className="relative group p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl flex items-center justify-center min-w-28 min-h-16 max-h-20 overflow-hidden">
+            <img src={value} alt={label} className="max-h-16 w-auto object-contain transition-transform group-hover:scale-105" />
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="absolute inset-0 bg-rose-600/80 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 font-bold text-xs transition-opacity cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" /> Hapus
+            </button>
           </div>
-          <div className="flex flex-col gap-2 flex-1 w-full">
-            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-xs">{value}</span>
-            <div className="flex items-center gap-2">
-              <label className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-extrabold cursor-pointer inline-flex items-center gap-1 shadow-xs">
-                <Download className="w-3.5 h-3.5" />
-                <span>Ganti File TTD / Stempel</span>
-                <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-              </label>
-              <button
-                type="button"
-                onClick={() => onChange("")}
-                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-extrabold cursor-pointer inline-flex items-center gap-1 shadow-xs"
-              >
-                <XCircle className="w-3.5 h-3.5" />
-                <span>Hapus</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-xl cursor-pointer bg-white dark:bg-zinc-900 transition-colors group">
-          {isUploading ? (
-            <div className="flex flex-col items-center gap-2 text-blue-600">
-              <Loader2 className="w-8 h-8 animate-spin" />
-              <span className="text-xs font-bold">Memproses RemoveBG &amp; Simpan HD ke Database...</span>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2 text-center">
-              <Download className="w-8 h-8 text-blue-600 group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200">Unggah File TTD / Stempel (PNG / JPG)</span>
-              <span className="text-[11px] text-zinc-500">Otomatis diproses HD &amp; Latar Belakang Putih Dihapus (RemoveBG Transparent)</span>
-            </div>
-          )}
-          <input type="file" accept="image/*" onChange={handleFileUpload} disabled={isUploading} className="hidden" />
-        </label>
-      )}
+        ) : (
+          <label className="flex items-center gap-2 px-4 py-2.5 bg-zinc-200/80 hover:bg-zinc-300/80 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-800 dark:text-zinc-200 rounded-xl font-bold text-xs cursor-pointer transition-all shrink-0">
+            {loading ? <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> : <Upload className="w-4 h-4" />}
+            <span>{loading ? "Memproses RemoveBG..." : "Upload & RemoveBG HD"}</span>
+            <input type="file" accept="image/*" onChange={handleUpload} disabled={loading} className="hidden" />
+          </label>
+        )}
+      </div>
     </div>
   );
 }
 
-function FriendlyGuideCard({ title, description, steps }: { title: string; description: string; steps?: string[] }) {
+function FriendlyGuideCard({ title, description }: { title: string; description: string }) {
   return (
-    <div className="p-5 bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-2xl space-y-2 shadow-xs mb-6">
-      <div className="flex items-center gap-2 text-blue-800 dark:text-blue-200 font-extrabold text-sm">
-        <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-        <span>Ketentuan &amp; Petunjuk Sistem: {title}</span>
+    <div className="p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex items-start gap-3.5 text-blue-900 dark:text-blue-200 shadow-xs">
+      <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+      <div className="space-y-1">
+        <h4 className="text-xs sm:text-sm font-black tracking-wide uppercase">{title}</h4>
+        <p className="text-xs text-blue-800 dark:text-blue-300/90 leading-relaxed font-medium">{description}</p>
       </div>
-      <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
-        {description}
-      </p>
-      {steps && steps.length > 0 && (
-        <ul className="text-xs text-zinc-600 dark:text-zinc-300 space-y-1 pt-1 list-disc list-inside">
-          {steps.map((s, i) => (
-            <li key={i} className="leading-snug">{s}</li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }
 
-function FriendlySwitch({ 
-  label, 
-  description, 
-  value, 
-  onChange, 
-  activeBadge = "AKTIF", 
-  inactiveBadge = "NON-AKTIF" 
-}: { 
-  label: string; 
-  description?: string; 
-  value: boolean; 
+function FriendlySwitch({
+  label,
+  description,
+  value,
+  onChange,
+  activeBadge = "AKTIF",
+  inactiveBadge = "NON-AKTIF",
+}: {
+  label: string;
+  description?: string;
+  value: boolean;
   onChange: (val: boolean) => void;
   activeBadge?: string;
   inactiveBadge?: string;
 }) {
   return (
-    <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/60 rounded-xl gap-4 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
-      <div className="space-y-0.5 max-w-md">
+    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-between gap-4">
+      <div className="space-y-1 max-w-lg">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-zinc-900 dark:text-white">{label}</span>
-          <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded-md uppercase tracking-wider ${
-            value 
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" 
-              : "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border border-zinc-500/20"
+          <span className="text-sm font-extrabold text-zinc-900 dark:text-white">{label}</span>
+          <span className={`text-[10px] px-2 py-0.5 font-black rounded-full ${
+            value ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300" : "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
           }`}>
             {value ? activeBadge : inactiveBadge}
           </span>
@@ -239,6 +202,8 @@ function FriendlySwitch({
 export function SystemSettingsCockpit() {
   const { settings, refetchSettings } = useSystemSettings();
   const { toast } = useToast();
+  const { activeWorkspace } = useWorkspace();
+  const isPondok = activeWorkspace === "pondok";
   
   const updateSettingsMutation = useMutation({
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -266,7 +231,7 @@ export function SystemSettingsCockpit() {
     }
   });
 
-  // Cockpit Settings States (10 Master Control Modules)
+  // Cockpit Settings States
   const [settingsTab, setSettingsTab] = useState("workspace");
   const [settingsSaved, setSettingsSaved] = useState(false);
 
@@ -278,68 +243,72 @@ export function SystemSettingsCockpit() {
   // 2. Academic Calendar & Freeze States
   const [activeTahunAjaran, setActiveTahunAjaran] = useState("2026/2027");
   const [activeKwartal, setActiveKwartal] = useState(1);
-  const [kwartal1Locked, setKwartal1Locked] = useState(false);
-  const [kwartal2Locked, setKwartal2Locked] = useState(false);
+  const [kwartal1Locked, setKwartal1Locked] = useState(true);
+  const [kwartal2Locked, setKwartal2Locked] = useState(true);
   const [kwartal3Locked, setKwartal3Locked] = useState(false);
   const [kwartal4Locked, setKwartal4Locked] = useState(false);
 
-  // 3. Grading Formula & Promotion Criteria States
+  // 3. Formulasi & Kenaikan
   const [weightHarian, setWeightHarian] = useState(30);
-  const [weightKwartal, setWeightKwartal] = useState(40);
-  const [weightSyafai, setWeightSyafai] = useState(30);
-  const [minPassingScore, setMinPassingScore] = useState(70);
+  const [weightKwartal, setWeightKwartal] = useState(50);
+  const [weightSyafai, setWeightSyafai] = useState(20);
+  const [minPassingScore, setMinPassingScore] = useState(65);
   const [maxRedSubjects, setMaxRedSubjects] = useState(2);
 
-  // 5. Official E-Signature & Stamp States
+  // 5. Stempel & TTD Digital
   const [pengasuhSignatureUrl, setPengasuhSignatureUrl] = useState("");
   const [kepalaMadrasahSignatureUrl, setKepalaMadrasahSignatureUrl] = useState("");
   const [mufattishSignatureUrl, setMufattishSignatureUrl] = useState("");
   const [officialStampUrl, setOfficialStampUrl] = useState("");
 
-  // 8. WhatsApp Gateway States
+  // 8. WhatsApp Gateway
   const [fonnteApiKey, setFonnteApiKey] = useState("");
-  const [whatsappTemplateRapor, setWhatsappTemplateRapor] = useState("Yth. Wali Santri {nama_santri}, Rapor Diniyyah Kwartal {kwartal} Tahun Ajaran {tahun_ajaran} telah terbit...");
-  const [whatsappTemplateBoyong, setWhatsappTemplateBoyong] = useState("Pemberitahuan Status Boyong Santri {nama_santri}: {status}...");
-  const [whatsappTemplateAbsensi, setWhatsappTemplateAbsensi] = useState("Rekap Kehadiran Santri {nama_santri}: Hadir {hadir}, Izin {izin}, Alpha {alpha}...");
+  const [whatsappTemplateRapor, setWhatsappTemplateRapor] = useState(
+    "Assalamu'alaikum Wr. Wb. Bapak/Ibu Wali Santri, rapor Kwartal {KWARTAL} atas nama {NAMA_SANTRI} telah diterbitkan."
+  );
+  const [whatsappTemplateBoyong, setWhatsappTemplateBoyong] = useState(
+    "Assalamu'alaikum Wr. Wb. Pemberitahuan status kepulangan/boyong santri atas nama {NAMA_SANTRI} telah diperbarui menjadi {STATUS}."
+  );
+  const [whatsappTemplateAbsensi, setWhatsappTemplateAbsensi] = useState(
+    "Assalamu'alaikum Wr. Wb. Rekap presensi dan kedisiplinan harian santriwati {NAMA_SANTRI} telah dicatat oleh pengurus."
+  );
 
-  // 9. API Data Wilayah States
+  // 9. API Data Wilayah RI
   const [regionApiSource, setRegionApiSource] = useState("cahyadsn");
-  const [binderbyteApiKey, setBinderbyteApiKey] = useState("8e49f28e0f2f2cf56393c352613eec358e85fb7077ce6f7f453ebb826a7b1f6d");
+  const [binderbyteApiKey, setBinderbyteApiKey] = useState("");
 
-  // 10. System Security & Maintenance States
+  // 10. Keamanan & Backup
   const [systemMaintenance, setSystemMaintenance] = useState(false);
   const [enforceHttps, setEnforceHttps] = useState(true);
   const [cookieLifetime, setCookieLifetime] = useState(30);
   const [autoBackupInterval, setAutoBackupInterval] = useState("daily");
 
-  // Roles & Positions States
   const [roleConfigs, setRoleConfigs] = useState<Record<RoleTypes, RoleUIConfig>>(() => {
-    const base = JSON.parse(JSON.stringify(DEFAULT_ROLE_CONFIGS)) as Record<RoleTypes, RoleUIConfig>;
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("system_role_ui_configs");
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          (Object.keys(base) as RoleTypes[]).forEach((r) => {
-            if (parsed[r]) {
-              base[r] = {
-                ...base[r],
-                ...parsed[r],
-                welcomeBanner: parsed[r].welcomeBanner || base[r].welcomeBanner || "",
-                navigationStyle: parsed[r].navigationStyle || base[r].navigationStyle || "sidebar",
-                capabilities: { ...(base[r].capabilities || {}), ...(parsed[r].capabilities || {}) }
-              };
-            }
-          });
+          return JSON.parse(saved);
         } catch (e) {
-          console.error("Failed to load saved role configs", e);
+          console.error("Failed to load system_role_ui_configs", e);
         }
       }
     }
-    return base;
+    return DEFAULT_ROLE_CONFIGS;
   });
 
-  const [selectedInstitution, setSelectedInstitution] = useState<"MADRASAH" | "PONDOK">("MADRASAH");
+  const [selectedInstitution, setSelectedInstitution] = useState<"MADRASAH" | "PONDOK">(isPondok ? "PONDOK" : "MADRASAH");
+  
+  // Keep selectedInstitution linked strictly to workspace & ensure valid tab is selected
+  useEffect(() => {
+    setSelectedInstitution(isPondok ? "PONDOK" : "MADRASAH");
+    if (isPondok && (settingsTab === "academic" || settingsTab === "formula")) {
+      setSettingsTab("workspace");
+    } else if (!isPondok && settingsTab === "pelanggaran") {
+      setSettingsTab("workspace");
+    }
+  }, [isPondok, settingsTab]);
+
   const [structuralJabatanList, setStructuralJabatanList] = useState<StructuralJabatan[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("structural_job_positions");
@@ -458,39 +427,63 @@ export function SystemSettingsCockpit() {
       localStorage.setItem("systemMaintenance", String(systemMaintenance));
       localStorage.setItem("structural_job_positions", JSON.stringify(structuralJabatanList));
       localStorage.setItem("system_role_ui_configs", JSON.stringify(roleConfigs));
-      window.dispatchEvent(new Event("structural_job_positions_changed"));
-      window.dispatchEvent(new Event("role_configs_changed"));
     }
   };
 
+  // Strictly segregated control modules by active workspace institution
+  const controlModules = isPondok
+    ? [
+        { id: "workspace", label: "1. Regulasi & Otorisasi Pondok", icon: BookOpen },
+        { id: "matrix", label: "2. Pembuatan Role Users Pondok", icon: Lock },
+        { id: "signature", label: "3. Stempel & TTD Digital Pondok", icon: Pin },
+        { id: "pelanggaran", label: "4. Master Kedisiplinan & Takzir", icon: ShieldAlert },
+        { id: "jabatan", label: "5. Struktur Jabatan Pondok (14)", icon: Users },
+        { id: "whatsapp", label: "6. WhatsApp Gateway Pondok", icon: RefreshCw },
+        { id: "region", label: "7. API Data Wilayah RI", icon: MapPin },
+        { id: "system", label: "8. Keamanan & Backup Sistem", icon: Lock },
+      ]
+    : [
+        { id: "workspace", label: "1. Regulasi & Otorisasi Madrasah", icon: BookOpen },
+        { id: "academic", label: "2. Kalender & Kwartal Lock", icon: Clock },
+        { id: "formula", label: "3. Formulasi & Kenaikan Kelas", icon: Calculator },
+        { id: "matrix", label: "4. Pembuatan Role Users Madrasah", icon: Lock },
+        { id: "signature", label: "5. Stempel & TTD Digital Madrasah", icon: Pin },
+        { id: "jabatan", label: "6. Struktur Jabatan Madrasah (11)", icon: Users },
+        { id: "whatsapp", label: "7. WhatsApp Gateway Madrasah", icon: RefreshCw },
+        { id: "region", label: "8. API Data Wilayah RI", icon: MapPin },
+        { id: "system", label: "9. Keamanan & Backup Sistem", icon: Lock },
+      ];
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header Section - Premium Gradient Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-8 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 border border-blue-500/30 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl text-white">
+    <div className="space-y-6">
+      {/* Dynamic Header Banner by Institution */}
+      <div className={`p-6 sm:p-8 bg-linear-to-r ${isPondok ? "from-emerald-900 via-zinc-900 to-emerald-950 border-emerald-500/30" : "from-blue-900 via-zinc-900 to-indigo-950 border-blue-500/30"} text-white rounded-3xl border shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden`}>
         <div className="flex flex-col gap-1.5 z-10">
-          <div className="flex items-center gap-2 text-blue-200 text-xs font-bold uppercase tracking-wider">
+          <div className={`flex items-center gap-2 ${isPondok ? "text-emerald-300" : "text-blue-200"} text-xs font-bold uppercase tracking-wider`}>
             <BookOpen className="w-4 h-4" />
-            <span>Pusat Kendali Konfigurasi Terpadu (10 Master Modules)</span>
+            <span>Pusat Kendali Konfigurasi Terpusat ({controlModules.length} Master Modules)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Konfigurasi Sistem P3HM &amp; MPHM
+            Konfigurasi Sistem {isPondok ? "Pondok Pesantren P3HM" : "Madrasah Diniyyah MPHM"}
           </h1>
-          <p className="text-blue-100/90 text-xs sm:text-sm max-w-2xl leading-relaxed">
-            Pusat pengaturan parameter keasramaan Pondok P3HM, akademik Diniyyah MPHM, formulasi nilai, penutupan Kwartal, WhatsApp Gateway, &amp; otorisasi sistem terintegrasi.
+          <p className={`${isPondok ? "text-emerald-100/90" : "text-blue-100/90"} text-xs sm:text-sm max-w-2xl leading-relaxed`}>
+            {isPondok 
+              ? "Pusat pengaturan parameter keasramaan, regulasi santriwati, master pelanggaran & takzir, serta struktur jabatan khusus Pondok Pesantren P3HM."
+              : "Pusat pengaturan parameter akademik Diniyyah MPHM, formulasi nilai Kwartal, kalender akademik, serta struktur jabatan pengajar & staf Madrasah."}
           </p>
         </div>
 
         <button
           onClick={handleSaveSettings}
           disabled={updateSettingsMutation.isPending}
-          className="flex items-center gap-2 px-6 py-3.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl text-xs sm:text-sm font-black shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 disabled:opacity-50"
+          className={`flex items-center gap-2 px-6 py-3.5 bg-white ${isPondok ? "text-emerald-800 hover:bg-emerald-50" : "text-blue-700 hover:bg-blue-50"} rounded-xl text-xs sm:text-sm font-black shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer w-fit z-10 shrink-0 disabled:opacity-50`}
         >
           {updateSettingsMutation.isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+            <Loader2 className={`w-4 h-4 animate-spin ${isPondok ? "text-emerald-600" : "text-blue-600"}`} />
           ) : (
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           )}
-          <span>Simpan Konfigurasi Terpusat</span>
+          <span>Simpan Konfigurasi {isPondok ? "Pondok" : "Madrasah"}</span>
         </button>
       </div>
 
@@ -502,7 +495,7 @@ export function SystemSettingsCockpit() {
           className="p-4 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-2xl flex items-center gap-2 text-xs font-bold shadow-xs"
         >
           <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
-          <span>Konfigurasi sistem berhasil disimpan ke database terpusat &amp; didistribusikan secara realtime.</span>
+          <span>Konfigurasi sistem {isPondok ? "Pondok P3HM" : "Madrasah MPHM"} berhasil disimpan ke database terpusat & didistribusikan secara realtime.</span>
         </motion.div>
       )}
 
@@ -510,109 +503,30 @@ export function SystemSettingsCockpit() {
         {/* Internal Categorized Navigation Sidebar */}
         <div className="w-full lg:w-72 shrink-0 flex flex-col gap-3 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs">
           <span className="px-3 text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block pt-1">
-            DAFTAR 10 MASTER KENDALI
+            {isPondok ? "DAFTAR 8 MASTER KENDALI PONDOK" : "DAFTAR 9 MASTER KENDALI MADRASAH"}
           </span>
 
           <nav className="space-y-1">
-            <button
-              onClick={() => setSettingsTab("workspace")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "workspace" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <BookOpen className="w-4 h-4 shrink-0" />
-              <span>1. Dikotomi Workspace</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("academic")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "academic" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <Clock className="w-4 h-4 shrink-0" />
-              <span>2. Kalender &amp; Kwartal Lock</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("formula")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "formula" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <BookOpen className="w-4 h-4 shrink-0" />
-              <span>3. Formulasi &amp; Kenaikan</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("matrix")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "matrix" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <Lock className="w-4 h-4 shrink-0" />
-              <span>4. Pembuatan Role Users</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("signature")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "signature" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <Pin className="w-4 h-4 shrink-0" />
-              <span>5. Stempel &amp; TTD Digital</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("pelanggaran")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "pelanggaran" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <Pin className="w-4 h-4 shrink-0" />
-              <span>6. Master Kedisiplinan</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("jabatan")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "jabatan" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <BookOpen className="w-4 h-4 shrink-0" />
-              <span>7. Struktur Jabatan Baku</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("whatsapp")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "whatsapp" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <RefreshCw className="w-4 h-4 shrink-0" />
-              <span>8. WhatsApp Gateway</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("region")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "region" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <Download className="w-4 h-4 shrink-0" />
-              <span>9. API Data Wilayah RI</span>
-            </button>
-
-            <button
-              onClick={() => setSettingsTab("system")}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
-                settingsTab === "system" ? "bg-blue-600 text-white shadow-md font-extrabold" : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <Lock className="w-4 h-4 shrink-0" />
-              <span>10. Keamanan &amp; Backup</span>
-            </button>
+            {controlModules.map((mod) => {
+              const IconComp = mod.icon;
+              const isActive = settingsTab === mod.id;
+              return (
+                <button
+                  key={mod.id}
+                  onClick={() => setSettingsTab(mod.id)}
+                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? isPondok 
+                        ? "bg-emerald-600 text-white shadow-md font-extrabold" 
+                        : "bg-blue-600 text-white shadow-md font-extrabold"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <IconComp className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{mod.label}</span>
+                </button>
+              );
+            })}
           </nav>
         </div>
 
@@ -623,30 +537,38 @@ export function SystemSettingsCockpit() {
           {settingsTab === "workspace" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 1: Dikotomi Workspace & Hak Akses Instansi"
-                description="Modul ini mengatur kewenangan baku antara Pondok Pesantren P3HM dan Madrasah MPHM. Data identitas santriwati terikat otomatis dari Pondok, sedangkan Cuti Pembelajaran dan Kenaikan Kelas dikelola mandiri oleh Madrasah."
+                title={`Regulasi & Hak Akses Instansi (${isPondok ? "Pondok P3HM" : "Madrasah MPHM"})`}
+                description={isPondok 
+                  ? "Modul ini mengatur kewenangan baku Pondok P3HM atas data identitas santriwati dan persetujuan status boyong. Seluruh data asal Pondok bersumber mutlak dari sini."
+                  : "Modul ini mengatur kewenangan Madrasah MPHM dalam mengelola Cuti Pembelajaran dan Kenaikan Kelas secara mandiri tanpa mengubah data induk Pondok."}
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4 shadow-sm">
                 <h3 className="text-base font-black text-zinc-900 dark:text-white flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-blue-600" />
-                  <span>Kewenangan Status &amp; Penguncian Data Identitas</span>
+                  <BookOpen className={`w-4 h-4 ${isPondok ? "text-emerald-600" : "text-blue-600"}`} />
+                  <span>Kewenangan Status & Penguncian Data Identitas {isPondok ? "Pondok" : "Madrasah"}</span>
                 </h3>
                 <div className="space-y-3">
-                  <FriendlySwitch
-                    label="Status Cuti Siswi Mandiri Madrasah"
-                    description="Madrasah berwenang langsung menetapkan status Cuti pembelajaran tanpa memerlukan approval Pondok P3HM."
-                    value={allowMadrasahCutiMandiri}
-                    onChange={setAllowMadrasahCutiMandiri}
-                  />
-                  <FriendlySwitch
-                    label="Status Boyong Memerlukan Approval Pondok P3HM"
-                    description="Pengajuan Boyong oleh Madrasah wajib disetujui (approve) oleh pihak Pondok P3HM sebelum berubah menjadi Boyong Resmi."
-                    value={allowPondokBoyongApproval}
-                    onChange={setAllowPondokBoyongApproval}
-                  />
+                  {!isPondok && (
+                    <FriendlySwitch
+                      label="Status Cuti Siswi Mandiri Madrasah"
+                      description="Madrasah berwenang langsung menetapkan status Cuti pembelajaran tanpa memerlukan approval Pondok P3HM."
+                      value={allowMadrasahCutiMandiri}
+                      onChange={setAllowMadrasahCutiMandiri}
+                    />
+                  )}
+                  {isPondok && (
+                    <FriendlySwitch
+                      label="Status Boyong Memerlukan Approval Pondok P3HM"
+                      description="Pengajuan Boyong wajib disetujui (approve) oleh pihak Pondok P3HM sebelum berubah menjadi Boyong Resmi."
+                      value={allowPondokBoyongApproval}
+                      onChange={setAllowPondokBoyongApproval}
+                    />
+                  )}
                   <FriendlySwitch
                     label="Penguncian Form Identitas Tarikan Pondok"
-                    description="Data Identitas &amp; Alamat Siswi asal P3HM terkunci otomatis di Madrasah untuk mencegah ketidakselarasan data."
+                    description={isPondok 
+                      ? "Data Identitas & Alamat asal Pondok P3HM akan terkunci otomatis di form Madrasah untuk menjaga integritas data induk."
+                      : "Data Identitas & Alamat Siswi asal P3HM terkunci otomatis di Madrasah untuk mencegah ketidakselarasan data dari sumber Pondok."}
                     value={lockPondokIdentityFields}
                     onChange={setLockPondokIdentityFields}
                   />
@@ -655,11 +577,11 @@ export function SystemSettingsCockpit() {
             </div>
           )}
 
-          {/* 2. Kalender & Kwartal Lock Engine */}
-          {settingsTab === "academic" && (
+          {/* 2. Kalender & Kwartal Lock Engine (Madrasah Only) */}
+          {settingsTab === "academic" && !isPondok && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 2: Kalender Akademik & Penguncian Kwartal"
+                title="Kalender Akademik & Penguncian Kwartal Madrasah"
                 description="Kunci input nilai per Kwartal untuk mencegah modifikasi nilai oleh Mustahiq setelah batas waktu pengesahan Mufattish berakhir."
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-5 shadow-sm">
@@ -699,11 +621,11 @@ export function SystemSettingsCockpit() {
             </div>
           )}
 
-          {/* 3. Formulasi & Kenaikan */}
-          {settingsTab === "formula" && (
+          {/* 3. Formulasi & Kenaikan (Madrasah Only) */}
+          {settingsTab === "formula" && !isPondok && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 3: Formulasi Nilai & Kriteria Kenaikan Kelas"
+                title="Formulasi Nilai & Kriteria Kenaikan Kelas"
                 description="Tentukan persentase bobot penilaian Diniyyah serta ambang batas Kriteria Ketuntasan Tujuan Pembelajaran (KKTP) dan syarat Naik Kelas."
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-5 shadow-sm">
@@ -723,7 +645,7 @@ export function SystemSettingsCockpit() {
                   </div>
                 </div>
 
-                <h4 className="text-xs font-black uppercase text-zinc-400 tracking-wider pt-2">AMBANG BATAS KELULUSAN &amp; KENAIKAN KELAS</h4>
+                <h4 className="text-xs font-black uppercase text-zinc-400 tracking-wider pt-2">AMBANG BATAS KELULUSAN & KENAIKAN KELAS</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Nilai Kelulusan Minimal (KKTP)</label>
@@ -738,84 +660,101 @@ export function SystemSettingsCockpit() {
             </div>
           )}
 
-          {/* 4. Pembuatan Role Users */}
+          {/* 4. Pembuatan Role Users (Matrix) */}
           {settingsTab === "matrix" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 4: Pembuatan Role Users & Matriks Hak Akses"
-                description="Kelola dan buat role kustom baru yang diambil langsung dari jabatan pengurus/staf di database, serta atur matriks otorisasi dan hak akses per menu secara terhubung persisten ke Database."
+                title={`Pembuatan Role Users & Matriks Hak Akses (${isPondok ? "Pondok P3HM" : "Madrasah MPHM"})`}
+                description={`Kelola role kustom untuk instansi ${isPondok ? "Pondok" : "Madrasah"} dan atur matriks hak akses menu secara terhubung persisten ke Database.`}
               />
               <CustomRoleMatrixManager />
             </div>
           )}
 
-          {/* 5. Stempel & TTD Digital (Server File Uploader + RemoveBG HD) */}
+          {/* 5. Stempel & TTD Digital */}
           {settingsTab === "signature" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 5: Stempel & Tanda Tangan Digital Resmi (HD Auto RemoveBG)"
-                description="Unggah file gambar TTD Digital & Stempel resmi instansi. Sistem secara otomatis memproses transparansi latar belakang (RemoveBG HD) dan menyimpannya ke Database."
+                title={`Stempel & Tanda Tangan Digital Resmi ${isPondok ? "Pondok (P3HM)" : "Madrasah (MPHM)"}`}
+                description={`Unggah file gambar TTD Digital & Stempel resmi ${isPondok ? "Pondok" : "Madrasah"}. Sistem secara otomatis memproses transparansi latar belakang (RemoveBG HD) dan menyimpannya ke Database.`}
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6 shadow-sm">
-                <SignatureImageUploader
-                  label="Tanda Tangan Digital Pengasuh Pondok P3HM"
-                  description="Digunakan pada pencetakan Sertifikat & Surat Keterangan Resmi Pondok P3HM Lirboyo."
-                  value={pengasuhSignatureUrl}
-                  onChange={setPengasuhSignatureUrl}
-                />
-
-                <SignatureImageUploader
-                  label="Tanda Tangan Digital Kepala Madrasah MPHM"
-                  description="Digunakan pada pencetakan Rapor Diniyyah, Ijazah Kelulusan, & Transkrip Nilai MPHM."
-                  value={kepalaMadrasahSignatureUrl}
-                  onChange={setKepalaMadrasahSignatureUrl}
-                />
-
-                <SignatureImageUploader
-                  label="Tanda Tangan Digital Mufattish Nilai"
-                  description="Digunakan sebagai pengesahan sah hasil penilaian kwartal Diniyyah."
-                  value={mufattishSignatureUrl}
-                  onChange={setMufattishSignatureUrl}
-                />
-
-                <SignatureImageUploader
-                  label="Stempel Resmi Instansi"
-                  description="Stempel resmi yang otomatis disematkan pada Dokumen Siswi, Rapor, & Ijazah."
-                  value={officialStampUrl}
-                  onChange={setOfficialStampUrl}
-                />
+                {isPondok ? (
+                  <>
+                    <SignatureImageUploader
+                      label="Tanda Tangan Digital Pengasuh Pondok P3HM"
+                      description="Digunakan pada pencetakan Sertifikat & Surat Keterangan Resmi Pondok P3HM Lirboyo."
+                      value={pengasuhSignatureUrl}
+                      onChange={setPengasuhSignatureUrl}
+                    />
+                    <SignatureImageUploader
+                      label="Stempel Resmi Pondok P3HM"
+                      description="Stempel resmi yang otomatis disematkan pada dokumen keasramaan & perizinan Pondok P3HM."
+                      value={officialStampUrl}
+                      onChange={setOfficialStampUrl}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <SignatureImageUploader
+                      label="Tanda Tangan Digital Kepala Madrasah MPHM"
+                      description="Digunakan pada pencetakan Rapor Diniyyah, Ijazah Kelulusan, & Transkrip Nilai MPHM."
+                      value={kepalaMadrasahSignatureUrl}
+                      onChange={setKepalaMadrasahSignatureUrl}
+                    />
+                    <SignatureImageUploader
+                      label="Tanda Tangan Digital Mufattish Nilai"
+                      description="Digunakan sebagai pengesahan sah hasil penilaian kwartal Diniyyah."
+                      value={mufattishSignatureUrl}
+                      onChange={setMufattishSignatureUrl}
+                    />
+                    <SignatureImageUploader
+                      label="Stempel Resmi Madrasah MPHM"
+                      description="Stempel resmi yang otomatis disematkan pada Dokumen Siswi, Rapor Kwartal, & Ijazah."
+                      value={officialStampUrl}
+                      onChange={setOfficialStampUrl}
+                    />
+                  </>
+                )}
               </div>
             </div>
           )}
 
-          {/* 6. Master Kedisiplinan */}
-          {settingsTab === "pelanggaran" && (
+          {/* 6. Master Kedisiplinan (Pondok Only) */}
+          {settingsTab === "pelanggaran" && isPondok && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 6: Master Kedisiplinan & Poin Pelanggaran"
-                description="Kelola kategori poin sanksi kedisiplinan santriwati keasramaan di Pondok Pesantren P3HM."
+                title="Master Kedisiplinan & Poin Pelanggaran Pondok P3HM"
+                description="Kelola kategori poin sanksi kedisiplinan dan takzir santriwati keasramaan di Pondok Pesantren P3HM."
               />
               <MasterPelanggaranTab />
             </div>
           )}
 
-          {/* 7. Struktur Jabatan Baku */}
+          {/* 7. Struktur Jabatan Baku (Separated strictly by Institution) */}
           {settingsTab === "jabatan" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 7: Struktur Jabatan Pengurus & Pengajar"
-                description="Kelola 14 Jabatan Baku Pengurus Pondok P3HM & 11 Jabatan Baku Pengurus Madrasah MPHM secara mandiri."
+                title={`Struktur Jabatan Baku (${isPondok ? "14 Jabatan Pondok P3HM" : "11 Jabatan Madrasah MPHM"})`}
+                description={`Kelola struktur jabatan baku untuk ${isPondok ? "Pengurus & Staf Pondok P3HM" : "Pengurus & Pengajar Madrasah MPHM"} secara terikat pada instansi Anda.`}
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-5 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setSelectedInstitution("MADRASAH")} className={`px-4 py-2 text-xs font-bold rounded-xl ${selectedInstitution === "MADRASAH" ? "bg-blue-600 text-white shadow-sm" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600"}`}>Jabatan Madrasah MPHM (11)</button>
-                  <button onClick={() => setSelectedInstitution("PONDOK")} className={`px-4 py-2 text-xs font-bold rounded-xl ${selectedInstitution === "PONDOK" ? "bg-emerald-600 text-white shadow-sm" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600"}`}>Jabatan Pondok P3HM (14)</button>
+                <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-3">
+                  <Users className={`w-5 h-5 ${isPondok ? "text-emerald-500" : "text-blue-500"}`} />
+                  <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white uppercase tracking-wider">
+                    {isPondok ? "Daftar 14 Jabatan Baku Pondok P3HM" : "Daftar 11 Jabatan Baku Madrasah MPHM"}
+                  </h4>
                 </div>
-                <div className="space-y-2">
-                  {structuralJabatanList.filter(j => j.institution === selectedInstitution).map(j => (
-                    <div key={j.id} className="p-3 bg-zinc-50 dark:bg-zinc-800/60 rounded-xl flex items-center justify-between">
-                      <span className="text-xs font-black text-zinc-900 dark:text-white">{j.jabatan}</span>
-                      <button onClick={() => handleRemoveJabatan(j.id)} className="text-xs text-rose-600 font-bold hover:underline">Hapus</button>
+                <div className="space-y-2.5">
+                  {structuralJabatanList.filter(j => j.institution === (isPondok ? "PONDOK" : "MADRASAH")).map(j => (
+                    <div key={j.id} className="p-3.5 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-700/50 rounded-xl flex items-center justify-between shadow-xs">
+                      <span className="text-xs font-black text-zinc-900 dark:text-white flex items-center gap-2.5">
+                        <span className={`w-2 h-2 rounded-full ${isPondok ? "bg-emerald-500" : "bg-blue-500"}`} />
+                        {j.jabatan}
+                      </span>
+                      <button onClick={() => handleRemoveJabatan(j.id)} className="text-xs text-rose-600 font-bold hover:underline cursor-pointer">
+                        Hapus
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -827,22 +766,31 @@ export function SystemSettingsCockpit() {
           {settingsTab === "whatsapp" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 8: WhatsApp Gateway & Notifikasi Wali Santri"
-                description="Konfigurasi token gateway Fonnte / Wablas untuk pengiriman pesan pengumuman otomatis ke orang tua / wali santri."
+                title={`WhatsApp Gateway & Notifikasi Wali Santri (${isPondok ? "Pondok P3HM" : "Madrasah MPHM"})`}
+                description={`Konfigurasi token gateway Fonnte / Wablas untuk pengiriman pesan pengumuman otomatis ke orang tua / wali santri khusus instansi ${isPondok ? "Pondok" : "Madrasah"}.`}
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4 shadow-sm">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Fonnte / Gateway API Token *</label>
                   <input type="password" value={fonnteApiKey} onChange={(e) => setFonnteApiKey(e.target.value)} placeholder="Masukkan API Token..." className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono dark:text-white" />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Template Pesan Rapor Terbit</label>
-                  <textarea rows={2} value={whatsappTemplateRapor} onChange={(e) => setWhatsappTemplateRapor(e.target.value)} className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium dark:text-white" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Template Pesan Status Boyong</label>
-                  <textarea rows={2} value={whatsappTemplateBoyong} onChange={(e) => setWhatsappTemplateBoyong(e.target.value)} className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium dark:text-white" />
-                </div>
+                {!isPondok ? (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Template Pesan Rapor Terbit</label>
+                      <textarea rows={3} value={whatsappTemplateRapor} onChange={(e) => setWhatsappTemplateRapor(e.target.value)} className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium dark:text-white" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Template Pesan Rekap Absensi Kelas</label>
+                      <textarea rows={3} value={whatsappTemplateAbsensi} onChange={(e) => setWhatsappTemplateAbsensi(e.target.value)} className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium dark:text-white" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Template Pesan Status Boyong & Perizinan Pondok</label>
+                    <textarea rows={3} value={whatsappTemplateBoyong} onChange={(e) => setWhatsappTemplateBoyong(e.target.value)} className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-medium dark:text-white" />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -851,14 +799,14 @@ export function SystemSettingsCockpit() {
           {settingsTab === "region" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 9: API Data Wilayah Indonesia & Eksternal"
-                description="Pilih penyedia API data wilayah administratif (Provinsi, Kabupaten, Kecamatan, Kelurahan) untuk pengisian alamat santri."
+                title="API Data Wilayah Indonesia & Eksternal"
+                description="Pilih penyedia API data wilayah administratif (Provinsi, Kabupaten, Kecamatan, Kelurahan) untuk pengisian alamat santriwati."
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4 shadow-sm">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">Penyedia API Wilayah *</label>
                   <select value={regionApiSource} onChange={(e) => setRegionApiSource(e.target.value)} className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-bold dark:text-white cursor-pointer">
-                    <option value="cahyadsn">Cahyadsn API (Rekomendasi - Gratis &amp; Cepat)</option>
+                    <option value="cahyadsn">Cahyadsn API (Rekomendasi - Gratis & Cepat)</option>
                     <option value="binderbyte">Binderbyte API (Berbayar)</option>
                     <option value="kemendagri">Kemendagri Data Referensi Resmi</option>
                   </select>
@@ -877,7 +825,7 @@ export function SystemSettingsCockpit() {
           {settingsTab === "system" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 10: Keamanan Sistem, Backup & Emergency Lock"
+                title="Keamanan Sistem, Backup & Emergency Lock"
                 description="Atur parameter keamanan cookie, HTTPS enforcement, jadwal backup database, serta Emergency Maintenance Lock."
               />
               <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4 shadow-sm">
