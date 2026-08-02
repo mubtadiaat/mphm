@@ -42,6 +42,8 @@ export async function GET(req: NextRequest) {
         person: { deletedAt: null },
         ...(isUnassignedTab
           ? { enrollments: { none: { deletedAt: null } } }
+          : statusTab === "cuti" || statusTab === "on_leave"
+          ? { status: { in: ["CUTI", "ON_LEAVE"] } }
           : statusTab && statusTab !== "all" && statusTab !== "aktif"
           ? { status: statusTab.toUpperCase() }
           : statusTab === "aktif"

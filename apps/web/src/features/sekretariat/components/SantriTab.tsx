@@ -39,7 +39,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
   const activeWorkspace = propWorkspace || contextWorkspace;
   const isPondok = activeWorkspace === "pondok";
 
-  const [activeSubTab, setActiveSubTab] = useState<"aktif" | "tanpa_kelas" | "alumni" | "mutasi">("aktif");
+  const [activeSubTab, setActiveSubTab] = useState<"aktif" | "cuti" | "tanpa_kelas" | "alumni" | "mutasi">("aktif");
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -632,13 +632,24 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
         </button>
         {!isPondok && (
           <button
-            onClick={() => setActiveSubTab("tanpa_kelas")}
-            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "tanpa_kelas"
+            onClick={() => setActiveSubTab("cuti")}
+            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === ("cuti" as any)
               ? "border-amber-600 text-amber-600 dark:text-amber-400 font-extrabold"
               : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               }`}
           >
-            Belum Ada Kelas (Tarik Data Pondok)
+            Siswi Cuti Diniyyah 🌴
+          </button>
+        )}
+        {!isPondok && (
+          <button
+            onClick={() => setActiveSubTab("tanpa_kelas")}
+            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-all duration-200 cursor-pointer whitespace-nowrap ${activeSubTab === "tanpa_kelas"
+              ? "border-purple-600 text-purple-600 dark:text-purple-400 font-extrabold"
+              : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              }`}
+          >
+            Tanpa Kelas / Belum Belajar
           </button>
         )}
         <button
