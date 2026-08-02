@@ -17,6 +17,8 @@ import {
   RefreshCw,
   Download,
   ChevronRight,
+  FileSpreadsheet,
+  Settings2,
 } from "lucide-react";
 
 import { DeveloperLogin } from "./_components/DeveloperLogin";
@@ -24,12 +26,14 @@ import { SystemHealthGrid } from "./_components/SystemHealthGrid";
 import { OverviewTab } from "./_components/tabs/OverviewTab";
 import { SystemHealthTab } from "./_components/tabs/SystemHealthTab";
 import { FlowTrackerTab } from "./_components/tabs/FlowTrackerTab";
+import { FlowConfiguratorTab } from "./_components/tabs/FlowConfiguratorTab";
+import { ExcelTemplateManagerTab } from "./_components/tabs/ExcelTemplateManagerTab";
 import { KillswitchesTab } from "./_components/tabs/KillswitchesTab";
 import { RoleMatrixTab } from "./_components/tabs/RoleMatrixTab";
 import { DatabaseExplorerTab } from "./_components/tabs/DatabaseExplorerTab";
 import { AuditLogTab } from "./_components/tabs/AuditLogTab";
 
-type TabId = "overview" | "health" | "flows" | "controls" | "roles" | "db_explorer" | "audit";
+type TabId = "overview" | "health" | "flows" | "flow_config" | "excel_templates" | "controls" | "roles" | "db_explorer" | "audit";
 
 interface TabItem {
   id: TabId;
@@ -43,6 +47,8 @@ const TABS: TabItem[] = [
   { id: "overview", label: "Ringkasan Statistik Live", shortLabel: "Overview", icon: <Zap className="w-4 h-4" /> },
   { id: "health", label: "System Health Monitor", shortLabel: "Health Check", icon: <HeartPulse className="w-4 h-4" />, badge: "API Ping" },
   { id: "flows", label: "Flow Tracker Interaktif", shortLabel: "Flow Tracker", icon: <GitBranch className="w-4 h-4" /> },
+  { id: "flow_config", label: "Pengatur Alur Manual (DB)", shortLabel: "Flow Config", icon: <Settings2 className="w-4 h-4" />, badge: "REALTIME" },
+  { id: "excel_templates", label: "Excel Template & Menu Binding", shortLabel: "Excel Templates", icon: <FileSpreadsheet className="w-4 h-4" /> },
   { id: "controls", label: "Master Killswitches", shortLabel: "Killswitches", icon: <Power className="w-4 h-4" /> },
   { id: "roles", label: "Dynamic Role Matrix", shortLabel: "Role Matrix", icon: <Sliders className="w-4 h-4" /> },
   { id: "db_explorer", label: "Database Inspector Live", shortLabel: "DB Inspector", icon: <Database className="w-4 h-4" /> },
@@ -198,9 +204,7 @@ export default function DeveloperSaaSCockpitPage() {
         </div>
       )}
 
-      {/* ------------------------------------------------------------- */}
-      {/* DESKTOP SIDEBAR (lg:flex w-72 border-r border-zinc-800 bg-zinc-900) */}
-      {/* ------------------------------------------------------------- */}
+      {/* DESKTOP SIDEBAR */}
       <aside className="hidden lg:flex flex-col w-72 border-r border-zinc-800 bg-zinc-900/90 backdrop-blur-md sticky top-0 h-screen shrink-0 z-30">
         {/* Brand Header */}
         <div className="p-5 border-b border-zinc-800 flex items-center gap-3">
@@ -284,9 +288,7 @@ export default function DeveloperSaaSCockpitPage() {
         </div>
       </aside>
 
-      {/* ------------------------------------------------------------- */}
-      {/* MOBILE TOP BAR & SIDEBAR DRAWER (< lg) */}
-      {/* ------------------------------------------------------------- */}
+      {/* MOBILE TOP BAR & SIDEBAR DRAWER */}
       <header className="lg:hidden bg-zinc-900 border-b border-zinc-800 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
           <button
@@ -389,7 +391,7 @@ export default function DeveloperSaaSCockpitPage() {
         </div>
       )}
 
-      {/* Mobile Horizontal Pill Navigation Bar (for quick 1-tap switching) */}
+      {/* Mobile Horizontal Pill Navigation Bar */}
       <div className="lg:hidden bg-zinc-900/60 border-b border-zinc-800/80 px-3 py-2 overflow-x-auto flex items-center gap-1.5 no-scrollbar">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -411,9 +413,7 @@ export default function DeveloperSaaSCockpitPage() {
         })}
       </div>
 
-      {/* ------------------------------------------------------------- */}
       {/* MAIN WORKSPACE CONTENT */}
-      {/* ------------------------------------------------------------- */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto space-y-6 overflow-x-hidden">
         {/* Status Grid */}
         <SystemHealthGrid
@@ -431,6 +431,8 @@ export default function DeveloperSaaSCockpitPage() {
           {activeTab === "overview" && <OverviewTab />}
           {activeTab === "health" && <SystemHealthTab />}
           {activeTab === "flows" && <FlowTrackerTab />}
+          {activeTab === "flow_config" && <FlowConfiguratorTab />}
+          {activeTab === "excel_templates" && <ExcelTemplateManagerTab />}
           {activeTab === "controls" && (
             <KillswitchesTab
               maintenanceMode={maintenanceMode}
