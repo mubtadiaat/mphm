@@ -112,7 +112,11 @@ export async function GET(req: NextRequest) {
           : {}),
       };
 
-      if (scope === "pondok") {
+      const sessionInst = session?.institution || (session?.role === "sek.pondok" ? "PONDOK" : session?.role === "sek.madrasah" ? "MADRASAH" : "ALL");
+      const activeInst = scope === "pondok" ? "PONDOK" : scope === "madrasah" ? "MADRASAH" : sessionInst;
+
+      if (activeInst === "PONDOK") {
+        // PONDOK DATA DOMAIN: Hanya santriwati yang tinggal di Asrama Pondok P3HM
         whereCondition.AND = [
           ...(whereCondition.AND || []),
           {
@@ -123,6 +127,19 @@ export async function GET(req: NextRequest) {
           },
           {
             residenceType: { not: "UNIT_LAIN" }
+          }
+        ];
+      } else if (activeInst === "MADRASAH") {
+        // MADRASAH DATA DOMAIN: Hanya siswi yang sudah ditarik ke Madrasah (Data Sinkron)
+        // ATAU siswi non-asrama yang didaftarkan langsung di Madrasah (Data Internal Madrasah).
+        // Santri Pondok yang BELUM ditarik TIDAK BOLEH muncul di sini.
+        whereCondition.AND = [
+          ...(whereCondition.AND || []),
+          {
+            OR: [
+              { enrollments: { some: { deletedAt: null } } },
+              { residenceType: "UNIT_LAIN" }
+            ]
           }
         ];
       }
