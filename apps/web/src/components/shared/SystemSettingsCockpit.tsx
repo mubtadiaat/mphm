@@ -10,59 +10,163 @@ import {
   Settings, Users, Database, Sliders, MapPin, Calculator, Briefcase, Plus, X, AlertCircle, Trash2, Loader2,
   FileText, Send, Save, Key, ShieldAlert
 } from "lucide-react";
-import { PillBadge } from "@/components/shared/PillBadge";
 import { MasterPelanggaranTab } from "@/features/sekretariat/components/MasterPelanggaranTab";
 import { 
   DEFAULT_ROLE_CONFIGS, 
   RoleTypes, 
   RoleUIConfig, 
-  DEFAULT_CAPABILITIES,
-  MenuCapabilities
 } from "@/lib/useRoleUIConfig";
 import { StructuralJabatan, DEFAULT_STRUCTURAL_JABATAN } from "@/config/jobPositions.config";
 import { CustomRoleMatrixManager } from "./CustomRoleMatrixManager";
 
-const ROLE_DEFAULT_MENUS_MAP: Record<RoleTypes, Array<{ label: string; href: string }>> = {
-  "sek.pondok": [
-    { label: "Dashboard Pondok", href: "/sekretariat" },
-    { label: "Data Santriwati", href: "/sekretariat/santri" },
-    { label: "Wali Santri", href: "/sekretariat/wali-santri" },
-    { label: "Data Asrama", href: "/sekretariat/rooms" },
-    { label: "Data Pengurus", href: "/sekretariat/pengurus" },
-    { label: "Alumni Pondok", href: "/sekretariat/alumni" },
-    { label: "Perizinan", href: "/sekretariat/perizinan" },
-    { label: "Pelanggaran", href: "/sekretariat/pelanggaran" },
-    { label: "Manajemen Akun", href: "/sekretariat/users" },
-    { label: "Audit Log", href: "/sekretariat/audit-log" }
-  ],
-  "sek.madrasah": [
-    { label: "Dashboard Madrasah", href: "/sekretariat" },
-    { label: "Data Siswi", href: "/sekretariat/santri" },
-    { label: "Data Pengurus", href: "/sekretariat/pengurus" },
-    { label: "Data Pengajar", href: "/sekretariat/pengajar" },
-    { label: "Kelas & Rombel", href: "/sekretariat/kelas" },
-    { label: "Kurikulum", href: "/sekretariat/kurikulum" },
-    { label: "Penilaian", href: "/sekretariat/penilaian" },
-    { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas" },
-    { label: "Dokumen & Raport", href: "/sekretariat/raport" },
-    { label: "Audit Log", href: "/sekretariat/audit-log" }
-  ],
-  mustahiq: [
-    { label: "Dashboard", href: "/mustahiq" },
-    { label: "Kelas & Santri", href: "/mustahiq/kelas" },
-    { label: "Penilaian Kwartal", href: "/mustahiq/penilaian" },
-    { label: "Rekap Absensi", href: "/mustahiq/absensi" },
-    { label: "Catatan Akhlaq", href: "/mustahiq/akhlaq" },
-    { label: "Rekomendasi Kenaikan", href: "/mustahiq/kenaikan-kelas" }
-  ],
-  wali_santri: [
-    { label: "Dashboard", href: "/guardian" },
-    { label: "Anak Saya", href: "/guardian/children" },
-    { label: "Akademik", href: "/guardian/akademik" },
-    { label: "Kedisiplinan", href: "/guardian/kedisiplinan" },
-    { label: "Kehadiran", href: "/guardian/kehadiran" }
-  ]
-};
+// Helper: Process white/light background out of signature scan into clean transparent PNG HD
+async function processSignatureImage(file: File): Promise<Blob> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return resolve(file);
+
+      ctx.drawImage(img, 0, 0);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imgData.data;
+
+      // Convert white/light gray background to transparent
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        if (r > 190 && g > 190 && b > 190) {
+          data[i + 3] = 0;
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else resolve(file);
+      }, "image/png");
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function SignatureImageUploader({
+  label,
+  description,
+  value,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+
+      // 1. Process client-side RemoveBG canvas transparency
+      const processedBlob = await processSignatureImage(file);
+
+      // 2. Fetch signature from API
+      const sigRes = await fetch("/api/media/signature");
+      if (!sigRes.ok) throw new Error("Gagal mengambil token upload Cloud Storage.");
+      const sigData = await sigRes.json();
+      if (sigData.status !== "Success") throw new Error(sigData.message || "Gagal mendapatkan token.");
+
+      const { signature, timestamp, apiKey, cloudName, folder } = sigData.data;
+
+      // 3. Upload to Cloudinary
+      const formData = new FormData();
+      formData.append("file", processedBlob, "signature.png");
+      formData.append("api_key", apiKey);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+      formData.append("folder", folder);
+
+      const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!cloudinaryRes.ok) throw new Error("Gagal mengunggah berkas ke Cloudinary.");
+      const cloudinaryData = await cloudinaryRes.json();
+      
+      const finalUrl = cloudinaryData.secure_url;
+      onChange(finalUrl);
+      toast(`${label} berhasil diunggah & diproses (RemoveBG HD)!`, "success", "Berhasil Upload");
+    } catch (err: any) {
+      console.error(err);
+      toast(err?.message || "Gagal mengunggah berkas TTD.", "error", "Gagal Upload");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="p-5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl space-y-3">
+      <div>
+        <h4 className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-wider">{label}</h4>
+        <p className="text-[11px] text-zinc-500 font-medium">{description}</p>
+      </div>
+
+      {value ? (
+        <div className="flex flex-col sm:flex-row items-center gap-4 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl">
+          <div className="w-36 h-24 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:8px_8px] flex items-center justify-center p-2 overflow-hidden shrink-0 shadow-inner">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={value} alt={label} className="max-w-full max-h-full object-contain filter drop-shadow-md" />
+          </div>
+          <div className="flex flex-col gap-2 flex-1 w-full">
+            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-xs">{value}</span>
+            <div className="flex items-center gap-2">
+              <label className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-extrabold cursor-pointer inline-flex items-center gap-1 shadow-xs">
+                <Download className="w-3.5 h-3.5" />
+                <span>Ganti File TTD / Stempel</span>
+                <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+              </label>
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-extrabold cursor-pointer inline-flex items-center gap-1 shadow-xs"
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                <span>Hapus</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-xl cursor-pointer bg-white dark:bg-zinc-900 transition-colors group">
+          {isUploading ? (
+            <div className="flex flex-col items-center gap-2 text-blue-600">
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <span className="text-xs font-bold">Memproses RemoveBG &amp; Upload HD ke Cloudinary...</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-center">
+              <Download className="w-8 h-8 text-blue-600 group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-extrabold text-zinc-800 dark:text-zinc-200">Unggah File TTD / Stempel (PNG / JPG)</span>
+              <span className="text-[11px] text-zinc-500">Otomatis diproses HD &amp; Latar Belakang Putih Dihapus (RemoveBG Transparent)</span>
+            </div>
+          )}
+          <input type="file" accept="image/*" onChange={handleFileUpload} disabled={isUploading} className="hidden" />
+        </label>
+      )}
+    </div>
+  );
+}
 
 function FriendlyGuideCard({ title, description, steps }: { title: string; description: string; steps?: string[] }) {
   return (
@@ -209,7 +313,6 @@ export function SystemSettingsCockpit() {
   const [autoBackupInterval, setAutoBackupInterval] = useState("daily");
 
   // Roles & Positions States
-  const [selectedConfigRole, setSelectedConfigRole] = useState<RoleTypes>("mustahiq");
   const [roleConfigs, setRoleConfigs] = useState<Record<RoleTypes, RoleUIConfig>>(() => {
     const base = JSON.parse(JSON.stringify(DEFAULT_ROLE_CONFIGS)) as Record<RoleTypes, RoleUIConfig>;
     if (typeof window !== "undefined") {
@@ -250,52 +353,9 @@ export function SystemSettingsCockpit() {
     }
     return DEFAULT_STRUCTURAL_JABATAN;
   });
-  const [newJabatanName, setNewJabatanName] = useState("");
-  const [newPosisiInputs, setNewPosisiInputs] = useState<Record<string, string>>({});
-
-  const handleAddJabatan = () => {
-    if (!newJabatanName.trim()) return;
-    const nameClean = newJabatanName.trim();
-    const newId = `${selectedInstitution.toLowerCase()}-${Date.now()}`;
-    const newItem: StructuralJabatan = {
-      id: newId,
-      institution: selectedInstitution,
-      jabatan: nameClean,
-      posisiList: [],
-    };
-    const nextList = [...structuralJabatanList, newItem];
-    setStructuralJabatanList(nextList);
-    setNewJabatanName("");
-  };
 
   const handleRemoveJabatan = (id: string) => {
     setStructuralJabatanList((prev) => prev.filter((j) => j.id !== id));
-  };
-
-  const handleAddPosisi = (jabatanId: string) => {
-    const val = (newPosisiInputs[jabatanId] || "").trim();
-    if (!val) return;
-    setStructuralJabatanList((prev) =>
-      prev.map((j) => {
-        if (j.id === jabatanId) {
-          if (j.posisiList.includes(val)) return j;
-          return { ...j, posisiList: [...j.posisiList, val] };
-        }
-        return j;
-      })
-    );
-    setNewPosisiInputs((prev) => ({ ...prev, [jabatanId]: "" }));
-  };
-
-  const handleRemovePosisi = (jabatanId: string, posisiName: string) => {
-    setStructuralJabatanList((prev) =>
-      prev.map((j) => {
-        if (j.id === jabatanId) {
-          return { ...j, posisiList: j.posisiList.filter((p) => p !== posisiName) };
-        }
-        return j;
-      })
-    );
   };
 
   const parseBool = (v: unknown) => v === "true" || v === true;
@@ -689,30 +749,41 @@ export function SystemSettingsCockpit() {
             </div>
           )}
 
-          {/* 5. Stempel & TTD Digital */}
+          {/* 5. Stempel & TTD Digital (Cloudinary File Uploader + RemoveBG HD) */}
           {settingsTab === "signature" && (
             <div className="space-y-6">
               <FriendlyGuideCard
-                title="Modul 5: Stempel & Tanda Tangan Digital Resmi"
-                description="Unggah tautan gambar TTD Digital & Stempel resmi instansi untuk otomatisasi pencetakan Rapor Diniyyah dan Ijazah."
+                title="Modul 5: Stempel & Tanda Tangan Digital Resmi (Cloudinary HD & Auto RemoveBG)"
+                description="Unggah file gambar TTD Digital & Stempel resmi instansi. Sistem secara otomatis memproses transparansi latar belakang (RemoveBG HD) dan mengunggahnya ke Cloud Storage."
               />
-              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4 shadow-sm">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">URL TTD Digital Pengasuh Pondok P3HM</label>
-                  <input type="text" value={pengasuhSignatureUrl} onChange={(e) => setPengasuhSignatureUrl(e.target.value)} placeholder="https://..." className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono dark:text-white" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">URL TTD Digital Kepala Madrasah MPHM</label>
-                  <input type="text" value={kepalaMadrasahSignatureUrl} onChange={(e) => setKepalaMadrasahSignatureUrl(e.target.value)} placeholder="https://..." className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono dark:text-white" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">URL TTD Digital Mufattish Nilai</label>
-                  <input type="text" value={mufattishSignatureUrl} onChange={(e) => setMufattishSignatureUrl(e.target.value)} placeholder="https://..." className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono dark:text-white" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">URL Stempel Resmi Instansi</label>
-                  <input type="text" value={officialStampUrl} onChange={(e) => setOfficialStampUrl(e.target.value)} placeholder="https://..." className="w-full px-3.5 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-xs font-mono dark:text-white" />
-                </div>
+              <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6 shadow-sm">
+                <SignatureImageUploader
+                  label="Tanda Tangan Digital Pengasuh Pondok P3HM"
+                  description="Digunakan pada pencetakan Sertifikat & Surat Keterangan Resmi Pondok P3HM Lirboyo."
+                  value={pengasuhSignatureUrl}
+                  onChange={setPengasuhSignatureUrl}
+                />
+
+                <SignatureImageUploader
+                  label="Tanda Tangan Digital Kepala Madrasah MPHM"
+                  description="Digunakan pada pencetakan Rapor Diniyyah, Ijazah Kelulusan, & Transkrip Nilai MPHM."
+                  value={kepalaMadrasahSignatureUrl}
+                  onChange={setKepalaMadrasahSignatureUrl}
+                />
+
+                <SignatureImageUploader
+                  label="Tanda Tangan Digital Mufattish Nilai"
+                  description="Digunakan sebagai pengesahan sah hasil penilaian kwartal Diniyyah."
+                  value={mufattishSignatureUrl}
+                  onChange={setMufattishSignatureUrl}
+                />
+
+                <SignatureImageUploader
+                  label="Stempel Resmi Instansi"
+                  description="Stempel resmi yang otomatis disematkan pada Dokumen Siswi, Rapor, & Ijazah."
+                  value={officialStampUrl}
+                  onChange={setOfficialStampUrl}
+                />
               </div>
             </div>
           )}
