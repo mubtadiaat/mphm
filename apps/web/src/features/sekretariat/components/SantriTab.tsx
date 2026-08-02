@@ -746,7 +746,7 @@ export function SantriTab({ onViewDetail, isReadOnly = false, selectedYearId, wo
             }`}
         >
           <Truck className="w-4 h-4 text-rose-500" />
-          <span>{isPondok ? "Santriwati Boyong 🚚" : "Mutasi & Keluar 🚚"}</span>
+          <span>{isPondok ? "Santriwati Boyong" : "Mutasi & Keluar 🚚"}</span>
         </button>
       </div>
 
