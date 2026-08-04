@@ -36,8 +36,9 @@ export function useAcademicYears() {
 
   const activateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest<{ data: AcademicYear }>(`/api/academic/years/${id}/activate`, {
+      const res = await apiRequest<{ data: AcademicYear }>(`/api/academic/years/${id}`, {
         method: "PUT",
+        body: JSON.stringify({ isActive: true }),
       });
       return res.data;
     },
@@ -61,8 +62,9 @@ export function useAcademicYears() {
 
   const deactivateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest<{ data: AcademicYear }>(`/api/academic/years/${id}/deactivate`, {
+      const res = await apiRequest<{ data: AcademicYear }>(`/api/academic/years/${id}`, {
         method: "PUT",
+        body: JSON.stringify({ isActive: false }),
       });
       return res.data;
     },
