@@ -16,7 +16,9 @@ import {
   Ticket,
   FileCode,
   UserCheck,
-  Calendar
+  Calendar,
+  Clock,
+  Briefcase
 } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { LucideProps } from "lucide-react";
@@ -50,6 +52,7 @@ export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
       { label: "Data Asrama", href: "/sekretariat/rooms", icon: Home },
       { label: "Data Pengurus", href: "/sekretariat/pengurus", icon: Users },
       { label: "Alumni", href: "/sekretariat/alumni", icon: Archive },
+      { label: "Khidmah & Pengabdian", href: "/sekretariat/khidmah", icon: Briefcase },
     ]
   },
   {
@@ -62,6 +65,7 @@ export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
   {
     group: "SISTEM & UTILITAS",
     items: [
+      { label: "Arsip Historis", href: "/sekretariat/arsip", icon: Archive },
       { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran", icon: Calendar },
       { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
       { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
@@ -80,6 +84,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
     items: [
       { label: "Data Siswi", href: "/sekretariat/santri", icon: Users },
       { label: "Data Kelas (Rombel)", href: "/sekretariat/kelas", icon: BookOpen },
+      { label: "Alumni", href: "/sekretariat/alumni", icon: Archive },
     ]
   },
   {
@@ -93,8 +98,10 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
     group: "AKADEMIK & PENILAIAN",
     items: [
       { label: "Kurikulum", href: "/sekretariat/kurikulum", icon: ClipboardList },
+      { label: "Jadwal KBM", href: "/sekretariat/jadwal", icon: Clock },
       { label: "Penilaian", href: "/sekretariat/penilaian", icon: FileText },
       { label: "Kenaikan Kelas", href: "/sekretariat/kenaikan-kelas", icon: Award },
+      { label: "Khidmah & Pengabdian", href: "/sekretariat/khidmah", icon: Briefcase },
     ]
   },
   {
@@ -109,6 +116,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
   {
     group: "SISTEM & UTILITAS",
     items: [
+      { label: "Arsip Historis", href: "/sekretariat/arsip", icon: Archive },
       { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran", icon: Calendar },
       { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
       { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
