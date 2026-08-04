@@ -15,7 +15,8 @@ import {
   Home,
   Ticket,
   FileCode,
-  UserCheck
+  UserCheck,
+  Calendar
 } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { LucideProps } from "lucide-react";
@@ -61,6 +62,7 @@ export const SEKRETARIAT_PONDOK_NAV: NavMenu[] = [
   {
     group: "SISTEM & UTILITAS",
     items: [
+      { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran", icon: Calendar },
       { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
       { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
@@ -107,6 +109,7 @@ export const SEKRETARIAT_MADRASAH_NAV: NavMenu[] = [
   {
     group: "SISTEM & UTILITAS",
     items: [
+      { label: "Tahun Ajaran", href: "/sekretariat/tahun-ajaran", icon: Calendar },
       { label: "Manajemen Akun", href: "/sekretariat/users", icon: UserCheck },
       { label: "Audit Log", href: "/sekretariat/audit-log", icon: History },
       { label: "Recycling Bin", href: "/sekretariat/recycle-bin", icon: Trash2 },
